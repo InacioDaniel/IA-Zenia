@@ -1,86 +1,68 @@
-// zenia.js
-// Núcleo da IA Zenia - versão com NLP + embeddings
-// Feito por @inacio.u.daniel e Clério Cuita
+// zenia.js — Motor da IA Zenia
+// by @inacio.u.daniel & Clério Cuita
 
 let chatHistory = JSON.parse(localStorage.getItem("zeniaHistory")) || [];
+let encoder;
 
-// Carregar bibliotecas externas dinamicamente (sem API_KEY)
-async function loadLibs() {
-  await Promise.all([
-    import("https://cdn.jsdelivr.net/npm/compromise@13.11.3/builds/compromise.min.js"),
-    tf = await import("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.13.0/dist/tf.min.js"),
-    use = await import("https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder")
-  ]);
-  window.nlp = window.nlp || compromise;
-  window.encoder = await use.load();
+// Banco inicial de conhecimento
+let knowledgeBase = [
+  { q: "olá", a: ["Olá! Como estás?", "Oi, tudo bem contigo?", "E aí, firmeza?"] },
+  { q: "como estás", a: ["Estou ótima! E você?", "Tudo certo por aqui. E contigo?", "Estou bem, valeu por perguntar!"] },
+  { q: "qual é o teu nome", a: ["Eu sou a Zenia, prazer em te conhecer!", "Chamo-me Zenia, tua assistente virtual."] },
+  { q: "o que sabes fazer", a: ["Consigo conversar, aprender contigo e até procurar informações online.", "Posso bater papo, lembrar coisas e evoluir com o tempo."] }
+];
+
+// Carregar modelo de embeddings
+async function loadEncoder() {
+  encoder = await use.load();
 }
-loadLibs();
+loadEncoder();
 
-// Função para gerar embeddings
+// Gerar embeddings
 async function getEmbedding(text) {
-  const emb = await window.encoder.embed([text]);
+  const emb = await encoder.embed([text]);
   return emb.arraySync()[0];
 }
 
-// Similaridade por cosseno
+// Similaridade cosseno
 function cosineSimilarity(vecA, vecB) {
   let dot = 0, normA = 0, normB = 0;
   for (let i = 0; i < vecA.length; i++) {
     dot += vecA[i] * vecB[i];
-    normA += vecA[i] * vecA[i];
-    normB += vecB[i] * vecB[i];
+    normA += vecA[i] ** 2;
+    normB += vecB[i] ** 2;
   }
   return dot / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
-// Respostas base locais (banco inicial)
-let knowledgeBase = [
-  { q: "olá", a: "Olá! Tudo bem contigo?" },
-  { q: "como estás", a: "Estou bem, obrigado por perguntar! E você?" },
-  { q: "qual é o teu nome", a: "Eu sou a Zenia, sua assistente virtual." },
-  { q: "o que sabes fazer", a: "Eu consigo conversar, aprender contigo e até procurar informações online." }
-];
+// Escolher resposta de forma variada
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
 
-// Resposta principal
+// Gerar resposta
 async function zeniaReply(userInput) {
-  if (!window.encoder) return "Carregando meu cérebro... tenta de novo em instantes 🤯";
+  if (!encoder) return "Ainda estou a aquecer o cérebro... tenta outra vez daqui a pouco 🔄";
 
-  // Processamento com compromise (NLP leve)
-  let doc = nlp(userInput);
-  let intent = doc.topics().out('array').join(", ") || "conversa";
+  const userVec = await getEmbedding(userInput);
+  let best = { score: -1, answer: "Hmm... não tenho certeza sobre isso. Queres me ensinar?" };
 
-  // Vetorizar entrada do usuário
-  let userVec = await getEmbedding(userInput);
-
-  // Procurar a resposta mais próxima semanticamente
-  let best = { score: -1, text: "Ainda não sei responder isso... podes me ensinar?" };
   for (let item of knowledgeBase) {
     let vec = await getEmbedding(item.q);
     let sim = cosineSimilarity(userVec, vec);
-    if (sim > best.score) best = { score: sim, text: item.a };
+    if (sim > best.score) {
+      best = { score: sim, answer: pickRandom(item.a) };
+    }
   }
 
-  // Aprender com usuário (guardar no histórico)
-  chatHistory.push({ pergunta: userInput, resposta: best.text });
+  // Aprendizado: guardar histórico
+  chatHistory.push({ pergunta: userInput, resposta: best.answer });
   localStorage.setItem("zeniaHistory", JSON.stringify(chatHistory));
 
-  return best.text;
+  return best.answer;
 }
 
-// Conectar à interface
-async function sendMessage() {
-  const input = document.getElementById("userInput");
-  const msg = input.value.trim();
-  if (!msg) return;
-
-  addMessage(msg, "user");
-  input.value = "";
-
-  const reply = await zeniaReply(msg);
-  addMessage(reply, "bot");
-}
-
-// Adicionar mensagens no chat
+// Mostrar mensagens na tela
 function addMessage(text, sender) {
   const messages = document.getElementById("messages");
   const div = document.createElement("div");
@@ -89,3 +71,17 @@ function addMessage(text, sender) {
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
 }
+
+// Envio de mensagem
+document.getElementById("chatForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const input = document.getElementById("userInput");
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  addMessage(msg, "user");
+  input.value = "";
+
+  const reply = await zeniaReply(msg);
+  setTimeout(() => addMessage(reply, "bot"), 500);
+});
