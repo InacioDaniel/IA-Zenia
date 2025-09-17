@@ -1,79 +1,26 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Zenia — Assistente AI (by @inacio.u.daniel & Clério Cuita)</title>
-  <link rel="stylesheet" href="style.css" />
-  <meta name="description" content="Zenia — IA local, offline-first, HTML/CSS/JS (voz, transcrição, memória local)" />
-
-  <!-- TensorFlow.js and Universal Sentence Encoder (for local embeddings) -->
-  <!-- Usamos CDN públicos; não precisa de API key -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.8.0/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.3/dist/universal-sentence-encoder.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zenia AI</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Bibliotecas -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.16.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/compromise@14.14.0/builds/compromise.min.js"></script>
 </head>
-<body class="light" data-theme="light">
-  <header class="topbar" role="banner">
-    <div class="brand">
-      <svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/></svg>
-      <div>
-        <h1 id="appTitle">Zenia</h1>
-        <small>AI local — @inacio.u.daniel &amp; Clério Cuita</small>
-      </div>
+<body>
+  <div class="app">
+    <h1>🤖 Zenia</h1>
+    <div id="chat"></div>
+    <div class="input-area">
+      <input id="userInput" type="text" placeholder="Fala comigo..." autofocus>
+      <button onclick="sendMessage()">Enviar</button>
+      <button onclick="startVoice()">🎤</button>
     </div>
+    <button onclick="toggleDarkMode()">🌙/☀️</button>
+  </div>
 
-    <div class="controls">
-      <button id="toggleTheme" title="Alternar tema (Ctrl+D)">🌓</button>
-      <button id="toggleMic" title="Ativar / Desativar microfone (Ctrl+M)">🎙️</button>
-      <button id="clearMemory" title="Limpar memória local">🧹</button>
-    </div>
-  </header>
-
-  <main class="container" role="main">
-    <section class="chat" aria-label="Conversa com Zenia">
-      <ol id="messages" class="messages" aria-live="polite"></ol>
-    </section>
-
-    <aside class="sidebar" aria-label="Controles e acessibilidade">
-      <div class="status">
-        <p><strong>Status:</strong> <span id="statusText">Inativo</span></p>
-        <p><strong>Idioma:</strong> <span id="detectedLang">—</span></p>
-        <p><strong>Embeddings:</strong> <span id="embeddingStatus">carregando...</span></p>
-      </div>
-
-      <div class="transcript">
-        <h3>Transcrição (fala → texto)</h3>
-        <div id="transcriptText" class="transcriptText" aria-live="polite">—</div>
-      </div>
-
-      <details>
-        <summary>Atalhos de teclado</summary>
-        <ul>
-          <li><kbd>Ctrl</kbd> + <kbd>M</kbd> — Alternar microfone</li>
-          <li><kbd>Ctrl</kbd> + <kbd>D</kbd> — Alternar tema</li>
-          <li><kbd>Ctrl</kbd> + <kbd>K</kbd> — Focar no campo de entrada</li>
-        </ul>
-      </details>
-
-      <div class="memoryInfo">
-        <h3>Memória local</h3>
-        <p id="memoryCount">Registos: 0</p>
-      </div>
-    </aside>
-  </main>
-
-  <form id="inputForm" class="inputForm" aria-label="Enviar mensagem para Zenia">
-    <label for="textInput" class="visually-hidden">Mensagem</label>
-    <input id="textInput" name="text" type="text" placeholder="Pergunte algo à Zenia..." autocomplete="off" aria-autocomplete="list" />
-    <button type="submit" id="sendBtn" aria-label="Enviar">Enviar</button>
-    <button type="button" id="speakBtn" title="Falar (usar TTS)">🔊</button>
-  </form>
-
-  <footer class="footer" role="contentinfo">
-    <small>Feito por @inacio.u.daniel &amp; Clério Cuita — Código aberto, rodável no Netlify / GitHub Pages.</small>
-  </footer>
-
-  <!-- Núcleo da IA (module) -->
-  <script type="module" src="zenia.js"></script>
+  <script src="zenia.js"></script>
 </body>
 </html>
