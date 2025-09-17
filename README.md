@@ -1,5 +1,5 @@
 
-# 🌟 IA-Zenia
+# 🌟 IA-Zenia by @inacio.u.daniel & Clério Cuita
 
 [![Site](https://img.shields.io/badge/Visite-Site-blue)](https://ia-zenia.netlify.app)
 [![GitHub Repo](https://img.shields.io/badge/GitHub-IA--Zenia-black)](https://github.com/InacioDaniel/IA-Zenia)
@@ -107,6 +107,10 @@ git push origin feature/nova-funcionalidade
 ## 📜 Licença
 
 Licenciado sob **GPL License** – consulte o arquivo `LICENSE` para detalhes.
+
+---
+
+by @inacio.u.daniel & Clério Cuita
 
 ---
 
