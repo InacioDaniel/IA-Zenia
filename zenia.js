@@ -77,7 +77,7 @@ async function importReddit(url) {
 
 /* ----------------- Datasets init ----------------- */
 async function initDatasets() {
-  // ⚠️ cuidado: são datasets muito grandes, podes comentar os que não quiseres
+  // ⚠️ Estes ficheiros são grandes, podes comentar se não quiseres todos
   await importSQuAD("https://rajpurkar.github.io/SQuAD-explorer/dataset/train-v1.1.json");
   await importCoQA("https://nlp.stanford.edu/data/coqa/coqa-train-v1.0.json");
   await importQuAC("https://s3.amazonaws.com/my89public/quac/train_v0.2.json");
@@ -85,27 +85,54 @@ async function initDatasets() {
   await importReddit("https://raw.githubusercontent.com/poly-ai/reddit-conversational-dataset/master/sample.json");
 }
 
+/* ----------------- Processamento de perguntas ----------------- */
+async function processUserQuery(userInput) {
+  // mostra a pergunta
+  displayMessage("Você", userInput);
+
+  // tenta responder
+  let response = await Learner.findAnswer(userInput);
+
+  if (!response) {
+    response = "Desculpa, ainda não sei responder a isso.";
+  }
+
+  // mostra resposta
+  displayMessage("Zenia", response);
+
+  // fala
+  speak(response);
+}
+
 /* ----------------- Zenia INIT ----------------- */
 async function init() {
   console.log("🚀 Inicializando Zenia...");
 
-  // carregar memória local, embeddings, tema, TTS/STT...
+  // carregar memória, embeddings, voz, tema
   await Learner.loadMemory();
   await Embeddings.load();
-
   Theme.applyCurrent();
   Voice.init();
   Mic.init();
 
-  // dar uma saudação
+  // saudação inicial
   speak("Olá, eu sou a Zenia. Como posso ajudar?");
 
-  // carregar datasets externos (grandes)
+  // iniciar datasets externos (em background)
   initDatasets().then(() => {
-    console.log("✅ Todos os datasets externos foram integrados.");
+    console.log("✅ Datasets externos carregados");
     updateMemoryCount();
   });
+
+  // verificar se existe ?text= na URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const query = urlParams.get("text");
+
+  if (query) {
+    console.log("🔎 Pergunta recebida via URL:", query);
+    processUserQuery(query);
+  }
 }
 
-// arranque da Zenia
+// arranque
 window.addEventListener("load", init);
