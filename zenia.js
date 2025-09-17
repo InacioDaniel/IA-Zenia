@@ -1,81 +1,92 @@
-// zenia.js — Motor da IA Zenia
-// by @inacio.u.daniel & Clério Cuita
+// zenia.js
+// Núcleo da IA Zenia - conversação natural com embeddings
+// Feito por @inacio.u.daniel e Clério Cuita
 
 let chatHistory = JSON.parse(localStorage.getItem("zeniaHistory")) || [];
+
+// Carregar TensorFlow + USE + Compromise (NLP)
 let encoder;
-
-// Banco inicial de conhecimento
-let knowledgeBase = [
-  { q: "olá", a: ["Olá! Como estás?", "Oi, tudo bem contigo?", "E aí, firmeza?"] },
-  { q: "como estás", a: ["Estou ótima! E você?", "Tudo certo por aqui. E contigo?", "Estou bem, valeu por perguntar!"] },
-  { q: "qual é o teu nome", a: ["Eu sou a Zenia, prazer em te conhecer!", "Chamo-me Zenia, tua assistente virtual."] },
-  { q: "o que sabes fazer", a: ["Consigo conversar, aprender contigo e até procurar informações online.", "Posso bater papo, lembrar coisas e evoluir com o tempo."] }
-];
-
-// Carregar modelo de embeddings
-async function loadEncoder() {
-  encoder = await use.load();
+async function loadLibs() {
+  await Promise.all([
+    import("https://cdn.jsdelivr.net/npm/compromise@13.11.3/builds/compromise.min.js"),
+    import("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.13.0/dist/tf.min.js"),
+    import("https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder")
+  ]).then((mods) => {
+    window.nlp = window.nlp || mods[0].default || compromise;
+    return mods[2].load();
+  }).then((model) => {
+    encoder = model;
+    document.getElementById("embeddingStatus").textContent = "pronto ✅";
+  });
 }
-loadEncoder();
+loadLibs();
 
-// Gerar embeddings
+// Função para embeddings
 async function getEmbedding(text) {
   const emb = await encoder.embed([text]);
   return emb.arraySync()[0];
 }
 
-// Similaridade cosseno
+// Similaridade por cosseno
 function cosineSimilarity(vecA, vecB) {
   let dot = 0, normA = 0, normB = 0;
   for (let i = 0; i < vecA.length; i++) {
     dot += vecA[i] * vecB[i];
-    normA += vecA[i] ** 2;
-    normB += vecB[i] ** 2;
+    normA += vecA[i] * vecA[i];
+    normB += vecB[i] * vecB[i];
   }
   return dot / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
-// Escolher resposta de forma variada
-function pickRandom(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
+// Base inicial de conhecimento
+let knowledgeBase = [
+  { q: "olá", a: "Olá! Como estás hoje?" },
+  { q: "como estás", a: "Estou bem, obrigado por perguntar! E você?" },
+  { q: "qual é o teu nome", a: "Eu sou a Zenia, tua assistente virtual." },
+  { q: "o que sabes fazer", a: "Eu consigo conversar, aprender contigo e até procurar informações online." }
+];
 
-// Gerar resposta
+// Responder
 async function zeniaReply(userInput) {
-  if (!encoder) return "Ainda estou a aquecer o cérebro... tenta outra vez daqui a pouco 🔄";
+  if (!encoder) return "Ainda estou a carregar o meu cérebro... 🤯";
 
-  const userVec = await getEmbedding(userInput);
-  let best = { score: -1, answer: "Hmm... não tenho certeza sobre isso. Queres me ensinar?" };
+  // NLP leve
+  let doc = nlp(userInput);
+  let sentiment = doc.sentences().sentiment();
+  let intent = doc.topics().out('array').join(", ") || "conversa";
 
-  for (let item of knowledgeBase) {
+  // Vetor do input
+  let userVec = await getEmbedding(userInput);
+
+  // Procurar em base + histórico
+  let candidates = [...knowledgeBase, ...chatHistory];
+  let best = { score: -1, text: "Ainda não sei responder isso... podes me ensinar?" };
+
+  for (let item of candidates) {
     let vec = await getEmbedding(item.q);
     let sim = cosineSimilarity(userVec, vec);
-    if (sim > best.score) {
-      best = { score: sim, answer: pickRandom(item.a) };
-    }
+    if (sim > best.score) best = { score: sim, text: item.a };
   }
 
-  // Aprendizado: guardar histórico
-  chatHistory.push({ pergunta: userInput, resposta: best.answer });
+  // Resposta adaptada
+  let resposta = best.text;
+
+  // Ajustar emoção
+  if (sentiment < 0) resposta += " (Percebo que não estás muito bem. Queres conversar sobre isso?)";
+  if (sentiment > 0.5) resposta += " 😃";
+
+  // Guardar histórico
+  chatHistory.push({ q: userInput, a: resposta });
   localStorage.setItem("zeniaHistory", JSON.stringify(chatHistory));
+  document.getElementById("memoryCount").textContent = `Registos: ${chatHistory.length}`;
 
-  return best.answer;
+  return resposta;
 }
 
-// Mostrar mensagens na tela
-function addMessage(text, sender) {
-  const messages = document.getElementById("messages");
-  const div = document.createElement("div");
-  div.className = sender === "user" ? "user-msg" : "bot-msg";
-  div.innerText = text;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
-}
-
-// Envio de mensagem
-document.getElementById("chatForm").addEventListener("submit", async (e) => {
+// UI - enviar mensagem
+document.getElementById("inputForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const input = document.getElementById("userInput");
+  const input = document.getElementById("textInput");
   const msg = input.value.trim();
   if (!msg) return;
 
@@ -83,5 +94,53 @@ document.getElementById("chatForm").addEventListener("submit", async (e) => {
   input.value = "";
 
   const reply = await zeniaReply(msg);
-  setTimeout(() => addMessage(reply, "bot"), 500);
+  addMessage(reply, "zenia");
+
+  // Falar resposta
+  speak(reply);
+});
+
+// Adicionar mensagens no chat
+function addMessage(text, sender) {
+  const li = document.createElement("li");
+  li.className = "message " + sender;
+  li.textContent = text;
+  document.getElementById("messages").appendChild(li);
+  li.scrollIntoView({ behavior: "smooth" });
+}
+
+// Text-to-Speech
+function speak(text) {
+  if (!("speechSynthesis" in window)) return;
+  let utter = new SpeechSynthesisUtterance(text);
+  utter.lang = "pt-PT";
+  window.speechSynthesis.speak(utter);
+}
+
+// Atalhos de teclado
+document.addEventListener("keydown", (e) => {
+  if (e.ctrlKey && e.key.toLowerCase() === "m") {
+    toggleMic();
+  }
+  if (e.ctrlKey && e.key.toLowerCase() === "d") {
+    toggleTheme();
+  }
+  if (e.ctrlKey && e.key.toLowerCase() === "k") {
+    document.getElementById("textInput").focus();
+  }
+});
+
+// Tema
+function toggleTheme() {
+  let body = document.body;
+  let theme = body.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  body.setAttribute("data-theme", theme);
+}
+
+// Limpar memória
+document.getElementById("clearMemory").addEventListener("click", () => {
+  localStorage.removeItem("zeniaHistory");
+  chatHistory = [];
+  document.getElementById("memoryCount").textContent = "Registos: 0";
+  addMessage("Memória limpa 🧹", "zenia");
 });
