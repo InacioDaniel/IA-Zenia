@@ -5,8 +5,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Zenia — Assistente AI (by @inacio.u.daniel & Clério Cuita)</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Icon (SVG inline optional) -->
   <meta name="description" content="Zenia — IA local, offline-first, HTML/CSS/JS (voz, transcrição, memória local)" />
+
+  <!-- TensorFlow.js and Universal Sentence Encoder (for local embeddings) -->
+  <!-- Usamos CDN públicos; não precisa de API key -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.8.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.3/dist/universal-sentence-encoder.min.js"></script>
 </head>
 <body class="light" data-theme="light">
   <header class="topbar" role="banner">
@@ -34,6 +38,7 @@
       <div class="status">
         <p><strong>Status:</strong> <span id="statusText">Inativo</span></p>
         <p><strong>Idioma:</strong> <span id="detectedLang">—</span></p>
+        <p><strong>Embeddings:</strong> <span id="embeddingStatus">carregando...</span></p>
       </div>
 
       <div class="transcript">
@@ -68,6 +73,7 @@
     <small>Feito por @inacio.u.daniel &amp; Clério Cuita — Código aberto, rodável no Netlify / GitHub Pages.</small>
   </footer>
 
-  <script src="zenia.js" type="module"></script>
+  <!-- Núcleo da IA (module) -->
+  <script type="module" src="zenia.js"></script>
 </body>
 </html>
