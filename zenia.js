@@ -1,134 +1,91 @@
-// ========================
-// Zenia AI by Inácio Daniel & Clério Cuita
-// ========================
+// zenia.js
+// Núcleo da IA Zenia - versão com NLP + embeddings
+// Feito por @inacio.u.daniel e Clério Cuita
 
-// Memória local
-let memory = JSON.parse(localStorage.getItem("zeniaMemory")) || [];
+let chatHistory = JSON.parse(localStorage.getItem("zeniaHistory")) || [];
 
-// Chat display
-const chat = document.getElementById("chat");
-function addMessage(text, sender) {
-  let div = document.createElement("div");
-  div.className = `message ${sender}`;
-  div.textContent = text;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
+// Carregar bibliotecas externas dinamicamente (sem API_KEY)
+async function loadLibs() {
+  await Promise.all([
+    import("https://cdn.jsdelivr.net/npm/compromise@13.11.3/builds/compromise.min.js"),
+    tf = await import("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.13.0/dist/tf.min.js"),
+    use = await import("https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder")
+  ]);
+  window.nlp = window.nlp || compromise;
+  window.encoder = await use.load();
+}
+loadLibs();
+
+// Função para gerar embeddings
+async function getEmbedding(text) {
+  const emb = await window.encoder.embed([text]);
+  return emb.arraySync()[0];
 }
 
-// --------------------
-// NLP e Raciocínio
-// --------------------
-
-// Embeddings locais simples
-function textToVector(text) {
-  text = text.toLowerCase().replace(/[^a-zá-úà-ùãõç\s]/gi, "");
-  let vec = Array(26).fill(0);
-  for (let char of text) {
-    let code = char.charCodeAt(0) - 97;
-    if (code >= 0 && code < 26) vec[code]++;
-  }
-  return tf.tensor(vec).div(tf.norm(vec));
-}
-
-// Similaridade semântica
+// Similaridade por cosseno
 function cosineSimilarity(vecA, vecB) {
-  return vecA.dot(vecB).dataSync()[0];
+  let dot = 0, normA = 0, normB = 0;
+  for (let i = 0; i < vecA.length; i++) {
+    dot += vecA[i] * vecB[i];
+    normA += vecA[i] * vecA[i];
+    normB += vecB[i] * vecB[i];
+  }
+  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
-// Geração de resposta
-async function generateResponse(userText) {
-  // Analisar texto com compromise (NLP básico)
-  let doc = nlp(userText);
-  let sentiment = doc.sentences().out("sentiment");
+// Respostas base locais (banco inicial)
+let knowledgeBase = [
+  { q: "olá", a: "Olá! Tudo bem contigo?" },
+  { q: "como estás", a: "Estou bem, obrigado por perguntar! E você?" },
+  { q: "qual é o teu nome", a: "Eu sou a Zenia, sua assistente virtual." },
+  { q: "o que sabes fazer", a: "Eu consigo conversar, aprender contigo e até procurar informações online." }
+];
 
-  // Embedding do input
-  let inputVec = textToVector(userText);
+// Resposta principal
+async function zeniaReply(userInput) {
+  if (!window.encoder) return "Carregando meu cérebro... tenta de novo em instantes 🤯";
 
-  // Procurar melhor resposta na memória
-  let bestMatch = null, bestScore = 0;
-  for (let entry of memory) {
-    let memVec = textToVector(entry.q);
-    let score = cosineSimilarity(inputVec, memVec);
-    if (score > bestScore) {
-      bestScore = score;
-      bestMatch = entry;
-    }
+  // Processamento com compromise (NLP leve)
+  let doc = nlp(userInput);
+  let intent = doc.topics().out('array').join(", ") || "conversa";
+
+  // Vetorizar entrada do usuário
+  let userVec = await getEmbedding(userInput);
+
+  // Procurar a resposta mais próxima semanticamente
+  let best = { score: -1, text: "Ainda não sei responder isso... podes me ensinar?" };
+  for (let item of knowledgeBase) {
+    let vec = await getEmbedding(item.q);
+    let sim = cosineSimilarity(userVec, vec);
+    if (sim > best.score) best = { score: sim, text: item.a };
   }
 
-  // Se encontrou algo parecido, responde parecido
-  if (bestScore > 0.6 && bestMatch) {
-    return bestMatch.a;
-  }
+  // Aprender com usuário (guardar no histórico)
+  chatHistory.push({ pergunta: userInput, resposta: best.text });
+  localStorage.setItem("zeniaHistory", JSON.stringify(chatHistory));
 
-  // Caso contrário, resposta criativa simples
-  let fallbackResponses = [
-    "Conta-me mais sobre isso!",
-    "Interessante, podes explicar melhor?",
-    "Hmm, acho que percebi. E depois?",
-    "Isso é profundo... o que achas sobre?"
-  ];
-
-  let reply = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-
-  // Aprender interação
-  memory.push({ q: userText, a: reply });
-  localStorage.setItem("zeniaMemory", JSON.stringify(memory));
-
-  return reply;
+  return best.text;
 }
 
-// --------------------
-// Funções principais
-// --------------------
+// Conectar à interface
 async function sendMessage() {
   const input = document.getElementById("userInput");
-  const userText = input.value.trim();
-  if (!userText) return;
+  const msg = input.value.trim();
+  if (!msg) return;
 
-  addMessage(userText, "user");
+  addMessage(msg, "user");
   input.value = "";
 
-  const response = await generateResponse(userText);
-  addMessage(response, "bot");
-
-  speak(response);
+  const reply = await zeniaReply(msg);
+  addMessage(reply, "bot");
 }
 
-// --------------------
-// Voz e fala
-// --------------------
-function speak(text) {
-  const synth = window.speechSynthesis;
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = "pt-PT";
-  synth.speak(utter);
-}
-
-function startVoice() {
-  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-  recognition.lang = "pt-PT";
-  recognition.start();
-
-  recognition.onresult = async function(event) {
-    let userText = event.results[0][0].transcript;
-    addMessage(userText, "user");
-    const response = await generateResponse(userText);
-    addMessage(response, "bot");
-    speak(response);
-  };
-}
-
-// --------------------
-// Dark mode
-// --------------------
-function toggleDarkMode() {
-  if (document.body.style.getPropertyValue("--bg") === "#121212") {
-    document.body.style.setProperty("--bg", "#fff");
-    document.body.style.setProperty("--text", "#000");
-    document.body.style.setProperty("--panel", "#eee");
-  } else {
-    document.body.style.setProperty("--bg", "#121212");
-    document.body.style.setProperty("--text", "#fff");
-    document.body.style.setProperty("--panel", "#1e1e1e");
-  }
+// Adicionar mensagens no chat
+function addMessage(text, sender) {
+  const messages = document.getElementById("messages");
+  const div = document.createElement("div");
+  div.className = sender === "user" ? "user-msg" : "bot-msg";
+  div.innerText = text;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
 }
