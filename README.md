@@ -3,7 +3,7 @@
 
 [![Site](https://img.shields.io/badge/Visite-Site-blue)](https://ia-zenia.netlify.app)
 [![GitHub Repo](https://img.shields.io/badge/GitHub-IA--Zenia-black)](https://github.com/InacioDaniel/IA-Zenia)
-[![License](https://img.shields.io/badge/Licença-MIT-green)](LICENSE)
+[![License](https://img.shields.io/badge/Licença-GPL-blue)](LICENSE)
 
 **IA-Zenia** é uma inteligência artificial interativa e adaptativa, criada para compreender **linguagem natural**, realizar **pesquisas online**, **reconhecimento de imagens** e interagir com o usuário de forma rápida e intuitiva.  
 
