@@ -78,8 +78,8 @@ IA-Zenia/
 ├─ index.html       # Página principal
 ├─ style.css        # Estilos e tema visual
 ├─ zenia.js         # Lógica principal da IA
-├─ assets/          # Imagens, ícones e mídia
-├─ data/            # Banco de dados local (memória offline)
+├─ logo.png         # Imagens padrão do zenia
+├─ favicon.png      # logotipo e icone do zenia
 └─ README.md        # Documentação completa
 ```
 
