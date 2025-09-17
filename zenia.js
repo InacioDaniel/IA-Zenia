@@ -1,87 +1,111 @@
-// zenia.js — Motor da IA Zenia
-// by @inacio.u.daniel & Clério Cuita
-
-let chatHistory = JSON.parse(localStorage.getItem("zeniaHistory")) || [];
-let encoder;
-
-// Banco inicial de conhecimento
-let knowledgeBase = [
-  { q: "olá", a: ["Olá! Como estás?", "Oi, tudo bem contigo?", "E aí, firmeza?"] },
-  { q: "como estás", a: ["Estou ótima! E você?", "Tudo certo por aqui. E contigo?", "Estou bem, valeu por perguntar!"] },
-  { q: "qual é o teu nome", a: ["Eu sou a Zenia, prazer em te conhecer!", "Chamo-me Zenia, tua assistente virtual."] },
-  { q: "o que sabes fazer", a: ["Consigo conversar, aprender contigo e até procurar informações online.", "Posso bater papo, lembrar coisas e evoluir com o tempo."] }
-];
-
-// Carregar modelo de embeddings
-async function loadEncoder() {
-  encoder = await use.load();
-}
-loadEncoder();
-
-// Gerar embeddings
-async function getEmbedding(text) {
-  const emb = await encoder.embed([text]);
-  return emb.arraySync()[0];
-}
-
-// Similaridade cosseno
-function cosineSimilarity(vecA, vecB) {
-  let dot = 0, normA = 0, normB = 0;
-  for (let i = 0; i < vecA.length; i++) {
-    dot += vecA[i] * vecB[i];
-    normA += vecA[i] ** 2;
-    normB += vecB[i] ** 2;
+/* ----------------- External datasets loader ----------------- */
+async function loadExternalJSON(url) {
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error("Erro ao carregar dataset: " + url);
+    return await resp.json();
+  } catch (err) {
+    console.error("Falha no fetch:", err);
+    return null;
   }
-  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
-// Escolher resposta de forma variada
-function pickRandom(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-// Gerar resposta
-async function zeniaReply(userInput) {
-  if (!encoder) return "Ainda estou a aquecer o cérebro... tenta outra vez daqui a pouco 🔄";
-
-  const userVec = await getEmbedding(userInput);
-  let best = { score: -1, answer: "Hmm... não tenho certeza sobre isso. Queres me ensinar?" };
-
-  for (let item of knowledgeBase) {
-    let vec = await getEmbedding(item.q);
-    let sim = cosineSimilarity(userVec, vec);
-    if (sim > best.score) {
-      best = { score: sim, answer: pickRandom(item.a) };
+async function importSQuAD(url) {
+  const squad = await loadExternalJSON(url);
+  if (!squad) return;
+  for (const entry of squad.data) {
+    for (const p of entry.paragraphs) {
+      for (const qa of p.qas) {
+        if (qa.answers.length > 0) {
+          await Learner.rememberPair(qa.question, qa.answers[0].text);
+        }
+      }
     }
   }
-
-  // Aprendizado: guardar histórico
-  chatHistory.push({ pergunta: userInput, resposta: best.answer });
-  localStorage.setItem("zeniaHistory", JSON.stringify(chatHistory));
-
-  return best.answer;
+  console.log("SQuAD carregado ✅");
 }
 
-// Mostrar mensagens na tela
-function addMessage(text, sender) {
-  const messages = document.getElementById("messages");
-  const div = document.createElement("div");
-  div.className = sender === "user" ? "user-msg" : "bot-msg";
-  div.innerText = text;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
+async function importCoQA(url) {
+  const coqa = await loadExternalJSON(url);
+  if (!coqa) return;
+  for (const d of coqa.data) {
+    for (let i = 0; i < d.questions.length; i++) {
+      await Learner.rememberPair(d.questions[i], d.answers[i]);
+    }
+  }
+  console.log("CoQA carregado ✅");
 }
 
-// Envio de mensagem
-document.getElementById("chatForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const input = document.getElementById("userInput");
-  const msg = input.value.trim();
-  if (!msg) return;
+async function importQuAC(url) {
+  const quac = await loadExternalJSON(url);
+  if (!quac) return;
+  for (const entry of quac.data) {
+    for (const p of entry.paragraphs) {
+      for (const qa of p.qas) {
+        if (qa.answers.length > 0) {
+          await Learner.rememberPair(qa.question, qa.answers[0].text);
+        }
+      }
+    }
+  }
+  console.log("QuAC carregado ✅");
+}
 
-  addMessage(msg, "user");
-  input.value = "";
+async function importPersonaChat(url) {
+  const persona = await loadExternalJSON(url);
+  if (!persona) return;
+  for (const utt of persona.utterances || []) {
+    if (utt.history.length > 0 && utt.candidates.length > 0) {
+      const q = utt.history[utt.history.length - 1];
+      const a = utt.candidates[0];
+      await Learner.rememberPair(q, a);
+    }
+  }
+  console.log("Persona-Chat carregado ✅");
+}
 
-  const reply = await zeniaReply(msg);
-  setTimeout(() => addMessage(reply, "bot"), 500);
-});
+async function importReddit(url) {
+  const reddit = await loadExternalJSON(url);
+  if (!reddit) return;
+  for (const conv of reddit.conversations) {
+    for (let i = 0; i < conv.length - 1; i++) {
+      await Learner.rememberPair(conv[i], conv[i + 1]);
+    }
+  }
+  console.log("Reddit carregado ✅");
+}
+
+/* ----------------- Datasets init ----------------- */
+async function initDatasets() {
+  // ⚠️ cuidado: são datasets muito grandes, podes comentar os que não quiseres
+  await importSQuAD("https://rajpurkar.github.io/SQuAD-explorer/dataset/train-v1.1.json");
+  await importCoQA("https://nlp.stanford.edu/data/coqa/coqa-train-v1.0.json");
+  await importQuAC("https://s3.amazonaws.com/my89public/quac/train_v0.2.json");
+  await importPersonaChat("https://raw.githubusercontent.com/facebookresearch/ParlAI/main/parlai/tasks/convai2/train.json");
+  await importReddit("https://raw.githubusercontent.com/poly-ai/reddit-conversational-dataset/master/sample.json");
+}
+
+/* ----------------- Zenia INIT ----------------- */
+async function init() {
+  console.log("🚀 Inicializando Zenia...");
+
+  // carregar memória local, embeddings, tema, TTS/STT...
+  await Learner.loadMemory();
+  await Embeddings.load();
+
+  Theme.applyCurrent();
+  Voice.init();
+  Mic.init();
+
+  // dar uma saudação
+  speak("Olá, eu sou a Zenia. Como posso ajudar?");
+
+  // carregar datasets externos (grandes)
+  initDatasets().then(() => {
+    console.log("✅ Todos os datasets externos foram integrados.");
+    updateMemoryCount();
+  });
+}
+
+// arranque da Zenia
+window.addEventListener("load", init);
