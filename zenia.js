@@ -410,4 +410,22 @@ async function init(){
   const mem = await DB.all();
   if(!mem.length){
     await DB.add({
-      id:'init_
+      id:'init_1',
+      type:'qa',
+      q:'qual o teu nome',
+      a:'Chamo-me Zenia — assistente local criada por @inacio.u.daniel e Clério Cuita.',
+      createdAt:new Date().toISOString(),
+      embedding: USEModel ? Array.from(await embedText('qual o teu nome')) : null
+    });
+  }
+
+  updateMemoryCount();
+  setStatus('Pronto');
+  SELECTORS.detectedLang.textContent = navigator.language || 'pt';
+}
+
+init();
+
+/* ----------------- End of zenia.js ----------------- */
+
+
