@@ -1,67 +1,111 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zenia IA - Sistema Inteligente</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box;}
-        :root{
-            --bg-primary:#0f172a;
-            --bg-secondary:#1e293b;
-            --bg-tertiary:#334155;
-            --text-primary:#f1f5f9;
-            --text-secondary:#94a3b8;
-            --border:#334155;
-        }
-        body.light{
-            --bg-primary:#f8fafc;
-            --bg-secondary:#ffffff;
-            --bg-tertiary:#f1f5f9;
-            --text-primary:#1e293b;
-            --text-secondary:#64748b;
-            --border:#e2e8f0;
-        }
-        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:var(--bg-primary);color:var(--text-primary);transition:all 0.3s ease;}
-        .header{background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:1rem 2rem;}
-        .header-content{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
-        .logo{display:flex;align-items:center;gap:1rem;}
-        .logo-icon{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);width:50px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;}
-        .logo-text h1{font-size:1.5rem;margin-bottom:2px;}
-        .logo-text p{font-size:0.85rem;color:var(--text-secondary);}
-        .header-actions{display:flex;gap:0.5rem;}
-        .icon-btn{background:var(--bg-tertiary);border:none;padding:0.75rem;border-radius:8px;cursor:pointer;font-size:1.2rem;transition:all 0.3s;}
-        .icon-btn:hover{transform:translateY(-2px);}
-        .container{max-width:1400px;margin:2rem auto;padding:0 2rem;display:grid;grid-template-columns:300px 1fr;gap:2rem;}
-        .sidebar{display:flex;flex-direction:column;gap:1rem;}
-        .stats-card,.modules-card,.info-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;padding:1.5rem;}
-        .stats-card h3,.modules-card h3,.info-card h3{font-size:0.9rem;color:var(--text-secondary);margin-bottom:1rem;}
-        .stat-item{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;font-size:0.9rem;}
-        .module-item{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;font-size:0.85rem;}
-        .status-dot{width:8px;height:8px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;}
-        @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
-        .info-card p{font-size:0.85rem;line-height:1.8;color:var(--text-secondary);}
-        .chat-container{background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;height:calc(100vh - 200px);}
-        .messages{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;}
-        .message{display:flex;animation:slideIn 0.3s ease;}
-        @keyframes slideIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-        .message.user{justify-content:flex-end;}
-        .message-content{max-width:70%;padding:1rem 1.25rem;border-radius:12px;line-height:1.6;}
-        .message.bot .message-content{background:var(--bg-tertiary);}
-        .message.user .message-content{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;}
-        .thinking{display:flex;gap:5px;padding:1rem;}
-        .thinking-dot{width:8px;height:8px;background:var(--text-secondary);border-radius:50%;animation:bounce 1.4s infinite ease-in-out;}
-        .thinking-dot:nth-child(1){animation-delay:-0.32s;}
-        .thinking-dot:nth-child(2){animation-delay:-0.16s;}
-        @keyframes bounce{0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
-        .input-container{border-top:1px solid var(--border);padding:1.5rem;display:flex;gap:1rem;}
-        #userInput{flex:1;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;background:var(--bg-tertiary);color:var(--text-primary);font-size:1rem;}
-        #userInput:focus{outline:none;border-color:#667eea;}
-        #sendBtn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border:none;padding:0.75rem 2rem;border-radius:8px;color:white;font-size:1.2rem;cursor:pointer;transition:opacity 0.3s;}
-        #sendBtn:hover{opacity:0.9;}
-        #sendBtn:disabled{opacity:0.5;cursor:not-allowed;}
-        @media(max-width:768px){.container{grid-template-columns:1fr;}.sidebar{order:2;}}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zenia IA - Sistema Inteligente com Wikimedia</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+    --bg-primary:#0f172a;
+    --bg-secondary:#1e293b;
+    --bg-tertiary:#334155;
+    --text-primary:#f1f5f9;
+    --text-secondary:#94a3b8;
+    --border:#334155;
+}
+body.light{
+    --bg-primary:#f8fafc;
+    --bg-secondary:#ffffff;
+    --bg-tertiary:#f1f5f9;
+    --text-primary:#1e293b;
+    --text-secondary:#64748b;
+    --border:#e2e8f0;
+}
+body{
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    background:var(--bg-primary);
+    color:var(--text-primary);
+    transition:all 0.3s ease;
+}
+.header{
+    background:var(--bg-secondary);
+    border-bottom:1px solid var(--border);
+    padding:1rem 2rem;
+}
+.header-content{
+    max-width:1400px;margin:0 auto;
+    display:flex;justify-content:space-between;align-items:center;
+}
+.logo{display:flex;align-items:center;gap:1rem;}
+.logo-icon{
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    width:50px;height:50px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;font-size:28px;
+}
+.logo-text h1{font-size:1.5rem;margin-bottom:2px;}
+.logo-text p{font-size:0.85rem;color:var(--text-secondary);}
+.header-actions{display:flex;gap:0.5rem;}
+.icon-btn{
+    background:var(--bg-tertiary);border:none;padding:0.75rem;
+    border-radius:8px;cursor:pointer;font-size:1.2rem;transition:all 0.3s;
+}
+.icon-btn:hover{transform:translateY(-2px);}
+.container{
+    max-width:1400px;margin:2rem auto;padding:0 2rem;
+    display:grid;grid-template-columns:300px 1fr;gap:2rem;
+}
+.sidebar{display:flex;flex-direction:column;gap:1rem;}
+.stats-card,.modules-card,.info-card{
+    background:var(--bg-secondary);border:1px solid var(--border);
+    border-radius:12px;padding:1.5rem;
+}
+.stats-card h3,.modules-card h3,.info-card h3{
+    font-size:0.9rem;color:var(--text-secondary);margin-bottom:1rem;
+}
+.stat-item{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;font-size:0.9rem;}
+.module-item{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;font-size:0.85rem;}
+.status-dot{width:8px;height:8px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+.info-card p{font-size:0.85rem;line-height:1.8;color:var(--text-secondary);}
+.chat-container{
+    background:var(--bg-secondary);border:1px solid var(--border);
+    border-radius:12px;display:flex;flex-direction:column;
+    height:calc(100vh - 200px);
+}
+.messages{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;}
+.message{display:flex;animation:slideIn 0.3s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.message.user{justify-content:flex-end;}
+.message-content{
+    max-width:70%;padding:1rem 1.25rem;border-radius:12px;line-height:1.6;
+}
+.message.bot .message-content{background:var(--bg-tertiary);}
+.message.user .message-content{
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    color:white;
+}
+.thinking{display:flex;gap:5px;padding:1rem;}
+.thinking-dot{width:8px;height:8px;background:var(--text-secondary);border-radius:50%;animation:bounce 1.4s infinite ease-in-out;}
+.thinking-dot:nth-child(1){animation-delay:-0.32s;}
+.thinking-dot:nth-child(2){animation-delay:-0.16s;}
+@keyframes bounce{0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
+.input-container{border-top:1px solid var(--border);padding:1.5rem;display:flex;gap:1rem;}
+#userInput{
+    flex:1;padding:0.75rem 1rem;border:1px solid var(--border);
+    border-radius:8px;background:var(--bg-tertiary);
+    color:var(--text-primary);font-size:1rem;
+}
+#userInput:focus{outline:none;border-color:#667eea;}
+#sendBtn{
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    border:none;padding:0.75rem 2rem;border-radius:8px;
+    color:white;font-size:1.2rem;cursor:pointer;transition:opacity 0.3s;
+}
+#sendBtn:hover{opacity:0.9;}
+#sendBtn:disabled{opacity:0.5;cursor:not-allowed;}
+@media(max-width:768px){.container{grid-template-columns:1fr;}.sidebar{order:2;}}
+</style>
 </head>
 <body>
 <div id="app">
@@ -87,21 +131,18 @@
 <div class="stats-card">
 <h3>Estatísticas</h3>
 <div class="stat-item"><span>⚡</span> Interações: <strong id="interactions">0</strong></div>
-<div class="stat-item"><span>💾</span> Aprendizados: <strong id="learned">0</strong></div>
 <div class="stat-item"><span>⚙️</span> Contexto: <strong id="contextSize">0</strong></div>
 </div>
 
 <div class="modules-card">
 <h3>Módulos Ativos</h3>
-<div class="module-item"><span class="status-dot"></span> NLP</div>
-<div class="module-item"><span class="status-dot"></span> Contexto</div>
-<div class="module-item"><span class="status-dot"></span> Aprendizado</div>
 <div class="module-item"><span class="status-dot"></span> Wikimedia</div>
+<div class="module-item"><span class="status-dot"></span> Base Local</div>
 </div>
 
 <div class="info-card">
 <h3>Como usar</h3>
-<p>• Converse naturalmente<br>• Pergunte qualquer coisa<br>• Zenia aprende e pesquisa na Wikipedia<br>• Pode ensinar-me também!</p>
+<p>• Converse naturalmente<br>• Pergunte qualquer coisa<br>• Respostas vêm da base local e Wikipedia/Wikimedia<br>• Não aprende manualmente do usuário</p>
 </div>
 </aside>
 
@@ -116,38 +157,35 @@
 </div>
 
 <script>
+// NLP simples
 const NLPModule = {
     tokenize(t){return t.toLowerCase().replace(/[^\w\s]/g,'').split(/\s+/).filter(w=>w.length>0);},
-    extractIntent(t){const i={
-        greeting:['oi','olá','ola','hey','bom dia','boa tarde','boa noite'],
-        question:['o que','como','quando','onde','por que','porque','qual','quem','quanto'],
-        help:['ajuda','ajudar','socorro','help'],
-        thanks:['obrigado','valeu','agradeço'],
-        farewell:['tchau','adeus','até logo','bye'],
-        info:['quem é você','quem e voce','o que você faz','suas funções']
-    };const j=t.join(' ');for(let[k,v]of Object.entries(i)){if(v.some(kw=>j.includes(kw)))return k;}return'unknown';},
-    calculateSentiment(t){const p=['bom','ótimo','legal','incrível','maravilhoso','top'];const n=['ruim','péssimo','horrível','odeio','triste'];let s=0;t.forEach(a=>{if(p.includes(a))s++;if(n.includes(a))s--;});return s>0?'positive':s<0?'negative':'neutral';},
-    detectLearningCommand(t){const r=[/(.+?)\s*[=:]\s*(.+)/,/(.+?)\s+(?:é|significa)\s+(.+)/i];for(let p of r){const m=t.match(p);if(m)return{key:m[1].trim(),value:m[2].trim()};}return null;}
+    extractIntent(t){
+        const i={
+            greeting:['oi','olá','ola','hey','bom dia','boa tarde','boa noite'],
+            question:['o que','como','quando','onde','por que','porque','qual','quem','quanto'],
+            help:['ajuda','ajudar','socorro','help'],
+            thanks:['obrigado','valeu','agradeço'],
+            farewell:['tchau','adeus','até logo','bye'],
+            info:['quem é você','quem e voce','o que você faz','suas funções']
+        };
+        const j=t.join(' ');
+        for(let[k,v]of Object.entries(i)){if(v.some(kw=>j.includes(kw)))return k;}
+        return'unknown';
+    }
 };
 
+// Contexto
 const ContextModule={context:[],maxSize:10,add(u,b){this.context.push({user:u,bot:b});if(this.context.length>this.maxSize)this.context.shift();},size(){return this.context.length;},clear(){this.context=[];}};
 
-const LearningModule={knowledge:{},learn(k,v){this.knowledge[k.toLowerCase()]={value:v};},findPattern(i){const l=i.toLowerCase().split(/\s+/);for(let[k,d]of Object.entries(this.knowledge)){if(l.some(t=>k.includes(t)))return d.value;}return null;},count(){return Object.keys(this.knowledge).length;}};
-
-// --- Base local ---
+// Base local leitura
 let LocalData={};
 fetch('dilexconversation_knowledge.json')
     .then(r=>r.json())
-    .then(d=>{
-        if(d.conversations){
-            d.conversations.forEach(c=>LearningModule.learn(c.prompt,c.response));
-            console.log("Base local carregada:", Object.keys(LearningModule.knowledge).length, "itens");
-        }
-        LocalData=d.conversations||[];
-    })
+    .then(d=>{LocalData=d.conversations||[]; console.log("Base local carregada:", LocalData.length, "conversas");})
     .catch(e=>console.error("Erro ao carregar base local:", e));
 
-// --- Wikimedia ---
+// Wikimedia
 const WikimediaModule={
     async search(q){
         try{
@@ -155,40 +193,45 @@ const WikimediaModule={
             const r=await fetch(u);
             if(!r.ok) return null;
             const d=await r.json();
-            if(d.extract){LearningModule.learn(q,d.extract); return d.extract;}
-            return null;
+            return d.extract || null;
         }catch(e){console.error("Erro Wikimedia:",e); return null;}
     }
 };
 
-// --- Resposta ---
+// Resposta
 const ResponseModule={
     async generateSmart(text){
         const tokens=NLPModule.tokenize(text);
-        const learnCmd=NLPModule.detectLearningCommand(text);
-        if(learnCmd){LearningModule.learn(learnCmd.key,learnCmd.value);return `Aprendi que "${learnCmd.key}" ${learnCmd.value}. Vou lembrar disso!`; }
-        const learned=LearningModule.findPattern(text);
-        if(learned) return `💡 Base local: ${learned}`;
         const intent=NLPModule.extractIntent(tokens);
-        const sentiment=NLPModule.calculateSentiment(tokens);
+
+        // Base local primeiro
+        for(let conv of LocalData){
+            if(text.toLowerCase().includes(conv.prompt.toLowerCase())){
+                return `💡 Base local: ${conv.response}`;
+            }
+        }
+
+        // Pesquisa Wikipedia
         if(intent==='question'||intent==='unknown'){
             const wiki=await WikimediaModule.search(text);
             if(wiki) return `🧠 Wikipedia: ${wiki}`;
         }
+
         const resp={
             greeting:['Olá! Sou a Zenia IA com acesso ao Wikimedia!','Oi! Como posso ajudar?'],
             farewell:['Até logo! 👋','Tchau!'],
             thanks:['De nada!','Disponha!'],
             help:['Posso responder perguntas e buscar na Wikipedia!','Pergunte qualquer coisa que eu tento achar!'],
-            info:['Sou a Zenia, uma IA que aprende, conversa e pesquisa na Wikipedia.'],
-            unknown:['Hmm, não tenho certeza sobre isso. Pode explicar melhor?','Interessante, conta mais!']
+            info:['Sou a Zenia, uma IA que conversa e pesquisa na Wikipedia.'],
+            unknown:['Hmm, não sei sobre isso. Pode explicar melhor?','Interessante, conta mais!']
         };
         const arr=resp[intent]||resp.unknown;
         return arr[Math.floor(Math.random()*arr.length)];
     }
 };
 
-let stats={interactions:0,learned:0};
+// Estatísticas
+let stats={interactions:0};
 let isThinking=false;
 
 document.addEventListener('DOMContentLoaded',()=>{
@@ -219,7 +262,6 @@ async function sendMessage(){
         addBotMessage(response);
         ContextModule.add(msg,response);
         stats.interactions++;
-        stats.learned=LearningModule.count();
         updateStats();
         isThinking=false;
         sendBtn.disabled=false;
@@ -231,9 +273,9 @@ function addUserMessage(t){const m=document.createElement('div');m.className='me
 function addBotMessage(t){const m=document.createElement('div');m.className='message bot';m.innerHTML=`<div class="message-content">${t}</div>`;messages.appendChild(m);messages.scrollTop=messages.scrollHeight;}
 function showThinking(){const d=document.createElement('div');d.className='message bot';d.id='thinking';d.innerHTML=`<div class="message-content thinking"><div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div></div>`;messages.appendChild(d);messages.scrollTop=messages.scrollHeight;}
 function removeThinking(){const t=document.getElementById('thinking');if(t)t.remove();}
-function updateStats(){interactions.textContent=stats.interactions;learned.textContent=stats.learned;contextSize.textContent=ContextModule.size();}
-function clearChat(){messages.innerHTML='';ContextModule.clear();stats={interactions:0,learned:LearningModule.count()};updateStats();addBotMessage('Chat limpo! 😊');}
-function exportData(){const data={messages:Array.from(document.querySelectorAll('.message')).map(m=>({type:m.classList.contains('user')?'user':'bot',text:m.textContent})),knowledge:LearningModule.knowledge,context:ContextModule.context,stats,exportDate:new Date()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='zenia-data.json';a.click();URL.revokeObjectURL(url);}
+function updateStats(){interactions.textContent=stats.interactions;contextSize.textContent=ContextModule.size();}
+function clearChat(){messages.innerHTML='';ContextModule.clear();stats={interactions:0};updateStats();addBotMessage('Chat limpo! 😊');}
+function exportData(){const data={messages:Array.from(document.querySelectorAll('.message')).map(m=>({type:m.classList.contains('user')?'user':'bot',text:m.textContent})),context:ContextModule.context,stats,exportDate:new Date()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='zenia-data.json';a.click();URL.revokeObjectURL(url);}
 </script>
 </body>
 </html>
