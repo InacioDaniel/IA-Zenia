@@ -3,762 +3,283 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zenia IA - Sistema Inteligente</title>
+    <title>Zenia IA - Sistema Inteligente com Wikimedia</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root{
+            --bg-primary:#0f172a;
+            --bg-secondary:#1e293b;
+            --bg-tertiary:#334155;
+            --text-primary:#f1f5f9;
+            --text-secondary:#94a3b8;
+            --border:#334155;
         }
-
-        :root {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-tertiary: #334155;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --border: #334155;
+        body.light{
+            --bg-primary:#f8fafc;
+            --bg-secondary:#ffffff;
+            --bg-tertiary:#f1f5f9;
+            --text-primary:#1e293b;
+            --text-secondary:#64748b;
+            --border:#e2e8f0;
         }
-
-        body.light {
-            --bg-primary: #f8fafc;
-            --bg-secondary: #ffffff;
-            --bg-tertiary: #f1f5f9;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --border: #e2e8f0;
+        body{
+            font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+            background:var(--bg-primary);
+            color:var(--text-primary);
+            transition:all 0.3s ease;
         }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            transition: all 0.3s ease;
+        .header{
+            background:var(--bg-secondary);
+            border-bottom:1px solid var(--border);
+            padding:1rem 2rem;
         }
-
-        .header {
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
+        .header-content{
+            max-width:1400px;margin:0 auto;
+            display:flex;justify-content:space-between;align-items:center;
         }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .logo{display:flex;align-items:center;gap:1rem;}
+        .logo-icon{
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            width:50px;height:50px;border-radius:12px;
+            display:flex;align-items:center;justify-content:center;font-size:28px;
         }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+        .logo-text h1{font-size:1.5rem;margin-bottom:2px;}
+        .logo-text p{font-size:0.85rem;color:var(--text-secondary);}
+        .header-actions{display:flex;gap:0.5rem;}
+        .icon-btn{
+            background:var(--bg-tertiary);border:none;padding:0.75rem;
+            border-radius:8px;cursor:pointer;font-size:1.2rem;transition:all 0.3s;
         }
-
-        .logo-icon {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
+        .icon-btn:hover{transform:translateY(-2px);}
+        .container{
+            max-width:1400px;margin:2rem auto;padding:0 2rem;
+            display:grid;grid-template-columns:300px 1fr;gap:2rem;
         }
-
-        .logo-text h1 {
-            font-size: 1.5rem;
-            margin-bottom: 2px;
+        .sidebar{display:flex;flex-direction:column;gap:1rem;}
+        .stats-card,.modules-card,.info-card{
+            background:var(--bg-secondary);border:1px solid var(--border);
+            border-radius:12px;padding:1.5rem;
         }
-
-        .logo-text p {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
+        .stats-card h3,.modules-card h3,.info-card h3{
+            font-size:0.9rem;color:var(--text-secondary);margin-bottom:1rem;
         }
-
-        .header-actions {
-            display: flex;
-            gap: 0.5rem;
+        .stat-item{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;font-size:0.9rem;}
+        .module-item{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;font-size:0.85rem;}
+        .status-dot{width:8px;height:8px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;}
+        @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+        .info-card p{font-size:0.85rem;line-height:1.8;color:var(--text-secondary);}
+        .chat-container{
+            background:var(--bg-secondary);border:1px solid var(--border);
+            border-radius:12px;display:flex;flex-direction:column;
+            height:calc(100vh - 200px);
         }
-
-        .icon-btn {
-            background: var(--bg-tertiary);
-            border: none;
-            padding: 0.75rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.3s;
+        .messages{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;}
+        .message{display:flex;animation:slideIn 0.3s ease;}
+        @keyframes slideIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+        .message.user{justify-content:flex-end;}
+        .message-content{
+            max-width:70%;padding:1rem 1.25rem;border-radius:12px;line-height:1.6;
         }
-
-        .icon-btn:hover {
-            transform: translateY(-2px);
+        .message.bot .message-content{background:var(--bg-tertiary);}
+        .message.user .message-content{
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color:white;
         }
-
-        .container {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 2rem;
+        .thinking{display:flex;gap:5px;padding:1rem;}
+        .thinking-dot{width:8px;height:8px;background:var(--text-secondary);border-radius:50%;animation:bounce 1.4s infinite ease-in-out;}
+        .thinking-dot:nth-child(1){animation-delay:-0.32s;}
+        .thinking-dot:nth-child(2){animation-delay:-0.16s;}
+        @keyframes bounce{0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
+        .input-container{border-top:1px solid var(--border);padding:1.5rem;display:flex;gap:1rem;}
+        #userInput{
+            flex:1;padding:0.75rem 1rem;border:1px solid var(--border);
+            border-radius:8px;background:var(--bg-tertiary);
+            color:var(--text-primary);font-size:1rem;
         }
-
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
+        #userInput:focus{outline:none;border-color:#667eea;}
+        #sendBtn{
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            border:none;padding:0.75rem 2rem;border-radius:8px;
+            color:white;font-size:1.2rem;cursor:pointer;transition:opacity 0.3s;
         }
-
-        .stats-card, .modules-card, .info-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-
-        .stats-card h3, .modules-card h3, .info-card h3 {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
-        }
-
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.75rem;
-            font-size: 0.9rem;
-        }
-
-        .stat-icon {
-            font-size: 1rem;
-        }
-
-        .module-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-            font-size: 0.85rem;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #22c55e;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .info-card p {
-            font-size: 0.85rem;
-            line-height: 1.8;
-            color: var(--text-secondary);
-        }
-
-        .chat-container {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - 200px);
-        }
-
-        .messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .message {
-            display: flex;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message.user {
-            justify-content: flex-end;
-        }
-
-        .message-content {
-            max-width: 70%;
-            padding: 1rem 1.25rem;
-            border-radius: 12px;
-            line-height: 1.6;
-        }
-
-        .message.bot .message-content {
-            background: var(--bg-tertiary);
-        }
-
-        .message.user .message-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .thinking {
-            display: flex;
-            gap: 5px;
-            padding: 1rem;
-        }
-
-        .thinking-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--text-secondary);
-            border-radius: 50%;
-            animation: bounce 1.4s infinite ease-in-out;
-        }
-
-        .thinking-dot:nth-child(1) { animation-delay: -0.32s; }
-        .thinking-dot:nth-child(2) { animation-delay: -0.16s; }
-
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
-        }
-
-        .input-container {
-            border-top: 1px solid var(--border);
-            padding: 1.5rem;
-            display: flex;
-            gap: 1rem;
-        }
-
-        #userInput {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            font-size: 1rem;
-        }
-
-        #userInput:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        #sendBtn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            padding: 0.75rem 2rem;
-            border-radius: 8px;
-            color: white;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: opacity 0.3s;
-        }
-
-        #sendBtn:hover {
-            opacity: 0.9;
-        }
-
-        #sendBtn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-            
-            .sidebar {
-                order: 2;
-            }
-        }
+        #sendBtn:hover{opacity:0.9;}
+        #sendBtn:disabled{opacity:0.5;cursor:not-allowed;}
+        @media(max-width:768px){.container{grid-template-columns:1fr;}.sidebar{order:2;}}
     </style>
 </head>
 <body>
-    <div id="app">
-        <header class="header">
-            <div class="header-content">
-                <div class="logo">
-                    <div class="logo-icon">🧠</div>
-                    <div class="logo-text">
-                        <h1>Zenia IA</h1>
-                        <p>Sistema Inteligente Melhorado</p>
-                    </div>
-                </div>
-                <div class="header-actions">
-                    <button id="exportBtn" class="icon-btn" title="Exportar dados">💾</button>
-                    <button id="clearBtn" class="icon-btn" title="Limpar chat">🗑️</button>
-                    <button id="themeBtn" class="icon-btn" title="Alternar tema">🌙</button>
-                </div>
-            </div>
-        </header>
+<div id="app">
+<header class="header">
+<div class="header-content">
+<div class="logo">
+<div class="logo-icon">🧠</div>
+<div class="logo-text">
+<h1>Zenia IA</h1>
+<p>Sistema Inteligente + Wikimedia</p>
+</div>
+</div>
+<div class="header-actions">
+<button id="exportBtn" class="icon-btn" title="Exportar dados">💾</button>
+<button id="clearBtn" class="icon-btn" title="Limpar chat">🗑️</button>
+<button id="themeBtn" class="icon-btn" title="Alternar tema">🌙</button>
+</div>
+</div>
+</header>
 
-        <div class="container">
-            <aside class="sidebar">
-                <div class="stats-card">
-                    <h3>Estatísticas</h3>
-                    <div class="stat-item">
-                        <span class="stat-icon">⚡</span>
-                        <span>Interações: <strong id="interactions">0</strong></span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-icon">💾</span>
-                        <span>Aprendizados: <strong id="learned">0</strong></span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-icon">⚙️</span>
-                        <span>Contexto: <strong id="contextSize">0</strong></span>
-                    </div>
-                </div>
+<div class="container">
+<aside class="sidebar">
+<div class="stats-card">
+<h3>Estatísticas</h3>
+<div class="stat-item"><span>⚡</span> Interações: <strong id="interactions">0</strong></div>
+<div class="stat-item"><span>💾</span> Aprendizados: <strong id="learned">0</strong></div>
+<div class="stat-item"><span>⚙️</span> Contexto: <strong id="contextSize">0</strong></div>
+</div>
 
-                <div class="modules-card">
-                    <h3>Módulos Ativos</h3>
-                    <div class="module-item">
-                        <span class="status-dot"></span>
-                        <span>NLP</span>
-                    </div>
-                    <div class="module-item">
-                        <span class="status-dot"></span>
-                        <span>Contexto</span>
-                    </div>
-                    <div class="module-item">
-                        <span class="status-dot"></span>
-                        <span>Aprendizado</span>
-                    </div>
-                    <div class="module-item">
-                        <span class="status-dot"></span>
-                        <span>Sentimento</span>
-                    </div>
-                </div>
+<div class="modules-card">
+<h3>Módulos Ativos</h3>
+<div class="module-item"><span class="status-dot"></span> NLP</div>
+<div class="module-item"><span class="status-dot"></span> Contexto</div>
+<div class="module-item"><span class="status-dot"></span> Aprendizado</div>
+<div class="module-item"><span class="status-dot"></span> Wikimedia</div>
+</div>
 
-                <div class="info-card">
-                    <h3>Como usar</h3>
-                    <p>• Converse naturalmente<br/>
-                    • Ensine: "X = Y" ou "X é Y"<br/>
-                    • Faça perguntas<br/>
-                    • A IA aprende com você!</p>
-                </div>
-            </aside>
+<div class="info-card">
+<h3>Como usar</h3>
+<p>• Converse naturalmente<br>• Pergunte qualquer coisa<br>• Se não souber, Zenia pesquisa na Wikipedia<br>• Pode aprender com você!</p>
+</div>
+</aside>
 
-            <main class="chat-container">
-                <div id="messages" class="messages"></div>
-                <div class="input-container">
-                    <input type="text" id="userInput" placeholder="Digite sua mensagem..." />
-                    <button id="sendBtn">📤</button>
-                </div>
-            </main>
-        </div>
-    </div>
+<main class="chat-container">
+<div id="messages" class="messages"></div>
+<div class="input-container">
+<input type="text" id="userInput" placeholder="Digite sua mensagem...">
+<button id="sendBtn">📤</button>
+</div>
+</main>
+</div>
+</div>
 
-    <script>
-        // ==================== MÓDULO NLP ====================
-        const NLPModule = {
-            tokenize(text) {
-                return text.toLowerCase()
-                    .replace(/[^\w\s]/g, '')
-                    .split(/\s+/)
-                    .filter(word => word.length > 0);
-            },
+<script>
+const NLPModule = {
+    tokenize(t){return t.toLowerCase().replace(/[^\w\s]/g,'').split(/\s+/).filter(w=>w.length>0);},
+    extractIntent(t){const i={
+        greeting:['oi','olá','ola','hey','bom dia','boa tarde','boa noite'],
+        question:['o que','como','quando','onde','por que','porque','qual','quem','quanto'],
+        help:['ajuda','ajudar','socorro','help'],
+        thanks:['obrigado','valeu','agradeço'],
+        farewell:['tchau','adeus','até logo','bye'],
+        info:['quem é você','quem e voce','o que você faz','suas funções']
+    };const j=t.join(' ');for(let[k,v]of Object.entries(i)){if(v.some(kw=>j.includes(kw)))return k;}return'unknown';},
+    calculateSentiment(t){const p=['bom','ótimo','legal','incrível','maravilhoso','top'];const n=['ruim','péssimo','horrível','odeio','triste'];let s=0;t.forEach(a=>{if(p.includes(a))s++;if(n.includes(a))s--;});return s>0?'positive':s<0?'negative':'neutral';},
+    detectLearningCommand(t){const r=[/(.+?)\s*[=:]\s*(.+)/,/(.+?)\s+(?:é|significa)\s+(.+)/i];for(let p of r){const m=t.match(p);if(m)return{key:m[1].trim(),value:m[2].trim()};}return null;}
+};
 
-            extractIntent(tokens) {
-                const intents = {
-                    greeting: ['oi', 'olá', 'ola', 'hey', 'bom dia', 'boa tarde', 'boa noite', 'opa'],
-                    question: ['o que', 'como', 'quando', 'onde', 'por que', 'porque', 'qual', 'quem', 'quanto'],
-                    help: ['ajuda', 'ajudar', 'socorro', 'help', 'auxílio', 'auxilio'],
-                    thanks: ['obrigado', 'obrigada', 'valeu', 'thanks', 'agradeço', 'agradecido'],
-                    farewell: ['tchau', 'adeus', 'até logo', 'bye', 'falou', 'ate mais'],
-                    learning: ['aprenda', 'aprende', 'lembre', 'memorize', 'guarde', 'salve'],
-                    info: ['quem é você', 'quem e voce', 'o que você faz', 'suas funções', 'o que voce faz']
-                };
+const ContextModule={context:[],maxSize:10,add(u,b){this.context.push({user:u,bot:b});if(this.context.length>this.maxSize)this.context.shift();},size(){return this.context.length;},clear(){this.context=[];}};
+const LearningModule={knowledge:{},learn(k,v){this.knowledge[k.toLowerCase()]={value:v};},findPattern(i){const l=i.toLowerCase().split(/\s+/);for(let[k,d]of Object.entries(this.knowledge)){if(l.some(t=>k.includes(t)))return d.value;}return null;},count(){return Object.keys(this.knowledge).length;}};
 
-                const joinedTokens = tokens.join(' ');
-                
-                for (let [intent, keywords] of Object.entries(intents)) {
-                    if (keywords.some(kw => joinedTokens.includes(kw))) {
-                        return intent;
-                    }
-                }
-                
-                return 'unknown';
-            },
+// Wikimedia API
+const WikimediaModule={
+    async search(q){
+        try{
+            const u=`https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`;
+            const r=await fetch(u);if(!r.ok)return null;
+            const d=await r.json();
+            if(d.extract){LearningModule.learn(q,d.extract);return d.extract;}
+            return null;
+        }catch(e){console.error("Erro Wikimedia:",e);return null;}
+    }
+};
 
-            extractEntities(text) {
-                return {
-                    numbers: text.match(/\d+/g) || [],
-                    emails: text.match(/[\w.-]+@[\w.-]+\.\w+/g) || [],
-                    urls: text.match(/https?:\/\/[^\s]+/g) || [],
-                    dates: text.match(/\d{1,2}\/\d{1,2}\/\d{2,4}/g) || []
-                };
-            },
+// Base local opcional
+let WikiLocalData={};
+fetch('wiki-data.json').then(r=>r.json()).then(d=>WikiLocalData=d).catch(()=>{});
+function searchLocalWiki(q){
+    q=q.toLowerCase();
+    for(let k in WikiLocalData){
+        if(k.toLowerCase().includes(q))return WikiLocalData[k];
+    }
+    return null;
+}
 
-            calculateSentiment(tokens) {
-                const positive = ['bom', 'ótimo', 'otimo', 'excelente', 'legal', 'adorei', 'incrível', 'incrivel', 
-                                 'maravilhoso', 'perfeito', 'fantástico', 'fantastico', 'show', 'top'];
-                const negative = ['ruim', 'péssimo', 'pessimo', 'horrível', 'horrivel', 'terrível', 'terrivel', 
-                                 'odeio', 'chato', 'mal', 'pior', 'triste'];
-                
-                let score = 0;
-                tokens.forEach(token => {
-                    if (positive.includes(token)) score += 1;
-                    if (negative.includes(token)) score -= 1;
-                });
+const ResponseModule={
+    async generateSmart(text){
+        const tokens=NLPModule.tokenize(text);
+        const learnCmd=NLPModule.detectLearningCommand(text);
+        if(learnCmd){LearningModule.learn(learnCmd.key,learnCmd.value);return `Aprendi que "${learnCmd.key}" ${learnCmd.value}. Vou lembrar disso!`; }
 
-                return score > 0 ? 'positive' : score < 0 ? 'negative' : 'neutral';
-            },
+        const learned=LearningModule.findPattern(text);
+        if(learned)return `Com base no que aprendi: ${learned}`;
 
-            detectLearningCommand(text) {
-                const patterns = [
-                    /(.+?)\s*[=:]\s*(.+)/,
-                    /(.+?)\s+(?:é|e|significa|means)\s+(.+)/i
-                ];
+        const local=searchLocalWiki(text);
+        if(local)return `📚 Encontrei isto na base local: ${local}`;
 
-                for (let pattern of patterns) {
-                    const match = text.match(pattern);
-                    if (match) {
-                        return {
-                            key: match[1].trim(),
-                            value: match[2].trim()
-                        };
-                    }
-                }
-                
-                return null;
-            }
+        const intent=NLPModule.extractIntent(tokens);
+        const sentiment=NLPModule.calculateSentiment(tokens);
+
+        if(intent==='question'||intent==='unknown'){
+            const wiki=await WikimediaModule.search(text);
+            if(wiki)return `🧠 Encontrei isto na Wikipedia: ${wiki}`;
+        }
+
+        const resp={
+            greeting:['Olá! Sou a Zenia com acesso ao Wikimedia!','Oi! Como posso ajudar?'],
+            farewell:['Até logo! 👋','Tchau!'],
+            thanks:['De nada!','Disponha!'],
+            help:['Posso responder perguntas e buscar na Wikipedia!'],
+            info:['Sou a Zenia, uma IA inteligente que aprende e pesquisa no Wikimedia.'],
+            unknown:['Hmm, não tenho certeza sobre isso. Pode explicar melhor?']
         };
+        const arr=resp[intent]||resp.unknown;
+        return arr[Math.floor(Math.random()*arr.length)];
+    }
+};
 
-        // ==================== MÓDULO CONTEXTO ====================
-        const ContextModule = {
-            context: [],
-            maxSize: 10,
+let stats={interactions:0,learned:0};
+let isThinking=false;
 
-            add(userMsg, botMsg) {
-                this.context.push({
-                    user: userMsg,
-                    bot: botMsg,
-                    timestamp: Date.now()
-                });
+document.addEventListener('DOMContentLoaded',()=>{
+    addBotMessage('👋 Olá! Sou a Zenia IA, agora conectada ao Wikimedia! Faça uma pergunta.');
+    init();
+});
 
-                if (this.context.length > this.maxSize) {
-                    this.context.shift();
-                }
+function init(){
+    sendBtn.onclick=sendMessage;
+    userInput.onkeypress=e=>{if(e.key==='Enter')sendMessage();};
+    clearBtn.onclick=clearChat;
+    themeBtn.onclick=()=>{document.body.classList.toggle('light');};
+    exportBtn.onclick=exportData;
+}
 
-                return this.context;
-            },
+async function sendMessage(){
+    const input=userInput;
+    const msg=input.value.trim();
+    if(!msg||isThinking)return;
+    addUserMessage(msg);
+    input.value='';
+    isThinking=true;
+    sendBtn.disabled=true;
+    showThinking();
 
-            getRecent(count = 3) {
-                return this.context.slice(-count);
-            },
+    setTimeout(async()=>{
+        const response=await ResponseModule.generateSmart(msg);
+        removeThinking();addBotMessage(response);
+        ContextModule.add(msg,response);
+        stats.interactions++;stats.learned=LearningModule.count();
+        updateStats();isThinking=false;sendBtn.disabled=false;input.focus();
+    },800);
+}
 
-            findSimilar(query) {
-                const queryLower = query.toLowerCase();
-                return this.context.filter(item => 
-                    item.user.toLowerCase().includes(queryLower)
-                );
-            },
-
-            size() {
-                return this.context.length;
-            },
-
-            clear() {
-                this.context = [];
-            }
-        };
-
-        // ==================== MÓDULO APRENDIZADO ====================
-        const LearningModule = {
-            knowledge: {},
-
-            learn(key, value) {
-                this.knowledge[key.toLowerCase()] = {
-                    value: value,
-                    learned: Date.now(),
-                    timesUsed: 0
-                };
-                return true;
-            },
-
-            recall(key) {
-                const item = this.knowledge[key.toLowerCase()];
-                if (item) {
-                    item.timesUsed++;
-                    return item.value;
-                }
-                return null;
-            },
-
-            findPattern(input) {
-                const inputLower = input.toLowerCase();
-                const tokens = inputLower.split(/\s+/);
-
-                for (let [key, data] of Object.entries(this.knowledge)) {
-                    if (tokens.some(token => key.includes(token) || token.includes(key))) {
-                        data.timesUsed++;
-                        return data.value;
-                    }
-                }
-                return null;
-            },
-
-            count() {
-                return Object.keys(this.knowledge).length;
-            },
-
-            clear() {
-                this.knowledge = {};
-            }
-        };
-
-        // ==================== MÓDULO RESPOSTAS ====================
-        const ResponseModule = {
-            responses: {
-                greeting: [
-                    'Olá! Sou a Zenia, sua assistente inteligente. Como posso ajudar?',
-                    'Oi! Prazer em conversar com você! 😊',
-                    'Olá! Estou aqui para ajudar no que precisar!',
-                    'Opa! Tudo bem? Como posso ser útil hoje?'
-                ],
-                question: [
-                    'Essa é uma ótima pergunta! Deixe-me pensar...',
-                    'Interessante! Vou analisar isso para você.',
-                    'Estou processando sua pergunta...',
-                    'Deixe-me verificar o que sei sobre isso...'
-                ],
-                help: [
-                    'Claro! Estou aqui para ajudar. Posso conversar, aprender informações e responder perguntas.',
-                    'Posso ajudar com várias coisas! Experimente me fazer perguntas ou me ensinar algo novo.',
-                    'Estou à disposição! Posso aprender, conversar e ajudar no que você precisar.'
-                ],
-                thanks: [
-                    'Por nada! Fico feliz em ajudar! 😊',
-                    'Sempre às ordens!',
-                    'É um prazer ajudar você!',
-                    'Disponha! Estou aqui para isso!'
-                ],
-                farewell: [
-                    'Até logo! Foi ótimo conversar com você!',
-                    'Tchau! Volte sempre! 👋',
-                    'Até a próxima!',
-                    'Nos vemos em breve! Cuide-se!'
-                ],
-                learning: [
-                    'Entendido! Vou guardar essa informação.',
-                    'Aprendi! Obrigada por me ensinar.',
-                    'Informação armazenada com sucesso!',
-                    'Perfeito! Vou lembrar disso.'
-                ],
-                info: [
-                    'Sou a Zenia, uma IA avançada com múltiplos módulos: processamento de linguagem natural, sistema de aprendizado, gerenciamento de contexto e análise de sentimentos. Posso aprender com nossas conversas e melhorar continuamente!',
-                    'Sou uma assistente inteligente modular com capacidades de NLP, aprendizado de máquina e análise contextual. Meu objetivo é conversar naturalmente e ajudar você!'
-                ],
-                unknown: [
-                    'Hmm, não tenho certeza sobre isso. Pode reformular?',
-                    'Interessante... Me conte mais sobre isso!',
-                    'Estou processando... Pode dar mais detalhes?',
-                    'Não entendi muito bem. Pode explicar de outra forma?'
-                ]
-            },
-
-            generate(intent, text, entities, sentiment) {
-                const intentResponses = this.responses[intent] || this.responses.unknown;
-                let response = intentResponses[Math.floor(Math.random() * intentResponses.length)];
-
-                if (sentiment === 'positive') {
-                    response += ' Fico feliz com seu entusiasmo!';
-                } else if (sentiment === 'negative') {
-                    response += ' Vou fazer o meu melhor para ajudar.';
-                }
-
-                const similar = ContextModule.findSimilar(text);
-                if (similar.length > 0 && intent === 'question') {
-                    response += ' Já conversamos sobre algo similar antes.';
-                }
-
-                return response;
-            },
-
-            generateSmart(text) {
-                const tokens = NLPModule.tokenize(text);
-                
-                const learningCmd = NLPModule.detectLearningCommand(text);
-                if (learningCmd) {
-                    LearningModule.learn(learningCmd.key, learningCmd.value);
-                    return `Aprendi que "${learningCmd.key}" ${learningCmd.value}. Vou lembrar disso!`;
-                }
-
-                const learned = LearningModule.findPattern(text);
-                if (learned) {
-                    return `Com base no que aprendi: ${learned}`;
-                }
-
-                const intent = NLPModule.extractIntent(tokens);
-                const entities = NLPModule.extractEntities(text);
-                const sentiment = NLPModule.calculateSentiment(tokens);
-
-                return this.generate(intent, text, entities, sentiment);
-            }
-        };
-
-        // ==================== APLICAÇÃO PRINCIPAL ====================
-        let stats = {
-            interactions: 0,
-            learned: 0
-        };
-
-        let isDarkMode = true;
-        let isThinking = false;
-
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
-            addBotMessage('👋 Olá! Sou a Zenia, sua assistente inteligente melhorada! Posso conversar, aprender e evoluir com você. Como posso ajudar hoje?');
-        });
-
-        function initializeApp() {
-            document.getElementById('sendBtn').addEventListener('click', sendMessage);
-            document.getElementById('userInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') sendMessage();
-            });
-            document.getElementById('themeBtn').addEventListener('click', toggleTheme);
-            document.getElementById('clearBtn').addEventListener('click', clearChat);
-            document.getElementById('exportBtn').addEventListener('click', exportData);
-
-            updateStats();
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('userInput');
-            const message = input.value.trim();
-            
-            if (!message || isThinking) return;
-
-            addUserMessage(message);
-            input.value = '';
-
-            isThinking = true;
-            document.getElementById('sendBtn').disabled = true;
-            showThinking();
-
-            setTimeout(() => {
-                const response = ResponseModule.generateSmart(message);
-                removeThinking();
-                addBotMessage(response);
-                
-                ContextModule.add(message, response);
-                
-                stats.interactions++;
-                stats.learned = LearningModule.count();
-                updateStats();
-
-                isThinking = false;
-                document.getElementById('sendBtn').disabled = false;
-                document.getElementById('userInput').focus();
-            }, 1000);
-        }
-
-        function addUserMessage(text) {
-            const messagesDiv = document.getElementById('messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message user';
-            messageDiv.innerHTML = `<div class="message-content">${text}</div>`;
-            messagesDiv.appendChild(messageDiv);
-            scrollToBottom();
-        }
-
-        function addBotMessage(text) {
-            const messagesDiv = document.getElementById('messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message bot';
-            messageDiv.innerHTML = `<div class="message-content">${text}</div>`;
-            messagesDiv.appendChild(messageDiv);
-            scrollToBottom();
-        }
-
-        function showThinking() {
-            const messagesDiv = document.getElementById('messages');
-            const thinkingDiv = document.createElement('div');
-            thinkingDiv.className = 'message bot';
-            thinkingDiv.id = 'thinking';
-            thinkingDiv.innerHTML = `
-                <div class="message-content thinking">
-                    <div class="thinking-dot"></div>
-                    <div class="thinking-dot"></div>
-                    <div class="thinking-dot"></div>
-                </div>
-            `;
-            messagesDiv.appendChild(thinkingDiv);
-            scrollToBottom();
-        }
-
-        function removeThinking() {
-            const thinking = document.getElementById('thinking');
-            if (thinking) thinking.remove();
-        }
-
-        function scrollToBottom() {
-            const messagesDiv = document.getElementById('messages');
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        function updateStats() {
-            document.getElementById('interactions').textContent = stats.interactions;
-            document.getElementById('learned').textContent = stats.learned;
-            document.getElementById('contextSize').textContent = ContextModule.size();
-        }
-
-        function toggleTheme() {
-            isDarkMode = !isDarkMode;
-            document.body.classList.toggle('light');
-            document.getElementById('themeBtn').textContent = isDarkMode ? '🌙' : '☀️';
-        }
-
-        function clearChat() {
-            if (confirm('Deseja limpar todo o histórico de conversas?')) {
-                document.getElementById('messages').innerHTML = '';
-                ContextModule.clear();
-                stats.interactions = 0;
-                updateStats();
-                addBotMessage('Chat limpo! Pronto para começar uma nova conversa. 😊');
-            }
-        }
-
-        function exportData() {
-            const data = {
-                messages: Array.from(document.querySelectorAll('.message')).map(msg => ({
-                    type: msg.classList.contains('user') ? 'user' : 'bot',
-                    text: msg.querySelector('.message-content').textContent
-                })),
-                context: ContextModule.context,
-                knowledge: LearningModule.knowledge,
-                stats: stats,
-                exportDate: new Date().toISOString()
-            };
-
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `zenia-data-${Date.now()}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-    </script>
+function addUserMessage(t){const m=document.createElement('div');m.className='message user';m.innerHTML=`<div class="message-content">${t}</div>`;messages.appendChild(m);messages.scrollTop=messages.scrollHeight;}
+function addBotMessage(t){const m=document.createElement('div');m.className='message bot';m.innerHTML=`<div class="message-content">${t}</div>`;messages.appendChild(m);messages.scrollTop=messages.scrollHeight;}
+function showThinking(){const d=document.createElement('div');d.className='message bot';d.id='thinking';d.innerHTML=`<div class="message-content thinking"><div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div></div>`;messages.appendChild(d);messages.scrollTop=messages.scrollHeight;}
+function removeThinking(){const t=document.getElementById('thinking');if(t)t.remove();}
+function updateStats(){interactions.textContent=stats.interactions;learned.textContent=stats.learned;contextSize.textContent=ContextModule.size();}
+function clearChat(){messages.innerHTML='';ContextModule.clear();stats={interactions:0,learned:LearningModule.count()};updateStats();addBotMessage('Chat limpo! 😊');}
+function exportData(){
+    const data={messages:Array.from(document.querySelectorAll('.message')).map(m=>({type:m.classList.contains('user')?'user':'bot',text:m.textContent})),knowledge:LearningModule.knowledge,context:ContextModule.context,stats,exportDate:new Date()};
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='zenia-data.json';a.click();URL.revokeObjectURL(url);
+}
+</script>
 </body>
 </html>
