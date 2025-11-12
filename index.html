@@ -3,61 +3,105 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zenia IA - Sistema Inteligente + Wikimedia + JSON</title>
+<title>Zenia IA - Acessível</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
---bg-primary:#0f172a;
---bg-secondary:#1e293b;
---bg-tertiary:#334155;
---text-primary:#f1f5f9;
---text-secondary:#94a3b8;
---border:#334155;
+    --bg-primary:#0f172a;
+    --bg-secondary:#1e293b;
+    --bg-tertiary:#334155;
+    --text-primary:#f1f5f9;
+    --text-secondary:#94a3b8;
+    --border:#334155;
 }
 body.light{
---bg-primary:#f8fafc;
---bg-secondary:#ffffff;
---bg-tertiary:#f1f5f9;
---text-primary:#1e293b;
---text-secondary:#64748b;
---border:#e2e8f0;
+    --bg-primary:#f8fafc;
+    --bg-secondary:#ffffff;
+    --bg-tertiary:#f1f5f9;
+    --text-primary:#1e293b;
+    --text-secondary:#64748b;
+    --border:#e2e8f0;
 }
-body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:var(--bg-primary);color:var(--text-primary);transition:all 0.3s ease;}
-.header{background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:1rem 2rem;}
-.header-content{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
+body{
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    background:var(--bg-primary);
+    color:var(--text-primary);
+    transition:all 0.3s ease;
+}
+.header{
+    background:var(--bg-secondary);
+    border-bottom:1px solid var(--border);
+    padding:1rem 2rem;
+}
+.header-content{
+    max-width:1400px;margin:0 auto;
+    display:flex;justify-content:space-between;align-items:center;
+}
 .logo{display:flex;align-items:center;gap:1rem;}
-.logo-icon{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);width:50px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;}
+.logo-icon{
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    width:50px;height:50px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;font-size:28px;
+}
 .logo-text h1{font-size:1.5rem;margin-bottom:2px;}
 .logo-text p{font-size:0.85rem;color:var(--text-secondary);}
 .header-actions{display:flex;gap:0.5rem;}
-.icon-btn{background:var(--bg-tertiary);border:none;padding:0.75rem;border-radius:8px;cursor:pointer;font-size:1.2rem;transition:all 0.3s;}
+.icon-btn{
+    background:var(--bg-tertiary);border:none;padding:0.75rem;
+    border-radius:8px;cursor:pointer;font-size:1.2rem;transition:all 0.3s;
+}
 .icon-btn:hover{transform:translateY(-2px);}
-.container{max-width:1400px;margin:2rem auto;padding:0 2rem;display:grid;grid-template-columns:300px 1fr;gap:2rem;}
+.container{
+    max-width:1400px;margin:2rem auto;padding:0 2rem;
+    display:grid;grid-template-columns:300px 1fr;gap:2rem;
+}
 .sidebar{display:flex;flex-direction:column;gap:1rem;}
-.stats-card,.modules-card,.info-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;padding:1.5rem;}
-.stats-card h3,.modules-card h3,.info-card h3{font-size:0.9rem;color:var(--text-secondary);margin-bottom:1rem;}
+.stats-card,.modules-card,.info-card{
+    background:var(--bg-secondary);border:1px solid var(--border);
+    border-radius:12px;padding:1.5rem;
+}
+.stats-card h3,.modules-card h3,.info-card h3{
+    font-size:0.9rem;color:var(--text-secondary);margin-bottom:1rem;
+}
 .stat-item{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;font-size:0.9rem;}
 .module-item{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;font-size:0.85rem;}
 .status-dot{width:8px;height:8px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
 .info-card p{font-size:0.85rem;line-height:1.8;color:var(--text-secondary);}
-.chat-container{background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;height:calc(100vh - 200px);}
+.chat-container{
+    background:var(--bg-secondary);border:1px solid var(--border);
+    border-radius:12px;display:flex;flex-direction:column;
+    height:calc(100vh - 200px);
+}
 .messages{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;}
 .message{display:flex;animation:slideIn 0.3s ease;}
 @keyframes slideIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 .message.user{justify-content:flex-end;}
-.message-content{max-width:70%;padding:1rem 1.25rem;border-radius:12px;line-height:1.6;}
+.message-content{
+    max-width:70%;padding:1rem 1.25rem;border-radius:12px;line-height:1.6;
+}
 .message.bot .message-content{background:var(--bg-tertiary);}
-.message.user .message-content{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;}
+.message.user .message-content{
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    color:white;
+}
 .thinking{display:flex;gap:5px;padding:1rem;}
 .thinking-dot{width:8px;height:8px;background:var(--text-secondary);border-radius:50%;animation:bounce 1.4s infinite ease-in-out;}
 .thinking-dot:nth-child(1){animation-delay:-0.32s;}
 .thinking-dot:nth-child(2){animation-delay:-0.16s;}
 @keyframes bounce{0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
 .input-container{border-top:1px solid var(--border);padding:1.5rem;display:flex;gap:1rem;}
-#userInput{flex:1;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;background:var(--bg-tertiary);color:var(--text-primary);font-size:1rem;}
+#userInput{
+    flex:1;padding:0.75rem 1rem;border:1px solid var(--border);
+    border-radius:8px;background:var(--bg-tertiary);
+    color:var(--text-primary);font-size:1rem;
+}
 #userInput:focus{outline:none;border-color:#667eea;}
-#sendBtn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border:none;padding:0.75rem 2rem;border-radius:8px;color:white;font-size:1.2rem;cursor:pointer;transition:opacity 0.3s;}
+#sendBtn{
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    border:none;padding:0.75rem 2rem;border-radius:8px;
+    color:white;font-size:1.2rem;cursor:pointer;transition:opacity 0.3s;
+}
 #sendBtn:hover{opacity:0.9;}
 #sendBtn:disabled{opacity:0.5;cursor:not-allowed;}
 @media(max-width:768px){.container{grid-template-columns:1fr;}.sidebar{order:2;}}
@@ -67,11 +111,18 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:var(--bg
 <div id="app">
 <header class="header">
 <div class="header-content">
-<div class="logo"><div class="logo-icon">🧠</div><div class="logo-text"><h1>Zenia IA</h1><p>Sistema Inteligente + Wikimedia</p></div></div>
+<div class="logo">
+<div class="logo-icon">🧠</div>
+<div class="logo-text">
+<h1>Zenia IA</h1>
+<p>Sistema Inteligente + Wikimedia</p>
+</div>
+</div>
 <div class="header-actions">
 <button id="exportBtn" class="icon-btn" title="Exportar dados">💾</button>
 <button id="clearBtn" class="icon-btn" title="Limpar chat">🗑️</button>
 <button id="themeBtn" class="icon-btn" title="Alternar tema">🌙</button>
+<button id="voiceBtn" class="icon-btn" title="Ler respostas em voz">🔊</button>
 </div>
 </div>
 </header>
@@ -81,26 +132,26 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:var(--bg
 <div class="stats-card">
 <h3>Estatísticas</h3>
 <div class="stat-item"><span>⚡</span> Interações: <strong id="interactions">0</strong></div>
-<div class="stat-item"><span>💾</span> Base JSON: <strong id="jsonCount">0</strong></div>
+<div class="stat-item"><span>💾</span> Respostas: <strong id="learned">0</strong></div>
 <div class="stat-item"><span>⚙️</span> Contexto: <strong id="contextSize">0</strong></div>
 </div>
 
 <div class="modules-card">
 <h3>Módulos Ativos</h3>
 <div class="module-item"><span class="status-dot"></span> Wikimedia</div>
-<div class="module-item"><span class="status-dot"></span> JSON Local</div>
+<div class="module-item"><span class="status-dot"></span> Base Local</div>
 </div>
 
 <div class="info-card">
 <h3>Como usar</h3>
-<p>• Pergunte qualquer coisa<br>• Zenia responde com base na base local ou Wikipedia/Wikimedia<br>• Sempre conectado à internet para buscar<br>• Sem aprendizado manual</p>
+<p>• Converse naturalmente<br>• Pergunte qualquer coisa<br>• Zenia busca respostas na Wikipedia/Wikimedia<br>• Suporte a voz para cegos</p>
 </div>
 </aside>
 
 <main class="chat-container">
 <div id="messages" class="messages"></div>
 <div class="input-container">
-<input type="text" id="userInput" placeholder="Digite sua mensagem...">
+<input type="text" id="userInput" placeholder="Digite sua mensagem..." aria-label="Digite sua mensagem">
 <button id="sendBtn">📤</button>
 </div>
 </main>
@@ -108,117 +159,126 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:var(--bg
 </div>
 
 <script>
-// ====== Variáveis e stats ======
-let stats = { interactions:0 };
-let isThinking = false;
-let LocalData = [];
-
-// ====== Carregar base JSON ======
+// Base local JSON
+let LocalData={};
 fetch('dilexconversation_knowledge.json')
 .then(r=>r.json())
-.then(d=>{LocalData=d; document.getElementById('jsonCount').textContent = LocalData.length;})
-.catch(()=>{console.warn('Não foi possível carregar a base local.')});
+.then(d=>{LocalData=d;})
+.catch(()=>{console.warn('Base local não carregou');});
 
-// ====== Função Wikimedia API ======
-const WikimediaModule = {
-    async search(query){
+// Função pesquisar base local
+function searchLocal(prompt){
+    const p=prompt.toLowerCase();
+    for(const item of LocalData){
+        if(item.prompt.toLowerCase()===p)return item.response;
+    }
+    return null;
+}
+
+// Wikimedia API
+const WikimediaModule={
+    async search(q){
         try{
-            const url = `https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
-            const res = await fetch(url);
-            if(!res.ok) return null;
-            const data = await res.json();
-            return data.extract || null;
-        } catch(e){console.error(e); return null;}
+            const u=`https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`;
+            const r=await fetch(u);
+            if(!r.ok)return null;
+            const d=await r.json();
+            if(d.extract)return d.extract;
+            return null;
+        }catch(e){console.error("Erro Wikimedia:",e);return null;}
     }
 };
 
-// ====== Funções de similaridade ======
-function similarity(s1, s2){
-    s1 = s1.toLowerCase(); s2 = s2.toLowerCase();
-    let longer = s1.length > s2.length ? s1 : s2;
-    let shorter = s1.length > s2.length ? s2 : s1;
-    let longerLength = longer.length;
-    if(longerLength===0) return 1.0;
-    let editDist = levenshteinDistance(longer, shorter);
-    return (longerLength - editDist)/longerLength;
+// Config TTS
+let voiceEnabled=true;
+voiceBtn.onclick=()=>{voiceEnabled=!voiceEnabled;voiceBtn.style.opacity=voiceEnabled?'1':'0.5';};
+function speak(text){
+    if(!voiceEnabled) return;
+    if('speechSynthesis' in window){
+        const utter=new SpeechSynthesisUtterance(text);
+        utter.lang='pt-PT';
+        window.speechSynthesis.speak(utter);
+    }
 }
 
-function levenshteinDistance(a,b){
-    const matrix = [];
-    for(let i=0;i<=b.length;i++) matrix[i]=[i];
-    for(let j=0;j<=a.length;j++) matrix[0][j]=j;
-    for(let i=1;i<=b.length;i++){
-        for(let j=1;j<=a.length;j++){
-            if(b.charAt(i-1)===a.charAt(j-1)) matrix[i][j]=matrix[i-1][j-1];
-            else matrix[i][j]=Math.min(matrix[i-1][j-1]+1,Math.min(matrix[i][j-1]+1,matrix[i-1][j]+1));
-        }
-    }
-    return matrix[b.length][a.length];
+// Contexto
+const ContextModule={context:[],maxSize:10,add(u,b){this.context.push({user:u,bot:b});if(this.context.length>this.maxSize)this.context.shift();},size(){return this.context.length;},clear(){this.context=[];}};
+
+// Estatísticas
+let stats={interactions:0,learned:0};
+let isThinking=false;
+
+// Mensagens
+function addBotMessage(t){
+    const m=document.createElement('div');
+    m.className='message bot';
+    m.setAttribute('role','status');
+    m.innerHTML=`<div class="message-content">${t}</div>`;
+    messages.appendChild(m);
+    messages.scrollTop=messages.scrollHeight;
+    speak(t);
 }
 
-// ====== Resposta Inteligente ======
-const ResponseModule = {
-    async generateSmart(text){
-        let bestMatch=null; let highestSim=0; const threshold=0.6;
-        for(let conv of LocalData){
-            let sim = similarity(text, conv.prompt);
-            if(sim>highestSim){highestSim=sim; bestMatch=conv;}
-        }
-        if(highestSim >= threshold) return bestMatch.response;
+function addUserMessage(t){
+    const m=document.createElement('div');
+    m.className='message user';
+    m.setAttribute('aria-label','Mensagem do usuário');
+    m.innerHTML=`<div class="message-content">${t}</div>`;
+    messages.appendChild(m);
+    messages.scrollTop=messages.scrollHeight;
+}
 
-        // fallback Wikipedia
-        const wiki = await WikimediaModule.search(text);
-        if(wiki) return `🧠 Wikipedia: ${wiki}`;
+// Thinking
+function showThinking(){
+    const d=document.createElement('div');
+    d.className='message bot'; d.id='thinking';
+    d.innerHTML=`<div class="message-content thinking"><div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div></div>`;
+    messages.appendChild(d); messages.scrollTop=messages.scrollHeight;
+}
+function removeThinking(){const t=document.getElementById('thinking');if(t)t.remove();}
 
-        return 'Hmm, não sei sobre isso. Conta mais!';
-    }
-};
+// Resposta inteligente
+async function getResponse(text){
+    const local=searchLocal(text);
+    if(local)return local;
 
-// ====== Contexto ======
-const ContextModule = {
-    context: [],
-    maxSize:10,
-    add(user, bot){ this.context.push({user, bot}); if(this.context.length>this.maxSize) this.context.shift(); },
-    size(){ return this.context.length; },
-    clear(){ this.context=[]; }
-};
+    const wiki=await WikimediaModule.search(text);
+    if(wiki)return wiki;
 
-// ====== Interface ======
-function addUserMessage(t){ const m=document.createElement('div'); m.className='message user'; m.innerHTML=`<div class="message-content">${t}</div>`; messages.appendChild(m); messages.scrollTop=messages.scrollHeight; }
-function addBotMessage(t){ const m=document.createElement('div'); m.className='message bot'; m.innerHTML=`<div class="message-content">${t}</div>`; messages.appendChild(m); messages.scrollTop=messages.scrollHeight; }
-function showThinking(){ const d=document.createElement('div'); d.className='message bot'; d.id='thinking'; d.innerHTML=`<div class="message-content thinking"><div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div></div>`; messages.appendChild(d); messages.scrollTop=messages.scrollHeight; }
-function removeThinking(){ const t=document.getElementById('thinking'); if(t)t.remove(); }
-function updateStats(){ interactions.textContent=stats.interactions; contextSize.textContent=ContextModule.size(); }
+    return "Não sei responder sobre isso. 😅";
+}
 
-// ====== Envio mensagem ======
+// Enviar mensagem
 async function sendMessage(){
     const input=userInput; const msg=input.value.trim();
-    if(!msg||isThinking) return;
-    addUserMessage(msg); input.value=''; isThinking=true; sendBtn.disabled=true; showThinking();
+    if(!msg||isThinking)return;
+    addUserMessage(msg); input.value='';
+    isThinking=true; sendBtn.disabled=true; showThinking();
 
     setTimeout(async()=>{
-        const resp = await ResponseModule.generateSmart(msg);
-        removeThinking(); addBotMessage(resp);
-        ContextModule.add(msg,resp);
-        stats.interactions++;
-        updateStats();
-        isThinking=false; sendBtn.disabled=false; input.focus();
+        const response=await getResponse(msg);
+        removeThinking(); addBotMessage(response);
+        ContextModule.add(msg,response);
+        stats.interactions++; stats.learned=LocalData.length;
+        updateStats(); isThinking=false; sendBtn.disabled=false; input.focus();
     },500);
 }
 
-// ====== Botões ======
-document.addEventListener('DOMContentLoaded',()=>{
-    addBotMessage('👋 Olá! Sou a Zenia IA. Pergunta algo que eu vou responder com base no JSON local ou na Wikipedia!');
-    sendBtn.onclick=sendMessage;
-    userInput.onkeypress=e=>{if(e.key==='Enter') sendMessage();};
-    clearBtn.onclick=()=>{messages.innerHTML=''; ContextModule.clear(); stats={interactions:0}; updateStats(); addBotMessage('Chat limpo! 😊');};
-    themeBtn.onclick=()=>{document.body.classList.toggle('light');};
-    exportBtn.onclick=()=>{ 
-        const data={messages:Array.from(document.querySelectorAll('.message')).map(m=>({type:m.classList.contains('user')?'user':'bot',text:m.textContent})),context:ContextModule.context,stats,exportDate:new Date()};
-        const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-        const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='zenia-data.json'; a.click(); URL.revokeObjectURL(url);
-    };
-});
+function updateStats(){
+    interactions.textContent=stats.interactions;
+    learned.textContent=stats.learned;
+    contextSize.textContent=ContextModule.size();
+}
+
+// Funções UI
+sendBtn.onclick=sendMessage;
+userInput.onkeypress=e=>{if(e.key==='Enter')sendMessage();};
+clearBtn.onclick=()=>{messages.innerHTML='';ContextModule.clear();stats={interactions:0,learned:LocalData.length};updateStats();addBotMessage('Chat limpo! 😊');};
+themeBtn.onclick=()=>{document.body.classList.toggle('light');};
+exportBtn.onclick=()=>{const data={messages:Array.from(document.querySelectorAll('.message')).map(m=>({type:m.classList.contains('user')?'user':'bot',text:m.textContent})),context:ContextModule.context,stats,exportDate:new Date()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='zenia-data.json';a.click();};
+
+// Inicial
+document.addEventListener('DOMContentLoaded',()=>{addBotMessage('👋 Olá! Sou a Zenia IA, agora acessível! Pergunte algo ou use a base local/Wikimedia.');});
 </script>
 </body>
 </html>
