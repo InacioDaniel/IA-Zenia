@@ -131,18 +131,20 @@ body{
 <div class="stats-card">
 <h3>Estatísticas</h3>
 <div class="stat-item"><span>⚡</span> Interações: <strong id="interactions">0</strong></div>
+<div class="stat-item"><span>💾</span> Base local: <strong id="learned">0</strong></div>
 <div class="stat-item"><span>⚙️</span> Contexto: <strong id="contextSize">0</strong></div>
 </div>
 
 <div class="modules-card">
 <h3>Módulos Ativos</h3>
+<div class="module-item"><span class="status-dot"></span> NLP</div>
+<div class="module-item"><span class="status-dot"></span> Contexto</div>
 <div class="module-item"><span class="status-dot"></span> Wikimedia</div>
-<div class="module-item"><span class="status-dot"></span> Base Local</div>
 </div>
 
 <div class="info-card">
 <h3>Como usar</h3>
-<p>• Converse naturalmente<br>• Pergunte qualquer coisa<br>• Respostas vêm da base local e Wikipedia/Wikimedia<br>• Não aprende manualmente do usuário</p>
+<p>• Converse naturalmente<br>• Pergunte qualquer coisa<br>• Zenia pesquisa na Wikipedia/Wikimedia<br>• Base local usada quando disponível</p>
 </div>
 </aside>
 
@@ -157,7 +159,6 @@ body{
 </div>
 
 <script>
-// NLP simples
 const NLPModule = {
     tokenize(t){return t.toLowerCase().replace(/[^\w\s]/g,'').split(/\s+/).filter(w=>w.length>0);},
     extractIntent(t){
@@ -170,72 +171,67 @@ const NLPModule = {
             info:['quem é você','quem e voce','o que você faz','suas funções']
         };
         const j=t.join(' ');
-        for(let[k,v]of Object.entries(i)){if(v.some(kw=>j.includes(kw)))return k;}
-        return'unknown';
+        for(let [k,v] of Object.entries(i)){if(v.some(kw=>j.includes(kw)))return k;}
+        return 'unknown';
     }
 };
 
-// Contexto
 const ContextModule={context:[],maxSize:10,add(u,b){this.context.push({user:u,bot:b});if(this.context.length>this.maxSize)this.context.shift();},size(){return this.context.length;},clear(){this.context=[];}};
 
-// Base local leitura
-let LocalData={};
-fetch('dilexconversation_knowledge.json')
-    .then(r=>r.json())
-    .then(d=>{LocalData=d.conversations||[]; console.log("Base local carregada:", LocalData.length, "conversas");})
-    .catch(e=>console.error("Erro ao carregar base local:", e));
+// Base local (dilexconversation_knowledge.json)
+let LocalData = [];
+fetch('dilexconversation_knowledge.json').then(r=>r.json()).then(d=>LocalData=d).catch(()=>{console.warn("Base local não carregou.");});
 
-// Wikimedia
 const WikimediaModule={
     async search(q){
         try{
             const u=`https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`;
             const r=await fetch(u);
-            if(!r.ok) return null;
+            if(!r.ok)return null;
             const d=await r.json();
-            return d.extract || null;
-        }catch(e){console.error("Erro Wikimedia:",e); return null;}
+            if(d.extract)return d.extract;
+            return null;
+        }catch(e){console.error("Erro Wikimedia:",e);return null;}
     }
 };
 
-// Resposta
-const ResponseModule={
+const ResponseModule = {
     async generateSmart(text){
-        const tokens=NLPModule.tokenize(text);
-        const intent=NLPModule.extractIntent(tokens);
+        const tokens = NLPModule.tokenize(text);
+        const intent = NLPModule.extractIntent(tokens);
 
-        // Base local primeiro
+        // 1️⃣ Base local
         for(let conv of LocalData){
             if(text.toLowerCase().includes(conv.prompt.toLowerCase())){
                 return `💡 Base local: ${conv.response}`;
             }
         }
 
-        // Pesquisa Wikipedia
+        // 2️⃣ Wikipedia/Wikimedia
         if(intent==='question'||intent==='unknown'){
-            const wiki=await WikimediaModule.search(text);
+            const wiki = await WikimediaModule.search(text);
             if(wiki) return `🧠 Wikipedia: ${wiki}`;
         }
 
-        const resp={
+        // 3️⃣ Respostas padrões
+        const resp = {
             greeting:['Olá! Sou a Zenia IA com acesso ao Wikimedia!','Oi! Como posso ajudar?'],
             farewell:['Até logo! 👋','Tchau!'],
             thanks:['De nada!','Disponha!'],
-            help:['Posso responder perguntas e buscar na Wikipedia!','Pergunte qualquer coisa que eu tento achar!'],
+            help:['Posso responder perguntas e buscar na Wikipedia!'],
             info:['Sou a Zenia, uma IA que conversa e pesquisa na Wikipedia.'],
             unknown:['Hmm, não sei sobre isso. Pode explicar melhor?','Interessante, conta mais!']
         };
-        const arr=resp[intent]||resp.unknown;
+        const arr = resp[intent] || resp.unknown;
         return arr[Math.floor(Math.random()*arr.length)];
     }
 };
 
-// Estatísticas
-let stats={interactions:0};
+let stats={interactions:0,learned:0};
 let isThinking=false;
 
 document.addEventListener('DOMContentLoaded',()=>{
-    addBotMessage('👋 Olá! Sou a Zenia IA, treinada com a base local e Wikipedia. Pergunta o que quiser!');
+    addBotMessage('👋 Olá! Sou a Zenia IA, agora conectada ao Wikimedia! Faça uma pergunta.');
     init();
 });
 
@@ -250,18 +246,20 @@ function init(){
 async function sendMessage(){
     const input=userInput;
     const msg=input.value.trim();
-    if(!msg||isThinking) return;
+    if(!msg||isThinking)return;
     addUserMessage(msg);
     input.value='';
     isThinking=true;
     sendBtn.disabled=true;
     showThinking();
+
     setTimeout(async()=>{
-        const response=await ResponseModule.generateSmart(msg);
+        const response = await ResponseModule.generateSmart(msg);
         removeThinking();
         addBotMessage(response);
         ContextModule.add(msg,response);
         stats.interactions++;
+        stats.learned = LocalData.length;
         updateStats();
         isThinking=false;
         sendBtn.disabled=false;
@@ -273,9 +271,13 @@ function addUserMessage(t){const m=document.createElement('div');m.className='me
 function addBotMessage(t){const m=document.createElement('div');m.className='message bot';m.innerHTML=`<div class="message-content">${t}</div>`;messages.appendChild(m);messages.scrollTop=messages.scrollHeight;}
 function showThinking(){const d=document.createElement('div');d.className='message bot';d.id='thinking';d.innerHTML=`<div class="message-content thinking"><div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div></div>`;messages.appendChild(d);messages.scrollTop=messages.scrollHeight;}
 function removeThinking(){const t=document.getElementById('thinking');if(t)t.remove();}
-function updateStats(){interactions.textContent=stats.interactions;contextSize.textContent=ContextModule.size();}
-function clearChat(){messages.innerHTML='';ContextModule.clear();stats={interactions:0};updateStats();addBotMessage('Chat limpo! 😊');}
-function exportData(){const data={messages:Array.from(document.querySelectorAll('.message')).map(m=>({type:m.classList.contains('user')?'user':'bot',text:m.textContent})),context:ContextModule.context,stats,exportDate:new Date()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='zenia-data.json';a.click();URL.revokeObjectURL(url);}
+function updateStats(){interactions.textContent=stats.interactions;learned.textContent=stats.learned;contextSize.textContent=ContextModule.size();}
+function clearChat(){messages.innerHTML='';ContextModule.clear();stats={interactions:0,learned:LocalData.length};updateStats();addBotMessage('Chat limpo! 😊');}
+function exportData(){
+    const data={messages:Array.from(document.querySelectorAll('.message')).map(m=>({type:m.classList.contains('user')?'user':'bot',text:m.textContent})),context:ContextModule.context,stats,exportDate:new Date()};
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='zenia-data.json';a.click();URL.revokeObjectURL(url);
+}
 </script>
 </body>
 </html>
