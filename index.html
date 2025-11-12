@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zenia IA - Sistema Inteligente com Wikimedia</title>
+<title>Zenia IA - Sistema Inteligente + Wikimedia</title>
 <style>
-/* --- mantém todo o CSS anterior --- */
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
     --bg-primary:#0f172a;
@@ -132,19 +131,20 @@ body{
 <div class="stats-card">
 <h3>Estatísticas</h3>
 <div class="stat-item"><span>⚡</span> Interações: <strong id="interactions">0</strong></div>
-<div class="stat-item"><span>💾</span> Base local: <strong id="learned">0</strong></div>
+<div class="stat-item"><span>💾</span> Perguntas no JSON: <strong id="jsonCount">0</strong></div>
 <div class="stat-item"><span>⚙️</span> Contexto: <strong id="contextSize">0</strong></div>
 </div>
 
 <div class="modules-card">
 <h3>Módulos Ativos</h3>
-<div class="module-item"><span class="status-dot"></span> Contexto</div>
+<div class="module-item"><span class="status-dot"></span> Conversa JSON</div>
 <div class="module-item"><span class="status-dot"></span> Wikimedia</div>
+<div class="module-item"><span class="status-dot"></span> Wikipedia</div>
 </div>
 
 <div class="info-card">
 <h3>Como usar</h3>
-<p>• Converse naturalmente<br>• Pergunte qualquer coisa<br>• Zenia pesquisa na Wikipedia/Wikimedia<br>• Base local usada quando disponível</p>
+<p>• Pergunte qualquer coisa<br>• Zenia responde do JSON<br>• Se não souber, pesquisa na Wikipedia/Wikimedia<br>• Não aprende localmente, só retorna informação!</p>
 </div>
 </aside>
 
@@ -159,39 +159,47 @@ body{
 </div>
 
 <script>
-// Contexto
-const ContextModule={context:[],maxSize:10,add(u,b){this.context.push({user:u,bot:b});if(this.context.length>this.maxSize)this.context.shift();},size(){return this.context.length;},clear(){this.context=[];}};
+// ====== Variáveis Globais ======
+let stats={interactions:0};
+let LocalData=[];
+let ContextModule={context:[],add(u,b){this.context.push({user:u,bot:b});if(this.context.length>10)this.context.shift();},size(){return this.context.length;},clear(){this.context=[];}};
+let isThinking=false;
 
-// Base local (dilexconversation_knowledge.json)
-let LocalData = [];
-fetch('dilexconversation_knowledge.json').then(r=>r.json()).then(d=>LocalData=d).catch(()=>{console.warn("Base local não carregou.");});
+// ====== Carregar base local JSON ======
+fetch('dilexconversation_knowledge.json')
+.then(r=>r.json())
+.then(data=>{
+    LocalData=data;
+    document.getElementById('jsonCount').textContent=LocalData.length;
+})
+.catch(()=>{console.warn('Não foi possível carregar o JSON local');});
 
-// Wikimedia API
+// ====== Wikimedia / Wikipedia ======
 const WikimediaModule={
     async search(q){
         try{
-            const u=`https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`;
-            const r=await fetch(u);
-            if(!r.ok)return null;
-            const d=await r.json();
+            const url=`https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`;
+            const res=await fetch(url);
+            if(!res.ok)return null;
+            const d=await res.json();
             if(d.extract)return d.extract;
             return null;
-        }catch(e){console.error("Erro Wikimedia:",e);return null;}
+        }catch(e){console.error('Erro Wikimedia:',e);return null;}
     }
 };
 
-// Resposta
-const ResponseModule = {
+// ====== Resposta Inteligente ======
+const ResponseModule={
     async generateSmart(text){
-        // 1️⃣ Base local
+        // 1️⃣ Buscar no JSON local
         for(let conv of LocalData){
             if(text.toLowerCase().includes(conv.prompt.toLowerCase())){
-                return `💡 Base local: ${conv.response}`;
+                return conv.response;
             }
         }
 
-        // 2️⃣ Wikipedia/Wikimedia
-        const wiki = await WikimediaModule.search(text);
+        // 2️⃣ Buscar na Wikimedia/Wikipedia
+        const wiki=await WikimediaModule.search(text);
         if(wiki) return `🧠 Wikipedia: ${wiki}`;
 
         // 3️⃣ Resposta padrão
@@ -199,12 +207,9 @@ const ResponseModule = {
     }
 };
 
-// Estatísticas
-let stats={interactions:0,learned:0};
-let isThinking=false;
-
+// ====== Funções Chat ======
 document.addEventListener('DOMContentLoaded',()=>{
-    addBotMessage('👋 Olá! Sou a Zenia IA, agora conectada ao Wikimedia! Faça uma pergunta.');
+    addBotMessage('👋 Olá! Sou a Zenia IA, pronta para responder do JSON ou pesquisar na Wikipedia/Wikimedia!');
     init();
 });
 
@@ -217,26 +222,24 @@ function init(){
 }
 
 async function sendMessage(){
-    const input=userInput;
-    const msg=input.value.trim();
+    const msg=userInput.value.trim();
     if(!msg||isThinking)return;
     addUserMessage(msg);
-    input.value='';
+    userInput.value='';
     isThinking=true;
     sendBtn.disabled=true;
     showThinking();
 
     setTimeout(async()=>{
-        const response = await ResponseModule.generateSmart(msg);
+        const resp=await ResponseModule.generateSmart(msg);
         removeThinking();
-        addBotMessage(response);
-        ContextModule.add(msg,response);
+        addBotMessage(resp);
+        ContextModule.add(msg,resp);
         stats.interactions++;
-        stats.learned = LocalData.length;
         updateStats();
         isThinking=false;
         sendBtn.disabled=false;
-        input.focus();
+        userInput.focus();
     },800);
 }
 
@@ -244,8 +247,8 @@ function addUserMessage(t){const m=document.createElement('div');m.className='me
 function addBotMessage(t){const m=document.createElement('div');m.className='message bot';m.innerHTML=`<div class="message-content">${t}</div>`;messages.appendChild(m);messages.scrollTop=messages.scrollHeight;}
 function showThinking(){const d=document.createElement('div');d.className='message bot';d.id='thinking';d.innerHTML=`<div class="message-content thinking"><div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div></div>`;messages.appendChild(d);messages.scrollTop=messages.scrollHeight;}
 function removeThinking(){const t=document.getElementById('thinking');if(t)t.remove();}
-function updateStats(){interactions.textContent=stats.interactions;learned.textContent=stats.learned;contextSize.textContent=ContextModule.size();}
-function clearChat(){messages.innerHTML='';ContextModule.clear();stats={interactions:0,learned:LocalData.length};updateStats();addBotMessage('Chat limpo! 😊');}
+function updateStats(){interactions.textContent=stats.interactions;contextSize.textContent=ContextModule.size();}
+function clearChat(){messages.innerHTML='';ContextModule.clear();stats={interactions:0};updateStats();addBotMessage('Chat limpo! 😊');}
 function exportData(){
     const data={messages:Array.from(document.querySelectorAll('.message')).map(m=>({type:m.classList.contains('user')?'user':'bot',text:m.textContent})),context:ContextModule.context,stats,exportDate:new Date()};
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
