@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zenia IA Acessível - Imagens & Teclado</title>
+<title>Zenia IA Acessível - Imagens Inteligentes</title>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.5.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2/dist/coco-ssd.min.js"></script>
 <style>
-/* Mantém estilos anteriores */
+/* Mesmos estilos do chat anterior */
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{--bg-primary:#0f172a;--bg-secondary:#1e293b;--bg-tertiary:#334155;--text-primary:#f1f5f9;--text-secondary:#94a3b8;--border:#334155;}
 body.light{--bg-primary:#f8fafc;--bg-secondary:#ffffff;--bg-tertiary:#f1f5f9;--text-primary:#1e293b;--text-secondary:#64748b;--border:#e2e8f0;}
@@ -78,10 +80,10 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:var(--bg
 <div class="modules-card"><h3>Módulos Ativos</h3>
 <div class="module-item"><span class="status-dot"></span> Wikimedia</div>
 <div class="module-item"><span class="status-dot"></span> Base Local</div>
-<div class="module-item"><span class="status-dot"></span> Análise de Imagem</div>
+<div class="module-item"><span class="status-dot"></span> Análise Inteligente de Imagem</div>
 </div>
 <div class="info-card"><h3>Como usar</h3>
-<p>• Converse naturalmente<br>• Pergunte qualquer coisa<br>• Envie imagens e Zenia descreverá em português<br>• Teclas de atalho: Enter enviar, Ctrl+V voz, Ctrl+L limpar, Ctrl+W tema</p></div>
+<p>• Converse naturalmente<br>• Pergunte qualquer coisa<br>• Envie imagens e Zenia descreverá objetos, pessoas, animais em português<br>• Atalhos: Enter enviar, Ctrl+V voz, Ctrl+L limpar, Ctrl+W tema</p></div>
 </aside>
 
 <main class="chat-container">
@@ -181,17 +183,22 @@ document.addEventListener('keydown', e=>{
     if(e.ctrlKey && e.key.toLowerCase()==='w'){document.body.classList.toggle('light');}
 });
 
-// Upload imagens para análise simples (descrição em português)
+// Análise de imagens com TensorFlow.js Coco-SSD
+let model=null;
+cocoSsd.load().then(m=>{model=m; console.log("Modelo Coco-SSD carregado");});
+
 uploadBtn.addEventListener('change', async e=>{
     const file=e.target.files[0];
-    if(!file) return;
-    const reader=new FileReader();
-    reader.onload=()=>{
-        const imgDesc=`Imagem enviada: ${file.name}, tamanho ${Math.round(file.size/1024)} KB.`;
+    if(!file || !model) return;
+    const img=new Image();
+    img.src=URL.createObjectURL(file);
+    img.onload=async ()=>{
+        const predictions=await model.detect(img);
+        if(predictions.length===0){addUserMessage('[Imagem enviada]'); addBotMessage('Não consegui identificar objetos na imagem.'); return;}
+        const desc=predictions.map(p=>`${p.class} (confiança ${(p.score*100).toFixed(0)}%)`).join(', ');
         addUserMessage('[Imagem enviada]');
-        addBotMessage(imgDesc);
+        addBotMessage(`Objetos detectados: ${desc}`);
     };
-    reader.readAsDataURL(file);
 });
 
 // Botões UI
