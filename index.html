@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zenia IA - Sistema Inteligente com Wikimedia</title>
 <style>
+/* --- mantém todo o CSS anterior --- */
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
     --bg-primary:#0f172a;
@@ -137,7 +138,6 @@ body{
 
 <div class="modules-card">
 <h3>Módulos Ativos</h3>
-<div class="module-item"><span class="status-dot"></span> NLP</div>
 <div class="module-item"><span class="status-dot"></span> Contexto</div>
 <div class="module-item"><span class="status-dot"></span> Wikimedia</div>
 </div>
@@ -159,29 +159,14 @@ body{
 </div>
 
 <script>
-const NLPModule = {
-    tokenize(t){return t.toLowerCase().replace(/[^\w\s]/g,'').split(/\s+/).filter(w=>w.length>0);},
-    extractIntent(t){
-        const i={
-            greeting:['oi','olá','ola','hey','bom dia','boa tarde','boa noite'],
-            question:['o que','como','quando','onde','por que','porque','qual','quem','quanto'],
-            help:['ajuda','ajudar','socorro','help'],
-            thanks:['obrigado','valeu','agradeço'],
-            farewell:['tchau','adeus','até logo','bye'],
-            info:['quem é você','quem e voce','o que você faz','suas funções']
-        };
-        const j=t.join(' ');
-        for(let [k,v] of Object.entries(i)){if(v.some(kw=>j.includes(kw)))return k;}
-        return 'unknown';
-    }
-};
-
+// Contexto
 const ContextModule={context:[],maxSize:10,add(u,b){this.context.push({user:u,bot:b});if(this.context.length>this.maxSize)this.context.shift();},size(){return this.context.length;},clear(){this.context=[];}};
 
 // Base local (dilexconversation_knowledge.json)
 let LocalData = [];
 fetch('dilexconversation_knowledge.json').then(r=>r.json()).then(d=>LocalData=d).catch(()=>{console.warn("Base local não carregou.");});
 
+// Wikimedia API
 const WikimediaModule={
     async search(q){
         try{
@@ -195,11 +180,9 @@ const WikimediaModule={
     }
 };
 
+// Resposta
 const ResponseModule = {
     async generateSmart(text){
-        const tokens = NLPModule.tokenize(text);
-        const intent = NLPModule.extractIntent(tokens);
-
         // 1️⃣ Base local
         for(let conv of LocalData){
             if(text.toLowerCase().includes(conv.prompt.toLowerCase())){
@@ -208,25 +191,15 @@ const ResponseModule = {
         }
 
         // 2️⃣ Wikipedia/Wikimedia
-        if(intent==='question'||intent==='unknown'){
-            const wiki = await WikimediaModule.search(text);
-            if(wiki) return `🧠 Wikipedia: ${wiki}`;
-        }
+        const wiki = await WikimediaModule.search(text);
+        if(wiki) return `🧠 Wikipedia: ${wiki}`;
 
-        // 3️⃣ Respostas padrões
-        const resp = {
-            greeting:['Olá! Sou a Zenia IA com acesso ao Wikimedia!','Oi! Como posso ajudar?'],
-            farewell:['Até logo! 👋','Tchau!'],
-            thanks:['De nada!','Disponha!'],
-            help:['Posso responder perguntas e buscar na Wikipedia!'],
-            info:['Sou a Zenia, uma IA que conversa e pesquisa na Wikipedia.'],
-            unknown:['Hmm, não sei sobre isso. Pode explicar melhor?','Interessante, conta mais!']
-        };
-        const arr = resp[intent] || resp.unknown;
-        return arr[Math.floor(Math.random()*arr.length)];
+        // 3️⃣ Resposta padrão
+        return 'Hmm, não sei sobre isso. Conta mais!';
     }
 };
 
+// Estatísticas
 let stats={interactions:0,learned:0};
 let isThinking=false;
 
