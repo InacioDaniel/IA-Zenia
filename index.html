@@ -3,231 +3,216 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zenia IA - Mangolé Edition</title>
-<link rel="shortcut icon" href="favicon.png" type="image/x-icon">
+<title>Zenia IA - Kamba Digital</title>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-:root{
-  --bg-primary:#0f172a; --bg-secondary:#1e293b;
-  --bg-tertiary:#334155; --text-primary:#f1f5f9;
-  --text-secondary:#94a3b8; --border:#334155;
-}
-body.light{--bg-primary:#f8fafc; --bg-secondary:#ffffff; --bg-tertiary:#f1f5f9;
---text-primary:#1e293b; --text-secondary:#64748b; --border:#e2e8f0;}
-body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:var(--bg-primary);
-color:var(--text-primary); transition:all 0.3s ease;}
-.header{background:var(--bg-secondary); border-bottom:1px solid var(--border); padding:1rem 2rem;}
-.header-content{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
-.logo{display:flex;align-items:center;gap:1rem;}
-.logo-icon{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); width:50px;height:50px; border-radius:12px; display:flex;align-items:center;justify-content:center;}
-.logo-text h1{font-size:1.5rem;margin-bottom:2px;}
-.logo-text p{font-size:0.85rem;color:var(--text-secondary);}
-.header-actions{display:flex;gap:0.5rem;align-items:center;}
-.icon-btn{background:var(--bg-tertiary);border:none;padding:0.75rem;border-radius:8px;cursor:pointer;font-size:1.2rem;transition:all 0.3s;}
-.icon-btn:hover{transform:translateY(-2px);}
-.container{max-width:1400px;margin:2rem auto;padding:0 2rem;display:grid;grid-template-columns:300px 1fr;gap:2rem;}
-.sidebar{display:flex;flex-direction:column;gap:1rem;}
-.stats-card,.modules-card,.info-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;padding:1.5rem;}
-.stats-card h3,.modules-card h3,.info-card h3{font-size:0.9rem;color:var(--text-secondary);margin-bottom:1rem;}
-.stat-item,.module-item{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;font-size:0.9rem;}
-.status-dot{width:8px;height:8px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
-.chat-container{background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;height:calc(100vh - 200px);}
-.messages{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;}
-.message{display:flex;animation:slideIn 0.3s ease;}
-@keyframes slideIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-.message.user{justify-content:flex-end;}
-.message-content{max-width:70%;padding:1rem 1.25rem;border-radius:12px;line-height:1.6;}
-.message.bot .message-content{background:var(--bg-tertiary);}
-.message.user .message-content{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white;}
-.input-container{border-top:1px solid var(--border);padding:1.5rem;display:flex;gap:1rem;}
-#userInput{flex:1;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;background:var(--bg-tertiary);color:var(--text-primary);font-size:1rem;}
-#sendBtn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border:none;padding:0.75rem 2rem;border-radius:8px;color:white;font-size:1.2rem;cursor:pointer;}
-#sendBtn:disabled{opacity:0.5;cursor:not-allowed;}
-#cameraContainer{position:relative;display:none;justify-content:center;align-items:center;margin-bottom:10px;}
-#camera{border-radius:10px;border:2px solid var(--border);width:100%;max-width:480px;}
-#detectedLabel{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#000000aa;color:#fff;padding:0.4rem 1rem;border-radius:8px;font-size:1rem;}
-@media(max-width:768px){.container{grid-template-columns:1fr;}.sidebar{order:2;}}
+  body{font-family:Arial;background:#121212;color:white;margin:0;display:flex;flex-direction:column;height:100vh;}
+  header{background:#222;padding:10px;text-align:center;font-size:20px;font-weight:bold;}
+  #messages{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px;}
+  .message{max-width:80%;padding:10px;border-radius:10px;}
+  .user{align-self:flex-end;background:#007bff;color:#fff;}
+  .bot{align-self:flex-start;background:#333;}
+  #inputArea{display:flex;align-items:center;padding:8px;background:#1e1e1e;}
+  #userInput{flex:1;padding:10px;border:none;border-radius:5px;}
+  button{margin-left:5px;padding:10px;border:none;border-radius:5px;cursor:pointer;}
+  #attachBtn{background:#555;color:white;}
+  #fileBtn{background:#666;color:white;}
+  #voiceBtn{background:#008000;color:white;}
+  #imageLabel{display:block;text-align:center;font-size:14px;margin-top:4px;}
+  #imagePreview{max-width:150px;margin:8px auto;display:block;border-radius:8px;}
+  #detectedObj{position:absolute;top:65px;left:50%;transform:translateX(-50%);background:#0008;color:#fff;padding:5px 12px;border-radius:8px;}
 </style>
 </head>
 <body>
-<div id="app">
-<header class="header">
-<div class="header-content">
-<div class="logo">
-<div class="logo-icon"><img src="favicon.png" width="45" height="45" alt="logo"></div>
-<div class="logo-text"><h1>🧠 Zenia IA</h1><p>by @inacio.u.daniel • Mangolé AI</p></div>
+<header>Zenia IA 🤖 - Kamba Digital</header>
+<div id="detectedObj" hidden></div>
+<div id="messages" role="log" aria-live="polite"></div>
+<div id="inputArea">
+  <input id="userInput" type="text" placeholder="Fala comigo kamba..." aria-label="Caixa de texto principal">
+  <button id="attachBtn">📎</button>
+  <button id="fileBtn">📄</button>
+  <button id="voiceBtn" title="Ler voz">🔊</button>
 </div>
-<div class="header-actions">
-<button id="cameraBtn" class="icon-btn" title="Ativar/Desativar câmera">📷</button>
-<button id="exportBtn" class="icon-btn" title="Exportar dados">💾</button>
-<button id="clearBtn" class="icon-btn" title="Limpar chat">🗑️</button>
-<button id="themeBtn" class="icon-btn" title="Alternar tema">🌙</button>
-</div>
-</div>
-</header>
-
-<div class="container">
-<aside class="sidebar">
-<div class="stats-card">
-<h3>Estatísticas</h3>
-<div class="stat-item"><span>⚡</span> Interações: <strong id="interactions">0</strong></div>
-<div class="stat-item"><span>💾</span> Respostas: <strong id="learned">0</strong></div>
-</div>
-
-<div class="modules-card">
-<h3>Módulos Ativos</h3>
-<div class="module-item"><span class="status-dot"></span> Base Local</div>
-<div class="module-item"><span class="status-dot"></span> Wikimedia</div>
-<div class="module-item"><span class="status-dot"></span> Câmera e Imagem</div>
-</div>
-
-<div class="info-card">
-<h3>Atalhos de Teclado</h3>
-<p>🎥 <b>A</b> - Ativar/desativar câmera<br>
-🧹 <b>C</b> - Limpar chat<br>
-🌗 <b>T</b> - Alternar tema<br>
-💾 <b>E</b> - Exportar conversa</p>
-</div>
-</aside>
-
-<main class="chat-container">
-<div id="cameraContainer">
-<video id="camera" autoplay playsinline></video>
-<div id="detectedLabel">Detectando...</div>
-</div>
-<div id="messages" class="messages"></div>
-<div class="input-container">
-<input type="text" id="userInput" placeholder="Escreve aqui...">
-<button id="sendBtn">📤</button>
-</div>
-</main>
-</div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.12.0/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 
 <script>
-let LocalData = [], stats={interactions:0, learned:0}, model=null, stream=null, cameraOn=false;
-fetch('/dilexconversation_knowledge.json')
-  .then(r=>r.json())
-  .then(d=>{LocalData=d;console.log("Base local carregada:",d.length);})
-  .catch(()=>console.warn("Base local não carregou!"));
+let LocalData=[], model=null, voiceEnabled=true;
+const messages=document.getElementById("messages");
+const input=document.getElementById("userInput");
+const voiceBtn=document.getElementById("voiceBtn");
+const detectedObj=document.getElementById("detectedObj");
 
-async function searchWikimedia(q){
+// ==== Inicialização ====
+window.onload=async()=>{
   try{
-    const url=`https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`;
-    const r=await fetch(url); if(!r.ok) return null;
-    const d=await r.json(); return d.extract||null;
-  }catch{ return null; }
+    const r=await fetch('/dilexconversation_knowledge.json');
+    LocalData=await r.json();
+    console.log("Base local carregada:",LocalData.length);
+  }catch{console.warn("Base local não encontrada.");}
+  model=await cocoSsd.load();
+  console.log("Modelo Coco-SSD pronto!");
+};
+
+// ==== TTS ====
+function speak(txt){
+  if(!voiceEnabled)return;
+  const u=new SpeechSynthesisUtterance(txt);
+  u.lang='pt-PT';
+  speechSynthesis.speak(u);
+}
+voiceBtn.onclick=()=>{voiceEnabled=!voiceEnabled;voiceBtn.style.opacity=voiceEnabled?'1':'0.5';};
+
+// ==== Envio ====
+input.addEventListener("keydown",e=>{
+  if(e.ctrlKey&&e.key==="Enter")sendMessage();
+});
+document.addEventListener("keydown",e=>{
+  if(e.ctrlKey&&e.key.toLowerCase()==="l"){messages.innerHTML='';addBotMessage("Chat limpo!");}
+  if(e.ctrlKey&&e.key.toLowerCase()==="v"){voiceBtn.click();}
+  if(e.ctrlKey&&e.key.toLowerCase()==="i"){attachBtn.click();}
+  if(e.ctrlKey&&e.key.toLowerCase()==="f"){fileBtn.click();}
+});
+
+function addUserMessage(t){
+  const m=document.createElement('div');
+  m.className='message user';
+  m.innerHTML=t;
+  messages.appendChild(m);
+  messages.scrollTop=messages.scrollHeight;
+}
+function addBotMessage(t){
+  const m=document.createElement('div');
+  m.className='message bot';
+  m.innerHTML=t;
+  messages.appendChild(m);
+  messages.scrollTop=messages.scrollHeight;
+  speak(t);
 }
 
-function addMsg(type,text){
-  const m=document.createElement('div');m.className=`message ${type}`;
-  m.innerHTML=`<div class="message-content">${text}</div>`;
-  document.getElementById('messages').appendChild(m);
-  document.getElementById('messages').scrollTop=99999;
-  if(type==='bot') speak(text);
+// ==== Enviar mensagem ====
+async function sendMessage(){
+  const text=input.value.trim();
+  if(!text)return;
+  addUserMessage(text);
+  input.value='';
+  const resp=await generateResponse(text);
+  addBotMessage(resp);
 }
 
-function speak(t){if('speechSynthesis'in window){const u=new SpeechSynthesisUtterance(t);u.lang='pt-PT';speechSynthesis.speak(u);}}
+// ==== Resposta ====
+async function generateResponse(msg){
+  msg=msg.toLowerCase();
 
-async function generateResponse(text){
-  const msg=text.toLowerCase().trim();
-
-  // SAUDAÇÕES
+  // Saudações
   if(["oi","olá","ola","yo","boas","bom dia","boa tarde","boa noite"].some(p=>msg.includes(p))){
-    const r=[
+    const respostas=[
       "Oi meu kamba! Tudo nice contigo? 😄",
       "Olá! Tás firme? 👋",
       "Boas! Bora conversar um pouco? 😎",
-      "Oi! Como tá o teu dia?",
       "Bom dia! Que o sol te dê boas vibrações ☀️",
       "Boa tarde! Tudo controlado?",
       "Boa noite! Relaxa e vamos papiar 💬"
-    ];return r[Math.floor(Math.random()*r.length)];
+    ];
+    return respostas[Math.floor(Math.random()*respostas.length)];
   }
 
-  // DESPEDIDAS
-  if(["tchau","xau","adeus","até logo","fui","até amanhã","bye"].some(p=>msg.includes(p))){
-    const r=[
-      "Tchau meu kamba, te cuida! 👋",
-      "Xau, foi nice conversar contigo 😄",
-      "Até logo! Que corra tudo bem 🙌",
-      "Fui! Mas volto rápido 😉"
-    ];return r[Math.floor(Math.random()*r.length)];
+  // Despedidas
+  if(["tchau","xau","fui","adeus","até logo","bye"].some(p=>msg.includes(p))){
+    const res=[
+      "Tchau kamba! Cuida-te 😎",
+      "Até já! Vou sentir tua falta 😂",
+      "Fui, mas volto já agora! 👋",
+      "Xau! Não desaparece ya?"
+    ];
+    return res[Math.floor(Math.random()*res.length)];
   }
 
-  // BASE LOCAL
-  const local=LocalData.find(i=>msg.includes(i.prompt.toLowerCase()));
-  if(local) return local.response;
+  // Base local
+  const item=LocalData.find(i=>msg.includes(i.prompt.toLowerCase()));
+  if(item)return item.response;
 
-  // WIKIMEDIA
+  // Wikipedia simples
   const wiki=await searchWikimedia(msg);
-  if(wiki) return "📚 Wikipedia: "+wiki;
+  if(wiki)return "📘 "+wiki;
 
-  // PADRÃO
-  return "Epa, isso aí ainda não aprendi 😅. Podes tentar de outra forma?";
+  // Conversas aleatórias estilo angolano
+  const aleatorias=[
+    "Hehe ya, concordo contigo nisso 😅",
+    "Kamba, isso que disseste é mesmo verdade!",
+    "Não sei bem, mas parece interessante 🤔",
+    "Ya, já ouvi essa história também!",
+    "Mano, explica lá melhor essa cena 😄"
+  ];
+  return aleatorias[Math.floor(Math.random()*aleatorias.length)];
 }
 
-async function sendMessage(){
-  const t=userInput.value.trim();if(!t)return;
-  addMsg('user',t);userInput.value='';
-  const res=await generateResponse(t);
-  addMsg('bot',res);
-  stats.interactions++;stats.learned++;
-  document.getElementById('interactions').textContent=stats.interactions;
-  document.getElementById('learned').textContent=stats.learned;
-}
-
-document.addEventListener('DOMContentLoaded',()=>{
-  addMsg('bot',"👋 Olá! Sou a Zenia IA, versão Mangolé. Podes perguntar o que quiseres ou ligar a câmera!");
-  document.getElementById('sendBtn').onclick=sendMessage;
-  userInput.onkeypress=e=>{if(e.key==='Enter')sendMessage();};
-  document.getElementById('clearBtn').onclick=()=>{document.getElementById('messages').innerHTML='';addMsg('bot',"Chat limpo! Vamos começar de novo 😄");};
-  document.getElementById('themeBtn').onclick=()=>document.body.classList.toggle('light');
-  document.getElementById('exportBtn').onclick=()=>{const data={messages:[...document.querySelectorAll('.message')].map(m=>({type:m.classList.contains('user')?'user':'bot',text:m.textContent})),stats};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='zenia_data.json';a.click();};
-});
-
-document.addEventListener('keydown',e=>{
-  if(e.key.toLowerCase()==='a')toggleCamera();
-  if(e.key.toLowerCase()==='c'){document.getElementById('messages').innerHTML='';addMsg('bot',"Chat limpo! 😎");}
-  if(e.key.toLowerCase()==='t')document.body.classList.toggle('light');
-  if(e.key.toLowerCase()==='e')document.getElementById('exportBtn').click();
-});
-
-// ======== CÂMERA ========
-const camContainer=document.getElementById('cameraContainer');
-const cam=document.getElementById('camera');
-const label=document.getElementById('detectedLabel');
-
-async function toggleCamera(){
-  if(cameraOn){
-    if(stream){stream.getTracks().forEach(t=>t.stop());}
-    camContainer.style.display='none';cameraOn=false;
-    addMsg('bot',"📷 Câmera desligada, meu kamba.");
-    return;
-  }
+// ==== Wikipedia ====
+async function searchWikimedia(q){
   try{
-    stream=await navigator.mediaDevices.getUserMedia({video:true});
-    cam.srcObject=stream;camContainer.style.display='flex';cameraOn=true;
-    addMsg('bot',"🎥 Câmera ligada! Vou tentar descrever o que vejo...");
-    if(!model)model=await cocoSsd.load();
-    detectLoop();
-  }catch{addMsg('bot',"😅 Não consegui ligar a câmera. Permite o acesso por favor.");}
+    const url=`https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`;
+    const r=await fetch(url);
+    const d=await r.json();
+    return d.extract || null;
+  }catch{return null;}
 }
 
-async function detectLoop(){
-  if(!cameraOn||!model)return;
-  const preds=await model.detect(cam);
-  if(preds.length>0){
-    label.textContent="Detectado: "+preds.map(p=>p.class).slice(0,3).join(', ');
-  }else label.textContent="Nada identificado...";
-  requestAnimationFrame(detectLoop);
+// ==== Anexo imagem ====
+const attachBtn=document.getElementById('attachBtn');
+attachBtn.onclick=()=>{
+  const inputFile=document.createElement('input');
+  inputFile.type='file';
+  inputFile.accept='image/*';
+  inputFile.onchange=e=>handleImage(e.target.files[0]);
+  inputFile.click();
+};
+
+// ==== Análise de imagem ====
+async function handleImage(file){
+  if(!model){addBotMessage("O modelo ainda não tá pronto.");return;}
+  const img=new Image();
+  img.src=URL.createObjectURL(file);
+  img.style.display='none';
+  document.body.appendChild(img);
+  img.onload=async()=>{
+    const preds=await model.detect(img);
+    document.body.removeChild(img);
+    if(preds.length===0){
+      detectedObj.hidden=false;
+      detectedObj.innerText="Nada reconhecido";
+      setTimeout(()=>detectedObj.hidden=true,3000);
+      addBotMessage("Não consegui identificar nada na imagem 😅");
+      return;
+    }
+    const top=preds[0];
+    detectedObj.hidden=false;
+    detectedObj.innerText=`${top.class} (${(top.score*100).toFixed(0)}%)`;
+    setTimeout(()=>detectedObj.hidden=true,4000);
+    addBotMessage(`Parece que vejo ${top.class}, confiança ${(top.score*100).toFixed(1)}%.`);
+  };
 }
 
-cocoSsd.load().then(m=>{model=m;console.log("Modelo de imagem pronto");});
+// ==== Leitura de ficheiro ====
+const fileBtn=document.getElementById('fileBtn');
+fileBtn.onclick=()=>{
+  const inputFile=document.createElement('input');
+  inputFile.type='file';
+  inputFile.accept='.txt,.js,.html,.css,.json,.py,.c,.cpp,.java,.md';
+  inputFile.onchange=e=>readFile(e.target.files[0]);
+  inputFile.click();
+};
+
+function readFile(file){
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const content=reader.result;
+    if(file.name.endsWith('.txt')||file.name.endsWith('.md')){
+      addBotMessage("📄 Li o ficheiro e parece ser texto. Aqui vai um resumo:\n"+content.slice(0,200)+"...");
+    }else{
+      addBotMessage("💻 Esse ficheiro parece código ("+file.name+"). Posso tentar explicar o que ele faz:\n"+content.slice(0,200)+"...");
+    }
+  };
+  reader.readAsText(file);
+}
 </script>
 </body>
 </html>
