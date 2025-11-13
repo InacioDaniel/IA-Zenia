@@ -114,7 +114,7 @@ let stats={interactions:0, learned:0};
 let isThinking=false, model=null, video=document.getElementById('videoStream'), canvas=document.getElementById('overlayCanvas'), ctx=canvas.getContext('2d'), listening=false;
 
 // ===== Carregar base local =====
-fetch('db/dilexconversation_knowledge.json')
+fetch('dilexconversation_knowledge.json')
 .then(r=>r.json())
 .then(d=>{LocalData=d; console.log("Base local carregada:",LocalData.length);})
 .catch(()=>{console.warn("Base local não carregou");});
