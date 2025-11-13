@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zenia IA - Wikimedia + Imagens</title>
+<title>Zenia IA - Wikimedia + Imagens + Câmera</title>
 <link rel="shortcut icon" href="favicon.png" type="image/x-icon">
-<link rel="apple-touch-icon" href="favicon.png">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -20,10 +19,10 @@ color:var(--text-primary); transition:all 0.3s ease;}
 .header{background:var(--bg-secondary); border-bottom:1px solid var(--border); padding:1rem 2rem;}
 .header-content{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
 .logo{display:flex;align-items:center;gap:1rem;}
-.logo-icon{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); width:50px;height:50px; border-radius:12px; display:flex;align-items:center;justify-content:center; font-size:28px;}
+.logo-icon img{width:50px;height:50px;border-radius:12px;}
 .logo-text h1{font-size:1.5rem;margin-bottom:2px;}
 .logo-text p{font-size:0.85rem;color:var(--text-secondary);}
-.header-actions{display:flex;gap:0.5rem;}
+.header-actions{display:flex;gap:0.5rem;align-items:center;}
 .icon-btn{background:var(--bg-tertiary);border:none;padding:0.75rem;border-radius:8px;cursor:pointer;font-size:1.2rem;transition:all 0.3s;}
 .icon-btn:hover{transform:translateY(-2px);}
 .container{max-width:1400px;margin:2rem auto;padding:0 2rem;display:grid;grid-template-columns:300px 1fr;gap:2rem;}
@@ -54,6 +53,8 @@ color:var(--text-primary); transition:all 0.3s ease;}
 #sendBtn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border:none;padding:0.75rem 2rem;border-radius:8px;color:white;font-size:1.2rem;cursor:pointer;transition:opacity 0.3s;}
 #sendBtn:hover{opacity:0.9;}
 #sendBtn:disabled{opacity:0.5;cursor:not-allowed;}
+#cameraContainer{display:none;justify-content:center;align-items:center;margin-top:1rem;}
+#cameraFeed{width:100%;max-width:500px;border-radius:12px;border:2px solid var(--border);}
 @media(max-width:768px){.container{grid-template-columns:1fr;}.sidebar{order:2;}}
 </style>
 </head>
@@ -61,9 +62,12 @@ color:var(--text-primary); transition:all 0.3s ease;}
 <div id="app">
 <header class="header">
 <div class="header-content">
-<div class="logo"><div class="logo-icon"><img src="favicon.png" width="60px" height="60px" alt="logo"> </div>
-<div class="logo-text"><h1>🧠 Zenia IA</h1><p>Sistema Inteligente + Wikimedia by @inacio.u.daniel</p></div></div>
+<div class="logo">
+<div class="logo-icon"><img src="favicon.png" alt="logo"></div>
+<div class="logo-text"><h1>🧠 Zenia IA</h1><p>Sistema Inteligente + Wikimedia by @inacio.u.daniel</p></div>
+</div>
 <div class="header-actions">
+<button id="cameraBtn" class="icon-btn" title="Ativar/Desativar Câmera">📸</button>
 <button id="exportBtn" class="icon-btn" title="Exportar dados">💾</button>
 <button id="clearBtn" class="icon-btn" title="Limpar chat">🗑️</button>
 <button id="themeBtn" class="icon-btn" title="Alternar tema">🌙</button>
@@ -77,7 +81,7 @@ color:var(--text-primary); transition:all 0.3s ease;}
 <h3>Estatísticas</h3>
 <div class="stat-item"><span>⚡</span> Interações: <strong id="interactions">0</strong></div>
 <div class="stat-item"><span>💾</span> Respostas: <strong id="learned">0</strong></div>
-<div class="stat-item"><span>⚙️</span> Contexto: <strong id="contextSize">0</strong></div>
+<div class="stat-item"><span>📷</span> Câmera: <strong id="camStatus">Desligada</strong></div>
 </div>
 
 <div class="modules-card">
@@ -85,16 +89,18 @@ color:var(--text-primary); transition:all 0.3s ease;}
 <div class="module-item"><span class="status-dot"></span> Contexto</div>
 <div class="module-item"><span class="status-dot"></span> Wikimedia</div>
 <div class="module-item"><span class="status-dot"></span> Análise de Imagens</div>
+<div class="module-item"><span class="status-dot"></span> Câmera em Tempo Real</div>
 </div>
 
 <div class="info-card">
 <h3>Como usar</h3>
-<p>• Converse normalmente<br>• Pergunte qualquer coisa<br>• Envie imagens para descrição<br>• Zenia fala o resultado para cegos</p>
+<p>• Converse normalmente<br>• Pergunte qualquer coisa<br>• Envie imagens ou use a câmera<br>• Zenia descreve o que vê e fala o resultado</p>
 </div>
 </aside>
 
 <main class="chat-container">
 <div id="messages" class="messages"></div>
+<div id="cameraContainer"><video id="cameraFeed" autoplay muted playsinline></video></div>
 <div class="input-container">
 <input type="text" id="userInput" placeholder="Digite sua mensagem...">
 <button id="sendBtn">📤</button>
@@ -103,119 +109,128 @@ color:var(--text-primary); transition:all 0.3s ease;}
 </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.12.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.12.0"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
-
 <script>
 // ======== Variáveis ========
 let LocalData = [];
-let ContextModule = { context: [], maxSize: 10, add(u,b){this.context.push({user:u,bot:b}); if(this.context.length>this.maxSize)this.context.shift();}, size(){return this.context.length;}, clear(){this.context=[];}};
-let stats = { interactions:0, learned:0};
-let isThinking = false;
 let model = null;
+let isCameraOn = false;
+let cameraStream = null;
 
-// ======== Carregar base local ========
+// ======== Base local ========
 fetch('dilexconversation_knowledge.json')
-  .then(r => r.json())
-  .then(d => { LocalData = d; console.log("Base local carregada:", LocalData.length); })
-  .catch(()=>{console.warn("Base local não carregou");});
+.then(r=>r.json())
+.then(d=>{LocalData=d;console.log("Base local carregada:",d.length);})
+.catch(()=>console.warn("Erro ao carregar base local"));
 
-// ======== Wikimedia API ========
+// ======== Wikimedia ========
 async function searchWikimedia(q){
     try{
-        const url = `https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`;
-        const r = await fetch(url);
-        if(!r.ok) return null;
-        const d = await r.json();
-        return d.extract || null;
-    }catch(e){console.error(e); return null;}
+        const url=`https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`;
+        const r=await fetch(url);
+        if(!r.ok)return null;
+        const d=await r.json();
+        return d.extract||null;
+    }catch{return null;}
 }
 
-// ======== Funções de Mensagem ========
-function addUserMessage(t){const m=document.createElement('div');m.className='message user';m.innerHTML=`<div class="message-content">${t}</div>`;messages.appendChild(m);messages.scrollTop=messages.scrollHeight; speak(t);}
-function addBotMessage(t){const m=document.createElement('div');m.className='message bot';m.innerHTML=`<div class="message-content">${t}</div>`;messages.appendChild(m);messages.scrollTop=messages.scrollHeight; speak(t);}
-function showThinking(){const d=document.createElement('div');d.className='message bot';d.id='thinking';d.innerHTML=`<div class="message-content thinking"><div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div></div>`;messages.appendChild(d);messages.scrollTop=messages.scrollHeight;}
-function removeThinking(){const t=document.getElementById('thinking');if(t)t.remove();}
-function updateStats(){interactions.textContent=stats.interactions;learned.textContent=stats.learned;contextSize.textContent=ContextModule.size();}
-
-// ======== Resposta Inteligente ========
-async function generateResponse(text){
-    // 1. Ver base local
-    const local = LocalData.find(item => item.prompt.toLowerCase() === text.toLowerCase());
-    if(local) return local.response;
-
-    // 2. Wikimedia
-    const wiki = await searchWikimedia(text);
-    if(wiki) return `📚 Encontrei isto na Wikipedia: ${wiki}`;
-
-    return "Não sei responder a isso 😅";
-}
-
-// ======== Envio de Mensagem ========
-async function sendMessage(){
-    const msg = userInput.value.trim();
-    if(!msg || isThinking) return;
-    addUserMessage(msg);
-    userInput.value = '';
-    isThinking = true;
-    sendBtn.disabled = true;
-    showThinking();
-
-    const response = await generateResponse(msg);
-    removeThinking();
-    addBotMessage(response);
-
-    ContextModule.add(msg,response);
-    stats.interactions++;
-    stats.learned++; // conta respostas
-    updateStats();
-    isThinking = false;
-    sendBtn.disabled = false;
-    userInput.focus();
-}
-
-// ======== Fala (TTS) ========
+// ======== Fala ========
 function speak(text){
     if('speechSynthesis' in window){
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang='pt-PT';
-        speechSynthesis.speak(utter);
+        const u=new SpeechSynthesisUtterance(text);
+        u.lang='pt-PT';
+        speechSynthesis.speak(u);
     }
 }
 
-// ======== Carregar modelo de imagens ========
-cocoSsd.load().then(m => { model = m; console.log("Modelo de imagens pronto"); });
+// ======== Mensagens ========
+function addBotMessage(t){const m=document.createElement('div');m.className='message bot';m.innerHTML=`<div class="message-content">${t}</div>`;messages.appendChild(m);messages.scrollTop=messages.scrollHeight;speak(t);}
+function addUserMessage(t){const m=document.createElement('div');m.className='message user';m.innerHTML=`<div class="message-content">${t}</div>`;messages.appendChild(m);messages.scrollTop=messages.scrollHeight;}
 
-// ======== Análise de imagem ========
-imgInput.onchange = async function(e){
-    if(!model){ addBotMessage("Modelo de imagens ainda não carregado."); return; }
-    const file = e.target.files[0];
-    if(!file) return;
-    const img = new Image();
-    img.src = URL.createObjectURL(file);
-    img.crossOrigin='anonymous';
-    img.style.display='none';
-    document.body.appendChild(img);
-    img.onload = async () => {
-        const predictions = await model.detect(img);
-        if(predictions.length === 0){
-            addBotMessage("Não consegui identificar objetos ou pessoas na imagem.");
-        } else {
-            const desc = predictions.map(p => `${p.class} (${(p.score*100).toFixed(0)}%)`).join(', ');
-            addBotMessage("Descrição da imagem: " + desc);
-        }
-        document.body.removeChild(img);
+// ======== Resposta ========
+async function generateResponse(text){
+    const local=LocalData.find(i=>i.prompt.toLowerCase()===text.toLowerCase());
+    if(local)return local.response;
+    const wiki=await searchWikimedia(text);
+    if(wiki)return `📚 Wikipedia diz: ${wiki}`;
+    return "Não sei responder a isso 😅";
+}
+
+// ======== Enviar ========
+async function sendMessage(){
+    const msg=userInput.value.trim();
+    if(!msg)return;
+    addUserMessage(msg);
+    userInput.value='';
+    const resp=await generateResponse(msg);
+    addBotMessage(resp);
+}
+
+// ======== Análise de imagem estática ========
+cocoSsd.load().then(m=>{model=m;console.log("Modelo carregado");});
+imgInput.onchange=async e=>{
+    const f=e.target.files[0];
+    if(!f||!model)return;
+    const img=new Image();
+    img.src=URL.createObjectURL(f);
+    img.onload=async()=>{
+        const p=await model.detect(img);
+        if(p.length===0)return addBotMessage("Não consegui identificar nada na imagem.");
+        const desc=p.map(x=>x.class).join(', ');
+        addBotMessage("Parece que vejo: "+desc);
     };
+};
+
+// ======== Câmera em tempo real ========
+async function toggleCamera(){
+    const camFeed=document.getElementById('cameraFeed');
+    const camStatus=document.getElementById('camStatus');
+    if(isCameraOn){
+        // Desativar
+        cameraStream.getTracks().forEach(t=>t.stop());
+        cameraStream=null;
+        camFeed.srcObject=null;
+        isCameraOn=false;
+        document.getElementById('cameraContainer').style.display='none';
+        camStatus.textContent="Desligada";
+        addBotMessage("Câmera desligada.");
+        return;
+    }
+    // Ativar
+    try{
+        cameraStream=await navigator.mediaDevices.getUserMedia({video:true});
+        camFeed.srcObject=cameraStream;
+        document.getElementById('cameraContainer').style.display='flex';
+        isCameraOn=true;
+        camStatus.textContent="Ligada";
+        addBotMessage("Câmera ativada. A analisar em tempo real...");
+        detectLoop();
+    }catch(err){
+        addBotMessage("Não consegui aceder à câmera 😞");
+    }
+}
+
+// ======== Loop de deteção ========
+async function detectLoop(){
+    if(!isCameraOn||!model)return;
+    const camFeed=document.getElementById('cameraFeed');
+    const preds=await model.detect(camFeed);
+    if(preds.length>0){
+        const objs=preds.map(p=>p.class);
+        const texto="Vejo: "+objs.join(', ');
+        addBotMessage(texto);
+    }
+    // Detetar a cada 5 segundos para evitar flood
+    setTimeout(()=>detectLoop(),5000);
 }
 
 // ======== Inicialização ========
 document.addEventListener('DOMContentLoaded',()=>{
-    addBotMessage("👋 Olá! Sou a Zenia IA. Pergunte algo ou envie uma imagem.");
-    sendBtn.onclick = sendMessage;
-    userInput.onkeypress = e=>{if(e.key==='Enter') sendMessage();};
-    clearBtn.onclick = ()=>{messages.innerHTML=''; ContextModule.clear(); stats={interactions:0,learned:0}; updateStats(); addBotMessage("Chat limpo!");};
-    themeBtn.onclick = ()=>{document.body.classList.toggle('light');};
-    exportBtn.onclick = ()=>{const data={messages:Array.from(document.querySelectorAll('.message')).map(m=>({type:m.classList.contains('user')?'user':'bot',text:m.textContent})),context:ContextModule.context,stats,exportDate:new Date()}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='zenia-data.json'; a.click();}
+    addBotMessage("👋 Olá! Sou a Zenia IA. Podes perguntar ou ativar a câmera!");
+    sendBtn.onclick=sendMessage;
+    userInput.onkeypress=e=>{if(e.key==='Enter')sendMessage();};
+    cameraBtn.onclick=toggleCamera;
 });
 </script>
 </body>
