@@ -171,7 +171,7 @@ cocoSsd.load().then(m => { model = m; console.log("Modelo de imagens pronto"); }
 // ======== Análise de imagem ========
 async function processImage(file){
     if(!model){ addBotMessage("Modelo de imagens ainda não carregado."); return; }
-    if(!file) return;
+    if(!file){ addBotMessage("Arquivo inválido."); return; }
     const img = new Image(); img.src = URL.createObjectURL(file); img.crossOrigin='anonymous'; img.style.display='none'; document.body.appendChild(img);
     img.onload = async () => {
         showThinking();
