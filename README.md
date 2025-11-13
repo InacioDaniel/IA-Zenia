@@ -2,7 +2,10 @@
 
 ![Zenia Banner](https://i.imgur.com/Fa1vO0r.png)  
 
-**Zenia IA** é uma **assistente virtual inteligente e interativa**, criada para conversar, ensinar, analisar imagens, reconhecer emoções vocais e traduzir textos em tempo real. Desenvolvida por [@InacioDaniel](https://github.com/InacioDaniel), ideal para estudos, feiras de tecnologia ou uso pessoal.
+**Zenia IA** é uma **assistente virtual inteligente e interativa**, criada para conversar, ensinar, analisar imagens, reconhecer emoções vocais e traduzir textos em tempo real.  
+
+**Criador:** [@inacio.u.daniel](https://github.com/InacioDaniel) – Programador e estudante no **Instituto Politécnico Pomba d’Amizade**.  
+Ideal para estudos, feiras de tecnologia ou uso pessoal.
 
 ---
 
@@ -40,6 +43,9 @@ flowchart TD
     D -- Não --> F{Wikipedia disponível?}
     F -- Sim --> G[Buscar resumo e responder]
     F -- Não --> H[Respostas padrão aleatórias]
-    C & E & G & H --> I[Exibir mensagem no chat]
+    C --> I[Exibir mensagem no chat]
+    E --> I
+    G --> I
+    H --> I
     I --> J[Atualizar estatísticas e contexto]
     J --> K[Falar a mensagem (TTS)]
