@@ -44,6 +44,7 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:var(--bg
 #userInput{flex:1;padding:0.5rem;border:1px solid var(--border);border-radius:8px;background:var(--bg-tertiary);color:var(--text-primary);font-size:1rem;}
 canvas#overlayCanvas{position:absolute;top:0;left:0;pointer-events:none;width:100%;height:100%;}
 video#videoStream{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:12px;}
+#emotionIndicator{position:absolute;top:10px;right:10px;padding:0.5rem 1rem;border-radius:8px;background:#64748b;color:white;font-weight:bold;font-size:0.9rem;}
 @media(max-width:768px){.container{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -94,6 +95,7 @@ video#videoStream{position:absolute;top:0;left:0;width:100%;height:100%;object-f
 
 <main class="chat-container">
 <div id="messages" class="messages"></div>
+<div id="emotionIndicator">Neutro</div>
 <div class="input-container" id="dropArea">
 <input type="text" id="userInput" placeholder="Digite sua mensagem...">
 <button id="sendBtn">📤</button>
@@ -112,6 +114,7 @@ let LocalData=[];
 let ContextModule={ context:[], maxSize:10, add(u,b){this.context.push({user:u,bot:b}); if(this.context.length>this.maxSize)this.context.shift();}, size(){return this.context.length;}, clear(){this.context=[];}};
 let stats={interactions:0, learned:0};
 let isThinking=false, model=null, video=document.getElementById('videoStream'), canvas=document.getElementById('overlayCanvas'), ctx=canvas.getContext('2d'), listening=false;
+let audioContext, analyser, microphone, dataArray;
 
 // ===== Carregar base local =====
 fetch('dilexconversation_knowledge.json')
@@ -119,7 +122,7 @@ fetch('dilexconversation_knowledge.json')
 .then(d=>{LocalData=d; console.log("Base local carregada:",LocalData.length);})
 .catch(()=>{console.warn("Base local não carregou");});
 
-// ===== Funções =====
+// ===== Funções básicas =====
 function addUserMessage(t){const m=document.createElement('div');m.className='message user';m.innerHTML=`<div class="message-content">${t}</div>`;messages.appendChild(m);messages.scrollTop=messages.scrollHeight;speak(t);}
 function addBotMessage(t){const m=document.createElement('div');m.className='message bot';m.innerHTML=`<div class="message-content">${t}</div>`;messages.appendChild(m);messages.scrollTop=messages.scrollHeight;speak(t);}
 function showThinking(){const d=document.createElement('div');d.className='message bot';d.id='thinking';d.innerHTML=`<div class="message-content thinking">...</div>`;messages.appendChild(d);messages.scrollTop=messages.scrollHeight;}
@@ -130,50 +133,91 @@ function speak(text){if('speechSynthesis' in window){const u=new SpeechSynthesis
 // Similaridade
 function similarity(a,b){const aWords=a.toLowerCase().match(/\w+/g)||[]; const bWords=b.toLowerCase().match(/\w+/g)||[]; let matches=0; aWords.forEach(w=>{if(bWords.includes(w)) matches++;}); return matches/Math.max(aWords.length,1);}
 
+// ===== Reconhecimento de voz e emoção =====
+let recognition;
+if('webkitSpeechRecognition' in window || 'SpeechRecognition' in window){
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.lang = 'pt-PT';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {listening=true; micBtn.style.background='#22c55e'; startVoiceEmotionAnalysis();};
+    recognition.onend = () => {listening=false; micBtn.style.background='var(--bg-tertiary)';};
+    recognition.onresult = async (event) => {
+        const transcript = event.results[0][0].transcript;
+        addUserMessage(transcript);
+        isThinking=true;
+        showThinking();
+        setTimeout(async ()=>{
+            removeThinking();
+            const botReply = await getBotReply(transcript);
+            addBotMessage(botReply);
+            ContextModule.add(transcript, botReply);
+            stats.interactions++;
+            stats.learned++;
+            updateStats();
+            isThinking=false;
+        },600);
+    };
+}else{console.warn("Reconhecimento de voz não suportado neste navegador.");}
+
+// ===== Análise de emoções vocais =====
+async function startVoiceEmotionAnalysis() {
+    try {
+        if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        microphone = audioContext.createMediaStreamSource(stream);
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 2048;
+        dataArray = new Uint8Array(analyser.fftSize);
+        microphone.connect(analyser);
+        detectEmotion();
+    } catch (err) { console.warn("Erro ao acessar microfone para análise de emoção:", err);}
+}
+
+function detectEmotion() {
+    analyser.getByteTimeDomainData(dataArray);
+    let sum = 0;
+    for (let i = 0; i < dataArray.length; i++) {
+        const v = (dataArray[i] - 128) / 128;
+        sum += v * v;
+    }
+    const volume = Math.sqrt(sum / dataArray.length);
+
+    let emotion = "Neutro";
+    if(volume>0.12) emotion="Animado/Feliz";
+    else if(volume>0.08) emotion="Normal";
+    else if(volume<0.04) emotion="Triste/Calmo";
+
+    document.getElementById('emotionIndicator').innerText = emotion;
+
+    if(listening) requestAnimationFrame(detectEmotion);
+}
+
 // ===== Obter resposta =====
 async function getBotReply(userMsg){
     const msgLower=userMsg.toLowerCase().trim();
-
-    // Saudações (palavra inteira)
     const greetings=["oi","olá","ola","bom dia","boa tarde","boa noite"];
     if(greetings.includes(msgLower)) return "👋 Olá! Que bom te ver! Eu sou a Zenia IA, sua assistente amiga e professora. Pergunte o que quiser, vamos aprender juntos!";
-
-    // Despedidas
     const farewells=["tchau","até logo","adeus","até mais"];
     if(farewells.includes(msgLower)) return "👋 Até mais! Foi ótimo conversar contigo. Volte sempre!";
-
-    // Quem te fez / para que serves
     if(msgLower.includes("quem te fez")) return "🤖 Fui criada por @inacio.u.daniel e posso ajudá-lo a aprender, resolver problemas e até vencer na feira de tecnologia e ciências!";
     if(msgLower.includes("para que serves")) return "🤖 Fui criada por @inacio.u.daniel, posso ensinar, aconselhar, analisar e divertir!";
-
-    // Base local
     if(LocalData && LocalData.length>0){
-        let scored=[]; 
-        LocalData.forEach(d=>{
-            const score=similarity(userMsg,d.prompt);
-            if(score>0) scored.push({score:score, response:d.response});
-        });
-        if(scored.length>0){
-            scored.sort((a,b)=>b.score - a.score);
-            return scored[0].response;
-        }
+        let scored=[]; LocalData.forEach(d=>{const score=similarity(userMsg,d.prompt); if(score>0) scored.push({score:score, response:d.response});});
+        if(scored.length>0){scored.sort((a,b)=>b.score - a.score); return scored[0].response;}
     }
-
-    // Wikipedia resumo
     try{
         const url=`https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(userMsg)}`;
         const res=await fetch(url);
-        if(res.ok){
-            const data=await res.json();
-            if(data.extract) return data.extract;
-        }
+        if(res.ok){const data=await res.json(); if(data.extract) return data.extract;}
     }catch(e){console.warn("Wikipedia erro", e);}
-
     const defaultReplies=["Interessante! Pode me contar mais sobre isso?","😄 Que legal!","🤔 Não tenho certeza, mas podemos conversar sobre isso.","👍 Entendi!","Vamos explorar juntos este assunto!"];
     return defaultReplies[Math.floor(Math.random()*defaultReplies.length)];
 }
 
-// ===== Envio de mensagens =====
+// ===== DOMContentLoaded =====
 document.addEventListener('DOMContentLoaded',()=>{
     const messages=document.getElementById('messages');
     const sendBtn=document.getElementById('sendBtn');
@@ -188,7 +232,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     const exportBtn=document.getElementById('exportBtn');
     const translateBtn=document.getElementById('translateBtn');
 
-    // Saudação inicial
     addBotMessage("👋 Olá! Eu sou a Zenia IA, sua assistente amiga e professora. Pergunte o que quiser, vamos aprender juntos!");
 
     sendBtn.onclick=async ()=>{
@@ -211,13 +254,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     };
     userInput.onkeypress=e=>{if(e.key==='Enter') sendBtn.click();};
 
-    // Limpar chat
     clearBtn.onclick=()=>{messages.innerHTML='';ContextModule.clear(); stats.interactions=0; stats.learned=0; updateStats(); addBotMessage("🧹 Chat limpo! Vamos continuar a conversa.");};
-
-    // Trocar tema
     themeBtn.onclick=()=>{document.body.classList.toggle('light');};
-
-    // Exportar chat
     exportBtn.onclick=()=>{
         let text="";
         messages.querySelectorAll('.message').forEach(m=>{
@@ -227,13 +265,17 @@ document.addEventListener('DOMContentLoaded',()=>{
         const url=URL.createObjectURL(blob);
         const a=document.createElement('a'); a.href=url; a.download="chat_zenia.txt"; a.click(); URL.revokeObjectURL(url);
     };
-
-    // Pesquisa Wikipedia manual
     translateBtn.onclick=async ()=>{
         const query=userInput.value.trim();
         if(query.length>0){addUserMessage(query); userInput.value=''; const botReply=await getBotReply(query); addBotMessage(botReply);}
     };
+
+    // Botão microfone
+    micBtn.onclick=()=>{
+        if(!recognition) return alert("Seu navegador não suporta reconhecimento de voz.");
+        if(listening){recognition.stop();} else {recognition.start();}
+    };
 });
 </script>
 </body>
-</html>
+</html
