@@ -114,12 +114,9 @@ let stats={interactions:0, learned:0};
 let isThinking=false, model=null, video=document.getElementById('videoStream'), canvas=document.getElementById('overlayCanvas'), ctx=canvas.getContext('2d'), listening=false;
 
 // ===== Carregar base local =====
-fetch('db/dilexconversation_knowledge.json')
+fetch('dilexconversation_knowledge.json')
 .then(r=>r.json())
-.then(d=>{
-    LocalData=d;
-    console.log("Base local carregada:",LocalData.length);
-})
+.then(d=>{LocalData=d; console.log("Base local carregada:",LocalData.length);})
 .catch(()=>{console.warn("Base local não carregou");});
 
 // ===== Funções básicas =====
@@ -130,26 +127,40 @@ function removeThinking(){const t=document.getElementById('thinking');if(t)t.rem
 function updateStats(){interactions.textContent=stats.interactions;learned.textContent=stats.learned;contextSize.textContent=ContextModule.size();}
 function speak(text){if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(text);u.lang='pt-PT';speechSynthesis.speak(u);}}
 
-// ===== Função para resposta inteligente =====
+// ===== Função para respostas inteligentes com reconhecimento de saudações e perguntas especiais =====
 function getBotReply(userMsg){
-    if(!LocalData || LocalData.length===0) return "🤔 Não sei responder isso ainda...";
-    // busca correspondência simples ignorando maiúsculas/minúsculas
-    const msgLower = userMsg.toLowerCase();
-    const match = LocalData.find(d=>msgLower.includes(d.prompt.toLowerCase()));
-    if(match) return match.response;
-    // respostas padrão caso não encontre correspondência
+    const msgLower=userMsg.toLowerCase();
+
+    // Saudações
+    const greetings = ["oi","olá","ola","bom dia","boa tarde","boa noite"];
+    if(greetings.some(g=>msgLower.includes(g))) return "👋 Olá! Que bom te ver! Eu sou a Zenia IA, sua assistente amiga e professora. Pergunte o que quiser, vamos aprender juntos!";
+
+    // Despedidas
+    const farewells = ["tchau","até logo","adeus","até mais"];
+    if(farewells.some(f=>msgLower.includes(f))) return "👋 Até mais! Foi ótimo conversar contigo. Volte sempre!";
+
+    // Quem te fez / para que serves
+    if(msgLower.includes("quem te fez")) return "🤖 Fui criada por @inacio.u.daniel e posso ajudá-lo a aprender, resolver problemas e até vencer na feira de tecnologia e ciências!";
+    if(msgLower.includes("para que serves")) return "🤖 Fui criada por @inacio.u.daniel, posso ensinar, aconselhar, analisar e divertir!";
+
+    // Base local
+    if(LocalData && LocalData.length>0){
+        const match = LocalData.find(d=>msgLower.includes(d.prompt.toLowerCase()));
+        if(match) return match.response;
+    }
+
+    // Respostas padrão
     const defaultReplies = [
-        "Oi! Como vai?",
-        "Estou bem, e você?",
-        "Interessante, me conte mais...",
+        "Interessante! Pode me contar mais sobre isso?",
         "😄 Que legal!",
         "🤔 Não tenho certeza, mas podemos conversar sobre isso.",
-        "👍 Entendi!"
+        "👍 Entendi!",
+        "Vamos explorar juntos este assunto!"
     ];
     return defaultReplies[Math.floor(Math.random()*defaultReplies.length)];
 }
 
-// ===== Envio de mensagem =====
+// ===== Envio de mensagens =====
 document.addEventListener('DOMContentLoaded',()=>{
     const messages=document.getElementById('messages');
     const sendBtn=document.getElementById('sendBtn');
@@ -161,9 +172,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     const contextSize=document.getElementById('contextSize');
 
     // Saudação inicial
-    addBotMessage("👋 Olá! Zenia IA está pronta.");
+    addBotMessage("👋 Olá! Eu sou a Zenia IA, sua assistente amiga e professora. Pergunte o que quiser, e vamos aprender juntos!");
 
-    // Enviar mensagem
     sendBtn.onclick=()=>{
         const msg=userInput.value.trim();
         if(!msg||isThinking) return;
@@ -184,7 +194,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     };
 
     userInput.onkeypress=e=>{if(e.key==='Enter') sendBtn.click();};
-
     micBtn.onclick=()=>{if(!listening){startAudioAnalysis(); listening=true;}};
     cameraBtn.onclick=()=>{if(video.style.display==='none'){video.style.display='block';startCameraDetection();}else{video.style.display='none';ctx.clearRect(0,0,canvas.width,canvas.height);}};
 });
