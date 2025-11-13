@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zenia IA - Wikimedia + Imagens</title>
+<link rel="shortcut icon" href="favicon.png" type="image/x-icon">
+<link rel="apple-touch-icon" href="favicon.png">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -59,8 +61,8 @@ color:var(--text-primary); transition:all 0.3s ease;}
 <div id="app">
 <header class="header">
 <div class="header-content">
-<div class="logo"><div class="logo-icon">🧠</div>
-<div class="logo-text"><h1>Zenia IA</h1><p>Sistema Inteligente + Wikimedia</p></div></div>
+<div class="logo"><div class="logo-icon"><img src="favicon.png" width="60px" height="60px" alt="logo"> </div>
+<div class="logo-text"><h1>🧠 Zenia IA</h1><p>Sistema Inteligente + Wikimedia by @inacio.u.daniel</p></div></div>
 <div class="header-actions">
 <button id="exportBtn" class="icon-btn" title="Exportar dados">💾</button>
 <button id="clearBtn" class="icon-btn" title="Limpar chat">🗑️</button>
@@ -113,7 +115,7 @@ let isThinking = false;
 let model = null;
 
 // ======== Carregar base local ========
-fetch('/dilexconversation_knowledge.json')
+fetch('db/dilexconversation_knowledge.json')
   .then(r => r.json())
   .then(d => { LocalData = d; console.log("Base local carregada:", LocalData.length); })
   .catch(()=>{console.warn("Base local não carregou");});
