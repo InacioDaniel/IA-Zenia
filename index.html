@@ -108,53 +108,158 @@ video#videoStream{position:absolute;top:0;left:0;width:100%;height:100%;object-f
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 <script>
 // ===== Variáveis Globais =====
-let LocalData=[], ContextModule={context:[], maxSize:10, add(u,b){this.context.push({user:u,bot:b);if(this.context.length>this.maxSize)this.context.shift();},size(){return this.context.length;},clear(){this.context=[];}};
-let stats={interactions:0,learned:0}, isThinking=false, model=null, video=document.getElementById('videoStream'), canvas=document.getElementById('overlayCanvas'), ctx=canvas.getContext('2d'), recognition=null, listening=false;
+let LocalData=[];
+let ContextModule = {
+    context:[],
+    maxSize:10,
+    add(u,b){this.context.push({user:u,bot:b}); if(this.context.length>this.maxSize) this.context.shift();},
+    size(){return this.context.length;},
+    clear(){this.context=[];}
+};
+let stats={interactions:0, learned:0};
+let isThinking=false, model=null, video=document.getElementById('videoStream'), canvas=document.getElementById('overlayCanvas'), ctx=canvas.getContext('2d'), recognition=null, listening=false;
 
 // ===== Carregar base local =====
 fetch('db/dilexconversation_knowledge.json').then(r=>r.json()).then(d=>{LocalData=d;console.log("Base local carregada:",LocalData.length);}).catch(()=>{console.warn("Base local não carregou");});
 
 // ===== Funções básicas =====
-function addUserMessage(t){const m=document.createElement('div');m.className='message user';m.innerHTML=`<div class="message-content">${t}</div>`;messages.appendChild(m);messages.scrollTop=messages.scrollHeight;speak(t);}
-function addBotMessage(t){const m=document.createElement('div');m.className='message bot';m.innerHTML=`<div class="message-content">${t}</div>`;messages.appendChild(m);messages.scrollTop=messages.scrollHeight;speak(t);}
-function showThinking(){const d=document.createElement('div');d.className='message bot';d.id='thinking';d.innerHTML=`<div class="message-content thinking">...</div>`;messages.appendChild(d);messages.scrollTop=messages.scrollHeight;}
-function removeThinking(){const t=document.getElementById('thinking');if(t)t.remove();}
-function updateStats(){interactions.textContent=stats.interactions;learned.textContent=stats.learned;contextSize.textContent=ContextModule.size();}
-function speak(text){if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(text);u.lang='pt-PT';speechSynthesis.speak(u);}}
+function addUserMessage(t){
+    const m=document.createElement('div');
+    m.className='message user';
+    m.innerHTML=`<div class="message-content">${t}</div>`;
+    messages.appendChild(m);
+    messages.scrollTop=messages.scrollHeight;
+    speak(t);
+}
+
+function addBotMessage(t){
+    const m=document.createElement('div');
+    m.className='message bot';
+    m.innerHTML=`<div class="message-content">${t}</div>`;
+    messages.appendChild(m);
+    messages.scrollTop=messages.scrollHeight;
+    speak(t);
+}
+
+function showThinking(){
+    const d=document.createElement('div');
+    d.className='message bot';
+    d.id='thinking';
+    d.innerHTML=`<div class="message-content thinking">...</div>`;
+    messages.appendChild(d);
+    messages.scrollTop=messages.scrollHeight;
+}
+
+function removeThinking(){
+    const t=document.getElementById('thinking');
+    if(t) t.remove();
+}
+
+function updateStats(){
+    interactions.textContent=stats.interactions;
+    learned.textContent=stats.learned;
+    contextSize.textContent=ContextModule.size();
+}
+
+function speak(text){
+    if('speechSynthesis' in window){
+        const u=new SpeechSynthesisUtterance(text);
+        u.lang='pt-PT';
+        speechSynthesis.speak(u);
+    }
+}
 
 // ===== Microfone + Emoções =====
 let audioCtx, analyser, dataArray, source;
-async function startAudioAnalysis(){if(!navigator.mediaDevices.getUserMedia)return addBotMessage("Microfone não suportado");
-const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-audioCtx=new AudioContext();analyser=audioCtx.createAnalyser();
-source=audioCtx.createMediaStreamSource(stream);source.connect(analyser);
-analyser.fftSize=2048;dataArray=new Uint8Array(analyser.frequencyBinCount);
-function analyze(){analyser.getByteFrequencyData(dataArray);
-const volume=dataArray.reduce((a,b)=>a+b)/dataArray.length;
-const pitch=dataArray.indexOf(Math.max(...dataArray));
-if(volume>140)addBotMessage("😄 Parece animado!");
-else if(volume<40)addBotMessage("😔 Parece triste ou calmo...");
-requestAnimationFrame(analyze);}
-analyze();}
+async function startAudioAnalysis(){
+    if(!navigator.mediaDevices.getUserMedia) return addBotMessage("Microfone não suportado");
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    audioCtx=new AudioContext();
+    analyser=audioCtx.createAnalyser();
+    source=audioCtx.createMediaStreamSource(stream);
+    source.connect(analyser);
+    analyser.fftSize=2048;
+    dataArray=new Uint8Array(analyser.frequencyBinCount);
+    function analyze(){
+        analyser.getByteFrequencyData(dataArray);
+        const volume=dataArray.reduce((a,b)=>a+b)/dataArray.length;
+        const pitch=dataArray.indexOf(Math.max(...dataArray));
+        if(volume>140)addBotMessage("😄 Parece animado!");
+        else if(volume<40)addBotMessage("😔 Parece triste ou calmo...");
+        requestAnimationFrame(analyze);
+    }
+    analyze();
+}
 
 // ===== Código base para enviar mensagem =====
 document.addEventListener('DOMContentLoaded',()=>{
-addBotMessage("👋 Olá! Zenia IA Completa está pronta.");
-sendBtn.onclick=()=>{const msg=userInput.value.trim();if(!msg||isThinking)return;addUserMessage(msg);userInput.value='';isThinking=true;showThinking();setTimeout(()=>{removeThinking();addBotMessage("Resposta automática/expansível...");ContextModule.add(msg,"Resposta automática/expansível...");stats.interactions++;stats.learned++;updateStats();isThinking=false;},800);};
-userInput.onkeypress=e=>{if(e.key==='Enter')sendBtn.click();};
-micBtn.onclick=()=>{if(!listening){startAudioAnalysis();listening=true;}};
-cameraBtn.onclick=()=>{if(video.style.display==='none'){video.style.display='block';startCameraDetection();}else{video.style.display='none';ctx.clearRect(0,0,canvas.width,canvas.height);}};
+    // Selecionar elementos do DOM
+    const messages = document.getElementById('messages');
+    const sendBtn = document.getElementById('sendBtn');
+    const userInput = document.getElementById('userInput');
+    const micBtn = document.getElementById('micBtn');
+    const cameraBtn = document.getElementById('cameraBtn');
+    const interactions = document.getElementById('interactions');
+    const learned = document.getElementById('learned');
+    const contextSize = document.getElementById('contextSize');
+
+    // Mensagem inicial de saudação
+    addBotMessage("👋 Olá! Zenia IA Completa está pronta.");
+
+    // Enviar mensagem
+    sendBtn.onclick = () => {
+        const msg = userInput.value.trim();
+        if(!msg || isThinking) return;
+        addUserMessage(msg);
+        userInput.value='';
+        isThinking=true;
+        showThinking();
+        setTimeout(()=>{
+            removeThinking();
+            addBotMessage("Resposta automática/expansível...");
+            ContextModule.add(msg,"Resposta automática/expansível...");
+            stats.interactions++;
+            stats.learned++;
+            updateStats();
+            isThinking=false;
+        },800);
+    };
+
+    userInput.onkeypress = e => { if(e.key==='Enter') sendBtn.click(); };
+
+    micBtn.onclick = () => { if(!listening){ startAudioAnalysis(); listening=true; } };
+
+    cameraBtn.onclick = () => {
+        if(video.style.display==='none'){
+            video.style.display='block';
+            startCameraDetection();
+        } else {
+            video.style.display='none';
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+        }
+    };
 });
 
 // ===== Camera + Detecção objetos =====
 async function startCameraDetection(){
-if(!navigator.mediaDevices.getUserMedia)return addBotMessage("Camera não suportada");
-const stream=await navigator.mediaDevices.getUserMedia({video:true});
-video.srcObject=stream;
-cocoSsd.load().then(m=>{model=m;detectFrame();});
+    if(!navigator.mediaDevices.getUserMedia) return addBotMessage("Camera não suportada");
+    const stream=await navigator.mediaDevices.getUserMedia({video:true});
+    video.srcObject=stream;
+    cocoSsd.load().then(m=>{model=m; detectFrame();});
 }
-function detectFrame(){if(!model||video.style.display==='none')return;model.detect(video).then(predictions=>{ctx.clearRect(0,0,canvas.width,canvas.height);ctx.font="16px Arial";ctx.fillStyle="red";predictions.forEach(p=>{ctx.fillText(`${p.class} (${(p.score*100).toFixed(0)}%)`,canvas.width/2-50,20);});requestAnimationFrame(detectFrame);});}
 
+function detectFrame(){
+    if(!model || video.style.display==='none') return;
+    model.detect(video).then(predictions=>{
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.font="16px Arial";
+        ctx.fillStyle="red";
+        predictions.forEach(p=>{
+            ctx.fillText(`${p.class} (${(p.score*100).toFixed(0)}%)`,canvas.width/2-50,20);
+        });
+        requestAnimationFrame(detectFrame);
+    });
+}
 </script>
 </body>
 </html>
