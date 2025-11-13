@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zenia IA - Completa</title>
+<title>Zenia IA - by @inacio.u.daniel</title>
 <link rel="shortcut icon" href="favicon.png" type="image/x-icon">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -109,65 +109,85 @@ video#videoStream{position:absolute;top:0;left:0;width:100%;height:100%;object-f
 <script>
 // ===== Variáveis Globais =====
 let LocalData=[];
-let ContextModule = {
-    context:[],
-    maxSize:10,
-    add(u,b){this.context.push({user:u,bot:b}); if(this.context.length>this.maxSize) this.context.shift();},
-    size(){return this.context.length;},
-    clear(){this.context=[];}
-};
+let ContextModule = { context:[], maxSize:10, add(u,b){this.context.push({user:u,bot:b}); if(this.context.length>this.maxSize) this.context.shift();}, size(){return this.context.length;}, clear(){this.context=[];}};
 let stats={interactions:0, learned:0};
-let isThinking=false, model=null, video=document.getElementById('videoStream'), canvas=document.getElementById('overlayCanvas'), ctx=canvas.getContext('2d'), recognition=null, listening=false;
+let isThinking=false, model=null, video=document.getElementById('videoStream'), canvas=document.getElementById('overlayCanvas'), ctx=canvas.getContext('2d'), listening=false;
 
 // ===== Carregar base local =====
-fetch('db/dilexconversation_knowledge.json').then(r=>r.json()).then(d=>{LocalData=d;console.log("Base local carregada:",LocalData.length);}).catch(()=>{console.warn("Base local não carregou");});
+fetch('db/dilexconversation_knowledge.json')
+.then(r=>r.json())
+.then(d=>{
+    LocalData=d;
+    console.log("Base local carregada:",LocalData.length);
+})
+.catch(()=>{console.warn("Base local não carregou");});
 
 // ===== Funções básicas =====
-function addUserMessage(t){
-    const m=document.createElement('div');
-    m.className='message user';
-    m.innerHTML=`<div class="message-content">${t}</div>`;
-    messages.appendChild(m);
-    messages.scrollTop=messages.scrollHeight;
-    speak(t);
+function addUserMessage(t){const m=document.createElement('div');m.className='message user';m.innerHTML=`<div class="message-content">${t}</div>`;messages.appendChild(m);messages.scrollTop=messages.scrollHeight;speak(t);}
+function addBotMessage(t){const m=document.createElement('div');m.className='message bot';m.innerHTML=`<div class="message-content">${t}</div>`;messages.appendChild(m);messages.scrollTop=messages.scrollHeight;speak(t);}
+function showThinking(){const d=document.createElement('div');d.className='message bot';d.id='thinking';d.innerHTML=`<div class="message-content thinking">...</div>`;messages.appendChild(d);messages.scrollTop=messages.scrollHeight;}
+function removeThinking(){const t=document.getElementById('thinking');if(t)t.remove();}
+function updateStats(){interactions.textContent=stats.interactions;learned.textContent=stats.learned;contextSize.textContent=ContextModule.size();}
+function speak(text){if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(text);u.lang='pt-PT';speechSynthesis.speak(u);}}
+
+// ===== Função para resposta inteligente =====
+function getBotReply(userMsg){
+    if(!LocalData || LocalData.length===0) return "🤔 Não sei responder isso ainda...";
+    // busca correspondência simples ignorando maiúsculas/minúsculas
+    const msgLower = userMsg.toLowerCase();
+    const match = LocalData.find(d=>msgLower.includes(d.prompt.toLowerCase()));
+    if(match) return match.response;
+    // respostas padrão caso não encontre correspondência
+    const defaultReplies = [
+        "Oi! Como vai?",
+        "Estou bem, e você?",
+        "Interessante, me conte mais...",
+        "😄 Que legal!",
+        "🤔 Não tenho certeza, mas podemos conversar sobre isso.",
+        "👍 Entendi!"
+    ];
+    return defaultReplies[Math.floor(Math.random()*defaultReplies.length)];
 }
 
-function addBotMessage(t){
-    const m=document.createElement('div');
-    m.className='message bot';
-    m.innerHTML=`<div class="message-content">${t}</div>`;
-    messages.appendChild(m);
-    messages.scrollTop=messages.scrollHeight;
-    speak(t);
-}
+// ===== Envio de mensagem =====
+document.addEventListener('DOMContentLoaded',()=>{
+    const messages=document.getElementById('messages');
+    const sendBtn=document.getElementById('sendBtn');
+    const userInput=document.getElementById('userInput');
+    const micBtn=document.getElementById('micBtn');
+    const cameraBtn=document.getElementById('cameraBtn');
+    const interactions=document.getElementById('interactions');
+    const learned=document.getElementById('learned');
+    const contextSize=document.getElementById('contextSize');
 
-function showThinking(){
-    const d=document.createElement('div');
-    d.className='message bot';
-    d.id='thinking';
-    d.innerHTML=`<div class="message-content thinking">...</div>`;
-    messages.appendChild(d);
-    messages.scrollTop=messages.scrollHeight;
-}
+    // Saudação inicial
+    addBotMessage("👋 Olá! Zenia IA está pronta.");
 
-function removeThinking(){
-    const t=document.getElementById('thinking');
-    if(t) t.remove();
-}
+    // Enviar mensagem
+    sendBtn.onclick=()=>{
+        const msg=userInput.value.trim();
+        if(!msg||isThinking) return;
+        addUserMessage(msg);
+        userInput.value='';
+        isThinking=true;
+        showThinking();
+        setTimeout(()=>{
+            removeThinking();
+            const botReply=getBotReply(msg);
+            addBotMessage(botReply);
+            ContextModule.add(msg,botReply);
+            stats.interactions++;
+            stats.learned++;
+            updateStats();
+            isThinking=false;
+        },600);
+    };
 
-function updateStats(){
-    interactions.textContent=stats.interactions;
-    learned.textContent=stats.learned;
-    contextSize.textContent=ContextModule.size();
-}
+    userInput.onkeypress=e=>{if(e.key==='Enter') sendBtn.click();};
 
-function speak(text){
-    if('speechSynthesis' in window){
-        const u=new SpeechSynthesisUtterance(text);
-        u.lang='pt-PT';
-        speechSynthesis.speak(u);
-    }
-}
+    micBtn.onclick=()=>{if(!listening){startAudioAnalysis(); listening=true;}};
+    cameraBtn.onclick=()=>{if(video.style.display==='none'){video.style.display='block';startCameraDetection();}else{video.style.display='none';ctx.clearRect(0,0,canvas.width,canvas.height);}};
+});
 
 // ===== Microfone + Emoções =====
 let audioCtx, analyser, dataArray, source;
@@ -183,7 +203,6 @@ async function startAudioAnalysis(){
     function analyze(){
         analyser.getByteFrequencyData(dataArray);
         const volume=dataArray.reduce((a,b)=>a+b)/dataArray.length;
-        const pitch=dataArray.indexOf(Math.max(...dataArray));
         if(volume>140)addBotMessage("😄 Parece animado!");
         else if(volume<40)addBotMessage("😔 Parece triste ou calmo...");
         requestAnimationFrame(analyze);
@@ -191,72 +210,20 @@ async function startAudioAnalysis(){
     analyze();
 }
 
-// ===== Código base para enviar mensagem =====
-document.addEventListener('DOMContentLoaded',()=>{
-    // Selecionar elementos do DOM
-    const messages = document.getElementById('messages');
-    const sendBtn = document.getElementById('sendBtn');
-    const userInput = document.getElementById('userInput');
-    const micBtn = document.getElementById('micBtn');
-    const cameraBtn = document.getElementById('cameraBtn');
-    const interactions = document.getElementById('interactions');
-    const learned = document.getElementById('learned');
-    const contextSize = document.getElementById('contextSize');
-
-    // Mensagem inicial de saudação
-    addBotMessage("👋 Olá! Zenia IA Completa está pronta.");
-
-    // Enviar mensagem
-    sendBtn.onclick = () => {
-        const msg = userInput.value.trim();
-        if(!msg || isThinking) return;
-        addUserMessage(msg);
-        userInput.value='';
-        isThinking=true;
-        showThinking();
-        setTimeout(()=>{
-            removeThinking();
-            addBotMessage("Resposta automática/expansível...");
-            ContextModule.add(msg,"Resposta automática/expansível...");
-            stats.interactions++;
-            stats.learned++;
-            updateStats();
-            isThinking=false;
-        },800);
-    };
-
-    userInput.onkeypress = e => { if(e.key==='Enter') sendBtn.click(); };
-
-    micBtn.onclick = () => { if(!listening){ startAudioAnalysis(); listening=true; } };
-
-    cameraBtn.onclick = () => {
-        if(video.style.display==='none'){
-            video.style.display='block';
-            startCameraDetection();
-        } else {
-            video.style.display='none';
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-        }
-    };
-});
-
-// ===== Camera + Detecção objetos =====
+// ===== Câmera + detecção de objetos =====
 async function startCameraDetection(){
     if(!navigator.mediaDevices.getUserMedia) return addBotMessage("Camera não suportada");
     const stream=await navigator.mediaDevices.getUserMedia({video:true});
     video.srcObject=stream;
     cocoSsd.load().then(m=>{model=m; detectFrame();});
 }
-
 function detectFrame(){
-    if(!model || video.style.display==='none') return;
+    if(!model||video.style.display==='none') return;
     model.detect(video).then(predictions=>{
         ctx.clearRect(0,0,canvas.width,canvas.height);
         ctx.font="16px Arial";
         ctx.fillStyle="red";
-        predictions.forEach(p=>{
-            ctx.fillText(`${p.class} (${(p.score*100).toFixed(0)}%)`,canvas.width/2-50,20);
-        });
+        predictions.forEach(p=>{ctx.fillText(`${p.class} (${(p.score*100).toFixed(0)}%)`,canvas.width/2-50,20);});
         requestAnimationFrame(detectFrame);
     });
 }
