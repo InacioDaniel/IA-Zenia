@@ -12,7 +12,7 @@
 --text-primary:#f1f5f9;--text-secondary:#94a3b8;--border:#334155;
 }
 body.light{
---bg-primary:#f8fafc;--bg-secondary:#ffffff;--bg-tertiary:#f1f5f9;
+--bg-primary:#f8fafc;--bg-secondary:#ffffff;--bg-tertiary:#f1f1f9;
 --text-primary:#1e293b;--text-secondary:#64748b;--border:#e2e8f0;
 }
 body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:var(--bg-primary);color:var(--text-primary);transition:all 0.3s ease;}
@@ -114,7 +114,7 @@ let stats={interactions:0, learned:0};
 let isThinking=false, model=null, video=document.getElementById('videoStream'), canvas=document.getElementById('overlayCanvas'), ctx=canvas.getContext('2d'), listening=false;
 
 // ===== Carregar base local =====
-fetch('dilexconversation_knowledge.json')
+fetch('db/dilexconversation_knowledge.json')
 .then(r=>r.json())
 .then(d=>{LocalData=d; console.log("Base local carregada:",LocalData.length);})
 .catch(()=>{console.warn("Base local não carregou");});
@@ -127,7 +127,16 @@ function removeThinking(){const t=document.getElementById('thinking');if(t)t.rem
 function updateStats(){interactions.textContent=stats.interactions;learned.textContent=stats.learned;contextSize.textContent=ContextModule.size();}
 function speak(text){if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(text);u.lang='pt-PT';speechSynthesis.speak(u);}}
 
-// ===== Função para respostas inteligentes com reconhecimento de saudações e perguntas especiais =====
+// ===== Função de similaridade de palavras =====
+function similarity(a,b){
+    const aWords = a.toLowerCase().match(/\w+/g) || [];
+    const bWords = b.toLowerCase().match(/\w+/g) || [];
+    let matches = 0;
+    aWords.forEach(w=>{if(bWords.includes(w)) matches++;});
+    return matches / Math.max(aWords.length,1);
+}
+
+// ===== Função para respostas inteligentes =====
 function getBotReply(userMsg){
     const msgLower=userMsg.toLowerCase();
 
@@ -143,10 +152,15 @@ function getBotReply(userMsg){
     if(msgLower.includes("quem te fez")) return "🤖 Fui criada por @inacio.u.daniel e posso ajudá-lo a aprender, resolver problemas e até vencer na feira de tecnologia e ciências!";
     if(msgLower.includes("para que serves")) return "🤖 Fui criada por @inacio.u.daniel, posso ensinar, aconselhar, analisar e divertir!";
 
-    // Base local
+    // Base local com similaridade
     if(LocalData && LocalData.length>0){
-        const match = LocalData.find(d=>msgLower.includes(d.prompt.toLowerCase()));
-        if(match) return match.response;
+        let bestMatch = null;
+        let bestScore = 0.0;
+        LocalData.forEach(d=>{
+            const score = similarity(userMsg, d.prompt);
+            if(score > bestScore) { bestScore=score; bestMatch=d; }
+        });
+        if(bestScore > 0.4) return bestMatch.response; // Threshold mínimo
     }
 
     // Respostas padrão
