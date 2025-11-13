@@ -127,30 +127,38 @@ function removeThinking(){const t=document.getElementById('thinking');if(t)t.rem
 function updateStats(){interactions.textContent=stats.interactions;learned.textContent=stats.learned;contextSize.textContent=ContextModule.size();}
 function speak(text){if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(text);u.lang='pt-PT';speechSynthesis.speak(u);}}
 
-// ===== Similaridade por palavras =====
-function similarity(a,b){
-    const aWords = a.toLowerCase().match(/\w+/g) || [];
-    const bWords = b.toLowerCase().match(/\w+/g) || [];
-    let matches = 0;
-    aWords.forEach(w=>{if(bWords.includes(w)) matches++;});
-    return matches / Math.max(aWords.length,1);
-}
+// ===== Similaridade =====
+function similarity(a,b){const aWords=a.toLowerCase().match(/\w+/g)||[]; const bWords=b.toLowerCase().match(/\w+/g)||[]; let matches=0; aWords.forEach(w=>{if(bWords.includes(w)) matches++;}); return matches/Math.max(aWords.length,1);}
 
-// ===== Obter melhor resposta com ranking =====
-function getBotReply(userMsg){
+// ===== Obter melhor resposta =====
+async function getBotReply(userMsg){
     const msgLower=userMsg.toLowerCase();
 
     // Saudações
-    const greetings = ["oi","olá","ola","bom dia","boa tarde","boa noite"];
+    const greetings=["oi","olá","ola","bom dia","boa tarde","boa noite"];
     if(greetings.some(g=>msgLower.includes(g))) return "👋 Olá! Que bom te ver! Eu sou a Zenia IA, sua assistente amiga e professora. Pergunte o que quiser, vamos aprender juntos!";
 
     // Despedidas
-    const farewells = ["tchau","até logo","adeus","até mais"];
+    const farewells=["tchau","até logo","adeus","até mais"];
     if(farewells.some(f=>msgLower.includes(f))) return "👋 Até mais! Foi ótimo conversar contigo. Volte sempre!";
 
     // Quem te fez / para que serves
     if(msgLower.includes("quem te fez")) return "🤖 Fui criada por @inacio.u.daniel e posso ajudá-lo a aprender, resolver problemas e até vencer na feira de tecnologia e ciências!";
     if(msgLower.includes("para que serves")) return "🤖 Fui criada por @inacio.u.daniel, posso ensinar, aconselhar, analisar e divertir!";
+
+    // Pesquisar na Wikimedia/Wikipedia
+    if(msgLower.includes("pesquisar") || msgLower.includes("wikipedia") || msgLower.includes("wikimedia")){
+        const query=userMsg.replace(/pesquisar|wikipedia|wikimedia/gi,'').trim();
+        if(query.length>0){
+            try{
+                const url=`https://pt.wikipedia.org/w/api.php?action=opensearch&format=json&origin=*&search=${encodeURIComponent(query)}`;
+                const res=await fetch(url);
+                const data=await res.json();
+                if(data[2] && data[2].length>0) return `${data[1][0]}: ${data[2][0]} - ${data[3][0]}`;
+                else return "Não encontrei informações sobre isso na Wikipedia.";
+            }catch(e){return "Erro ao acessar a Wikipedia.";}
+        }
+    }
 
     // Ranking base local
     if(LocalData && LocalData.length>0){
@@ -160,23 +168,16 @@ function getBotReply(userMsg){
             if(score>0) scored.push({score:score, response:d.response});
         });
         if(scored.length>0){
-            scored.sort((a,b)=>b.score - a.score); // do maior para menor
+            scored.sort((a,b)=>b.score - a.score);
             return scored[0].response;
         }
     }
 
-    // Resposta padrão
-    const defaultReplies = [
-        "Interessante! Pode me contar mais sobre isso?",
-        "😄 Que legal!",
-        "🤔 Não tenho certeza, mas podemos conversar sobre isso.",
-        "👍 Entendi!",
-        "Vamos explorar juntos este assunto!"
-    ];
+    const defaultReplies=["Interessante! Pode me contar mais sobre isso?","😄 Que legal!","🤔 Não tenho certeza, mas podemos conversar sobre isso.","👍 Entendi!","Vamos explorar juntos este assunto!"];
     return defaultReplies[Math.floor(Math.random()*defaultReplies.length)];
 }
 
-// ===== Envio de mensagens =====
+// ===== Envio de mensagens e botões =====
 document.addEventListener('DOMContentLoaded',()=>{
     const messages=document.getElementById('messages');
     const sendBtn=document.getElementById('sendBtn');
@@ -186,20 +187,24 @@ document.addEventListener('DOMContentLoaded',()=>{
     const interactions=document.getElementById('interactions');
     const learned=document.getElementById('learned');
     const contextSize=document.getElementById('contextSize');
+    const clearBtn=document.getElementById('clearBtn');
+    const themeBtn=document.getElementById('themeBtn');
+    const exportBtn=document.getElementById('exportBtn');
+    const translateBtn=document.getElementById('translateBtn');
 
     // Saudação inicial
-    addBotMessage("👋 Olá! Eu sou a Zenia IA, sua assistente amiga e professora. Pergunte o que quiser, e vamos aprender juntos!");
+    addBotMessage("👋 Olá! Eu sou a Zenia IA, sua assistente amiga e professora. Pergunte o que quiser, vamos aprender juntos!");
 
-    sendBtn.onclick=()=>{
+    sendBtn.onclick=async ()=>{
         const msg=userInput.value.trim();
         if(!msg||isThinking) return;
         addUserMessage(msg);
         userInput.value='';
         isThinking=true;
         showThinking();
-        setTimeout(()=>{
+        setTimeout(async ()=>{
             removeThinking();
-            const botReply=getBotReply(msg);
+            const botReply=await getBotReply(msg);
             addBotMessage(botReply);
             ContextModule.add(msg,botReply);
             stats.interactions++;
@@ -210,48 +215,30 @@ document.addEventListener('DOMContentLoaded',()=>{
     };
 
     userInput.onkeypress=e=>{if(e.key==='Enter') sendBtn.click();};
-    micBtn.onclick=()=>{if(!listening){startAudioAnalysis(); listening=true;}};
-    cameraBtn.onclick=()=>{if(video.style.display==='none'){video.style.display='block';startCameraDetection();}else{video.style.display='none';ctx.clearRect(0,0,canvas.width,canvas.height);}};
+
+    // Limpar chat
+    clearBtn.onclick=()=>{messages.innerHTML='';ContextModule.clear(); stats.interactions=0; stats.learned=0; updateStats(); addBotMessage("🧹 Chat limpo! Vamos continuar a conversa.");};
+
+    // Trocar tema
+    themeBtn.onclick=()=>{document.body.classList.toggle('light');};
+
+    // Exportar chat
+    exportBtn.onclick=()=>{
+        let text="";
+        messages.querySelectorAll('.message').forEach(m=>{
+            text+=(m.classList.contains('user')?"Você: ":"Zenia: ")+m.innerText+"\n";
+        });
+        const blob=new Blob([text],{type:"text/plain"});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a'); a.href=url; a.download="chat_zenia.txt"; a.click(); URL.revokeObjectURL(url);
+    };
+
+    // Pesquisa Wikipedia
+    translateBtn.onclick=async ()=>{
+        const query=userInput.value.trim();
+        if(query.length>0){addUserMessage(query); userInput.value=''; const botReply=await getBotReply("pesquisar "+query); addBotMessage(botReply);}
+    };
 });
-
-// ===== Microfone + Emoções =====
-let audioCtx, analyser, dataArray, source;
-async function startAudioAnalysis(){
-    if(!navigator.mediaDevices.getUserMedia) return addBotMessage("Microfone não suportado");
-    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-    audioCtx=new AudioContext();
-    analyser=audioCtx.createAnalyser();
-    source=audioCtx.createMediaStreamSource(stream);
-    source.connect(analyser);
-    analyser.fftSize=2048;
-    dataArray=new Uint8Array(analyser.frequencyBinCount);
-    function analyze(){
-        analyser.getByteFrequencyData(dataArray);
-        const volume=dataArray.reduce((a,b)=>a+b)/dataArray.length;
-        if(volume>140)addBotMessage("😄 Parece animado!");
-        else if(volume<40)addBotMessage("😔 Parece triste ou calmo...");
-        requestAnimationFrame(analyze);
-    }
-    analyze();
-}
-
-// ===== Câmera + detecção de objetos =====
-async function startCameraDetection(){
-    if(!navigator.mediaDevices.getUserMedia) return addBotMessage("Camera não suportada");
-    const stream=await navigator.mediaDevices.getUserMedia({video:true});
-    video.srcObject=stream;
-    cocoSsd.load().then(m=>{model=m; detectFrame();});
-}
-function detectFrame(){
-    if(!model||video.style.display==='none') return;
-    model.detect(video).then(predictions=>{
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.font="16px Arial";
-        ctx.fillStyle="red";
-        predictions.forEach(p=>{ctx.fillText(`${p.class} (${(p.score*100).toFixed(0)}%)`,canvas.width/2-50,20);});
-        requestAnimationFrame(detectFrame);
-    });
-}
 </script>
 </body>
 </html>
