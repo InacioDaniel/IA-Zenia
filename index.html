@@ -127,7 +127,7 @@ function removeThinking(){const t=document.getElementById('thinking');if(t)t.rem
 function updateStats(){interactions.textContent=stats.interactions;learned.textContent=stats.learned;contextSize.textContent=ContextModule.size();}
 function speak(text){if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(text);u.lang='pt-PT';speechSynthesis.speak(u);}}
 
-// ===== Função de similaridade de palavras =====
+// ===== Similaridade por palavras =====
 function similarity(a,b){
     const aWords = a.toLowerCase().match(/\w+/g) || [];
     const bWords = b.toLowerCase().match(/\w+/g) || [];
@@ -136,7 +136,7 @@ function similarity(a,b){
     return matches / Math.max(aWords.length,1);
 }
 
-// ===== Função para respostas inteligentes =====
+// ===== Obter melhor resposta com ranking =====
 function getBotReply(userMsg){
     const msgLower=userMsg.toLowerCase();
 
@@ -152,18 +152,20 @@ function getBotReply(userMsg){
     if(msgLower.includes("quem te fez")) return "🤖 Fui criada por @inacio.u.daniel e posso ajudá-lo a aprender, resolver problemas e até vencer na feira de tecnologia e ciências!";
     if(msgLower.includes("para que serves")) return "🤖 Fui criada por @inacio.u.daniel, posso ensinar, aconselhar, analisar e divertir!";
 
-    // Base local com similaridade
+    // Ranking base local
     if(LocalData && LocalData.length>0){
-        let bestMatch = null;
-        let bestScore = 0.0;
+        let scored=[]; 
         LocalData.forEach(d=>{
-            const score = similarity(userMsg, d.prompt);
-            if(score > bestScore) { bestScore=score; bestMatch=d; }
+            const score=similarity(userMsg,d.prompt);
+            if(score>0) scored.push({score:score, response:d.response});
         });
-        if(bestScore > 0.4) return bestMatch.response; // Threshold mínimo
+        if(scored.length>0){
+            scored.sort((a,b)=>b.score - a.score); // do maior para menor
+            return scored[0].response;
+        }
     }
 
-    // Respostas padrão
+    // Resposta padrão
     const defaultReplies = [
         "Interessante! Pode me contar mais sobre isso?",
         "😄 Que legal!",
