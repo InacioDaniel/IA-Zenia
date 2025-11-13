@@ -3,129 +3,132 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Zenia IA - Mangolé (Imagens + Ficheiros)</title>
+<title>Zenia IA - Mangolé (Completo)</title>
 <link rel="shortcut icon" href="favicon.png" type="image/x-icon">
 <style>
-/* --- Styles (compact) --- */
+/* ---------- Estilos (compactos e acessíveis) ---------- */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0f172a;--panel:#1e293b;--muted:#94a3b8;--accent:#667eea;--accent2:#764ba2;--text:#f1f5f9;--border:#334155
+  --bg:#0f172a;--panel:#1e293b;--muted:#94a3b8;--accent:#667eea;--accent2:#764ba2;--text:#f1f5f9;--border:#334155;
 }
 body{font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text);transition:background .2s,color .2s}
 body.light{background:#f8fafc;color:#1e293b}
-.header{background:var(--panel);padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:1rem}
-.brand{display:flex;align-items:center;gap:.75rem}
-.brand img{width:44px;height:44px;border-radius:10px}
-.header-actions{display:flex;gap:.5rem;align-items:center}
-.icon-btn{background:transparent;border:1px solid var(--border);padding:.45rem .6rem;border-radius:8px;color:var(--text);cursor:pointer}
+.header{background:var(--panel);padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand img{width:44px;height:44px;border-radius:8px}
+.header-actions{display:flex;gap:8px;align-items:center}
+.icon-btn{background:transparent;border:1px solid var(--border);padding:6px 8px;border-radius:8px;color:var(--text);cursor:pointer}
 .icon-btn:hover{transform:translateY(-2px)}
-.container{max-width:1200px;margin:1.25rem auto;padding:0 1rem;display:grid;grid-template-columns:320px 1fr;gap:1rem}
-.sidebar{display:flex;flex-direction:column;gap:.9rem}
-.card{background:var(--panel);padding:1rem;border-radius:10px;border:1px solid var(--border)}
-.card h3{font-size:.95rem;color:var(--muted);margin-bottom:.6rem}
-.stat{display:flex;justify-content:space-between;align-items:center;padding:.35rem 0;font-size:.95rem}
-.modules{display:flex;flex-direction:column;gap:.4rem}
-.dot{width:9px;height:9px;border-radius:50%;background:#22c55e;margin-right:.6rem}
-.main{display:flex;flex-direction:column;gap:.8rem}
-.chat-window{background:var(--panel);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;height:68vh;overflow:hidden}
-.messages{flex:1;padding:1rem;overflow:auto;display:flex;flex-direction:column;gap:.8rem}
-.message{max-width:78%;padding:.8rem 1rem;border-radius:12px;line-height:1.4}
+.container{max-width:1200px;margin:14px auto;padding:0 12px;display:grid;grid-template-columns:320px 1fr;gap:12px}
+.card{background:var(--panel);padding:12px;border-radius:10px;border:1px solid var(--border)}
+.card h3{font-size:15px;color:var(--muted);margin-bottom:8px}
+.stat{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:14px}
+.dot{width:9px;height:9px;border-radius:50%;background:#22c55e;margin-right:8px}
+.chat-window{background:var(--panel);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;height:70vh;overflow:hidden}
+.messages{flex:1;padding:12px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.message{max-width:78%;padding:10px 12px;border-radius:12px;line-height:1.4;word-wrap:break-word}
 .message.user{align-self:flex-end;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
 .message.bot{align-self:flex-start;background:var(--bg);border:1px solid var(--border);color:var(--text)}
-.input-row{display:flex;gap:.6rem;padding:1rem;border-top:1px solid var(--border);align-items:center;background:var(--panel)}
-#userInput{flex:1;padding:.6rem .8rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:inherit}
-#sendBtn,#imgBtn{padding:.6rem .9rem;border-radius:8px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;cursor:pointer}
-#sendBtn[disabled]{opacity:.5;cursor:not-allowed}
-.camera-area{display:none;position:relative;justify-content:center;align-items:center}
-#camera{width:100%;max-width:560px;border-radius:10px;border:2px solid var(--border);background:#000}
-#detectedLabel{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;padding:.4rem .8rem;border-radius:8px;font-weight:600}
+.input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border);align-items:center;background:var(--panel)}
+#userInput{flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:inherit}
+#sendBtn,#imgBtn,#micBtn{padding:8px 10px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;cursor:pointer}
+#cameraContainer{display:none;position:relative;justify-content:center;align-items:center;padding:10px;border-radius:10px}
+#camera{width:100%;max-width:560px;border-radius:8px;border:2px solid var(--border);background:#000}
+#detectedLabel{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;padding:8px 12px;border-radius:8px;font-weight:600}
 .file-input-hidden{display:none}
-.footer-note{font-size:.85rem;color:var(--muted);margin-top:.6rem}
+.footer-note{font-size:13px;color:var(--muted);margin-top:8px}
+kbd{background:#111827;border:1px solid #2d3748;padding:2px 6px;border-radius:6px;font-family:monospace;font-size:12px;color:#fff}
 @media(max-width:900px){.container{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
   <!-- HEADER -->
-  <header class="header" role="banner">
-    <div class="brand" aria-hidden="false">
+  <header class="header" role="banner" aria-label="Barra superior">
+    <div class="brand">
       <img src="favicon.png" alt="Zenia logo">
       <div>
-        <strong>Zenia IA</strong><div style="font-size:.85rem;color:var(--muted)">Mangolé Edition — by @inacio.u.daniel</div>
+        <strong>Zenia IA</strong>
+        <div style="font-size:13px;color:var(--muted)">Mangolé Edition — by @inacio.u.daniel</div>
       </div>
     </div>
 
     <div class="header-actions" role="toolbar" aria-label="Ações">
-      <!-- separate file upload for reading files -->
-      <label class="icon-btn" title="Carregar ficheiro (txt, js, py, json, ...) - Ctrl+O">
+      <!-- File read (for code/text) -->
+      <label class="icon-btn" title="Carregar ficheiro (txt, js, py, json...) - Ctrl+O">
         📂 Ler ficheiro
-        <input id="fileReaderInput" class="file-input-hidden" type="file" accept=".txt,.md,.js,.py,.json,.html,.css,.java,.c,.cpp,.php,.sql,.xml" />
+        <input id="fileReaderInput" class="file-input-hidden" type="file"
+               accept=".txt,.md,.js,.py,.json,.html,.css,.java,.c,.cpp,.php,.sql,.xml" />
       </label>
 
-      <!-- export, theme, camera toggled via ctrl too -->
-      <button id="exportBtn" class="icon-btn" title="Exportar conversa (Ctrl+E)">💾</button>
-      <button id="themeBtn" class="icon-btn" title="Tema claro/escuro (Ctrl+T)">🌗</button>
-      <button id="cameraToggleHeader" class="icon-btn" title="Ativar/Desativar câmera (Ctrl+A)">📷</button>
+      <!-- Export -->
+      <button id="exportBtn" class="icon-btn" title="Exportar conversa (Ctrl+E)">💾 Exportar</button>
+
+      <!-- Theme -->
+      <button id="themeBtn" class="icon-btn" title="Tema claro/escuro (Ctrl+T)">🌗 Tema</button>
+
+      <!-- Upload image on header (alternative) -->
+      <label class="icon-btn" title="Upload imagem (Ctrl+U)">
+        📷 Upload Imagem
+        <input id="imgUploadHeader" class="file-input-hidden" type="file" accept="image/*" />
+      </label>
+
+      <!-- Camera toggle -->
+      <button id="cameraToggleHeader" class="icon-btn" title="Ativar/Desativar câmera (Ctrl+A)">📹 Câmera</button>
+
+      <!-- Microphone in header (duplicate) optionally -->
+      <button id="micToggleHeader" class="icon-btn" title="Ativar/Desativar microfone (Ctrl+M)">🎙️ Voz</button>
     </div>
   </header>
 
   <!-- MAIN -->
-  <div class="container">
-    <!-- LEFT SIDEBAR -->
-    <aside class="sidebar" aria-label="Painel lateral">
-      <div class="card">
+  <div class="container" role="main">
+    <!-- SIDEBAR -->
+    <aside style="display:flex;flex-direction:column;gap:10px">
+      <div class="card" role="complementary" aria-label="Painel estado">
         <h3>Estado</h3>
         <div class="stat"><span>Interações</span><strong id="interactions">0</strong></div>
         <div class="stat"><span>Respostas</span><strong id="learned">0</strong></div>
         <div class="stat"><span>Câmera</span><strong id="camStatus">Desligada</strong></div>
       </div>
 
-      <div class="card">
-        <h3>Módulos ativos</h3>
-        <div class="modules">
-          <div class="module-item"><span class="dot" aria-hidden="true"></span>Base Local</div>
-          <div class="module-item"><span class="dot" aria-hidden="true"></span>Wikimedia</div>
-          <div class="module-item"><span class="dot" aria-hidden="true"></span>Visão Computacional</div>
+      <div class="card" aria-hidden="false">
+        <h3>Módulos</h3>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div><span class="dot" aria-hidden="true"></span>Base Local</div>
+          <div><span class="dot" aria-hidden="true"></span>Wikimedia</div>
+          <div><span class="dot" aria-hidden="true"></span>Visão</div>
+          <div><span class="dot" aria-hidden="true"></span>Tradução (LibreTranslate)</div>
         </div>
       </div>
 
       <div class="card">
         <h3>Atalhos</h3>
-        <div style="color:var(--muted);font-size:.95rem;line-height:1.5">
-          <b>Ctrl + A</b> — Câmera<br>
-          <b>Ctrl + U</b> — Upload imagem (input ao lado)<br>
-          <b>Ctrl + O</b> — Ler ficheiro<br>
-          <b>Ctrl + C</b> — Limpar chat<br>
-          <b>Ctrl + T</b> — Tema<br>
-          <b>Ctrl + E</b> — Exportar
+        <div style="color:var(--muted);font-size:13px;line-height:1.5">
+          <b>Ctrl+A</b> — Câmera • <b>Ctrl+U</b> — Upload Imagem • <b>Ctrl+O</b> — Ler ficheiro<br>
+          <b>Ctrl+C</b> — Limpar • <b>Ctrl+T</b> — Tema • <b>Ctrl+M</b> — Microfone<br>
+          <b>Ctrl+E</b> — Exportar
         </div>
-      </div>
-
-      <div class="card" aria-hidden="true">
-        <h3>Dica</h3>
-        <div class="footer-note">Para cegos: Zenia lê todas as respostas automaticamente. Usa Ctrl+O para carregar .txt ou código e pedir explicação.</div>
       </div>
     </aside>
 
-    <!-- RIGHT: CHAT + CAMERA -->
-    <main class="main">
+    <!-- CHAT + CAMERA -->
+    <main style="display:flex;flex-direction:column;gap:10px">
       <!-- camera area -->
-      <div id="cameraContainer" class="camera-area card" aria-live="polite">
+      <div id="cameraContainer" class="card" style="display:none;position:relative" aria-live="polite">
         <div id="detectedLabel">Aguardando...</div>
         <video id="camera" autoplay muted playsinline></video>
       </div>
 
       <!-- chat window -->
-      <section class="chat-window" role="region" aria-label="Janela de chat">
+      <section class="chat-window card" role="region" aria-label="Janela de conversa">
         <div id="messages" class="messages" aria-live="polite"></div>
 
-        <!-- input row -->
+        <!-- input row: microfone ao lado do input (opção 3) -->
         <div class="input-row" role="form" aria-label="Enviar mensagem">
-          <!-- image upload next to input -->
-          <input id="userInput" type="text" placeholder="Escreve aqui..." aria-label="Mensagem do utilizador">
-          <label for="imgUpload" style="display:inline-block">
-            <button id="imgBtn" title="Enviar imagem (Ctrl+U)">📷</button>
-          </label>
+          <input id="userInput" type="text" placeholder="Escreve aqui..." aria-label="Mensagem do utilizador" autocomplete="off" />
+          <button id="imgBtn" title="Enviar imagem (Ctrl+U)">📷</button>
           <input id="imgUpload" class="file-input-hidden" type="file" accept="image/*" />
+          <button id="micBtn" title="Ativar fala (Ctrl+M)">🎙️</button>
           <button id="sendBtn" title="Enviar mensagem">📤</button>
         </div>
       </section>
@@ -137,235 +140,63 @@ body.light{background:#f8fafc;color:#1e293b}
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 
 <script>
-/* ========== Global state ========== */
+/* =================== CONFIGURAÇÕES =================== */
+const LIBRETRANSLATE_URL = 'https://libretranslate.com/translate'; // opção C escolhida
+const LOCAL_JSON_PATH = '/dilexconversation_knowledge.json'; // garantir no root do Netlify
+const MAX_DETECT_INTERVAL_MS = 1000; // throttle camera detect
+
+/* =================== ESTADO GLOBAL =================== */
 let LocalData = [];
-let FallbackBase = [
-  {prompt:"o que é ia", response:"IA é a capacidade de máquinas aprenderem e resolverem problemas — basicamente ensinar computadores a pensar."},
+let fallback = [
+  {prompt:"o que é ia", response:"IA é a capacidade de máquinas aprenderem e resolver problemas."},
   {prompt:"quem criou a zenia", response:"Fui criada por Inácio U. Daniel — Mangolé power! 🇦🇴"}
 ];
 let model = null;
 let stream = null;
 let cameraOn = false;
-let lastDetected = "";
+let lastDetected = '';
 let speakEnabled = true;
-let allowAutoDetectSpeech = true; // flag if want to read detection
+let recognition = null;
+let listening = false;
 let interactions = 0, learned = 0;
 
-/* --- Load local base (Netlify: place dilexconversation_knowledge.json at root) --- */
-fetch('/dilexconversation_knowledge.json')
+/* =================== ELEMENTOS =================== */
+const messagesDiv = document.getElementById('messages');
+const userInput = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+const imgBtn = document.getElementById('imgBtn');
+const imgUpload = document.getElementById('imgUpload');
+const imgUploadHeader = document.getElementById('imgUploadHeader');
+const fileReaderInput = document.getElementById('fileReaderInput');
+const cameraContainer = document.getElementById('cameraContainer');
+const cameraEl = document.getElementById('camera');
+const detectedLabel = document.getElementById('detectedLabel');
+
+/* =================== INICIALIZAÇÃO BASE LOCAL =================== */
+fetch(LOCAL_JSON_PATH)
   .then(r => {
-    if (!r.ok) throw new Error('no file');
+    if(!r.ok) throw new Error('not-found');
     return r.json();
   })
   .then(d => { LocalData = d; console.log('Base local carregada:', d.length); })
-  .catch(() => { console.warn('dilexconversation_knowledge.json não carregou — usando fallback'); LocalData = FallbackBase; });
+  .catch(() => { console.warn('Base local não carregou. Usando fallback.'); LocalData = fallback; });
 
-/* --- Helper: TTS --- */
+/* =================== TTS =================== */
 function speak(text) {
   if(!speakEnabled || !('speechSynthesis' in window)) return;
-  // cancel previous to avoid overlap for long reads
-  if(window.speechSynthesis.speaking) window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'pt-PT';
-  u.rate = 1;
-  window.speechSynthesis.speak(u);
-}
-
-/* --- UI helpers --- */
-const messagesDiv = document.getElementById('messages');
-function appendMessage(who, text, opts = {}) {
-  const el = document.createElement('div');
-  el.className = `message ${who}`;
-  el.innerHTML = `<div class="message-content">${text}</div>`;
-  messagesDiv.appendChild(el);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  if(who === 'bot') speak(text);
-}
-
-/* --- Simple summarizer for text/code files --- */
-function summarizeText(content, filename) {
-  const maxChars = 1200;
-  const lines = content.split(/\r?\n/);
-  // make a short preview: first 20 lines
-  const previewLines = lines.slice(0, 20).join('\n');
-  // counts
-  const words = content.trim().split(/\s+/).filter(Boolean).length;
-  const chars = content.length;
-  let languageHint = '';
-  const ext = (filename.split('.').pop() || '').toLowerCase();
-  if(['js','py','java','c','cpp','php','html','css','sql','json'].includes(ext)) {
-    languageHint = ` (parece código ${ext})`;
-  }
-  let summary = `Ficheiro ${filename}${languageHint} — ${lines.length} linhas, ${words} palavras, ${chars} caracteres.\n\n`;
-  summary += `**Pré-visualização:**\n` + (previewLines.length ? previewLines : '(vazio)') + '\n\n';
-  if(content.length > maxChars) {
-    summary += `--- Conteúdo longo cortado. Pede "explica ficheiro" para resumo mais profundo.`;
-  } else {
-    summary += `--- Ficheiro completo carregado. Pede "explica ficheiro" para analisar.`;
-  }
-  return summary;
-}
-
-/* --- File reader for many extensions --- */
-const fileReaderInput = document.getElementById('fileReaderInput');
-fileReaderInput.addEventListener('change', async (ev) => {
-  const f = ev.target.files[0];
-  if(!f) return;
-  const name = f.name || 'ficheiro';
-  const ext = (name.split('.').pop() || '').toLowerCase();
-  // Only text-based reading
-  const textTypes = ['txt','md','js','py','json','html','css','java','c','cpp','php','sql','xml'];
-  if(!textTypes.includes(ext)) {
-    appendMessage('user', `📂 ${name} (enviado)`); 
-    appendMessage('bot', `Não consigo ler este tipo de ficheiro diretamente. Se for uma imagem, usa o botão de imagem. Extensão: .${ext}`);
-    return;
-  }
-  const reader = new FileReader();
-  reader.onload = () => {
-    const content = reader.result;
-    appendMessage('user', `📂 ${name} (enviado)`); 
-    const summary = summarizeText(content, name).replace(/\n/g,'<br>');
-    appendMessage('bot', summary);
-    interactions++; learned++;
-    updateStats();
-  };
-  reader.readAsText(f, 'utf-8');
-  // clear input so same file can be reselected later
-  fileReaderInput.value = '';
-});
-
-/* --- Image upload next to input --- */
-const imgUpload = document.getElementById('imgUpload');
-const imgBtn = document.getElementById('imgBtn');
-imgBtn.addEventListener('click', ()=> imgUpload.click());
-imgUpload.addEventListener('change', async (ev) => {
-  const f = ev.target.files[0];
-  if(!f) return;
-  // show image in chat
-  const url = URL.createObjectURL(f);
-  const imgHtml = `<div style="max-width:220px"><img src="${url}" alt="imagem" style="max-width:100%;border-radius:8px;border:1px solid ${getComputedStyle(document.body).getPropertyValue('--border')||'#333'}"></div>`;
-  appendMessage('user', imgHtml);
-  // analyze image
-  if(!model) {
-    appendMessage('bot', 'A carregar modelo... aguarda 1-2 segundos.');
-    model = await cocoSsd.load();
-  }
-  const imgEl = new Image();
-  imgEl.src = url;
-  imgEl.onload = async () => {
-    const preds = await model.detect(imgEl);
-    if(!preds || preds.length === 0) {
-      appendMessage('bot', 'Não consegui identificar objetos na imagem.');
-    } else {
-      // build natural portuguese description
-      const unique = [...new Set(preds.map(p => p.class))].slice(0,6);
-      const desc = buildImageDescription(unique, preds);
-      appendMessage('bot', desc);
-    }
-    URL.revokeObjectURL(url);
-  };
-  imgUpload.value = '';
-});
-
-/* --- Build natural description for image --- */
-function buildImageDescription(uniqueClasses, preds) {
-  // create sentence variations Mangolé style
-  const countMap = uniqueClasses.reduce((acc,k)=>{
-    acc[k] = preds.filter(p=>p.class===k).length; return acc;
-  },{});
-  const parts = uniqueClasses.map(c=>{
-    const n = countMap[c];
-    return n > 1 ? `${n} ${c}s` : `um ${c}`;
-  });
-  const main = parts.join(', ');
-  // add confidence hint for first item
-  const top = preds[0];
-  const conf = Math.round((top.score || 0)*100);
-  const text = `Parece que vejo ${main}. (Confiança: ${conf}%)`;
-  return text + ' — Se quiseres, pede para descrever mais ou identificar pessoas.';
-}
-
-/* --- Response generation (Mangolé style + fallback + wiki) --- */
-async function searchWikimedia(q) {
   try {
-    const url = `https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`;
-    const r = await fetch(url);
-    if(!r.ok) return null;
-    const j = await r.json();
-    return j.extract || null;
-  } catch(e) { return null; }
+    if(window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'pt-PT';
+    u.rate = 1;
+    window.speechSynthesis.speak(u);
+  } catch (e) {
+    console.warn('TTS erro', e);
+  }
 }
 
-async function generateResponse(text) {
-  const t = (text||'').toLowerCase().trim();
-
-  // greetings
-  const greets = ["oi","olá","ola","yo","boas","bom dia","boa tarde","boa noite","e aí","epa"];
-  if(greets.some(g => t === g || t.startsWith(g + ' ') || t.includes(' ' + g + ' '))) {
-    const arr = [
-      "Oi meu kamba! Tudo nice contigo? 😄",
-      "Ya! Olá! Tás firme? 👋",
-      "Boas! Bora papiar? 😎",
-      "Epa! Como vai a malta? Começou bem o dia?"
-    ];
-    return arr[Math.floor(Math.random()*arr.length)];
-  }
-
-  // farewells
-  const farewells = ["tchau","xau","adeus","até logo","fui","bye"];
-  if(farewells.some(f => t === f || t.startsWith(f + ' ') || t.includes(' ' + f + ' '))) {
-    const arr = [
-      "Xau, kamba! Te cuida e volta sempre. 👋",
-      "Tchau! Foi fixe conversar contigo 😄",
-      "Até logo, companheiro — portou-se bem!"
-    ];
-    return arr[Math.floor(Math.random()*arr.length)];
-  }
-
-  // small talk patterns
-  if(t.includes("como estás") || t.includes("como vai") || t.includes("tudo bem")) {
-    return "Tô na luta! E tu? Tudo asseado ou tá a dar trabalho?";
-  }
-  if(t.includes("obrigad") || t.includes("valeu")) {
-    return "De nada! Sempre às ordens, meu kamba.";
-  }
-
-  // local base exact or fuzzy includes
-  const found = LocalData.find(i => {
-    try { return t.includes(i.prompt.toLowerCase()); } catch(e){ return false; }
-  });
-  if(found) return found.response;
-
-  // try wiki
-  const wiki = await searchWikimedia(text);
-  if(wiki) return `📚 Wikipedia: ${wiki}`;
-
-  // default
-  return "Epa, isso ainda não aprendi. Podes explicar de outra forma ou enviar um ficheiro para eu ler?";
-}
-
-/* --- Sending messages (input) --- */
-const userInput = document.getElementById('userInput');
-const sendBtn = document.getElementById('sendBtn');
-sendBtn.addEventListener('click', async () => { await handleSend(); });
-
-userInput.addEventListener('keypress', async (e) => {
-  if(e.key === 'Enter') { e.preventDefault(); await handleSend(); }
-});
-
-async function handleSend() {
-  const text = userInput.value.trim();
-  if(!text) return;
-  appendMessageSafe('user', escapeHtml(text));
-  userInput.value = '';
-  interactions++; updateStats();
-  const resp = await generateResponse(text);
-  appendMessageSafe('bot', escapeHtml(resp));
-  learned++; updateStats();
-}
-
-/* --- Append safe (allow small html previews) --- */
-function appendMessageSafe(who, html) {
+/* =================== UTIL: append mensagens =================== */
+function appendMessage(who, html, opts={}) {
   const el = document.createElement('div');
   el.className = `message ${who}`;
   el.innerHTML = `<div class="message-content">${html}</div>`;
@@ -373,170 +204,408 @@ function appendMessageSafe(who, html) {
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
   if(who === 'bot') speak(stripHtml(html));
 }
+function escapeHtml(s){ if(!s) return ''; return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'); }
+function stripHtml(s){ return s ? s.replace(/<[^>]+>/g,'') : ''; }
 
-/* --- Escape and strip helpers --- */
-function escapeHtml(s){
-  if(!s) return '';
-  return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+/* =================== Tradução (LibreTranslate) =================== */
+async function translateText(text, target='en') {
+  // LibreTranslate expects q and target; detect auto-language if needed - we send as is
+  try {
+    const resp = await fetch(LIBRETRANSLATE_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({q: text, source: 'auto', target: target, format: 'text'})
+    });
+    if(!resp.ok) throw new Error('translate-fail');
+    const j = await resp.json();
+    return j.translatedText || null;
+  } catch(e) {
+    console.warn('Translate erro', e);
+    return null;
+  }
 }
-function stripHtml(s){ return s.replace(/<[^>]+>/g,''); }
 
-/* --- Stats update --- */
-function updateStats(){
-  document.getElementById('interactions').textContent = interactions;
-  document.getElementById('learned').textContent = learned;
+/* =================== Funções: resumo e lint básico JS =================== */
+function summarizeText(content, filename) {
+  const maxChars = 1200;
+  const lines = content.split(/\r?\n/);
+  const preview = lines.slice(0, 20).join('\n');
+  const words = content.trim().split(/\s+/).filter(Boolean).length;
+  const chars = content.length;
+  const ext = (filename.split('.').pop() || '').toLowerCase();
+  let languageHint = '';
+  if(['js','py','java','c','cpp','php','html','css','sql','json'].includes(ext)) languageHint = ` (parece ${ext})`;
+  let summary = `Ficheiro ${filename}${languageHint} — ${lines.length} linhas, ${words} palavras, ${chars} caracteres.\n\n`;
+  summary += `Pré-visualização:\n` + (preview.length ? preview : '(vazio)') + '\n\n';
+  if(content.length > maxChars) summary += '--- Conteúdo longo cortado. Pede "explica ficheiro" para análise mais profunda.';
+  else summary += '--- Ficheiro carregado. Pede "explica ficheiro" para analisar detalhadamente.';
+  return summary;
 }
 
-/* --- Export --- */
-document.getElementById('exportBtn').addEventListener('click', () => {
-  const items = [...document.querySelectorAll('.message')].map(m => ({type: m.classList.contains('user') ? 'user':'bot', text: m.textContent}));
-  const data = {messages: items, stats: {interactions, learned}, exportDate: new Date().toISOString()};
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `zenia-conversation-${Date.now()}.json`;
-  a.click();
+/* Basic JS lint heuristics */
+function lintJS(content) {
+  const problems = [];
+  const lines = content.split(/\r?\n/);
+  lines.forEach((ln, idx) => {
+    const n = idx + 1;
+    if(/\bvar\b/.test(ln)) problems.push({line:n, msg:'Uso de var — considera let/const.'});
+    if(/console\.log\s*\(/.test(ln)) problems.push({line:n, msg:'Encontrado console.log — remover em produção.'});
+    if(/^\s*if\s*\(.*\)\s*[^{}]\s*$/.test(ln)) problems.push({line:n, msg:'If sem chaves — pode causar erros em blocos.'});
+    if(/;\s*$/.test(ln) === false && ln.trim() !== '' && !/[\{\}\(\),:]$/.test(ln) && !/^\s*\/\//.test(ln)) {
+      // warn about missing semicolon (soft)
+      if(!/^\s*(function|if|for|while|else|switch|return|const|let|var|class)\b/.test(ln)) {
+        problems.push({line:n, msg:'Verifica ponto-e-vírgula/terminador (verificar sintaxe).'});
+      }
+    }
+    if(ln.length > 220) problems.push({line:n, msg:'Linha muito longa (>220 colunas).'});
+  });
+  // basic brace balance check
+  const open = (content.match(/\{/g) || []).length;
+  const close = (content.match(/\}/g) || []).length;
+  if(open !== close) problems.push({line:null, msg:`Desbalanceamento de chaves: ${open} '{' vs ${close} '}'`});
+  return problems;
+}
+
+/* =================== File reader (header) - leitura de ficheiros de código/texto =================== */
+fileReaderInput.addEventListener('change', async (ev) => {
+  const f = ev.target.files[0];
+  if(!f) return;
+  const name = f.name || 'ficheiro';
+  const ext = (name.split('.').pop() || '').toLowerCase();
+  const textTypes = ['txt','md','js','py','json','html','css','java','c','cpp','php','sql','xml'];
+  if(!textTypes.includes(ext)) {
+    appendMessage('user', `📂 ${escapeHtml(name)} (enviado)`);
+    appendMessage('bot', `Não consigo ler este tipo de ficheiro aqui. Extensão: .${ext}`);
+    fileReaderInput.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const content = reader.result;
+    appendMessage('user', `📂 ${escapeHtml(name)} (enviado)`);
+    const summary = summarizeText(content, name).replace(/\n/g,'<br>');
+    appendMessage('bot', summary);
+    interactions++; learned++; updateStats();
+    // if JS file, run lint heuristics
+    if(ext === 'js') {
+      const problems = lintJS(content);
+      if(problems.length === 0) appendMessage('bot', '✔ Lint JS básico: Sem problemas detectados.');
+      else {
+        const list = problems.slice(0,20).map(p => (p.line ? `Linha ${p.line}: ${p.msg}` : `${p.msg}`)).join('<br>');
+        appendMessage('bot', `<b>Lint JS (resultados):</b><br>${list}`);
+      }
+    }
+  };
+  reader.readAsText(f, 'utf-8');
+  fileReaderInput.value = '';
 });
 
-/* --- Theme toggle --- */
-document.getElementById('themeBtn').addEventListener('click', () => document.body.classList.toggle('light'));
+/* =================== Image upload (input next to input) =================== */
+imgBtn.addEventListener('click', () => imgUpload.click());
+imgUpload.addEventListener('change', async (ev) => {
+  const f = ev.target.files[0];
+  if(!f) return;
+  const url = URL.createObjectURL(f);
+  appendMessage('user', `<div style="max-width:260px"><img src="${url}" alt="imagem" style="max-width:100%;border-radius:8px"></div>`);
+  if(!model) {
+    appendMessage('bot', 'A carregar modelo de visão... espera 1-2s.');
+    model = await cocoSsd.load();
+  }
+  const imgEl = new Image();
+  imgEl.src = url;
+  imgEl.onload = async () => {
+    const preds = await model.detect(imgEl);
+    if(!preds || preds.length === 0) appendMessage('bot', 'Não identifiquei objetos na imagem.');
+    else {
+      const unique = [...new Set(preds.map(p => p.class))].slice(0,6);
+      const desc = buildImageDescription(unique, preds);
+      appendMessage('bot', desc);
+    }
+    URL.revokeObjectURL(url);
+    interactions++; learned++; updateStats();
+  };
+  imgUpload.value = '';
+});
 
-/* --- Keyboard shortcuts (Ctrl + ...) --- */
+/* header upload image support */
+imgUploadHeader.addEventListener('change', (e) => { imgUpload.files = e.target.files; imgUpload.dispatchEvent(new Event('change')); imgUploadHeader.value=''; });
+
+/* =================== Build natural description for image =================== */
+function buildImageDescription(uniqueClasses, preds) {
+  const countMap = uniqueClasses.reduce((acc,k) => { acc[k] = preds.filter(p=>p.class===k).length; return acc; }, {});
+  const parts = uniqueClasses.map(c => { const n=countMap[c]; return n>1?`${n} ${c}s`:`um ${c}`; });
+  const main = parts.join(', ');
+  const conf = Math.round((preds[0]?.score||0)*100);
+  const text = `Parece que vejo ${main}. (Confiança: ${conf}%) — Pede "diz mais" para descrição detalhada.`;
+  return text;
+}
+
+/* =================== Conversação inteligente + Wiki + Tradução comandos =================== */
+async function searchWikimedia(q){
+  try {
+    const u = `https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`;
+    const r = await fetch(u);
+    if(!r.ok) return null;
+    const j = await r.json();
+    return j.extract || null;
+  } catch(e){ return null; }
+}
+
+async function generateResponse(text) {
+  const t = (text||'').toLowerCase().trim();
+
+  // Translation commands: "traduza para espanhol: ...", "traduza para inglês: ...", "traduza isto:"
+  if(t.startsWith('traduza para espanhol:') || t.startsWith('traduza para español:')) {
+    const q = text.split(':').slice(1).join(':').trim();
+    if(!q) return 'Põe o texto após os dois-pontos para traduzir.';
+    const tr = await translateText(q, 'es');
+    return tr ? `🇪🇸 ${tr}` : 'Erro a traduzir.';
+  }
+  if(t.startsWith('traduza para inglês:') || t.startsWith('traduza para ingles:') || t.startsWith('traduza para english:')) {
+    const q = text.split(':').slice(1).join(':').trim();
+    if(!q) return 'Põe o texto após os dois-pontos para traduzir.';
+    const tr = await translateText(q, 'en');
+    return tr ? `🇬🇧 ${tr}` : 'Erro a traduzir.';
+  }
+  if(t.startsWith('traduza para português:') || t.startsWith('traduza para portugues:')) {
+    const q = text.split(':').slice(1).join(':').trim();
+    if(!q) return 'Põe o texto após os dois-pontos para traduzir.';
+    const tr = await translateText(q, 'pt');
+    return tr ? `🇵🇹 ${tr}` : 'Erro a traduzir.';
+  }
+  if(t.startsWith('traduza isto:') || t.startsWith('traduz isto:')) {
+    const q = text.split(':').slice(1).join(':').trim();
+    if(!q) return 'Põe o texto após os dois-pontos para traduzir.';
+    const tr = await translateText(q, 'en');
+    return tr ? `🔤 ${tr}` : 'Erro a traduzir.';
+  }
+
+  // Greetings
+  const greets = ["oi","olá","ola","yo","boas","bom dia","boa tarde","boa noite","e aí","epa"];
+  if(greets.some(g => t === g || t.startsWith(g + ' ') || t.includes(' ' + g + ' '))) {
+    const arr = ["Oi meu kamba! Tudo nice? 😄","Ya! Olá! Tás firme? 👋","Boas! Bora papiar? 😎","Epa! Como vai?"];
+    return arr[Math.floor(Math.random()*arr.length)];
+  }
+
+  // Farewells
+  const farewells = ["tchau","xau","adeus","até logo","fui","bye"];
+  if(farewells.some(f => t === f || t.startsWith(f + ' ') || t.includes(' ' + f + ' '))) {
+    const arr = ["Xau, kamba! Cuida-te! 👋","Tchau! Foi fixe conversar contigo 😄","Até logo!"];
+    return arr[Math.floor(Math.random()*arr.length)];
+  }
+
+  // Small talk
+  if(t.includes("como estás") || t.includes("como vai") || t.includes("tudo bem")) return "Tô na luta! E tu?";
+
+  // Local base exact or fuzzy includes
+  const found = LocalData.find(i => {
+    try { return t.includes(i.prompt.toLowerCase()); } catch(e){ return false; }
+  });
+  if(found) return found.response;
+
+  // Try Wikipedia (if question-like)
+  if(t.startsWith('o que') || t.startsWith('quem') || t.startsWith('como') || t.includes('?')) {
+    const wiki = await searchWikimedia(text);
+    if(wiki) return `📚 Wikipedia: ${wiki}`;
+  }
+
+  return "Epa, isso ainda não aprendi. Podes explicar ou enviar um ficheiro para eu ler?";
+}
+
+/* =================== Envio de mensagem (input) =================== */
+sendBtn.addEventListener('click', async () => { await handleSend(); });
+userInput.addEventListener('keypress', async (e) => { if(e.key === 'Enter') { e.preventDefault(); await handleSend(); } });
+
+async function handleSend() {
+  const t = userInput.value.trim();
+  if(!t) return;
+  appendMessage('user', escapeHtml(t));
+  userInput.value = '';
+  interactions++; updateStats();
+  const res = await generateResponse(t);
+  appendMessage('bot', escapeHtml(res));
+  learned++; updateStats();
+}
+
+/* =================== Keyboard shortcuts (Ctrl + ...) =================== */
 document.addEventListener('keydown', async (e) => {
   if(!e.ctrlKey) return;
-  const key = e.key.toLowerCase();
-  if(key === 'a') { e.preventDefault(); toggleCamera(); }
-  if(key === 'u') { e.preventDefault(); document.getElementById('imgUpload').click(); }
-  if(key === 'o') { e.preventDefault(); document.getElementById('fileReaderInput').click(); }
-  if(key === 'c') { e.preventDefault(); document.getElementById('messages').innerHTML=''; appendMessageSafe('bot','Chat limpo!'); interactions = 0; learned = 0; updateStats(); }
-  if(key === 't') { e.preventDefault(); document.body.classList.toggle('light'); }
-  if(key === 'e') { e.preventDefault(); document.getElementById('exportBtn').click(); }
+  const k = e.key.toLowerCase();
+  if(k === 'a') { e.preventDefault(); toggleCamera(); }
+  if(k === 'u') { e.preventDefault(); imgUpload.click(); }
+  if(k === 'o') { e.preventDefault(); fileReaderInput.click(); }
+  if(k === 'c') { e.preventDefault(); messagesDiv.innerHTML=''; appendMessage('bot','Chat limpo!'); interactions=0; learned=0; updateStats(); }
+  if(k === 't') { e.preventDefault(); document.body.classList.toggle('light'); }
+  if(k === 'e') { e.preventDefault(); document.getElementById('exportBtn').click(); }
+  if(k === 'm') { e.preventDefault(); toggleMic(); } // speech to text
 });
 
-/* --- Camera: toggle, load model, detect only updates to label (speak only if changed) --- */
-const cameraContainer = document.getElementById('cameraContainer');
-const cameraEl = document.getElementById('camera');
-const detectedLabel = document.getElementById('detectedLabel');
-document.getElementById('cameraToggleHeader').addEventListener('click', toggleCamera);
+/* =================== Export conversation =================== */
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const items = [...document.querySelectorAll('.message')].map(m => ({type: m.classList.contains('user') ? 'user' : 'bot', text: m.textContent}));
+  const data = {messages: items, stats: {interactions, learned}, exportDate: new Date().toISOString()};
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `zenia-conversation-${Date.now()}.json`; a.click();
+});
 
-async function toggleCamera(){
+/* =================== CAMERA (toggle + detect loop) =================== */
+document.getElementById('cameraToggleHeader').addEventListener('click', toggleCamera);
+async function toggleCamera() {
   if(cameraOn) {
     if(stream) stream.getTracks().forEach(t => t.stop());
-    cameraEl.srcObject = null;
-    cameraContainer.style.display = 'none';
-    cameraOn = false;
-    document.getElementById('camStatus').textContent = 'Desligada';
-    appendMessageSafe('bot','📷 Câmera desligada, meu kamba.');
+    cameraEl.srcObject = null; cameraContainer.style.display='none'; cameraOn=false; document.getElementById('camStatus').textContent='Desligada';
+    appendMessage('bot','📷 Câmera desligada.');
     return;
   }
   try {
     stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}, audio:false});
-    cameraEl.srcObject = stream;
-    cameraContainer.style.display = 'block';
-    cameraOn = true;
-    document.getElementById('camStatus').textContent = 'Ligada';
-    appendMessageSafe('bot','🎥 Câmera ligada! Vou olhar e dizer o que vejo.');
-    if(!model) {
-      detectedLabel.textContent = 'A carregar modelo...';
-      model = await cocoSsd.load();
-      detectedLabel.textContent = 'Modelo pronto — a analisar...';
-    }
+    cameraEl.srcObject = stream; cameraContainer.style.display='block'; cameraOn=true; document.getElementById('camStatus').textContent='Ligada';
+    appendMessage('bot','🎥 Câmera ligada! A analisar...');
+    if(!model) { detectedLabel.textContent='A carregar modelo...'; model = await cocoSsd.load(); detectedLabel.textContent='Modelo pronto'; }
     detectLoop();
-  } catch(err) {
-    console.error(err);
-    appendMessageSafe('bot','😅 Não consegui aceder à câmera. Verifica permissões.');
+  } catch(e) {
+    console.error(e);
+    appendMessage('bot','Não consegui aceder à câmera. Verifica permissões.');
   }
 }
 
-let lastSpeakText = '';
+let lastDetect = '';
+let lastDetectTs = 0;
 async function detectLoop(){
   if(!cameraOn || !model) return;
+  const now = Date.now();
+  if(now - lastDetectTs < MAX_DETECT_INTERVAL_MS) { requestAnimationFrame(detectLoop); return; }
+  lastDetectTs = now;
   try {
     const preds = await model.detect(cameraEl);
     if(preds && preds.length > 0) {
-      const unique = [...new Set(preds.map(p => p.class))].slice(0,5);
-      const summary = unique.join(', ');
-      const outText = summary ? `Vejo: ${summary}` : 'Nada detectado';
-      detectedLabel.textContent = outText;
-      if(outText !== lastDetected) {
-        // speak only if changed
-        lastDetected = outText;
-        if(speakEnabled) speak(outText);
-      }
+      const unique = [...new Set(preds.map(p=>p.class))].slice(0,5);
+      const text = unique.join(', ');
+      const out = text ? `Vejo: ${text}` : 'Nada detectado';
+      detectedLabel.textContent = out;
+      if(out !== lastDetect) { lastDetect = out; if(speakEnabled) speak(out); }
     } else {
       detectedLabel.textContent = 'Nada identificado...';
-      if(lastDetected !== 'Nada identificado...') {
-        lastDetected = 'Nada identificado...';
-      }
+      if(lastDetect !== 'Nada identificado...') { lastDetect = 'Nada identificado...'; }
     }
   } catch(e) {
-    console.warn('detectLoop erro', e);
+    console.warn('Erro detectLoop', e);
   } finally {
     if(cameraOn) requestAnimationFrame(detectLoop);
   }
 }
 
-/* --- On load ensure model warm-up in background quietly --- */
-cocoSsd.load().then(m=>{
-  model = m;
-  console.log('Modelo COCO-SSD carregado em background');
-}).catch(e => console.warn('Erro a carregar coco-ssd', e));
+/* Warm-up model in background */
+cocoSsd.load().then(m => { model = m; console.log('COCO-SSD pronto em background'); }).catch(e => console.warn('Erro a carregar modelo', e));
 
-/* --- Escape paste / long content safety for chat showing --- */
-function safeHtmlFromText(text) {
-  if(!text) return '';
-  return escapeHtml(text).replace(/\n/g,'<br>');
-}
-
-/* --- Utility for reading dropped files via drag&drop (image or text) in messages area --- */
+/* =================== Drag & Drop (images & files) =================== */
 messagesDiv.addEventListener('dragover', (e) => e.preventDefault());
 messagesDiv.addEventListener('drop', async (e) => {
   e.preventDefault();
   const f = e.dataTransfer.files[0];
   if(!f) return;
   if(f.type.startsWith('image/')) {
-    // treat as image upload (same as imgUpload)
     const url = URL.createObjectURL(f);
-    appendMessageSafe('user', `<div style="max-width:220px"><img src="${url}" style="max-width:100%;border-radius:8px"></div>`);
+    appendMessage('user', `<div style="max-width:260px"><img src="${url}" style="max-width:100%;border-radius:8px"></div>`);
     if(!model) model = await cocoSsd.load();
     const img = new Image(); img.src = url;
     img.onload = async () => {
       const preds = await model.detect(img);
-      if(!preds || preds.length === 0) appendMessageSafe('bot','Não identifiquei objetos na imagem.');
-      else appendMessageSafe('bot', buildImageDescription([...new Set(preds.map(p=>p.class))], preds));
+      if(!preds || preds.length===0) appendMessage('bot','Nada identificado na imagem.');
+      else appendMessage('bot', buildImageDescription([...new Set(preds.map(p=>p.class))], preds));
       URL.revokeObjectURL(url);
     };
     return;
   }
-  // else if text/code file
+  // else text file
   const reader = new FileReader();
   reader.onload = () => {
     const summary = summarizeText(reader.result, f.name).replace(/\n/g,'<br>');
-    appendMessageSafe('user', `📂 ${f.name} (arrastado)`);
-    appendMessageSafe('bot', summary);
+    appendMessage('user', `📂 ${escapeHtml(f.name)} (arrastado)`);
+    appendMessage('bot', summary);
+    interactions++; learned++; updateStats();
+    if(f.name.toLowerCase().endsWith('.js')) {
+      const problems = lintJS(reader.result);
+      if(problems.length===0) appendMessage('bot','✔ Lint JS: Sem problemas básicos detectados.');
+      else appendMessage('bot','<b>Lint JS:</b><br>' + problems.slice(0,20).map(p=> (p.line ? `Linha ${p.line}: ${p.msg}` : p.msg)).join('<br>'));
+    }
   };
   reader.readAsText(f, 'utf-8');
 });
 
-/* --- Simple helper to build image description for drag as well --- */
-function buildImageDescription(unique, preds){
-  const parts = unique.map((c,i) => {
-    const count = preds.filter(p => p.class === c).length;
-    return count > 1 ? `${count} ${c}s` : (i===0 ? `um ${c}` : `um ${c}`);
-  });
-  const main = parts.join(', ');
-  const conf = preds[0] ? Math.round(preds[0].score*100) : 0;
-  return `Parece que vejo ${main}. (confiança cerca de ${conf}%).`;
+/* =================== Speech-to-Text (Web Speech API) =================== */
+const micBtnElem = document.getElementById('micBtn');
+const micHeader = document.getElementById('micToggleHeader');
+micBtnElem.addEventListener('click', toggleMic);
+micHeader.addEventListener('click', toggleMic);
+
+function initSpeechRecognition() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition) { appendMessage('bot','Reconhecimento de voz não suportado neste navegador.'); return null; }
+  const rec = new SpeechRecognition();
+  rec.lang = 'pt-PT';
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
+  rec.onresult = async (ev) => {
+    const text = ev.results[0][0].transcript;
+    appendMessage('user', escapeHtml(text));
+    interactions++; updateStats();
+    const res = await generateResponse(text);
+    appendMessage('bot', escapeHtml(res));
+    learned++; updateStats();
+  };
+  rec.onerror = (e) => { console.warn('SpeechRecognition error', e); appendMessage('bot','Erro no reconhecimento de voz.'); toggleMic(false); };
+  rec.onend = () => { listening=false; micBtnElem.textContent='🎙️'; micHeader.textContent='🎙️ Voz'; };
+  return rec;
 }
 
-/* --- Utility: escapeHtml already defined earlier --- */
+function toggleMic(forceOff) {
+  if(forceOff === true) {
+    if(recognition && listening) { recognition.stop(); listening=false; micBtnElem.textContent='🎙️'; micHeader.textContent='🎙️ Voz'; }
+    return;
+  }
+  if(!recognition) recognition = initSpeechRecognition();
+  if(!recognition) return;
+  if(!listening) {
+    try { recognition.start(); listening = true; micBtnElem.textContent='⏺️'; micHeader.textContent='⏺️ Gravando'; appendMessage('bot','🔊 Estou a ouvir...'); }
+    catch(e) { console.warn('start fail', e); }
+  } else {
+    recognition.stop(); listening=false; micBtnElem.textContent='🎙️'; micHeader.textContent='🎙️ Voz';
+  }
+}
 
-/* --- Initial bot greeting --- */
+/* =================== Helper: basic JS lint used by drag/file read too =================== */
+function lintJS(content) {
+  const problems = [];
+  const lines = content.split(/\r?\n/);
+  lines.forEach((ln, idx) => {
+    const n = idx+1;
+    if(/\bvar\b/.test(ln)) problems.push({line:n, msg:'Uso de var — considera let/const.'});
+    if(/console\.log\s*\(/.test(ln)) problems.push({line:n, msg:'Encontrado console.log — remover/tratar.'});
+    if(/^\s*if\s*\(.*\)\s*[^{}]\s*$/.test(ln)) problems.push({line:n, msg:'If sem chaves — pode causar confusão.'});
+    if(ln.length > 240) problems.push({line:n, msg:'Linha muito longa (>240 caracteres).'});
+  });
+  const open = (content.match(/\{/g)||[]).length;
+  const close = (content.match(/\}/g)||[]).length;
+  if(open !== close) problems.push({line:null, msg:`Desbalanceamento chaves: ${open} '{' vs ${close} '}'`});
+  return problems;
+}
+
+/* =================== Update stats =================== */
+function updateStats() {
+  document.getElementById('interactions').textContent = interactions;
+  document.getElementById('learned').textContent = learned;
+}
+
+/* =================== Utilities =================== */
+function stripHtml(s){ return s ? s.replace(/<[^>]+>/g,'') : ''; }
+
+/* =================== Inicial greeting */ 
 document.addEventListener('DOMContentLoaded', () => {
-  appendMessageSafe('bot', '👋 Olá! Sou a Zenia IA — Mangolé. Usa Ctrl+A para ligar a câmera, Ctrl+U para enviar imagem, Ctrl+O para abrir ficheiro. Posso ler ficheiros de código e .txt.');
+  appendMessage('bot', '👋 Olá! Sou a Zenia IA — Mangolé. Usa Ctrl+A (câmera), Ctrl+U (imagem), Ctrl+O (ficheiro), Ctrl+M (voz). Posso traduzir com "traduza para inglês: texto".');
 });
 
-// END SCRIPT
+/* =================== END =================== */
 </script>
 </body>
 </html>
