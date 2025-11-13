@@ -6,273 +6,194 @@
 <title>Zenia IA - Mangolé (Imagens + Ficheiros + Voz + Tradução)</title>
 <link rel="shortcut icon" href="favicon.png" type="image/x-icon">
 <style>
-/* ---------- Estilos (compactos e animados) ---------- */
-*{box-sizing:border-box;margin:0;padding:0}
+*{margin:0;padding:0;box-sizing:border-box;}
 :root{
-  --bg:#0f172a;--panel:#1e293b;--muted:#94a3b8;--accent:#667eea;--accent2:#764ba2;--text:#f1f5f9;--border:#334155;
+  --bg-primary:#0f172a; --bg-secondary:#1e293b;
+  --bg-tertiary:#334155; --text-primary:#f1f5f9;
+  --text-secondary:#94a3b8; --border:#334155;
 }
-body{font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text);transition:background .4s,color .4s}
-body.light{background:#f8fafc;color:#1e293b}
-.header{background:var(--panel);padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;transition:background .3s}
-.brand{display:flex;align-items:center;gap:10px}
-.brand img{width:44px;height:44px;border-radius:8px;transition:transform .3s;cursor:pointer}
-.brand img:hover{transform:rotate(12deg) scale(1.05);}
-.header-actions{display:flex;gap:8px;align-items:center}
-.icon-btn{background:transparent;border:1px solid var(--border);padding:6px 8px;border-radius:8px;color:var(--text);cursor:pointer;transition:all .3s ease}
-.icon-btn:hover{transform:translateY(-2px) scale(1.05);background:var(--accent2);border-color:var(--accent);color:#fff}
-.container{max-width:1200px;margin:14px auto;padding:0 12px;display:grid;grid-template-columns:320px 1fr;gap:12px}
-.card{background:var(--panel);padding:12px;border-radius:10px;border:1px solid var(--border);transition:transform .3s,box-shadow .3s}
-.card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.4);}
-.card h3{font-size:15px;color:var(--muted);margin-bottom:8px}
-.stat{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:14px}
-.dot{width:9px;height:9px;border-radius:50%;background:#22c55e;margin-right:8px;animation:pulseDot 1.5s infinite;}
-@keyframes pulseDot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.6}}
-.chat-window{background:var(--panel);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;height:70vh;overflow:hidden}
-.messages{flex:1;padding:12px;overflow:auto;display:flex;flex-direction:column;gap:10px}
-.message{max-width:78%;padding:10px 12px;border-radius:12px;line-height:1.4;word-wrap:break-word;opacity:0;transform:translateY(20px);animation:fadeInUp .4s forwards}
-.message.user{align-self:flex-end;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
-.message.bot{align-self:flex-start;background:var(--bg);border:1px solid var(--border);color:var(--text)}
-@keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
-.input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border);align-items:center;background:var(--panel);transition:background .3s}
-#userInput{flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:inherit;transition:all .3s}
-#userInput:focus{border-color:var(--accent);box-shadow:0 0 6px rgba(102,126,234,.5)}
-#sendBtn,#imgBtn,#micBtn{padding:8px 10px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;cursor:pointer;transition:transform .2s,box-shadow .2s}
-#sendBtn:hover,#imgBtn:hover,#micBtn:hover{transform:translateY(-2px) scale(1.05);box-shadow:0 4px 12px rgba(0,0,0,.3);}
-#cameraContainer{display:none;position:relative;justify-content:center;align-items:center;padding:10px;border-radius:10px;opacity:0;transition:opacity .5s ease-in-out;}
-#cameraContainer.active{opacity:1;}
-#camera{width:100%;max-width:560px;border-radius:8px;border:2px solid var(--border);background:#000;transition:transform .3s}
-#camera:hover{transform:scale(1.02);}
-#detectedLabel{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;padding:8px 12px;border-radius:8px;font-weight:600;animation:fadeIn 1s ease-in;}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.file-input-hidden{display:none}
-.footer-note{font-size:13px;color:var(--muted);margin-top:8px}
-kbd{background:#111827;border:1px solid #2d3748;padding:2px 6px;border-radius:6px;font-family:monospace;font-size:12px;color:#fff}
-@media(max-width:900px){.container{grid-template-columns:1fr}}
+body.light{--bg-primary:#f8fafc; --bg-secondary:#ffffff; --bg-tertiary:#f1f5f9;
+--text-primary:#1e293b; --text-secondary:#64748b; --border:#e2e8f0;}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:var(--bg-primary);
+color:var(--text-primary); transition:all 0.3s ease;}
+.header{background:var(--bg-secondary); border-bottom:1px solid var(--border); padding:1rem 2rem; display:flex;justify-content:space-between;align-items:center;}
+.logo{display:flex;align-items:center;gap:1rem;}
+.logo-icon{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); width:50px;height:50px; border-radius:12px; display:flex;align-items:center;justify-content:center; font-size:28px;}
+.logo-text h1{font-size:1.5rem;margin-bottom:2px;}
+.logo-text p{font-size:0.85rem;color:var(--text-secondary);}
+.header-actions{display:flex;gap:0.5rem;}
+.icon-btn{background:var(--bg-tertiary);border:none;padding:0.75rem;border-radius:8px;cursor:pointer;font-size:1.2rem;transition:all 0.3s;}
+.icon-btn:hover{transform:translateY(-2px);}
+.container{max-width:1400px;margin:2rem auto;padding:0 2rem;display:grid;grid-template-columns:300px 1fr;gap:2rem;}
+.sidebar{display:flex;flex-direction:column;gap:1rem;}
+.card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;padding:1.5rem;}
+.card h3{font-size:0.9rem;color:var(--text-secondary);margin-bottom:1rem;}
+.stat,.module-item{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;font-size:0.9rem;}
+.status-dot{width:8px;height:8px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+.chat-window{background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;height:70vh;overflow:hidden;}
+.messages{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;}
+.message{display:flex;animation:slideIn 0.3s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.message.user{justify-content:flex-end;}
+.message-content{max-width:70%;padding:1rem 1.25rem;border-radius:12px;line-height:1.6;}
+.message.bot .message-content{background:var(--bg-tertiary);}
+.message.user .message-content{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white;}
+.thinking{display:flex;gap:5px;padding:1rem;}
+.thinking-dot{width:8px;height:8px;background:var(--text-secondary);border-radius:50%;animation:bounce 1.4s infinite ease-in-out;}
+.thinking-dot:nth-child(1){animation-delay:-0.32s;}
+.thinking-dot:nth-child(2){animation-delay:-0.16s;}
+@keyframes bounce{0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
+.input-container{border-top:1px solid var(--border);padding:1.5rem;display:flex;gap:1rem;}
+#userInput{flex:1;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;background:var(--bg-tertiary);color:var(--text-primary);font-size:1rem;}
+#userInput:focus{outline:none;border-color:#667eea;}
+#sendBtn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border:none;padding:0.75rem 2rem;border-radius:8px;color:white;font-size:1.2rem;cursor:pointer;transition:opacity 0.3s;}
+#sendBtn:hover{opacity:0.9;}
+#sendBtn:disabled{opacity:0.5;cursor:not-allowed;}
+@media(max-width:768px){.container{grid-template-columns:1fr;}.sidebar{order:2;}}
 </style>
 </head>
 <body>
-  <header class="header">
-    <div class="brand">
-      <img src="favicon.png" alt="Zenia logo">
-      <div>
-        <strong>Zenia IA</strong><div style="font-size:.85rem;color:var(--muted)">Mangolé Edition — by @inacio.u.daniel</div>
-      </div>
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">🤖</div>
+    <div class="logo-text">
+      <h1>Zenia IA</h1>
+      <p>Mangolé Edition — by @inacio.u.daniel</p>
     </div>
-    <div class="header-actions">
-      <label class="icon-btn" title="Carregar ficheiro (txt, js, py, json, ...) - Ctrl+O">
-        📂 Ler ficheiro
-        <input id="fileReaderInput" class="file-input-hidden" type="file" accept=".txt,.md,.js,.py,.json,.html,.css,.java,.c,.cpp,.php,.sql,.xml" />
-      </label>
-      <button id="exportBtn" class="icon-btn" title="Exportar conversa (Ctrl+E)">💾</button>
-      <button id="themeBtn" class="icon-btn" title="Tema claro/escuro (Ctrl+T)">🌗</button>
-      <button id="cameraToggleHeader" class="icon-btn" title="Ativar/Desativar câmera (Ctrl+A)">📷</button>
-    </div>
-  </header>
-
-  <div class="container">
-    <aside class="sidebar">
-      <div class="card">
-        <h3>Estado</h3>
-        <div class="stat"><span>Interações</span><strong id="interactions">0</strong></div>
-        <div class="stat"><span>Respostas</span><strong id="learned">0</strong></div>
-        <div class="stat"><span>Câmera</span><strong id="camStatus">Desligada</strong></div>
-      </div>
-      <div class="card">
-        <h3>Módulos ativos</h3>
-        <div class="modules">
-          <div class="module-item"><span class="dot"></span>Base Local</div>
-          <div class="module-item"><span class="dot"></span>Wikimedia</div>
-          <div class="module-item"><span class="dot"></span>Visão Computacional</div>
-          <div class="module-item"><span class="dot"></span>Tradução Automática</div>
-          <div class="module-item"><span class="dot"></span>Reconhecimento de Voz</div>
-          <div class="module-item"><span class="dot"></span>Lint JS</div>
-        </div>
-      </div>
-      <div class="card" aria-hidden="true">
-        <h3>Dica</h3>
-        <div class="footer-note">Para cegos: Zenia lê todas as respostas automaticamente. Usa Ctrl+O para carregar .txt ou código e pedir explicação. Pressiona 🎤 para falar.</div>
-      </div>
-    </aside>
-
-    <main class="main">
-      <div id="cameraContainer" class="camera-area card">
-        <div id="detectedLabel">Aguardando...</div>
-        <video id="camera" autoplay muted playsinline></video>
-      </div>
-      <section class="chat-window">
-        <div id="messages" class="messages"></div>
-        <div class="input-row">
-          <input id="userInput" type="text" placeholder="Escreve aqui..." aria-label="Mensagem do utilizador">
-          <button id="micBtn" title="Fala com Zenia">🎤</button>
-          <label for="imgUpload" style="display:inline-block">
-            <button id="imgBtn" title="Enviar imagem (Ctrl+U)">📷</button>
-          </label>
-          <input id="imgUpload" class="file-input-hidden" type="file" accept="image/*" />
-          <button id="sendBtn" title="Enviar mensagem">📤</button>
-        </div>
-      </section>
-    </main>
   </div>
+  <div class="header-actions">
+    <label class="icon-btn" title="Carregar ficheiro">
+      📂
+      <input id="fileReaderInput" class="file-input-hidden" type="file" />
+    </label>
+    <button id="exportBtn" class="icon-btn" title="Exportar">💾</button>
+    <button id="themeBtn" class="icon-btn" title="Tema claro/escuro">🌗</button>
+    <button id="cameraToggleHeader" class="icon-btn" title="Câmera">📷</button>
+  </div>
+</header>
 
-<!-- TensorFlow + COCO-SSD -->
+<div class="container">
+  <aside class="sidebar">
+    <div class="card">
+      <h3>Estado</h3>
+      <div class="stat">Interações: <strong id="interactions">0</strong></div>
+      <div class="stat">Respostas: <strong id="learned">0</strong></div>
+      <div class="stat">Câmera: <strong id="camStatus">Desligada</strong></div>
+    </div>
+    <div class="card">
+      <h3>Módulos ativos</h3>
+      <div class="module-item"><span class="status-dot"></span>Base Local</div>
+      <div class="module-item"><span class="status-dot"></span>Wikimedia</div>
+      <div class="module-item"><span class="status-dot"></span>Visão Computacional</div>
+      <div class="module-item"><span class="status-dot"></span>Tradução Automática</div>
+      <div class="module-item"><span class="status-dot"></span>Reconhecimento de Voz</div>
+      <div class="module-item"><span class="status-dot"></span>Lint JS</div>
+    </div>
+  </aside>
+
+  <main>
+    <div id="cameraContainer" class="card" style="display:none; margin-bottom:12px;">
+      <div id="detectedLabel">Aguardando...</div>
+      <video id="camera" autoplay muted playsinline style="width:100%;border-radius:8px;"></video>
+    </div>
+
+    <section class="chat-window">
+      <div id="messages" class="messages"></div>
+      <div class="input-container">
+        <input id="userInput" type="text" placeholder="Escreve aqui..." />
+        <button id="sendBtn">📤</button>
+      </div>
+    </section>
+  </main>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.12.0/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 
 <script>
-/* ========== Estado Global ========== */
-let LocalData = [];
-let FallbackBase = [
+let LocalData=[], FallbackBase=[
   {prompt:"o que é ia", response:"IA é a capacidade de máquinas aprenderem e resolverem problemas."},
   {prompt:"quem criou a zenia", response:"Fui criada por Inácio U. Daniel — Mangolé power! 🇦🇴"}
 ];
-let model = null, stream = null, cameraOn=false, lastDetected="", speakEnabled=true, interactions=0, learned=0;
-
-/* --- Helper TTS --- */
-function speak(text){
-  if(!speakEnabled || !('speechSynthesis' in window)) return;
-  if(window.speechSynthesis.speaking) window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);
-  u.lang='pt-PT';
-  u.rate=1;
-  window.speechSynthesis.speak(u);
-}
-
-/* --- Mensagens --- */
+let model=null, stream=null, cameraOn=false, lastDetected="", speakEnabled=true, interactions=0, learned=0;
 const messagesDiv=document.getElementById('messages');
-function appendMessage(who, text){
-  const el=document.createElement('div');
-  el.className=`message ${who}`;
-  el.innerHTML=`<div class="message-content">${text}</div>`;
-  messagesDiv.appendChild(el);
-  messagesDiv.scrollTop=messagesDiv.scrollHeight;
-  if(who==='bot') speak(stripHtml(text));
+
+function speak(text){
+  if(!speakEnabled||!('speechSynthesis'in window)) return;
+  if(window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text); u.lang='pt-PT'; u.rate=1; window.speechSynthesis.speak(u);
 }
 
-/* --- Escape/strip --- */
-function escapeHtml(s){return s?s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'):'';}
-function stripHtml(s){return s.replace(/<[^>]+>/g,'');}
-
-/* --- JS Lint Simples --- */
-function lintJS(code){
-  try{
-    new Function(code); return "✅ Código JS válido.";
-  }catch(e){return "❌ Erro JS: "+e.message;}
+function appendMessage(who,text,thinking=false){
+  const el=document.createElement('div'); el.className=`message ${who}`;
+  if(thinking){el.innerHTML='<div class="thinking"><div class="thinking-dot"></div><div class="thinking-dot"></div></div>';}
+  else el.innerHTML=`<div class="message-content">${text}</div>`;
+  messagesDiv.appendChild(el); messagesDiv.scrollTop=messagesDiv.scrollHeight;
+  if(who==='bot'&&!thinking) speak(text.replace(/<[^>]+>/g,''));
+  return el;
 }
 
-/* --- Tradução Automática (PT/EN) --- */
-async function translateText(text){
-  try{
-    const res=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=auto|pt');
-    const j=await res.json();
-    return j.responseData.translatedText||text;
-  }catch(e){return text;}
-}
-
-/* --- Arquivos --- */
-document.getElementById('fileReaderInput').addEventListener('change', async (ev)=>{
-  const f=ev.target.files[0]; if(!f) return;
-  const name=f.name; const ext=(name.split('.').pop()||'').toLowerCase();
-  const textTypes=['txt','md','js','py','json','html','css','java','c','cpp','php','sql','xml'];
-  if(!textTypes.includes(ext)){appendMessage('bot',`Não consigo ler .${ext}`); return;}
-  const reader=new FileReader();
-  reader.onload=async ()=> {
-    const content=reader.result;
-    appendMessage('user',`📂 ${name}`);
-    let summary=`${content.split(/\r?\n/).slice(0,20).join('\n')}`;
-    if(ext==='js') summary+='\n'+lintJS(content);
-    summary=await translateText(summary);
-    appendMessage('bot',summary.replace(/\n/g,'<br>'));
-    interactions++; learned++; updateStats();
-  };
-  reader.readAsText(f,'utf-8');
-  ev.target.value='';
-});
-
-/* --- Input send --- */
 const userInput=document.getElementById('userInput');
 document.getElementById('sendBtn').addEventListener('click',handleSend);
-userInput.addEventListener('keypress', e=>{if(e.key==='Enter'){e.preventDefault();handleSend();}});
+userInput.addEventListener('keypress',e=>{if(e.key==='Enter'){e.preventDefault();handleSend();}});
+
 async function handleSend(){
   const text=userInput.value.trim(); if(!text) return;
-  appendMessage('user',escapeHtml(text));
-  userInput.value='';
+  appendMessage('user',text); userInput.value='';
   interactions++; updateStats();
+  const thinkingEl=appendMessage('bot','',true);
   let resp=await generateResponse(text);
   resp=await translateText(resp);
-  appendMessage('bot',escapeHtml(resp));
+  thinkingEl.remove();
+  appendMessage('bot',resp);
   learned++; updateStats();
 }
 
-/* --- Resposta Zenia --- */
 async function generateResponse(text){
   const t=text.toLowerCase();
   const found=LocalData.find(i=>t.includes(i.prompt.toLowerCase()));
-  if(found) return found.response;
-  return "Ainda não sei responder. Podes enviar um ficheiro ou explicar.";
+  return found?found.response:"Ainda não sei responder. Podes enviar um ficheiro ou explicar.";
 }
 
-/* --- Stats --- */
 function updateStats(){
   document.getElementById('interactions').textContent=interactions;
   document.getElementById('learned').textContent=learned;
 }
 
-/* --- Export --- */
-document.getElementById('exportBtn').addEventListener('click',()=>{
-  const items=[...document.querySelectorAll('.message')].map(m=>({type:m.classList.contains('user')?'user':'bot',text:m.textContent}));
-  const blob=new Blob([JSON.stringify({messages:items,interactions,learned,date:new Date().toISOString()},null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`zenia-${Date.now()}.json`; a.click();
-});
-
-/* --- Tema --- */
-document.getElementById('themeBtn').addEventListener('click',()=>document.body.classList.toggle('light'));
+async function translateText(text){
+  try{
+    const res=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=auto|pt');
+    const j=await res.json(); return j.responseData.translatedText||text;
+  }catch(e){return text;}
+}
 
 /* --- Câmera --- */
 const cameraContainer=document.getElementById('cameraContainer');
 const cameraEl=document.getElementById('camera');
 const detectedLabel=document.getElementById('detectedLabel');
 document.getElementById('cameraToggleHeader').addEventListener('click',toggleCamera);
+
 async function toggleCamera(){
-  if(cameraOn){stream.getTracks().forEach(t=>t.stop());cameraEl.srcObject=null;cameraContainer.style.display='none';cameraOn=false;document.getElementById('camStatus').textContent='Desligada';return;}
+  if(cameraOn){stream.getTracks().forEach(t=>t.stop());cameraEl.srcObject=null;cameraContainer.style.display='none';cameraOn=false;return;}
   try{
     stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
-    cameraEl.srcObject=stream; cameraContainer.style.display='block';cameraOn=true;document.getElementById('camStatus').textContent='Ligada';
-    if(!model) model=await cocoSsd.load();
-    detectLoop();
+    cameraEl.srcObject=stream; cameraContainer.style.display='block';cameraOn=true;
+    if(!model) model=await cocoSsd.load(); detectLoop();
   }catch(e){appendMessage('bot','Não consegui aceder à câmera.')}
 }
+
 async function detectLoop(){
   if(!cameraOn||!model) return;
-  try{
-    const preds=await model.detect(cameraEl);
-    if(preds?.length>0){
-      const unique=[...new Set(preds.map(p=>p.class))].slice(0,5);
-      const outText=unique.join(', ')||'Nada detectado';
-      detectedLabel.textContent=outText;
-      if(outText!==lastDetected){lastDetected=outText;speak(outText);}
-    }else{detectedLabel.textContent='Nada detectado';lastDetected='Nada detectado';}
-  }catch(e){console.warn(e);} finally{if(cameraOn) requestAnimationFrame(detectLoop);}
+  const preds=await model.detect(cameraEl);
+  if(preds?.length>0){
+    const unique=[...new Set(preds.map(p=>p.class))].slice(0,5);
+    const outText=unique.join(', ')||'Nada detectado';
+    detectedLabel.textContent=outText;
+    if(outText!==lastDetected){lastDetected=outText;speak(outText);}
+  }else{detectedLabel.textContent='Nada detectado';lastDetected='Nada detectado';}
+  if(cameraOn) requestAnimationFrame(detectLoop);
 }
-
-/* --- Mic (Speech to Text) --- */
-document.getElementById('micBtn').addEventListener('click',()=>{
-  if(!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)){appendMessage('bot','Reconhecimento de voz não suportado.');return;}
-  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-  const rec=new SpeechRecognition();
-  rec.lang='pt-PT'; rec.interimResults=false; rec.maxAlternatives=1;
-  rec.onresult=e=>{const t=e.results[0][0].transcript; userInput.value=t; handleSend();}
-  rec.onerror=e=>{console.error(e); appendMessage('bot','Erro no reconhecimento de voz.');}
-  rec.start();
-});
-
-/* --- Drag & Drop --- */
-messagesDiv.addEventListener('dragover',e=>e.preventDefault());
-messagesDiv.addEventListener('drop',async e=>{
-  e.preventDefault();
-  const f=e.dataTransfer.files[0]; if(!f) return;
-  document.getElementById('fileReaderInput').files=e.dataTransfer.files;
-  document.getElementById('fileReaderInput').dispatchEvent(new Event('change'));
-});
 </script>
 </body>
 </html>
