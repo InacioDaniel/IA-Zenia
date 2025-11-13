@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zenia _IA_ - by @inacio.u.daniel</title>
+<title>Zenia IA - by @inacio.u.daniel</title>
 <link rel="shortcut icon" href="favicon.png" type="image/x-icon">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -114,7 +114,7 @@ let stats={interactions:0, learned:0};
 let isThinking=false, model=null, video=document.getElementById('videoStream'), canvas=document.getElementById('overlayCanvas'), ctx=canvas.getContext('2d'), listening=false;
 
 // ===== Carregar base local =====
-fetch('dilexconversation_knowledge.json')
+fetch('db/dilexconversation_knowledge.json')
 .then(r=>r.json())
 .then(d=>{LocalData=d; console.log("Base local carregada:",LocalData.length);})
 .catch(()=>{console.warn("Base local não carregou");});
@@ -132,15 +132,15 @@ function similarity(a,b){const aWords=a.toLowerCase().match(/\w+/g)||[]; const b
 
 // ===== Obter resposta =====
 async function getBotReply(userMsg){
-    const msgLower=userMsg.toLowerCase();
+    const msgLower=userMsg.toLowerCase().trim();
 
-    // Saudações
+    // Saudações (palavra inteira)
     const greetings=["oi","olá","ola","bom dia","boa tarde","boa noite"];
-    if(greetings.some(g=>msgLower.includes(g))) return "👋 Olá! Que bom te ver! Eu sou a Zenia IA, sua assistente amiga e professora. Pergunte o que quiser, vamos aprender juntos!";
+    if(greetings.includes(msgLower)) return "👋 Olá! Que bom te ver! Eu sou a Zenia IA, sua assistente amiga e professora. Pergunte o que quiser, vamos aprender juntos!";
 
     // Despedidas
     const farewells=["tchau","até logo","adeus","até mais"];
-    if(farewells.some(f=>msgLower.includes(f))) return "👋 Até mais! Foi ótimo conversar contigo. Volte sempre!";
+    if(farewells.includes(msgLower)) return "👋 Até mais! Foi ótimo conversar contigo. Volte sempre!";
 
     // Quem te fez / para que serves
     if(msgLower.includes("quem te fez")) return "🤖 Fui criada por @inacio.u.daniel e posso ajudá-lo a aprender, resolver problemas e até vencer na feira de tecnologia e ciências!";
@@ -159,12 +159,14 @@ async function getBotReply(userMsg){
         }
     }
 
-    // Wikipedia automática
+    // Wikipedia resumo
     try{
-        const url=`https://pt.wikipedia.org/w/api.php?action=opensearch&format=json&origin=*&search=${encodeURIComponent(userMsg)}`;
+        const url=`https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(userMsg)}`;
         const res=await fetch(url);
-        const data=await res.json();
-        if(data[2] && data[2].length>0) return `${data[1][0]}: ${data[2][0]} - ${data[3][0]}`;
+        if(res.ok){
+            const data=await res.json();
+            if(data.extract) return data.extract;
+        }
     }catch(e){console.warn("Wikipedia erro", e);}
 
     const defaultReplies=["Interessante! Pode me contar mais sobre isso?","😄 Que legal!","🤔 Não tenho certeza, mas podemos conversar sobre isso.","👍 Entendi!","Vamos explorar juntos este assunto!"];
