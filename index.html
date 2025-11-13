@@ -115,7 +115,7 @@ let isThinking = false;
 let model = null;
 
 // ======== Carregar base local ========
-fetch('db/dilexconversation_knowledge.json')
+fetch('dilexconversation_knowledge.json')
   .then(r => r.json())
   .then(d => { LocalData = d; console.log("Base local carregada:", LocalData.length); })
   .catch(()=>{console.warn("Base local não carregou");});
