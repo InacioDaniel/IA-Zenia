@@ -36,16 +36,16 @@ Ideal para estudos, feiras de tecnologia ou uso pessoal.
 
 ```mermaid
 flowchart TD
-    A[Usuário envia mensagem] --> B{Saudação ou Despedida?}
+    A[Usuario envia mensagem] --> B{Saudacao ou Despedida?}
     B -- Sim --> C[Resposta pronta]
-    B -- Não --> D{Base Local de Conhecimento?}
+    B -- Nao --> D{Base Local de Conhecimento?}
     D -- Sim --> E[Responder com base na similaridade]
-    D -- Não --> F{Wikipedia disponível?}
+    D -- Nao --> F{Wikipedia disponivel?}
     F -- Sim --> G[Buscar resumo e responder]
-    F -- Não --> H[Respostas padrão aleatórias]
+    F -- Nao --> H[Respostas padrao aleatorias]
     C --> I[Exibir mensagem no chat]
     E --> I
     G --> I
     H --> I
-    I --> J[Atualizar estatísticas e contexto]
-    J --> K[Falar a mensagem (TTS)]
+    I --> J[Atualizar estatisticas e contexto]
+    J --> K[Falar a mensagem - TTS]
