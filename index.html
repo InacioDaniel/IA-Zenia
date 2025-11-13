@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zenia IA - by @inacio.u.daniel</title>
+<title>Zenia _IA_ - by @inacio.u.daniel</title>
 <link rel="shortcut icon" href="favicon.png" type="image/x-icon">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -109,7 +109,7 @@ video#videoStream{position:absolute;top:0;left:0;width:100%;height:100%;object-f
 <script>
 // ===== Variáveis Globais =====
 let LocalData=[];
-let ContextModule = { context:[], maxSize:10, add(u,b){this.context.push({user:u,bot:b}); if(this.context.length>this.maxSize) this.context.shift();}, size(){return this.context.length;}, clear(){this.context=[];}};
+let ContextModule={ context:[], maxSize:10, add(u,b){this.context.push({user:u,bot:b}); if(this.context.length>this.maxSize)this.context.shift();}, size(){return this.context.length;}, clear(){this.context=[];}};
 let stats={interactions:0, learned:0};
 let isThinking=false, model=null, video=document.getElementById('videoStream'), canvas=document.getElementById('overlayCanvas'), ctx=canvas.getContext('2d'), listening=false;
 
@@ -119,7 +119,7 @@ fetch('dilexconversation_knowledge.json')
 .then(d=>{LocalData=d; console.log("Base local carregada:",LocalData.length);})
 .catch(()=>{console.warn("Base local não carregou");});
 
-// ===== Funções básicas =====
+// ===== Funções =====
 function addUserMessage(t){const m=document.createElement('div');m.className='message user';m.innerHTML=`<div class="message-content">${t}</div>`;messages.appendChild(m);messages.scrollTop=messages.scrollHeight;speak(t);}
 function addBotMessage(t){const m=document.createElement('div');m.className='message bot';m.innerHTML=`<div class="message-content">${t}</div>`;messages.appendChild(m);messages.scrollTop=messages.scrollHeight;speak(t);}
 function showThinking(){const d=document.createElement('div');d.className='message bot';d.id='thinking';d.innerHTML=`<div class="message-content thinking">...</div>`;messages.appendChild(d);messages.scrollTop=messages.scrollHeight;}
@@ -127,10 +127,10 @@ function removeThinking(){const t=document.getElementById('thinking');if(t)t.rem
 function updateStats(){interactions.textContent=stats.interactions;learned.textContent=stats.learned;contextSize.textContent=ContextModule.size();}
 function speak(text){if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(text);u.lang='pt-PT';speechSynthesis.speak(u);}}
 
-// ===== Similaridade =====
+// Similaridade
 function similarity(a,b){const aWords=a.toLowerCase().match(/\w+/g)||[]; const bWords=b.toLowerCase().match(/\w+/g)||[]; let matches=0; aWords.forEach(w=>{if(bWords.includes(w)) matches++;}); return matches/Math.max(aWords.length,1);}
 
-// ===== Obter melhor resposta =====
+// ===== Obter resposta =====
 async function getBotReply(userMsg){
     const msgLower=userMsg.toLowerCase();
 
@@ -146,21 +146,7 @@ async function getBotReply(userMsg){
     if(msgLower.includes("quem te fez")) return "🤖 Fui criada por @inacio.u.daniel e posso ajudá-lo a aprender, resolver problemas e até vencer na feira de tecnologia e ciências!";
     if(msgLower.includes("para que serves")) return "🤖 Fui criada por @inacio.u.daniel, posso ensinar, aconselhar, analisar e divertir!";
 
-    // Pesquisar na Wikimedia/Wikipedia
-    if(msgLower.includes("pesquisar") || msgLower.includes("wikipedia") || msgLower.includes("wikimedia")){
-        const query=userMsg.replace(/pesquisar|wikipedia|wikimedia/gi,'').trim();
-        if(query.length>0){
-            try{
-                const url=`https://pt.wikipedia.org/w/api.php?action=opensearch&format=json&origin=*&search=${encodeURIComponent(query)}`;
-                const res=await fetch(url);
-                const data=await res.json();
-                if(data[2] && data[2].length>0) return `${data[1][0]}: ${data[2][0]} - ${data[3][0]}`;
-                else return "Não encontrei informações sobre isso na Wikipedia.";
-            }catch(e){return "Erro ao acessar a Wikipedia.";}
-        }
-    }
-
-    // Ranking base local
+    // Base local
     if(LocalData && LocalData.length>0){
         let scored=[]; 
         LocalData.forEach(d=>{
@@ -173,11 +159,19 @@ async function getBotReply(userMsg){
         }
     }
 
+    // Wikipedia automática
+    try{
+        const url=`https://pt.wikipedia.org/w/api.php?action=opensearch&format=json&origin=*&search=${encodeURIComponent(userMsg)}`;
+        const res=await fetch(url);
+        const data=await res.json();
+        if(data[2] && data[2].length>0) return `${data[1][0]}: ${data[2][0]} - ${data[3][0]}`;
+    }catch(e){console.warn("Wikipedia erro", e);}
+
     const defaultReplies=["Interessante! Pode me contar mais sobre isso?","😄 Que legal!","🤔 Não tenho certeza, mas podemos conversar sobre isso.","👍 Entendi!","Vamos explorar juntos este assunto!"];
     return defaultReplies[Math.floor(Math.random()*defaultReplies.length)];
 }
 
-// ===== Envio de mensagens e botões =====
+// ===== Envio de mensagens =====
 document.addEventListener('DOMContentLoaded',()=>{
     const messages=document.getElementById('messages');
     const sendBtn=document.getElementById('sendBtn');
@@ -213,7 +207,6 @@ document.addEventListener('DOMContentLoaded',()=>{
             isThinking=false;
         },600);
     };
-
     userInput.onkeypress=e=>{if(e.key==='Enter') sendBtn.click();};
 
     // Limpar chat
@@ -233,10 +226,10 @@ document.addEventListener('DOMContentLoaded',()=>{
         const a=document.createElement('a'); a.href=url; a.download="chat_zenia.txt"; a.click(); URL.revokeObjectURL(url);
     };
 
-    // Pesquisa Wikipedia
+    // Pesquisa Wikipedia manual
     translateBtn.onclick=async ()=>{
         const query=userInput.value.trim();
-        if(query.length>0){addUserMessage(query); userInput.value=''; const botReply=await getBotReply("pesquisar "+query); addBotMessage(botReply);}
+        if(query.length>0){addUserMessage(query); userInput.value=''; const botReply=await getBotReply(query); addBotMessage(botReply);}
     };
 });
 </script>
