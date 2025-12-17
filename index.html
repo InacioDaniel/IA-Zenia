@@ -103,89 +103,138 @@
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 
 <script>
-/* =========================
-   CORREÇÕES OBRIGATÓRIAS
-   ========================= */
+/* ======================================================
+   MEMÓRIA PERSISTENTE
+====================================================== */
+const MEMORY_KEY = "zenia_memory_v1";
+let Memory = JSON.parse(localStorage.getItem(MEMORY_KEY) || "[]");
 
-// NÃO EXISTIAM — agora existem
-const LocalData = [];
-
-function similarity(a,b){
-if(!a||!b)return 0;
-a=a.toLowerCase();b=b.toLowerCase();
-let m=0;
-a.split(" ").forEach(w=>{if(b.includes(w))m++});
-return m/Math.max(a.split(" ").length,1);
+function saveMemory(prompt, response){
+  Memory.push({prompt, response});
+  localStorage.setItem(MEMORY_KEY, JSON.stringify(Memory));
+  document.getElementById("learned").textContent = Memory.length;
 }
 
-/* =========================
-   ZENIA NLP (INALTERADO)
-   ========================= */
-const ZeniaNLP={
-normalize(t){return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")},
-intent(t){
-if(/[0-9].*[\+\-\*\/]/.test(t))return"calculo";
-if(/quem/.test(t))return"pessoa";
-if(/onde/.test(t))return"localizacao";
-if(/porque/.test(t))return"explicacao";
-if(/o que e|oque e/.test(t))return"definicao";
-return"conhecimento";
-},
-extractTopic:t=>t.replace(/o que e|oque e|quem e|onde fica|porque|explica/g,"").trim(),
-parseMath:t=>t.replace(/vezes/g,"*").replace(/mais/g,"+").replace(/menos/g,"-")
-};
-
-/* =========================
-   WIKIPÉDIA (INALTERADO)
-   ========================= */
-async function ZeniaKnowledgeEngine(msg){
-const clean=ZeniaNLP.normalize(msg);
-if(ZeniaNLP.intent(clean)==="calculo"){
-try{return "🧮 Resultado: "+Function("return "+ZeniaNLP.parseMath(clean))();}
-catch{return"Erro no cálculo";}
-}
-const topic=ZeniaNLP.extractTopic(clean);
-if(!topic)return null;
-try{
-const r=await fetch("https://pt.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(topic));
-if(!r.ok)return null;
-const d=await r.json();
-return d.extract||null;
-}catch{return null}
+/* ======================================================
+   EMOÇÕES (ANÁLISE SIMPLES)
+====================================================== */
+function detectEmotion(text){
+  text = text.toLowerCase();
+  if(/feliz|bom|otimo|adoro|amei/.test(text)) return "😊 Feliz";
+  if(/triste|mal|odeio|raiva/.test(text)) return "😠 Irritado";
+  if(/medo|assustado/.test(text)) return "😨 Medo";
+  if(/amor|gosto/.test(text)) return "❤️ Amor";
+  return "😐 Neutro";
 }
 
-/* =========================
-   BOT (INALTERADO)
-   ========================= */
-async function getBotReply(msg){
-const k=await ZeniaKnowledgeEngine(msg);
-if(k)return k;
-if(["oi","ola","olá"].includes(msg.toLowerCase()))return"👋 Olá!";
-return"🤖 Ainda estou a aprender.";
+/* ======================================================
+   VOZ (STT + TTS)
+====================================================== */
+let recognition;
+let ttsEnabled = true;
+
+if ("webkitSpeechRecognition" in window) {
+  recognition = new webkitSpeechRecognition();
+  recognition.lang = "pt-PT";
+  recognition.continuous = false;
+  recognition.onresult = e => {
+    document.getElementById("userInput").value = e.results[0][0].transcript;
+  };
 }
 
-/* =========================
-   CHAT (FALTAVA)
-   ========================= */
+document.getElementById("micBtn").onclick = () => recognition && recognition.start();
+document.getElementById("ttsBtn").onclick = () => ttsEnabled = !ttsEnabled;
+
+function speak(text){
+  if(!ttsEnabled) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "pt-PT";
+  speechSynthesis.speak(u);
+}
+
+/* ======================================================
+   CÂMERA + COCO SSD
+====================================================== */
+let model, stream, detecting = false;
+
+const video = document.getElementById("videoStream");
+const canvas = document.getElementById("overlayCanvas");
+const ctx = canvas.getContext("2d");
+
+async function startCamera(){
+  stream = await navigator.mediaDevices.getUserMedia({video:true});
+  video.srcObject = stream;
+  video.style.display = "block";
+  model = await cocoSsd.load();
+  detecting = true;
+  detectFrame();
+}
+
+function stopCamera(){
+  detecting = false;
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+  video.style.display = "none";
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+
+async function detectFrame(){
+  if(!detecting) return;
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  const predictions = await model.detect(video);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  document.getElementById("detectedCount").textContent = predictions.length;
+
+  predictions.forEach(p=>{
+    ctx.strokeStyle = "#7c3aed";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(...p.bbox);
+    ctx.fillStyle = "#7c3aed";
+    ctx.fillText(p.class, p.bbox[0], p.bbox[1]-5);
+  });
+
+  requestAnimationFrame(detectFrame);
+}
+
+document.getElementById("cameraBtn").onclick = startCamera;
+document.getElementById("stopCameraBtn").onclick = stopCamera;
+
+/* ======================================================
+   CHAT + MEMÓRIA + EMOÇÃO
+====================================================== */
 document.addEventListener("DOMContentLoaded",()=>{
-const input=document.getElementById("userInput");
-const btn=document.getElementById("sendBtn");
-const msgs=document.getElementById("messages");
+const input = document.getElementById("userInput");
+const btn = document.getElementById("sendBtn");
+const msgs = document.getElementById("messages");
+const interactions = document.getElementById("interactions");
+const emotionUI = document.getElementById("emotionIndicator");
+
+let count = 0;
 
 async function send(){
-if(!input.value.trim())return;
-const user=input.value;
-msgs.innerHTML+=`<div class="message">🧑 ${user}</div>`;
-input.value="";
-const r=await getBotReply(user);
-msgs.innerHTML+=`<div class="message">🤖 ${r}</div>`;
-msgs.scrollTop=msgs.scrollHeight;
+  if(!input.value.trim()) return;
+  const user = input.value;
+  msgs.innerHTML += `<div class="message">🧑 ${user}</div>`;
+  input.value = "";
+
+  const reply = await getBotReply(user);
+  msgs.innerHTML += `<div class="message">🤖 ${reply}</div>`;
+
+  saveMemory(user, reply);
+  speak(reply);
+
+  emotionUI.textContent = detectEmotion(user);
+  interactions.textContent = ++count;
+  msgs.scrollTop = msgs.scrollHeight;
 }
 
-btn.onclick=send;
-input.onkeydown=e=>{if(e.key==="Enter")send();}
+btn.onclick = send;
+input.onkeydown = e => { if(e.key==="Enter") send(); };
 });
 </script>
+
 
 </body>
 </html>
