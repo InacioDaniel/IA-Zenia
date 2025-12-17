@@ -1,34 +1,102 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Zenia IA - by @inacio.u.daniel</title>
-<link rel="shortcut icon" href="favicon.png">
-
-<!-- ======= CSS ORIGINAL (INALTERADO) ======= -->
-<style>
-/* TODO O TEU CSS — NÃO ALTERADO */
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
---bg-primary:#0f172a;--bg-secondary:#0f2130;--bg-tertiary:#152433;
---accent-1:#7c3aed;--accent-2:#06b6d4;--text:#e6eef8;--muted:#94a3b8;
---card:#102235;--glass:rgba(255,255,255,0.04);
-}
-body{background:var(--bg-primary);color:var(--text);font-family:Inter}
-.message{background:var(--glass);padding:.5rem .7rem;border-radius:8px}
-</style>
-</head>
-
-<body>
-<div id="app">
-
-<!-- ======= HTML ORIGINAL (INALTERADO) ======= -->
-<input id="userInput" placeholder="Digite sua mensagem...">
-<button id="sendBtn">Enviar</button>
-<div id="messages"></div>
-
-</div>
+<!DOCTYPE html> 
+<html lang="pt"> 
+   <head> 
+      <meta charset="utf-8" /> 
+      <meta name="viewport" content="width=device-width, initial-scale=1" /> 
+      <title>Zenia IA - by @inacio.u.daniel</title> 
+      <link rel="shortcut icon" href="favicon.png" type="image/x-icon"> 
+      <style> 
+         /* ===== Reset & Variáveis ===== */ 
+         *{margin:0;padding:0;box-sizing:border-box} 
+         :root{ --bg-primary:#0f172a;
+		 --bg-secondary:#0f2130;
+		 --bg-tertiary:#152433; 
+		 --accent-1:#7c3aed;
+		 --accent-2:#06b6d4;
+		 --text:#e6eef8;
+		 --muted:#94a3b8; 
+		 --card:#102235;
+		 --glass:rgba(255,255,255,0.04); 
+		 } 
+		 body.light { 
+		    --bg-primary:#f8fafc;
+			--bg-secondary:#ffffff;
+			--bg-tertiary:#f1f5f9; 
+			--accent-1:#6b21a8;
+			--accent-2:#0891b2;
+			--text:#0f172a;
+			--muted:#475569; 
+			--card:#ffffff;
+			--glass:rgba(0,0,0,0.03); 
+			} 
+		 body {
+			font-family:Inter, "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial; 
+			background:var(--bg-primary);
+			color:var(--text); 
+			min-height:100vh; 
+			transition:all .25s ease} .header{background:var(--bg-secondary);
+			border-bottom:1px solid rgba(255,255,255,0.03); 
+			padding:1rem 1.25rem} 
+			.header-content {
+				max-width:1200px;
+				margin:0 auto;
+				display:flex;
+				align-items:center;
+				justify-content:space-between;
+				gap:1rem;
+				flex-wrap:wrap
+				} 
+				.logo{display:flex;align-items:center;gap:.75rem} .logo-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)} .logo-text h1{font-size:1.1rem;margin-bottom:2px} .logo-text p{font-size:.78rem;color:var(--muted)} .header-actions{display:flex;gap:.5rem;align-items:center} .icon-btn{background:var(--card);border:1px solid rgba(255,255,255,0.03);padding:.5rem .65rem;border-radius:10px;cursor:pointer;font-size:1rem;color:var(--text);display:inline-flex;align-items:center;gap:.5rem} .icon-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,0.25)} .container{max-width:1200px;margin:1.25rem auto;padding:0 1rem;display:grid;grid-template-columns:320px 1fr;gap:1rem;align-items:start} .sidebar{display:flex;flex-direction:column;gap:.9rem} .card{background:var(--card);border-radius:12px;padding:1rem;border:1px solid rgba(255,255,255,0.02)} .card h3{font-size:.9rem;color:var(--muted);margin-bottom:.6rem} .stat-item{display:flex;justify-content:space-between;padding:.35rem 0;font-size:.9rem;color:var(--text)} .module-item{display:flex;align-items:center;gap:.5rem;padding:.35rem 0} .status-dot{width:10px;height:10px;border-radius:999px;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,.2)} .info-card p{font-size:.85rem;color:var(--muted);line-height:1.4} .chat-container{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent); border-radius:12px; border:1px solid rgba(255,255,255,0.03); display:flex;flex-direction:column; height:calc(100vh - 170px); overflow:hidden; position:relative} .controls{display:flex;gap:.5rem;padding:.7rem;border-bottom:1px solid rgba(255,255,255,0.02);align-items:center} #videoWrap{position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; overflow:hidden} video#videoStream{width:100%; height:100%; object-fit:cover; border-radius:8px; transform-origin:center center; transition:transform .35s ease} canvas#overlayCanvas{position:absolute; top:0; left:0; pointer-events:none; width:100%; height:100%} .scanner{position:absolute; inset:0; pointer-events:none} .scanner .line{position:absolute; left:0; right:0; height:2px; background:linear-gradient(90deg, transparent, rgba(124,58,237,0.7), transparent); animation:scan 2s linear infinite} @keyframes scan{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}} .overlay-label{position:absolute; top:8px; left:50%; transform:translateX(-50%); background:rgba(16,34,53,0.8); padding:.35rem .6rem; border-radius:999px; font-weight:600; font-size:.85rem; color:var(--text)} .messages{position:absolute; left:12px; bottom:12px; z-index:30; display:flex; flex-direction:column; gap:.4rem; max-width:60%} .message{background:var(--glass); padding:.5rem .7rem; border-radius:8px; color:var(--text); font-size:.9rem; border:1px solid rgba(255,255,255,0.02)} .controls .toggles{margin-left:auto; display:flex; gap:.5rem} .input-row{display:flex; gap:.5rem; padding:.65rem; border-top:1px solid rgba(255,255,255,0.02); align-items:center} #userInput{flex:1;padding:.6rem;border-radius:10px;border:1px solid rgba(255,255,255,0.03); background:transparent;color:var(--text)} .send-btn{padding:.5rem .7rem;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent-1),var(--accent-2));color:white;cursor:pointer} .emotion-pill{position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.5); padding:.4rem .6rem;border-radius:8px; font-weight:700} .small{font-size:.8rem;color:var(--muted)} .legend{display:flex;gap:.5rem;flex-wrap:wrap} .legend .item{display:flex;align-items:center;gap:.4rem;padding:.25rem .35rem;border-radius:999px;background:rgba(255,255,255,0.02);font-size:.8rem} .color-dot{width:12px;height:12px;border-radius:3px} .zoom-reset{background:transparent;border:1px dashed rgba(255,255,255,0.06);padding:.35rem .5rem;border-radius:8px;cursor:pointer;color:var(--muted)} .footer-note{font-size:.8rem;color:var(--muted);margin-top:.6rem} @media(max-width:900px){.container{grid-template-columns:1fr;}.messages{max-width:90%}} 
+		</style> 
+	</head> 
+	<body> 
+	<div id="app"> 
+	<header class="header"> 
+		<div class="header-content"> 
+			<div class="logo"> 
+			<div class="logo-icon">🧠</div> 
+			<div class="logo-text"> 
+				<h1>Zenia IA</h1> 
+				<p>Inteligência Completa — <span class="small">by <strong>@inacio.u.daniel</strong></span></p> 
+			</div> 
+			</div> 
+				<div class="header-actions"> 
+				<button id="exportBtn" class="icon-btn">💾 Export</button> 
+				<button id="clearBtn" class="icon-btn">🗑️ Limpar</button> 
+				<button id="themeBtn" class="icon-btn">🌙 Tema</button> 
+				<button id="ttsBtn" class="icon-btn">🔊 TTS</button> 
+				<button id="cameraBtn" class="icon-btn" title="Ligar câmera">📹 Camera</button> 
+				<button id="stopCameraBtn" class="icon-btn" title="Desligar câmera">⛔ Parar</button> 
+				<button id="micBtn" class="icon-btn">🎤 Microfone</button> 
+				<button id="soundToggleBtn" class="icon-btn">🔔 Som</button> 
+		</div> 
+		</div> 
+	</header> 
+	<div class="container"> 
+	<aside class="sidebar"> 
+	<div class="card"> 
+	<h3>Autor</h3> 
+	<div class="stat-item">
+	<div><strong>@inacio.u.daniel</strong></div>
+	<div class="small">Programador</div>
+	</div> 
+	<div class="stat-item">
+	<div><strong>Instituto</strong></div>
+	<div class="small">Instituto Politécnico Pomba d'Amizade</div>
+	</div> </div> <div class="card"> <h3>Estatísticas</h3> 
+	<div class="stat-item"><div>⚡ Interações</div>
+	<div id="interactions">0</div></div> 
+	<div class="stat-item"><div>💾 Respostas</div>
+	<div id="learned">0</div></div> <div class="stat-item">
+	<div>⚙️ Contexto</div><div id="contextSize">0</div></div> 
+	</div> <div class="card"> <h3>Módulos</h3> <div class="module-item">
+	<span class="status-dot"></span> Contexto</div> <div class="module-item">
+	<span class="status-dot"></span> Wikimedia</div> <div class="module-item">
+	<span class="status-dot"></span> Imagem/Camera</div> <div class="module-item">
+	<span class="status-dot"></span> Emoções Vocais</div> <div class="module-item">
+	<span class="status-dot"></span> Tradução</div> <div class="module-item"><span class="status-dot"></span> Código/Arquivos</div> </div> <div class="card info-card"> <h3>Como usar</h3> <p>• Clique em <strong>Camera</strong> para ativar a câmera e iniciar a detecção em tempo real.<br> • Use <strong>Parar</strong> para encerrar a câmera.<br> • Ative/desative o som com <strong>🔔 Som</strong>.<br> • Ative o microfone para entrada por voz (se suportado pelo navegador).</p> <div class="footer-note">Atalhos: <span class="small">Ctrl+Enter enviar · Ctrl+M microfone</span></div> </div> </aside> <main class="chat-container"> <div class="controls"> <div class="overlay-label">Detecção: <span id="detectedCount">0</span> objetos</div> <div class="toggles"> <button id="scannerToggle" class="icon-btn">🛰️ Scanner</button> <button id="zoomToggle" class="icon-btn">🔍 AutoZoom</button> <button id="resetZoom" class="zoom-reset">Reset Zoom</button> </div> </div> <div id="videoWrap" style="flex:1; position:relative;"> <video id="videoStream" autoplay playsinline muted style="display:none"></video> <canvas id="overlayCanvas">
+   
+</canvas> <!-- Scanner overlay lines --> <div class="scanner" id="scanner" style="display:none;"> <div class="line" style="top:10%"></div> <div class="line" style="top:30%"></div> <div class="line" style="top:50%"></div> <div class="line" style="top:70%"></div> </div> <!-- top center label --> <div class="overlay-label" id="topCenterLabel" style="display:none"></div> <!-- emotion indicator --> <div class="emotion-pill" id="emotionIndicator">Neutro</div> <!-- simple messages --> <div class="messages" id="messages"></div> </div> <div class="input-row"> <input id="userInput" placeholder="Digite sua mensagem..." /> <button class="send-btn" id="sendBtn">📤 Enviar</button> </div> </main> </div> </div>
 
 <!-- ======= LIBS ======= -->
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.12.0/dist/tf.min.js"></script>
