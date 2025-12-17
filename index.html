@@ -1,688 +1,169 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
 <title>Zenia IA - by @inacio.u.daniel</title>
-<link rel="shortcut icon" href="favicon.png" type="image/x-icon">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
-/* ===== Reset & Variáveis ===== */
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg-primary:#0f172a;--bg-secondary:#0f2130;--bg-tertiary:#152433;
-  --accent-1:#7c3aed;--accent-2:#06b6d4;--text:#e6eef8;--muted:#94a3b8;
-  --card:#102235;--glass:rgba(255,255,255,0.04);
+body{
+  margin:0;
+  font-family:system-ui;
+  background:#0f172a;
+  color:#e6eef8;
 }
-body.light{
-  --bg-primary:#f8fafc;--bg-secondary:#ffffff;--bg-tertiary:#f1f5f9;
-  --accent-1:#6b21a8;--accent-2:#0891b2;--text:#0f172a;--muted:#475569;
-  --card:#ffffff;--glass:rgba(0,0,0,0.03);
+.header{
+  padding:1rem;
+  background:#020617;
 }
-body{font-family:Inter, "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial; background:var(--bg-primary); color:var(--text); min-height:100vh; transition:all .25s ease}
-.header{background:var(--bg-secondary); border-bottom:1px solid rgba(255,255,255,0.03); padding:1rem 1.25rem}
-.header-content{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
-.logo{display:flex;align-items:center;gap:.75rem}
-.logo-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)}
-.logo-text h1{font-size:1.1rem;margin-bottom:2px}
-.logo-text p{font-size:.78rem;color:var(--muted)}
-.header-actions{display:flex;gap:.5rem;align-items:center}
-.icon-btn{background:var(--card);border:1px solid rgba(255,255,255,0.03);padding:.5rem .65rem;border-radius:10px;cursor:pointer;font-size:1rem;color:var(--text);display:inline-flex;align-items:center;gap:.5rem}
-.icon-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,0.25)}
-.container{max-width:1200px;margin:1.25rem auto;padding:0 1rem;display:grid;grid-template-columns:320px 1fr;gap:1rem;align-items:start}
-.sidebar{display:flex;flex-direction:column;gap:.9rem}
-.card{background:var(--card);border-radius:12px;padding:1rem;border:1px solid rgba(255,255,255,0.02)}
-.card h3{font-size:.9rem;color:var(--muted);margin-bottom:.6rem}
-.stat-item{display:flex;justify-content:space-between;padding:.35rem 0;font-size:.9rem;color:var(--text)}
-.module-item{display:flex;align-items:center;gap:.5rem;padding:.35rem 0}
-.status-dot{width:10px;height:10px;border-radius:999px;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,.2)}
-.info-card p{font-size:.85rem;color:var(--muted);line-height:1.4}
-.chat-container{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent); border-radius:12px; border:1px solid rgba(255,255,255,0.03); display:flex;flex-direction:column; height:calc(100vh - 170px); overflow:hidden; position:relative}
-.controls{display:flex;gap:.5rem;padding:.7rem;border-bottom:1px solid rgba(255,255,255,0.02);align-items:center}
-#videoWrap{position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; overflow:hidden}
-video#videoStream{width:100%; height:100%; object-fit:cover; border-radius:8px; transform-origin:center center; transition:transform .35s ease}
-canvas#overlayCanvas{position:absolute; top:0; left:0; pointer-events:none; width:100%; height:100%}
-.scanner{position:absolute; inset:0; pointer-events:none}
-.scanner .line{position:absolute; left:0; right:0; height:2px; background:linear-gradient(90deg, transparent, rgba(124,58,237,0.7), transparent); animation:scan 2s linear infinite}
-@keyframes scan{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
-.overlay-label{position:absolute; top:8px; left:50%; transform:translateX(-50%); background:rgba(16,34,53,0.8); padding:.35rem .6rem; border-radius:999px; font-weight:600; font-size:.85rem; color:var(--text)}
-.messages{position:absolute; left:12px; bottom:12px; z-index:30; display:flex; flex-direction:column; gap:.4rem; max-width:60%}
-.message{background:var(--glass); padding:.5rem .7rem; border-radius:8px; color:var(--text); font-size:.9rem; border:1px solid rgba(255,255,255,0.02)}
-.controls .toggles{margin-left:auto; display:flex; gap:.5rem}
-.input-row{display:flex; gap:.5rem; padding:.65rem; border-top:1px solid rgba(255,255,255,0.02); align-items:center}
-#userInput{flex:1;padding:.6rem;border-radius:10px;border:1px solid rgba(255,255,255,0.03); background:transparent;color:var(--text)}
-.send-btn{padding:.5rem .7rem;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent-1),var(--accent-2));color:white;cursor:pointer}
-.emotion-pill{position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.5); padding:.4rem .6rem;border-radius:8px; font-weight:700}
-.small{font-size:.8rem;color:var(--muted)}
-.legend{display:flex;gap:.5rem;flex-wrap:wrap}
-.legend .item{display:flex;align-items:center;gap:.4rem;padding:.25rem .35rem;border-radius:999px;background:rgba(255,255,255,0.02);font-size:.8rem}
-.color-dot{width:12px;height:12px;border-radius:3px}
-.zoom-reset{background:transparent;border:1px dashed rgba(255,255,255,0.06);padding:.35rem .5rem;border-radius:8px;cursor:pointer;color:var(--muted)}
-.footer-note{font-size:.8rem;color:var(--muted);margin-top:.6rem}
-@media(max-width:900px){.container{grid-template-columns:1fr;}.messages{max-width:90%}}
+.container{
+  display:grid;
+  grid-template-columns:300px 1fr;
+  gap:1rem;
+  padding:1rem;
+}
+.card{
+  background:#020617;
+  padding:1rem;
+  border-radius:10px;
+}
+.chat{
+  display:flex;
+  flex-direction:column;
+  height:80vh;
+}
+#video{
+  width:100%;
+  height:260px;
+  background:black;
+  display:none;
+}
+.messages{
+  flex:1;
+  overflow:auto;
+  padding:.5rem;
+}
+.msg{
+  margin:.3rem 0;
+  padding:.4rem .6rem;
+  border-radius:6px;
+  background:#1e293b;
+}
+.bot{background:#312e81}
+.input{
+  display:flex;
+}
+input{
+  flex:1;
+  padding:.5rem;
+}
+button{
+  padding:.5rem;
+  cursor:pointer;
+}
 </style>
 </head>
+
 <body>
-<div id="app">
-  <header class="header">
-    <div class="header-content">
-      <div class="logo">
-        <div class="logo-icon">🧠</div>
-        <div class="logo-text">
-          <h1>Zenia IA</h1>
-          <p>Inteligência Completa — <span class="small">by <strong>@inacio.u.daniel</strong></span></p>
-        </div>
-      </div>
 
-      <div class="header-actions">
-        <button id="exportBtn" class="icon-btn">💾 Export</button>
-        <button id="clearBtn" class="icon-btn">🗑️ Limpar</button>
-        <button id="themeBtn" class="icon-btn">🌙 Tema</button>
-        <button id="ttsBtn" class="icon-btn">🔊 TTS</button>
-        <button id="cameraBtn" class="icon-btn" title="Ligar câmera">📹 Camera</button>
-        <button id="stopCameraBtn" class="icon-btn" title="Desligar câmera">⛔ Parar</button>
-        <button id="micBtn" class="icon-btn">🎤 Microfone</button>
-        <button id="soundToggleBtn" class="icon-btn">🔔 Som</button>
-      </div>
-    </div>
-  </header>
-
-  <div class="container">
-    <aside class="sidebar">
-      <div class="card">
-        <h3>Autor</h3>
-        <div class="stat-item"><div><strong>@inacio.u.daniel</strong></div><div class="small">Programador</div></div>
-        <div class="stat-item"><div><strong>Instituto</strong></div><div class="small">Instituto Politécnico Pomba d'Amizade</div></div>
-      </div>
-
-      <div class="card">
-        <h3>Estatísticas</h3>
-        <div class="stat-item"><div>⚡ Interações</div><div id="interactions">0</div></div>
-        <div class="stat-item"><div>💾 Respostas</div><div id="learned">0</div></div>
-        <div class="stat-item"><div>⚙️ Contexto</div><div id="contextSize">0</div></div>
-      </div>
-
-      <div class="card">
-        <h3>Módulos</h3>
-        <div class="module-item"><span class="status-dot"></span> Contexto</div>
-        <div class="module-item"><span class="status-dot"></span> Wikimedia</div>
-        <div class="module-item"><span class="status-dot"></span> Imagem/Camera</div>
-        <div class="module-item"><span class="status-dot"></span> Emoções Vocais</div>
-        <div class="module-item"><span class="status-dot"></span> Tradução</div>
-        <div class="module-item"><span class="status-dot"></span> Código/Arquivos</div>
-      </div>
-
-      <div class="card info-card">
-        <h3>Como usar</h3>
-        <p>• Clique em <strong>Camera</strong> para ativar a câmera e iniciar a detecção em tempo real.<br>
-           • Use <strong>Parar</strong> para encerrar a câmera.<br>
-           • Ative/desative o som com <strong>🔔 Som</strong>.<br>
-           • Ative o microfone para entrada por voz (se suportado pelo navegador).</p>
-        <div class="footer-note">Atalhos: <span class="small">Ctrl+Enter enviar · Ctrl+M microfone</span></div>
-      </div>
-    </aside>
-
-    <main class="chat-container">
-      <div class="controls">
-        <div class="overlay-label">Detecção: <span id="detectedCount">0</span> objetos</div>
-        <div class="toggles">
-          <button id="scannerToggle" class="icon-btn">🛰️ Scanner</button>
-          <button id="zoomToggle" class="icon-btn">🔍 AutoZoom</button>
-          <button id="resetZoom" class="zoom-reset">Reset Zoom</button>
-        </div>
-      </div>
-
-      <div id="videoWrap" style="flex:1; position:relative;">
-        <video id="videoStream" autoplay playsinline muted style="display:none"></video>
-        <canvas id="overlayCanvas"></canvas>
-
-        <!-- Scanner overlay lines -->
-        <div class="scanner" id="scanner" style="display:none;">
-          <div class="line" style="top:10%"></div>
-          <div class="line" style="top:30%"></div>
-          <div class="line" style="top:50%"></div>
-          <div class="line" style="top:70%"></div>
-        </div>
-
-        <!-- top center label -->
-        <div class="overlay-label" id="topCenterLabel" style="display:none"></div>
-
-        <!-- emotion indicator -->
-        <div class="emotion-pill" id="emotionIndicator">Neutro</div>
-
-        <!-- simple messages -->
-        <div class="messages" id="messages"></div>
-      </div>
-
-      <div class="input-row">
-        <input id="userInput" placeholder="Digite sua mensagem..." />
-        <button class="send-btn" id="sendBtn">📤 Enviar</button>
-      </div>
-    </main>
-  </div>
+<div class="header">
+  <strong>🧠 Zenia IA</strong>
 </div>
 
-<!-- TensorFlow.js e COCO-SSD -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.12.0/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+<div class="container">
+
+<aside class="card">
+  <p><strong>Autor:</strong> @inacio.u.daniel</p>
+  <p>Interações: <span id="count">0</span></p>
+  <button id="cameraBtn">📷 Câmera</button>
+  <button id="stopBtn">⛔ Parar</button>
+</aside>
+
+<main class="card chat">
+  <video id="video" autoplay muted playsinline></video>
+  <div class="messages" id="messages"></div>
+  <div class="input">
+    <input id="input" placeholder="Digite..." />
+    <button id="send">Enviar</button>
+  </div>
+</main>
+
+</div>
 
 <script>
-/* ===================== Variáveis ===================== */
-let LocalData = [];
-let ContextModule = { context: [], maxSize: 10, add(u, b) { this.context.push({ user: u, bot: b }); if (this.context.length > this.maxSize) this.context.shift(); }, size() { return this.context.length; }, clear() { this.context = []; } };
-let stats = { interactions: 0, learned: 0 };
+let interactions = 0;
+let stream = null;
 
-let model = null;
-const video = document.getElementById('videoStream');
-const canvas = document.getElementById('overlayCanvas');
-const ctx = canvas.getContext('2d');
-const scanner = document.getElementById('scanner');
-const topCenterLabel = document.getElementById('topCenterLabel');
+const messages = document.getElementById("messages");
+const input = document.getElementById("input");
+const count = document.getElementById("count");
+const video = document.getElementById("video");
 
-let streamTrack = null;
-let cameraActive = false;
-let detectLoopId = null;
-let lastDetected = new Set();
-let soundEnabled = true;
-let scannerEnabled = false;
-let autoZoomEnabled = false;
+/* ===== NLP SIMPLES ===== */
+async function getBotReply(text){
+  text = text.toLowerCase();
 
-/* ===== Carregar base local se existir ===== */
-fetch('dilexconversation_knowledge.json').then(r => r.ok ? r.json() : []).then(d => { LocalData = d || []; console.log("Base local carregada:", LocalData.length); }).catch(() => { console.warn("Base local não carregou"); });
+  if(text.includes("oi") || text.includes("olá"))
+    return "👋 Olá! Sou a Zenia IA.";
 
-/* ===== Utils: cores por classe ===== */
-const colorPalette = {};
-function getColorForClass(name) {
-  if (colorPalette[name]) return colorPalette[name];
-  // gerar cor a partir do hash do nome
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  const h = Math.abs(hash) % 360;
-  const color = `hsl(${h}deg 85% 55%)`;
-  colorPalette[name] = color;
-  return color;
-}
-
-/* ===== Beep simples para detecção ===== */
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function beep(freq = 600, duration = 120) {
-  if (!soundEnabled) return;
-  try {
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = 'sine';
-    o.frequency.value = freq;
-    o.connect(g);
-    g.connect(audioCtx.destination);
-    g.gain.value = 0.0001;
-    o.start();
-    // ramp up
-    g.gain.exponentialRampToValueAtTime(0.05, audioCtx.currentTime + 0.02);
-    setTimeout(() => {
-      g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.05);
-      o.stop(audioCtx.currentTime + 0.07);
-    }, duration);
-  } catch (e) { console.warn("beep failed", e); }
-}
-
-/* ===== Iniciar câmera e carregar modelo ===== */
-async function startCameraAndModel() {
-  if (cameraActive) return;
-  try {
-    const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
-    video.srcObject = s;
-    streamTrack = s.getTracks()[0];
-    video.style.display = 'block';
-    cameraActive = true;
-
-    // Ajustar canvas quando metadata carregar
-    video.onloadedmetadata = () => {
-      resizeCanvas();
-      video.play();
-    };
-
-    // Carregar modelo se necessário
-    if (!model) {
-      topCenterLabel.style.display = 'block';
-      topCenterLabel.innerText = 'Carregando modelo...';
-      model = await cocoSsd.load();
-      topCenterLabel.innerText = 'Modelo pronto';
-      setTimeout(() => { topCenterLabel.style.display = 'none'; }, 1200);
+  if(/\d+.*[\+\-\*\/].*\d+/.test(text)){
+    try{
+      return "🧮 Resultado: " + Function("return "+text)();
+    }catch{
+      return "Erro no cálculo.";
     }
-
-    // Iniciar loop de detecção
-    detectObjectsLoop();
-  } catch (err) {
-    console.error("Erro ao acessar câmera:", err);
-    alert("Não foi possível acessar a câmera. Verifique permissões.");
   }
+
+  try{
+    const res = await fetch(
+      "https://pt.wikipedia.org/api/rest_v1/page/summary/" +
+      encodeURIComponent(text)
+    );
+    const data = await res.json();
+    if(data.extract) return data.extract.slice(0,400)+"...";
+  }catch{}
+
+  return "🤖 Ainda estou a aprender.";
 }
 
-/* ===== Parar câmera ===== */
-function stopCamera() {
-  if (!cameraActive) return;
-  if (streamTrack) streamTrack.stop();
-  // stop all tracks just in case
-  if (video.srcObject) {
-    video.srcObject.getTracks().forEach(t => t.stop());
-    video.srcObject = null;
-  }
-  cameraActive = false;
-  cancelAnimationFrame(detectLoopId);
-  clearCanvas();
-  topCenterLabel.style.display = 'none';
-  lastDetected.clear();
-  // reset zoom
-  resetZoom();
-  video.style.display = 'none';
+/* ===== UI ===== */
+function addMsg(text, cls){
+  const div = document.createElement("div");
+  div.className = "msg "+cls;
+  div.textContent = text;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
 }
 
-/* ===== Resize canvas ===== */
-function resizeCanvas() {
-  const rect = video.getBoundingClientRect();
-  canvas.width = video.videoWidth || rect.width;
-  canvas.height = video.videoHeight || rect.height;
-  canvas.style.width = '100%';
-  canvas.style.height = '100%';
-}
+/* ===== ENVIAR ===== */
+document.getElementById("send").onclick = async ()=>{
+  if(!input.value) return;
+  addMsg(input.value,"user");
+  const reply = await getBotReply(input.value);
+  addMsg(reply,"bot");
+  input.value="";
+  interactions++;
+  count.textContent = interactions;
+};
 
-/* ===== Clear overlay ===== */
-function clearCanvas() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-/* ===== Detect loop ===== */
-async function detectObjectsLoop() {
-  if (!cameraActive || !model) return;
-  try {
-    resizeCanvas();
-    const predictions = await model.detect(video, 10); // up to 10 boxes
-    renderPredictions(predictions);
-    updateDetectedCount(predictions.length);
-
-    // beep for new classes
-    const currentSet = new Set(predictions.map(p => p.class));
-    for (let cls of currentSet) {
-      if (!lastDetected.has(cls)) {
-        // beep with frequency based on hash
-        const freq = 300 + (Math.abs(hashString(cls)) % 700);
-        beep(freq, 120);
-      }
-    }
-    lastDetected = currentSet;
-
-    // Auto zoom if enabled and person detected
-    if (autoZoomEnabled) {
-      const person = predictions.find(p => p.class === 'person');
-      if (person) zoomOnBox(person.bbox); else resetZoomSmooth();
-    }
-
-  } catch (e) {
-    console.warn("detect loop error", e);
-  } finally {
-    detectLoopId = requestAnimationFrame(detectObjectsLoop);
-  }
-}
-
-/* ===== Render boxes and labels ===== */
-function renderPredictions(predictions) {
-  clearCanvas();
-  // draw slight background blur (faux) — not actual blur for performance
-  // draw each prediction
-  predictions.forEach(pred => {
-    const [x, y, w, h] = pred.bbox.map(v => Math.round(v));
-    const cls = pred.class;
-    const score = Math.round(pred.score * 100);
-    const color = getColorForClass(cls);
-
-    // rectangle
-    ctx.lineWidth = Math.max(2, Math.round(Math.min(canvas.width, canvas.height) * 0.003));
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-    ctx.globalAlpha = 0.95;
-    ctx.beginPath();
-    ctx.strokeRect(x, y, w, h);
-
-    // label background (top center of box)
-    const label = `${cls} ${score}%`;
-    ctx.font = `${Math.max(14, Math.round(canvas.width * 0.02))}px Arial`;
-    ctx.textAlign = "center";
-    // background pill
-    const textWidth = ctx.measureText(label).width;
-    const pillW = textWidth + 12;
-    const pillH = parseInt(ctx.font, 10) + 8;
-    const pillX = x + w / 2 - pillW / 2;
-    const pillY = Math.max(6, y - pillH - 6);
-
-    // shadow / glow
-    ctx.fillStyle = hexToRgba(color, 0.15);
-    roundRect(ctx, pillX - 2, pillY - 2, pillW + 4, pillH + 4, 8, true, false);
-    // fill pill
-    ctx.fillStyle = color;
-    roundRect(ctx, pillX, pillY, pillW, pillH, 8, true, false);
-    // text
-    ctx.fillStyle = "#fff";
-    ctx.fillText(label, x + w / 2, pillY + pillH - 8);
-
-    // small score at bottom-right
-    ctx.fillStyle = hexToRgba(color, 0.25);
-    ctx.fillRect(x + w - 40, y + h - 18, 36, 14);
-    ctx.fillStyle = "#fff";
-    ctx.textAlign = "right";
-    ctx.fillText(`${score}%`, x + w - 6, y + h - 6);
-  });
-
-  // show topCenterLabel for primary object (first highest score)
-  if (predictions.length > 0) {
-    topCenterLabel.style.display = 'block';
-    topCenterLabel.innerText = `${predictions[0].class.toUpperCase()} • ${Math.round(predictions[0].score*100)}%`;
-  } else {
-    topCenterLabel.style.display = 'none';
-  }
-}
-
-/* ===== Helpers ===== */
-function roundRect(ctx, x, y, w, h, r, fill, stroke) {
-  if (typeof r === 'undefined') r = 5;
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
-  if (fill) ctx.fill();
-  if (stroke) ctx.stroke();
-}
-
-function hexToRgba(h, a = 1) {
-  // h expected to be "hsl(...)" or any CSS color; fallback to rgba white
-  // We'll try to parse HSL -> convert to rgb (quick hack: use offscreen element)
-  try {
-    const tmp = document.createElement('div');
-    tmp.style.color = h;
-    document.body.appendChild(tmp);
-    const cs = getComputedStyle(tmp).color;
-    document.body.removeChild(tmp);
-    // cs is like "rgb(r, g, b)" or "rgba(...)"
-    const nums = cs.match(/(\d+),\s*(\d+),\s*(\d+)/);
-    if (nums) {
-      return `rgba(${nums[1]},${nums[2]},${nums[3]},${a})`;
-    }
-  } catch (e) {}
-  return `rgba(255,255,255,${a})`;
-}
-
-function hashString(s) {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = s.charCodeAt(i) + ((h << 5) - h);
-  return h;
-}
-
-/* ===== Update detected count UI ===== */
-function updateDetectedCount(n) {
-  document.getElementById('detectedCount').innerText = n;
-}
-
-/* ===== Zoom functions ===== */
-let currentZoom = 1;
-let zoomAnimating = false;
-function zoomOnBox(bbox) {
-  // bbox: [x,y,w,h] relative to video pixel coords
-  const [x, y, w, h] = bbox;
-  const cx = x + w / 2;
-  const cy = y + h / 2;
-  // convert to percent center
-  const vx = canvas.width;
-  const vy = canvas.height;
-  const px = cx / vx * 100;
-  const py = cy / vy * 100;
-  const scale = Math.min(2.2, Math.max(1.1, Math.round((Math.min(vx, vy) / Math.max(w, h)) * 10) / 10));
-  currentZoom = scale;
-  // apply transform origin and scale
-  video.style.transformOrigin = `${px}% ${py}%`;
-  video.style.transition = 'transform 350ms cubic-bezier(.2,.9,.2,1)';
-  video.style.transform = `scale(${currentZoom})`;
-  // subtle overlay brightness
-  canvas.style.transition = 'opacity 350ms';
-  canvas.style.opacity = 1;
-}
-
-function resetZoomSmooth() {
-  if (currentZoom === 1) return;
-  video.style.transform = `scale(1)`;
-  currentZoom = 1;
-}
-
-function resetZoom() {
-  video.style.transform = 'scale(1)';
-  video.style.transformOrigin = 'center center';
-  currentZoom = 1;
-}
-
-/* ===== Main UI bindings ===== */
-document.addEventListener('DOMContentLoaded', () => {
-  // elements
-  const cameraBtn = document.getElementById('cameraBtn');
-  const stopCameraBtn = document.getElementById('stopCameraBtn');
-  const sendBtn = document.getElementById('sendBtn');
-  const userInput = document.getElementById('userInput');
-  const micBtn = document.getElementById('micBtn');
-  const soundToggleBtn = document.getElementById('soundToggleBtn');
-  const scannerToggle = document.getElementById('scannerToggle');
-  const zoomToggle = document.getElementById('zoomToggle');
-  const resetZoomBtn = document.getElementById('resetZoom');
-  const themeBtn = document.getElementById('themeBtn');
-
-  // camera on
-  cameraBtn.onclick = async () => {
-    await startCameraAndModel();
-    scanner.style.display = scannerEnabled ? 'block' : 'none';
-  };
-  stopCameraBtn.onclick = () => { stopCamera(); };
-
-  // scanner toggle
-  scannerToggle.onclick = () => {
-    scannerEnabled = !scannerEnabled;
-    scanner.style.display = scannerEnabled ? 'block' : 'none';
-    scannerToggle.style.boxShadow = scannerEnabled ? '0 8px 28px rgba(124,58,237,0.18)' : 'none';
-  };
-
-  // zoom toggle
-  zoomToggle.onclick = () => {
-    autoZoomEnabled = !autoZoomEnabled;
-    zoomToggle.style.boxShadow = autoZoomEnabled ? '0 8px 28px rgba(6,182,212,0.12)' : 'none';
-  };
-
-  resetZoomBtn.onclick = () => { resetZoom(); };
-
-  // sound toggle
-  soundToggleBtn.onclick = () => {
-    soundEnabled = !soundEnabled;
-    soundToggleBtn.innerText = soundEnabled ? '🔔 Som' : '🔕 Sem Som';
-  };
-
-  // theme toggle
-  themeBtn.onclick = () => { document.body.classList.toggle('light'); };
-
-  // send message
-  sendBtn.onclick = async () => {
-    const msg = userInput.value.trim();
-    if (!msg) return;
-    addUserMessage(msg);
-    userInput.value = '';
-    // emulate reply
-    showThinking();
-    setTimeout(async () => {
-      removeThinking();
-      const reply = await getBotReply(msg);
-      addBotMessage(reply);
-      ContextModule.add(msg, reply);
-      stats.interactions++; stats.learned++;
-      updateStats();
-    }, 600);
-  };
-  userInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendBtn.click(); });
-
-  // mic button (speech recognition)
-  micBtn.onclick = () => { toggleSpeechRecognition(); };
-
-  // export & clear
-  document.getElementById('exportBtn').onclick = () => {
-    const messages = Array.from(document.querySelectorAll('.message')).map(m => m.innerText).join("\n");
-    const blob = new Blob([messages], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'chat_zenia.txt'; a.click(); URL.revokeObjectURL(url);
-  };
-  document.getElementById('clearBtn').onclick = () => {
-    document.getElementById('messages').innerHTML = '';
-    ContextModule.clear();
-    stats.interactions = 0; stats.learned = 0;
-    updateStats();
-    addBotMessage("🧹 Chat limpo! Vamos continuar a conversa.");
-  };
-
-  // init small UI bits
-  updateStats();
+input.addEventListener("keydown",e=>{
+  if(e.key==="Enter") document.getElementById("send").click();
 });
 
-/* ===== Simple chat helpers (reuse from your original) ===== */
-function addUserMessage(t) {
-  const container = document.getElementById('messages');
-  const m = document.createElement('div'); m.className = 'message'; m.style.alignSelf = 'flex-end';
-  m.innerText = `Você: ${t}`; container.appendChild(m); container.scrollTop = container.scrollHeight;
-  // speak optionally
-}
-function addBotMessage(t) {
-  const container = document.getElementById('messages');
-  const m = document.createElement('div'); m.className = 'message'; m.style.alignSelf = 'flex-start';
-  m.innerText = `Zenia: ${t}`; container.appendChild(m); container.scrollTop = container.scrollHeight;
-  // tts
-  try { if ('speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(t); u.lang = 'pt-PT'; speechSynthesis.speak(u); } } catch (e) {}
-}
-function showThinking() {
-  const container = document.getElementById('messages');
-  const d = document.createElement('div'); d.className = 'message'; d.id = 'thinking'; d.innerText = 'Zenia está escrevendo...'; container.appendChild(d); container.scrollTop = container.scrollHeight;
-}
-function removeThinking() { const t = document.getElementById('thinking'); if (t) t.remove(); }
+/* ===== CÂMERA ===== */
+document.getElementById("cameraBtn").onclick = async ()=>{
+  stream = await navigator.mediaDevices.getUserMedia({video:true});
+  video.srcObject = stream;
+  video.style.display="block";
+};
 
-function updateStats() {
-  document.getElementById('interactions').innerText = stats.interactions;
-  document.getElementById('learned').innerText = stats.learned;
-  document.getElementById('contextSize').innerText = ContextModule.size();
-}
-
-/* ===== Simple similarity-based reply + Wikipedia fallback (kept compact) ===== */
-function similarity(a, b) {
-  const aWords = a.toLowerCase().match(/\w+/g) || [];
-  const bWords = b.toLowerCase().match(/\w+/g) || [];
-  let matches = 0; aWords.forEach(w => { if (bWords.includes(w)) matches++; });
-  return matches / Math.max(aWords.length, 1);
-}
-async function getBotReply(userMsg) {
-  const msgLower = userMsg.toLowerCase().trim();
-  const greetings = ["oi", "olá", "ola", "bom dia", "boa tarde", "boa noite"];
-  if (greetings.includes(msgLower)) return "👋 Olá! Que bom te ver! Eu sou a Zenia IA, sua assistente amiga e professora. Pergunte o que quiser, vamos aprender juntos!";
-  const farewells = ["tchau", "até logo", "adeus", "até mais"];
-  if (farewells.includes(msgLower)) return "👋 Até mais! Foi ótimo conversar contigo. Volte sempre!";
-
-  if (LocalData && LocalData.length > 0) {
-    let scored = [];
-    LocalData.forEach(d => {
-      const score = similarity(userMsg, d.prompt || "");
-      if (score > 0) scored.push({ score: score, response: d.response });
-    });
-    if (scored.length > 0) {
-      scored.sort((a, b) => b.score - a.score);
-      return scored[0].response;
-    }
+document.getElementById("stopBtn").onclick = ()=>{
+  if(stream){
+    stream.getTracks().forEach(t=>t.stop());
+    video.style.display="none";
   }
-
-  // Wikipedia summary fallback
-  try {
-    const url = `https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(userMsg)}`;
-    const res = await fetch(url);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.extract) return data.extract;
-    }
-  } catch (e) { console.warn("Wikipedia erro", e); }
-
-  const defaultReplies = ["Interessante! Pode me contar mais sobre isso?", "😄 Que legal!", "🤔 Não tenho certeza, mas podemos conversar sobre isso.", "👍 Entendi!", "Vamos explorar juntos este assunto!"];
-  return defaultReplies[Math.floor(Math.random() * defaultReplies.length)];
-}
-
-/* ===== Speech recognition + emotion analysis (kept from your code) ===== */
-let recognition;
-let listening = false;
-let audioContext, analyser, microphoneStream, dataArray;
-if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new SpeechRecognition();
-  recognition.lang = 'pt-PT';
-  recognition.continuous = false;
-  recognition.interimResults = false;
-
-  recognition.onstart = () => { listening = true; document.getElementById('micBtn').style.background = '#22c55e'; startVoiceEmotionAnalysis(); };
-  recognition.onend = () => { listening = false; document.getElementById('micBtn').style.background = ''; stopVoiceEmotionAnalysis(); };
-  recognition.onresult = async (event) => {
-    const transcript = event.results[0][0].transcript;
-    addUserMessage(transcript);
-    showThinking();
-    setTimeout(async () => {
-      removeThinking();
-      const botReply = await getBotReply(transcript);
-      addBotMessage(botReply);
-      ContextModule.add(transcript, botReply);
-      stats.interactions++; stats.learned++; updateStats();
-    }, 600);
-  };
-}
-
-function toggleSpeechRecognition() {
-  if (!recognition) return alert("Reconhecimento de voz não suportado neste navegador.");
-  if (listening) recognition.stop(); else recognition.start();
-}
-
-/* ===== Emotion analysis via audio input (volume-based heuristic) ===== */
-async function startVoiceEmotionAnalysis() {
-  try {
-    if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-    microphoneStream = audioContext.createMediaStreamSource(stream);
-    analyser = audioContext.createAnalyser();
-    analyser.fftSize = 2048;
-    dataArray = new Uint8Array(analyser.fftSize);
-    microphoneStream.connect(analyser);
-    detectEmotion();
-  } catch (err) { console.warn("Erro emoção:", err); }
-}
-function stopVoiceEmotionAnalysis() {
-  try {
-    if (microphoneStream && microphoneStream.mediaStream) microphoneStream.mediaStream.getTracks().forEach(t => t.stop());
-  } catch (e) {}
-}
-function detectEmotion() {
-  if (!analyser) return;
-  analyser.getByteTimeDomainData(dataArray);
-  let sum = 0;
-  for (let i = 0; i < dataArray.length; i++) {
-    const v = (dataArray[i] - 128) / 128;
-    sum += v * v;
-  }
-  const volume = Math.sqrt(sum / dataArray.length);
-  let emotion = "Neutro";
-  if (volume > 0.12) emotion = "Animado/Feliz";
-  else if (volume > 0.08) emotion = "Normal";
-  else if (volume < 0.04) emotion = "Triste/Calmo";
-  document.getElementById('emotionIndicator').innerText = emotion;
-  if (listening) requestAnimationFrame(detectEmotion);
-}
-
-/* ===== Misc: simple hash -> deterministic color generation already above ===== */
-
-/* ===== Ensure canvas resizes on window change ===== */
-window.addEventListener('resize', () => { try { resizeCanvas(); } catch (e) {} });
-
+};
 </script>
+
 </body>
 </html>
