@@ -1,168 +1,179 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Zenia IA - by @inacio.u.daniel</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="shortcut icon" href="favicon.png" type="image/x-icon">
 
 <style>
+/* ===== RESET & VARIÁVEIS ===== */
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg-primary:#0f172a;--bg-secondary:#0f2130;--bg-tertiary:#152433;
+--accent-1:#7c3aed;--accent-2:#06b6d4;--text:#e6eef8;--muted:#94a3b8;
+--card:#102235;--glass:rgba(255,255,255,0.04);
+}
 body{
-  margin:0;
-  font-family:system-ui;
-  background:#0f172a;
-  color:#e6eef8;
+font-family:Inter,"Segoe UI",system-ui;
+background:var(--bg-primary);
+color:var(--text);
+min-height:100vh;
 }
-.header{
-  padding:1rem;
-  background:#020617;
-}
-.container{
-  display:grid;
-  grid-template-columns:300px 1fr;
-  gap:1rem;
-  padding:1rem;
-}
-.card{
-  background:#020617;
-  padding:1rem;
-  border-radius:10px;
-}
-.chat{
-  display:flex;
-  flex-direction:column;
-  height:80vh;
-}
-#video{
-  width:100%;
-  height:260px;
-  background:black;
-  display:none;
-}
-.messages{
-  flex:1;
-  overflow:auto;
-  padding:.5rem;
-}
-.msg{
-  margin:.3rem 0;
-  padding:.4rem .6rem;
-  border-radius:6px;
-  background:#1e293b;
-}
-.bot{background:#312e81}
-.input{
-  display:flex;
-}
-input{
-  flex:1;
-  padding:.5rem;
-}
-button{
-  padding:.5rem;
-  cursor:pointer;
-}
+.header{background:var(--bg-secondary);padding:1rem}
+.header-content{max-width:1200px;margin:auto;display:flex;justify-content:space-between;flex-wrap:wrap}
+.logo{display:flex;gap:.75rem;align-items:center}
+.logo-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(135deg,#667eea,#764ba2)}
+.header-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+.icon-btn{background:var(--card);border:none;padding:.5rem .7rem;border-radius:10px;color:var(--text);cursor:pointer}
+.container{max-width:1200px;margin:1rem auto;padding:0 1rem;display:grid;grid-template-columns:320px 1fr;gap:1rem}
+.sidebar{display:flex;flex-direction:column;gap:.8rem}
+.card{background:var(--card);padding:1rem;border-radius:12px}
+.card h3{font-size:.9rem;color:var(--muted);margin-bottom:.5rem}
+.stat-item{display:flex;justify-content:space-between;font-size:.9rem}
+.chat-container{background:var(--bg-secondary);border-radius:12px;display:flex;flex-direction:column;height:80vh}
+.controls{padding:.6rem;border-bottom:1px solid rgba(255,255,255,.05)}
+#videoWrap{flex:1;position:relative}
+.messages{position:absolute;bottom:10px;left:10px;display:flex;flex-direction:column;gap:.4rem;max-width:90%}
+.message{background:var(--glass);padding:.5rem .7rem;border-radius:8px;font-size:.9rem}
+.input-row{display:flex;gap:.5rem;padding:.6rem;border-top:1px solid rgba(255,255,255,.05)}
+#userInput{flex:1;padding:.6rem;border-radius:10px;border:none}
+.send-btn{background:linear-gradient(90deg,var(--accent-1),var(--accent-2));border:none;padding:.6rem .8rem;border-radius:10px;color:white;cursor:pointer}
+@media(max-width:900px){.container{grid-template-columns:1fr}}
 </style>
 </head>
 
 <body>
+<div id="app">
 
-<div class="header">
-  <strong>🧠 Zenia IA</strong>
-</div>
+<header class="header">
+  <div class="header-content">
+    <div class="logo">
+      <div class="logo-icon">🧠</div>
+      <div>
+        <h1>Zenia IA</h1>
+        <p style="font-size:.8rem;color:var(--muted)">by <strong>@inacio.u.daniel</strong></p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn">📹 Camera</button>
+      <button class="icon-btn">🎤 Microfone</button>
+    </div>
+  </div>
+</header>
 
 <div class="container">
 
-<aside class="card">
-  <p><strong>Autor:</strong> @inacio.u.daniel</p>
-  <p>Interações: <span id="count">0</span></p>
-  <button id="cameraBtn">📷 Câmera</button>
-  <button id="stopBtn">⛔ Parar</button>
+<aside class="sidebar">
+  <div class="card">
+    <h3>Autor</h3>
+    <div class="stat-item"><span>@inacio.u.daniel</span><span>Dev</span></div>
+  </div>
+
+  <div class="card">
+    <h3>Estatísticas</h3>
+    <div class="stat-item"><span>⚡ Interações</span><span id="interactions">0</span></div>
+  </div>
 </aside>
 
-<main class="card chat">
-  <video id="video" autoplay muted playsinline></video>
-  <div class="messages" id="messages"></div>
-  <div class="input">
-    <input id="input" placeholder="Digite..." />
-    <button id="send">Enviar</button>
+<main class="chat-container">
+  <div class="controls">Zenia IA Online</div>
+
+  <div id="videoWrap">
+    <div class="messages" id="messages"></div>
+  </div>
+
+  <div class="input-row">
+    <input id="userInput" placeholder="Digite sua mensagem..." />
+    <button class="send-btn" id="sendBtn">Enviar</button>
   </div>
 </main>
 
 </div>
+</div>
 
+<!-- ================= SCRIPT ================= -->
 <script>
-let interactions = 0;
-let stream = null;
+/* ===== BASE LOCAL ===== */
+const LocalData = [];
 
-const messages = document.getElementById("messages");
-const input = document.getElementById("input");
-const count = document.getElementById("count");
-const video = document.getElementById("video");
-
-/* ===== NLP SIMPLES ===== */
-async function getBotReply(text){
-  text = text.toLowerCase();
-
-  if(text.includes("oi") || text.includes("olá"))
-    return "👋 Olá! Sou a Zenia IA.";
-
-  if(/\d+.*[\+\-\*\/].*\d+/.test(text)){
-    try{
-      return "🧮 Resultado: " + Function("return "+text)();
-    }catch{
-      return "Erro no cálculo.";
-    }
-  }
-
-  try{
-    const res = await fetch(
-      "https://pt.wikipedia.org/api/rest_v1/page/summary/" +
-      encodeURIComponent(text)
-    );
-    const data = await res.json();
-    if(data.extract) return data.extract.slice(0,400)+"...";
-  }catch{}
-
-  return "🤖 Ainda estou a aprender.";
+/* ===== SIMILARIDADE ===== */
+function similarity(a,b){
+if(!a||!b)return 0;
+a=a.toLowerCase();b=b.toLowerCase();
+let c=0;
+a.split(" ").forEach(w=>{if(b.includes(w))c++});
+return c/a.split(" ").length;
 }
 
-/* ===== UI ===== */
-function addMsg(text, cls){
-  const div = document.createElement("div");
-  div.className = "msg "+cls;
-  div.textContent = text;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
-}
-
-/* ===== ENVIAR ===== */
-document.getElementById("send").onclick = async ()=>{
-  if(!input.value) return;
-  addMsg(input.value,"user");
-  const reply = await getBotReply(input.value);
-  addMsg(reply,"bot");
-  input.value="";
-  interactions++;
-  count.textContent = interactions;
+/* ===== NLP ===== */
+const ZeniaNLP={
+normalize:t=>t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,""),
+intent:t=>{
+if(/[0-9].*[\+\-\*\/]/.test(t))return"calculo";
+if(/quem/.test(t))return"pessoa";
+if(/onde/.test(t))return"localizacao";
+if(/porque/.test(t))return"explicacao";
+if(/o que e|oque e/.test(t))return"definicao";
+return"geral";
+},
+extractTopic:t=>t.replace(/o que e|oque e|quem e|onde fica|porque|explica/g,"").trim(),
+parseMath:t=>t.replace(/vezes/g,"*").replace(/mais/g,"+").replace(/menos/g,"-")
 };
 
-input.addEventListener("keydown",e=>{
-  if(e.key==="Enter") document.getElementById("send").click();
+/* ===== WIKI ===== */
+async function ZeniaKnowledgeEngine(msg){
+const clean=ZeniaNLP.normalize(msg);
+if(ZeniaNLP.intent(clean)==="calculo"){
+try{return "🧮 Resultado: "+Function("return "+ZeniaNLP.parseMath(clean))();}
+catch{return"Erro no cálculo";}
+}
+const topic=ZeniaNLP.extractTopic(clean);
+if(!topic)return null;
+try{
+const r=await fetch("https://pt.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(topic));
+if(!r.ok)return null;
+const d=await r.json();
+return d.extract||null;
+}catch{return null}
+}
+
+/* ===== BOT ===== */
+async function getBotReply(msg){
+const k=await ZeniaKnowledgeEngine(msg);
+if(k)return k;
+if(["oi","ola","olá"].includes(msg.toLowerCase()))return"👋 Olá!";
+return"🤖 Ainda estou a aprender.";
+}
+
+/* ===== CHAT ===== */
+document.addEventListener("DOMContentLoaded",()=>{
+const input=document.getElementById("userInput");
+const btn=document.getElementById("sendBtn");
+const msgs=document.getElementById("messages");
+const stats=document.getElementById("interactions");
+let count=0;
+
+function add(text){
+const d=document.createElement("div");
+d.className="message";
+d.textContent=text;
+msgs.appendChild(d);
+msgs.scrollTop=msgs.scrollHeight;
+}
+
+async function send(){
+if(!input.value.trim())return;
+add("🧑 "+input.value);
+const r=await getBotReply(input.value);
+add("🤖 "+r);
+input.value="";
+stats.textContent=++count;
+}
+
+btn.onclick=send;
+input.onkeydown=e=>{if(e.key==="Enter")send();}
 });
-
-/* ===== CÂMERA ===== */
-document.getElementById("cameraBtn").onclick = async ()=>{
-  stream = await navigator.mediaDevices.getUserMedia({video:true});
-  video.srcObject = stream;
-  video.style.display="block";
-};
-
-document.getElementById("stopBtn").onclick = ()=>{
-  if(stream){
-    stream.getTracks().forEach(t=>t.stop());
-    video.style.display="none";
-  }
-};
 </script>
 
 </body>
