@@ -104,24 +104,71 @@
 
 <script>
 /* ======================================================
-   MEMÓRIA PERSISTENTE
+   ESTADO GLOBAL
 ====================================================== */
-const MEMORY_KEY = "zenia_memory_v1";
-let Memory = JSON.parse(localStorage.getItem(MEMORY_KEY) || "[]");
+let LocalData = JSON.parse(localStorage.getItem("zenia_local_data") || "[]");
+let interactions = 0;
+let soundEnabled = true;
+let scannerOn = false;
+let autoZoom = false;
 
-function saveMemory(prompt, response){
-  Memory.push({prompt, response});
-  localStorage.setItem(MEMORY_KEY, JSON.stringify(Memory));
-  document.getElementById("learned").textContent = Memory.length;
+/* ======================================================
+   UTILIDADES
+====================================================== */
+function similarity(a,b){
+  if(!a||!b) return 0;
+  a=a.toLowerCase(); b=b.toLowerCase();
+  let m=0;
+  a.split(" ").forEach(w=>{ if(b.includes(w)) m++; });
+  return m/Math.max(a.split(" ").length,1);
+}
+
+function updateStats(){
+  document.getElementById("interactions").textContent = interactions;
+  document.getElementById("learned").textContent = LocalData.length;
+  document.getElementById("contextSize").textContent = JSON.stringify(LocalData).length;
 }
 
 /* ======================================================
-   EMOÇÕES (ANÁLISE SIMPLES)
+   MEMÓRIA
+====================================================== */
+function saveMemory(prompt,response){
+  LocalData.push({prompt,response,ts:Date.now()});
+  localStorage.setItem("zenia_local_data", JSON.stringify(LocalData));
+  updateStats();
+}
+
+document.getElementById("exportBtn").onclick = ()=>{
+  const blob = new Blob([JSON.stringify(LocalData,null,2)],{type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "zenia_memoria.json";
+  a.click();
+};
+
+document.getElementById("clearBtn").onclick = ()=>{
+  if(confirm("Limpar memória da Zenia?")){
+    LocalData = [];
+    localStorage.removeItem("zenia_local_data");
+    updateStats();
+    document.getElementById("messages").innerHTML="";
+  }
+};
+
+/* ======================================================
+   TEMA
+====================================================== */
+document.getElementById("themeBtn").onclick = ()=>{
+  document.body.classList.toggle("light");
+};
+
+/* ======================================================
+   EMOÇÕES
 ====================================================== */
 function detectEmotion(text){
-  text = text.toLowerCase();
+  text=text.toLowerCase();
   if(/feliz|bom|otimo|adoro|amei/.test(text)) return "😊 Feliz";
-  if(/triste|mal|odeio|raiva/.test(text)) return "😠 Irritado";
+  if(/triste|mal|odeio|raiva/.test(text)) return "😠 Raiva";
   if(/medo|assustado/.test(text)) return "😨 Medo";
   if(/amor|gosto/.test(text)) return "❤️ Amor";
   return "😐 Neutro";
@@ -133,108 +180,129 @@ function detectEmotion(text){
 let recognition;
 let ttsEnabled = true;
 
-if ("webkitSpeechRecognition" in window) {
+if("webkitSpeechRecognition" in window){
   recognition = new webkitSpeechRecognition();
   recognition.lang = "pt-PT";
-  recognition.continuous = false;
-  recognition.onresult = e => {
+  recognition.onresult = e=>{
     document.getElementById("userInput").value = e.results[0][0].transcript;
   };
 }
 
-document.getElementById("micBtn").onclick = () => recognition && recognition.start();
-document.getElementById("ttsBtn").onclick = () => ttsEnabled = !ttsEnabled;
+document.getElementById("micBtn").onclick = ()=> recognition && recognition.start();
+document.getElementById("soundToggleBtn").onclick = ()=> soundEnabled=!soundEnabled;
+document.getElementById("ttsBtn").onclick = ()=> ttsEnabled=!ttsEnabled;
 
 function speak(text){
-  if(!ttsEnabled) return;
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "pt-PT";
+  if(!ttsEnabled||!soundEnabled) return;
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang="pt-PT";
   speechSynthesis.speak(u);
 }
+
+document.addEventListener("keydown",e=>{
+  if(e.ctrlKey && e.key==="m") recognition && recognition.start();
+});
 
 /* ======================================================
    CÂMERA + COCO SSD
 ====================================================== */
-let model, stream, detecting = false;
+let model,stream,detecting=false,zoom=1;
 
-const video = document.getElementById("videoStream");
-const canvas = document.getElementById("overlayCanvas");
-const ctx = canvas.getContext("2d");
+const video=document.getElementById("videoStream");
+const canvas=document.getElementById("overlayCanvas");
+const ctx=canvas.getContext("2d");
 
 async function startCamera(){
-  stream = await navigator.mediaDevices.getUserMedia({video:true});
-  video.srcObject = stream;
-  video.style.display = "block";
-  model = await cocoSsd.load();
-  detecting = true;
-  detectFrame();
+  stream=await navigator.mediaDevices.getUserMedia({video:true});
+  video.srcObject=stream;
+  video.style.display="block";
+  model=await cocoSsd.load();
+  detecting=true;
+  detectLoop();
 }
 
 function stopCamera(){
-  detecting = false;
-  if(stream) stream.getTracks().forEach(t=>t.stop());
-  video.style.display = "none";
+  detecting=false;
+  stream && stream.getTracks().forEach(t=>t.stop());
+  video.style.display="none";
   ctx.clearRect(0,0,canvas.width,canvas.height);
 }
 
-async function detectFrame(){
+async function detectLoop(){
   if(!detecting) return;
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-
-  const predictions = await model.detect(video);
+  canvas.width=video.videoWidth;
+  canvas.height=video.videoHeight;
+  const preds=await model.detect(video);
   ctx.clearRect(0,0,canvas.width,canvas.height);
+  document.getElementById("detectedCount").textContent=preds.length;
 
-  document.getElementById("detectedCount").textContent = predictions.length;
-
-  predictions.forEach(p=>{
-    ctx.strokeStyle = "#7c3aed";
-    ctx.lineWidth = 2;
+  preds.forEach(p=>{
+    ctx.strokeStyle="#7c3aed";
+    ctx.lineWidth=2;
     ctx.strokeRect(...p.bbox);
-    ctx.fillStyle = "#7c3aed";
-    ctx.fillText(p.class, p.bbox[0], p.bbox[1]-5);
+    ctx.fillStyle="#7c3aed";
+    ctx.fillText(p.class,p.bbox[0],p.bbox[1]-5);
   });
 
-  requestAnimationFrame(detectFrame);
+  if(autoZoom && preds[0]){
+    zoom=1.2;
+    video.style.transform=`scale(${zoom})`;
+  }
+
+  requestAnimationFrame(detectLoop);
 }
 
-document.getElementById("cameraBtn").onclick = startCamera;
-document.getElementById("stopCameraBtn").onclick = stopCamera;
+document.getElementById("cameraBtn").onclick=startCamera;
+document.getElementById("stopCameraBtn").onclick=stopCamera;
 
 /* ======================================================
-   CHAT + MEMÓRIA + EMOÇÃO
+   SCANNER / ZOOM
+====================================================== */
+document.getElementById("scannerToggle").onclick=()=>{
+  scannerOn=!scannerOn;
+  document.getElementById("scanner").style.display=scannerOn?"block":"none";
+};
+
+document.getElementById("zoomToggle").onclick=()=>{
+  autoZoom=!autoZoom;
+};
+
+document.getElementById("resetZoom").onclick=()=>{
+  zoom=1;
+  video.style.transform="scale(1)";
+};
+
+/* ======================================================
+   CHAT
 ====================================================== */
 document.addEventListener("DOMContentLoaded",()=>{
-const input = document.getElementById("userInput");
-const btn = document.getElementById("sendBtn");
-const msgs = document.getElementById("messages");
-const interactions = document.getElementById("interactions");
-const emotionUI = document.getElementById("emotionIndicator");
-
-let count = 0;
+const input=document.getElementById("userInput");
+const btn=document.getElementById("sendBtn");
+const msgs=document.getElementById("messages");
+const emotionUI=document.getElementById("emotionIndicator");
 
 async function send(){
   if(!input.value.trim()) return;
-  const user = input.value;
-  msgs.innerHTML += `<div class="message">🧑 ${user}</div>`;
-  input.value = "";
+  const user=input.value;
+  msgs.innerHTML+=`<div class="message">🧑 ${user}</div>`;
+  input.value="";
 
-  const reply = await getBotReply(user);
-  msgs.innerHTML += `<div class="message">🤖 ${reply}</div>`;
+  const reply=await getBotReply(user);
+  msgs.innerHTML+=`<div class="message">🤖 ${reply}</div>`;
 
-  saveMemory(user, reply);
+  saveMemory(user,reply);
+  emotionUI.textContent=detectEmotion(user);
   speak(reply);
-
-  emotionUI.textContent = detectEmotion(user);
-  interactions.textContent = ++count;
-  msgs.scrollTop = msgs.scrollHeight;
+  interactions++;
+  updateStats();
+  msgs.scrollTop=msgs.scrollHeight;
 }
 
-btn.onclick = send;
-input.onkeydown = e => { if(e.key==="Enter") send(); };
+btn.onclick=send;
+input.onkeydown=e=>{if(e.key==="Enter")send();}
+updateStats();
 });
 </script>
-
 
 </body>
 </html>
