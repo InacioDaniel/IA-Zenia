@@ -1,28 +1,20 @@
 // script.js
 
-const { pipeline } = window.transformers;
-
-let embedder = null;
-let generator = null;
+let engine = null;
 let modelsReady = false;
 
 async function loadModels() {
   try {
-    document.getElementById("status").textContent = "Carregando modelos...";
+    document.getElementById("status").textContent = "Carregando modelo WebLLM...";
 
-    // Carrega embeddings
-    embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
-
-    // Carrega modelo de geração
-    generator = await pipeline("text-generation", "Xenova/distilgpt2"); 
-    // use distilgpt2 primeiro para testar, é mais leve
+    // Inicializa engine com modelo leve (vicuna 7B quantizado)
+    engine = await webllm.CreateEngine("vicuna-v1.5-7b-q4f32_0");
 
     modelsReady = true;
-    document.getElementById("status").textContent = "Modelos carregados!";
-    document.getElementById("modelProgress").style.width = "100%";
+    document.getElementById("status").textContent = "Modelo carregado!";
   } catch (err) {
-    console.error("Erro ao carregar modelos", err);
-    document.getElementById("status").textContent = "Erro ao carregar modelos.";
+    console.error("Erro ao carregar modelo", err);
+    document.getElementById("status").textContent = "Erro ao carregar modelo.";
   }
 }
 
@@ -35,14 +27,16 @@ async function handleUserInput() {
   input.value = "";
 
   if (!modelsReady) {
-    addMessage("Modelos ainda não estão prontos.", "zenia");
+    addMessage("Modelo ainda não está pronto.", "zenia");
     return;
   }
 
   try {
     document.getElementById("status").textContent = "Gerando resposta...";
-    const output = await generator(text, { max_new_tokens: 50 });
-    addMessage(output[0].generated_text, "zenia");
+    const reply = await engine.chat.completion([
+      { role: "user", content: text }
+    ]);
+    addMessage(reply.message.content, "zenia");
     document.getElementById("status").textContent = "Pronto!";
   } catch (err) {
     console.error(err);
