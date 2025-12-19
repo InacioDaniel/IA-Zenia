@@ -33,10 +33,16 @@ async function handleUserInput() {
 
   try {
     document.getElementById("status").textContent = "Gerando resposta...";
-    const reply = await engine.chat.completion([
-      { role: "user", content: text }
-    ]);
-    addMessage(reply.message.content, "zenia");
+
+    // WebLLM retorna um async generator, precisamos iterar
+    let resposta = "";
+    for await (const chunk of engine.chat.completion([{ role: "user", content: text }])) {
+      if (chunk.message?.content) {
+        resposta += chunk.message.content;
+      }
+    }
+
+    addMessage(resposta, "zenia");
     document.getElementById("status").textContent = "Pronto!";
   } catch (err) {
     console.error(err);
