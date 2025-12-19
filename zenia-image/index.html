@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sora AI v2.1 – Futurista</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+<style>
+body { font-family:'Fira Code', monospace; margin:0; background: linear-gradient(135deg,#0c0f1e,#1a1f35); color:#eee; }
+.sidebar { backdrop-filter: blur(20px) saturate(180%); background-color: rgba(20,25,40,0.7); border-radius:24px; padding:2rem; display:flex; flex-direction:column; gap:1rem; box-shadow: 0 15px 40px rgba(0,0,0,0.7); }
+button { backdrop-filter: blur(8px); background: linear-gradient(145deg, rgba(125,179,255,0.25), rgba(125,179,255,0.15)); border-radius:16px; padding:0.5rem 1rem; font-weight:600; text-align:center; transition:0.25s; box-shadow: 0 4px 15px rgba(0,0,0,0.4); cursor:pointer; }
+button[disabled] { opacity:0.5; cursor:not-allowed; transform:none; }
+button:hover:not([disabled]) { background: linear-gradient(145deg, rgba(125,179,255,0.4), rgba(125,179,255,0.25)); box-shadow: 0 6px 20px rgba(0,0,0,0.5); transform: translateY(-1px); }
+#zenia-viewport { border-radius:32px; box-shadow: 0 15px 40px rgba(0,0,0,0.7), inset 0 0 20px rgba(0,0,0,0.3); background:#000; display:block; margin:auto; }
+.badge { backdrop-filter: blur(8px); background-color: rgba(125,179,255,0.2); padding: 0.25rem 0.8rem; border-radius:9999px; transition:0.25s; display:inline-block; font-weight:500; }
+.badge:hover { background-color: rgba(125,179,255,0.35); transform: translateY(-2px) scale(1.05); box-shadow:0 6px 20px rgba(0,0,0,0.5);}
+.progress-circle { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); pointer-events:none; }
+.progress-bar-container { position:relative; width:60%; height:10px; background:rgba(0,0,0,0.4); border-radius:6px; overflow:hidden; margin-top:8px; }
+.progress-bar { position:absolute; height:100%; width:0%; background:#7db3ff; border-radius:6px; transition:width 0.1s; }
+</style>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen p-6 gap-6">
+
+<!-- Sidebar -->
+<div class="sidebar w-full md:w-80">
+  <h2 class="text-[#7db3ff] text-3xl font-bold">Sora AI v2.1</h2>
+  
+  <label class="text-gray-400 mt-2">Modelo:</label>
+  <div class="flex flex-wrap gap-2">
+    <button onclick="setVersion('v1.0')">v1.0 Artística</button>
+    <button onclick="setVersion('v1.1')">v1.1 Realista</button>
+    <button onclick="setVersion('v2.0')">v2.0 Realista+</button>
+    <button onclick="setVersion('v2.1')">v2.1 Cinemática</button>
+  </div>
+
+  <input id="prompt" type="text" placeholder="Digite seu prompt" class="px-3 py-2 rounded text-black mt-2">
+
+  <!-- Upload local image -->
+  <label class="text-gray-400 mt-2">Ou carregue uma imagem local:</label>
+  <input id="fileInput" type="file" accept="image/*" class="mt-1 text-sm">
+
+  <div class="flex flex-col gap-2 mt-2">
+    <button id="generateBtn" onclick="SoraAI.paint()">GERAR IMAGEM</button>
+    <button id="downloadBtn" onclick="SoraAI.download()">BAIXAR IMAGEM</button>
+    <button onclick="SoraAI.randomImage()" id="randomBtn">ALEATÓRIA (v2.1)</button>
+    <button id="cancelBtn" onclick="SoraAI.cancel()" style="display:none">CANCELAR</button>
+  </div>
+
+  <label class="text-gray-400 mt-4">Tamanho final:</label>
+  <div class="flex flex-wrap gap-2">
+    <button onclick="setSize(512)">512x512</button>
+    <button onclick="setSize(1024)">1024x1024</button>
+    <button onclick="setSize(2048)">2048x2048</button>
+  </div>
+
+  <div class="mt-auto">
+    <label class="text-gray-400">Resolução preview:</label>
+    <input type="range" id="resSlider" min="128" max="512" value="256" step="32" class="w-full mt-1">
+  </div>
+</div>
+
+<!-- Canvas central -->
+<div class="flex-grow flex flex-col items-center justify-center p-4 relative">
+  <canvas id="zenia-viewport" width="256" height="256"></canvas>
+  <canvas id="progress-circle" width="100" height="100" class="progress-circle"></canvas>
+  <div class="progress-bar-container">
+    <div id="status-bar" class="progress-bar"></div>
+  </div>
+  <div class="w-full flex justify-between text-sm text-gray-400 mt-2">
+    <span id="status-text">Core: Standby</span>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
