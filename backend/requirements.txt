@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+qdrant-client
+sentence-transformers
+transformers>=4.30.0
+torch   # or install CPU/CUDA build appropriate to your machine
+requests
+tqdm
+python-multipart
+pydantic
