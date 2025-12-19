@@ -56,7 +56,7 @@
 
       <div style="margin-top:10px">
         <label class="small">Modelos (client-side)</label>
-        <div style="margin-top:6px" class="small">Embeddings: sentence-transformers/all‑MiniLM‑L6‑v2<br>Geração: EleutherAI/gpt-neo-125M (há trade‑offs entre qualidade e velocidade)</div>
+        <div style="margin-top:6px" class="small">Embeddings: sentence-transformers/all‑MiniLM‑L6‑v2<br>Geração: EleutherAI/gpt-neo-125M</div>
       </div>
 
       <div id="status" style="margin-top:12px">Status: inicializando...</div>
@@ -75,7 +75,7 @@
         <button id="clearBtn" style="width:100%">Limpar conversa</button>
       </div>
 
-      <div style="margin-top:8px" class="small">Observação: para respostas mais longas e modelos maiores uma maquina com GPU superior a 250MB.</div>
+      <div style="margin-top:8px" class="small">Observação: para respostas mais longas e modelos maiores uma máquina com GPU superior a 250MB.</div>
     </aside>
 
     <main class="card">
@@ -90,8 +90,8 @@
     </main>
   </div>
 
-  <!-- transformers.js (Xenova) -->
-  <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@latest/dist/transformers.min.js"></script>
+  <!-- ✅ versão UMD correta -->
+  <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers/dist/transformers.umd.min.js"></script>
   <!-- main client script -->
   <script src="script.js"></script>
 </body>
