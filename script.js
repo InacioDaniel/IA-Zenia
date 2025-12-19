@@ -7,7 +7,7 @@ async function loadModels() {
   try {
     document.getElementById("status").textContent = "Carregando modelo WebLLM...";
 
-    // Inicializa engine com modelo leve (vicuna 7B quantizado)
+    // Inicializa engine com modelo leve (vicuna quantizado)
     engine = await webllm.CreateEngine("vicuna-v1.5-7b-q4f32_0");
 
     modelsReady = true;
