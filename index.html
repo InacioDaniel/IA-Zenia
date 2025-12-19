@@ -1,87 +1,98 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Zenia IA — Chat</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Zenia IA — by @inacio.u.daniel (agora com LLM)</title>
+  <link rel="shortcut icon" href="favicon.png" type="image/x-icon">
   <style>
     :root{
-      --bg:#0f172a; --card:#102235; --accent1:#7c3aed; --accent2:#06b6d4; --text:#e6eef8; --muted:#94a3b8;
+      --bg:#0f172a; --card:#102235; --accent1:#7c3aed; --accent2:#06b6d4;
+      --text:#e6eef8; --muted:#94a3b8; --glass:rgba(255,255,255,0.03);
     }
-    body{font-family:Inter,system-ui,Arial; background:var(--bg); color:var(--text); margin:0; padding:0}
-    .wrap{max-width:1100px;margin:20px auto;display:grid;grid-template-columns:320px 1fr;gap:16px;padding:0 16px}
-    .card{background:var(--card);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.03)}
-    .sidebar .logo{display:flex;gap:10px;align-items:center}
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,Arial;margin:0;background:var(--bg);color:var(--text)}
+    .wrap{max-width:1100px;margin:18px auto;display:grid;grid-template-columns:320px 1fr;gap:16px;padding:0 16px}
+    .card{background:var(--card);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.02)}
+    .logo{display:flex;gap:10px;align-items:center}
     .logo-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,var(--accent1),#764ba2)}
     .small{font-size:13px;color:var(--muted)}
     .controls{display:flex;gap:8px;align-items:center;margin-bottom:10px}
-    #chatArea{height:70vh; overflow:auto; padding:8px; background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent); border-radius:8px}
-    .msg.user{background:rgba(125,179,255,0.12); color:#021124; padding:8px; margin:6px 0;border-radius:8px}
-    .msg.zenia{background:rgba(255,255,255,0.02); padding:8px; margin:6px 0;border-radius:8px}
+    #chatArea{height:64vh; overflow:auto; padding:10px; background:linear-gradient(180deg, rgba(255,255,255,0.015), transparent); border-radius:8px}
+    .msg{padding:10px;margin:8px 0;border-radius:10px;max-width:78%}
+    .msg.user{background:rgba(125,179,255,0.12); color:#021124; margin-left:auto}
+    .msg.zenia{background:rgba(255,255,255,0.02)}
     .input-row{display:flex;gap:8px;margin-top:10px}
-    input[type="text"]{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--text)}
-    button{padding:8px 10px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:white;cursor:pointer}
-    .footer{margin-top:12px;font-size:13px;color:var(--muted)}
-    .sources{margin-top:8px;font-size:13px;color:var(--muted)}
+    input[type="text"], select {flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--text)}
+    button{padding:10px 12px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:white;cursor:pointer}
+    #status {font-size:13px;color:var(--muted);margin-top:8px}
+    .sources a{display:inline-block;margin-right:8px;color:var(--muted);text-decoration:none}
+    .progress{height:8px;background:#0b1320;border-radius:999px;overflow:hidden;margin-top:8px}
+    .progress > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--accent1),var(--accent2));transition:width .12s}
+    @media(max-width:900px){.wrap{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <aside class="sidebar">
-      <div class="card">
-        <div class="logo">
-          <div class="logo-icon">🧠</div>
-          <div>
-            <div style="font-weight:700">Zenia IA</div>
-            <div class="small">by @inacio.u.daniel</div>
-          </div>
+    <aside class="card">
+      <div class="logo">
+        <div class="logo-icon">🧠</div>
+        <div>
+          <div style="font-weight:700">Zenia IA</div>
+          <div class="small">RAG + In‑Browser LLM — rodando no seu navegador</div>
         </div>
       </div>
 
-      <div class="card">
-        <h4>Configurações</h4>
-        <div style="margin-top:8px">
-          <label class="small">Backend URL (edite para seu servidor)</label>
-          <input id="backendUrl" type="text" value="http://localhost:8000" style="width:100%;margin-top:6px;padding:8px;border-radius:6px;background:#0b1624;border:1px solid rgba(255,255,255,0.03);color:var(--text)"/>
-          <div class="small" style="margin-top:6px">Você pode definir aqui a URL do backend (FastAPI + Qdrant).</div>
-        </div>
+      <hr style="margin:10px 0;border:none;border-top:1px solid rgba(255,255,255,0.02)">
+
+      <div>
+        <label class="small">Idioma</label>
+        <select id="langSelect" style="width:100%;margin-top:6px">
+          <option value="pt" selected>Português (pt)</option>
+          <option value="en">English (en)</option>
+          <option value="es">Español (es)</option>
+        </select>
       </div>
 
-      <div class="card">
-        <h4>Memória</h4>
-        <div class="small">Armazenamento: remoto (vector DB)</div>
-        <div style="margin-top:8px"><button id="clearLocalBtn">Limpar histórico local</button></div>
+      <div style="margin-top:10px">
+        <label class="small">Modelos (client-side)</label>
+        <div style="margin-top:6px" class="small">Embeddings: sentence-transformers/all‑MiniLM‑L6‑v2<br>Geração: EleutherAI/gpt-neo-125M (há trade‑offs entre qualidade e velocidade)</div>
       </div>
 
-      <div class="card">
-        <div class="footer">Front-end hospedado no Netlify. Backend: servidor próprio com Qdrant + modelo de geração open-source.</div>
+      <div id="status" style="margin-top:12px">Status: inicializando...</div>
+      <div class="progress" aria-hidden><i id="modelProgress"></i></div>
+
+      <div style="margin-top:12px">
+        <h4 class="small">Recursos</h4>
+        <ul class="small" style="padding-left:16px;margin-top:6px">
+          <li>Busca Wikipedia via API</li>
+          <li>Chunking + embeddings in‑browser</li>
+          <li>RAG: recupera trechos relevantes e gera resposta com LLM local</li>
+        </ul>
       </div>
+
+      <div style="margin-top:8px">
+        <button id="clearBtn" style="width:100%">Limpar conversa</button>
+      </div>
+
+      <div style="margin-top:8px" class="small">Observação: para respostas mais longas e modelos maiores uma maquina com GPU superior a 250MB.</div>
     </aside>
 
-    <main>
-      <div class="card">
-        <div class="controls">
-          <div style="flex:1">
-            <input id="userInput" type="text" placeholder="Pergunte à Zenia (ex: o que é um vulcão?)"/>
-          </div>
-          <div>
-            <button id="sendBtn">Enviar</button>
-          </div>
-        </div>
-
-        <div id="chatArea"></div>
-
-        <div class="sources" id="sources"></div>
+    <main class="card">
+      <div class="controls">
+        <input id="userInput" type="text" placeholder="Pergunte à Zenia (ex: O que é um vulcão?)" />
+        <button id="sendBtn">Enviar</button>
       </div>
+
+      <div id="chatArea" role="log" aria-live="polite"></div>
+
+      <div class="sources" id="sources"></div>
     </main>
   </div>
 
-  <!-- Configure backend URL here if you prefer to inject at build time -->
-  <script>
-    // If you host on Netlify, edit this to point to your backend (e.g., https://zenia-backend.example.com)
-    window.BACKEND_URL = window.BACKEND_URL || document.getElementById('backendUrl').value || 'http://localhost:8000';
-  </script>
-
+  <!-- transformers.js (Xenova) -->
+  <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@latest/dist/transformers.min.js"></script>
+  <!-- main client script -->
   <script src="script.js"></script>
 </body>
 </html>
