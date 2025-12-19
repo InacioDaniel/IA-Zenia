@@ -1,23 +1,15 @@
-// script.js — versão com Worker inline (Blob -> URL.createObjectURL)
+// script.js — sem worker, usando Wikimedia Commons para imagens, com marca Zenia Text-to-Image
 let currentVersion = 'v1.0';
 let finalSize = 512;
 let controller = { cancelled: false };
 
 function setVersion(v) {
     currentVersion = v;
-    SoraAI.paint();
+    ZeniaAI.paint();
     document.getElementById('randomBtn').style.display = (v === 'v2.1') ? 'block' : 'none';
 }
 
 function setSize(s) { finalSize = s; }
-
-const dataset = {
-    "vulcão": "https://upload.wikimedia.org/wikipedia/commons/3/3e/Volcano_Eruption_Hawaii.jpg",
-    "iceberg": "https://upload.wikimedia.org/wikipedia/commons/6/63/Iceberg_Antarctica.jpg",
-    "cachoeira glacial": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Glacial_waterfall.jpg",
-    "deserto": "https://upload.wikimedia.org/wikipedia/commons/8/88/Sahara_Dune.jpg",
-    "tempestade": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Lightning_over_sky.jpg"
-};
 
 const promptColors = {
     "vulcão": ["#FF4500", "#FF8C00", "#800000"],
@@ -27,123 +19,72 @@ const promptColors = {
     "tempestade": ["#191970", "#708090", "#F0F8FF"]
 };
 
-const SUPPORTS_WORKER = !!(window.Worker && window.OffscreenCanvas);
-
-function createInlineWorker() {
-    // worker source as string (same logic as external worker)
-    const src = `
-    let cancelled = false;
-
-    function hexToRgb(hex) {
-        const h = hex.replace('#','');
-        return [
-            parseInt(h.substr(0,2),16),
-            parseInt(h.substr(2,2),16),
-            parseInt(h.substr(4,2),16)
-        ];
-    }
-
-    self.onmessage = async (e) => {
-        const msg = e.data;
-        if (msg.type === 'cancel') {
-            cancelled = true;
-            return;
-        }
-        if (msg.type !== 'render') return;
-        cancelled = false;
-
-        const width = msg.width;
-        const height = msg.height;
-        const tile = msg.tile || 8;
-        const promptKey = msg.promptKey || '';
-        const colorsMap = msg.colors || {};
-
-        try {
-            const off = new OffscreenCanvas(width, height);
-            const ctx = off.getContext('2d');
-
-            // desenha imagem se veio ImageBitmap
-            if (msg.hasImageBitmap && msg.imageBitmap) {
-                ctx.drawImage(msg.imageBitmap, 0, 0, width, height);
-            } else {
-                // fallback gradient + noise
-                const cols = colorsMap[promptKey] || ["#777777","#999999","#555555"];
-                const c0 = hexToRgb(cols[0]);
-                const c1 = hexToRgb(cols[1] || cols[0]);
-
-                const imgData = ctx.createImageData(width, height);
-                for (let y = 0; y < height; y++) {
-                    const t = y / (height - 1 || 1);
-                    for (let x = 0; x < width; x++) {
-                        const i = (y * width + x) * 4;
-                        const r = Math.floor(c0[0] * (1 - t) + c1[0] * t) + Math.floor(Math.random() * 20 - 10);
-                        const g = Math.floor(c0[1] * (1 - t) + c1[1] * t) + Math.floor(Math.random() * 20 - 10);
-                        const b = Math.floor(c0[2] * (1 - t) + c1[2] * t) + Math.floor(Math.random() * 20 - 10);
-                        const brushNoise = Math.random() * 40 - 20;
-                        imgData.data[i] = Math.min(Math.max(r + brushNoise, 0), 255);
-                        imgData.data[i+1] = Math.min(Math.max(g + brushNoise, 0), 255);
-                        imgData.data[i+2] = Math.min(Math.max(b + brushNoise, 0), 255);
-                        imgData.data[i+3] = 255;
-                    }
-                }
-                ctx.putImageData(imgData, 0, 0);
-                // simple brush strokes
-                for (let i = 0; i < 400; i++) {
-                    const idx = Math.floor(Math.random() * cols.length);
-                    const alphaVal = (Math.floor(Math.random() * 60) + 100).toString(16).padStart(2,'0');
-                    ctx.fillStyle = cols[idx] + alphaVal;
-                    ctx.beginPath();
-                    const px = Math.random() * width;
-                    const py = Math.random() * height;
-                    const radius = Math.random() * 6 + 2;
-                    ctx.arc(px, py, radius, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-
-            const totalPasses = Math.ceil(height / tile);
-            for (let pass = 0; pass < totalPasses; pass++) {
-                if (cancelled) break;
-                const yStart = pass * tile;
-                const yEnd = Math.min(yStart + tile, height);
-                const h = yEnd - yStart;
-                const stripe = ctx.getImageData(0, yStart, width, h);
-                for (let yy = 0; yy < stripe.height; yy++) {
-                    for (let x = 0; x < width; x++) {
-                        const i = (yy * width + x) * 4;
-                        stripe.data[i] = Math.min(255, Math.max(0, stripe.data[i] * 0.97 + (Math.random() * 10 - 5)));
-                        stripe.data[i+1] = Math.min(255, Math.max(0, stripe.data[i+1] * 0.97 + (Math.random() * 10 - 5)));
-                        stripe.data[i+2] = Math.min(255, Math.max(0, stripe.data[i+2] * 0.97 + (Math.random() * 10 - 5)));
-                    }
-                }
-                ctx.putImageData(stripe, 0, yStart);
-
-                const bitmap = off.transferToImageBitmap();
-                const progress = (yEnd / height);
-                self.postMessage({type:'progress', bitmap, progress}, [bitmap]);
-                // yield
-                await new Promise(r => setTimeout(r, 0));
-            }
-
-            if (!cancelled) {
-                const finalBitmap = off.transferToImageBitmap();
-                self.postMessage({type:'done', bitmap: finalBitmap}, [finalBitmap]);
-            } else {
-                self.postMessage({type:'error', message:'cancelled'});
-            }
-        } catch (err) {
-            self.postMessage({type:'error', message: String(err)});
-        }
-    };
-    `;
-    const blob = new Blob([src], { type: 'application/javascript' });
-    const url = URL.createObjectURL(blob);
-    const wk = new Worker(url);
-    // opcional: revoke depois que o worker for terminado/destruído
-    return { worker: wk, url };
+// Wikimedia helpers (busca com thumbnails)
+async function fetchWikimediaSearch(prompt, limit = 20, thumbWidth = 512) {
+  if (!prompt) return [];
+  const api = 'https://commons.wikimedia.org/w/api.php';
+  const params = new URLSearchParams({
+    action: 'query',
+    generator: 'search',
+    gsrsearch: prompt,
+    gsrnamespace: '6',
+    gsrlimit: String(limit),
+    prop: 'imageinfo',
+    iiprop: 'url',
+    iiurlwidth: String(thumbWidth),
+    format: 'json',
+    origin: '*'
+  });
+  const res = await fetch(`${api}?${params.toString()}`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  if (!data.query || !data.query.pages) return [];
+  return Object.values(data.query.pages).map(p => {
+    const info = (p.imageinfo && p.imageinfo[0]) || {};
+    const url = info.thumburl || info.url || null;
+    return { url, title: p.title || '' };
+  }).filter(x => x.url);
 }
 
-const SoraAI = {
+async function fetchWikimediaCategory(categoryTitle = 'Category:CommonsRoot', limit = 50, thumbWidth = 512) {
+  const api = 'https://commons.wikimedia.org/w/api.php';
+  const params = new URLSearchParams({
+    action: 'query',
+    generator: 'categorymembers',
+    gcmtitle: categoryTitle,
+    gcmnamespace: '6',
+    gcmlimit: String(limit),
+    prop: 'imageinfo',
+    iiprop: 'url',
+    iiurlwidth: String(thumbWidth),
+    format: 'json',
+    origin: '*'
+  });
+  const res = await fetch(`${api}?${params.toString()}`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  if (!data.query || !data.query.pages) return [];
+  return Object.values(data.query.pages).map(p => {
+    const info = (p.imageinfo && p.imageinfo[0]) || {};
+    const url = info.thumburl || info.url || null;
+    return { url, title: p.title || '' };
+  }).filter(x => x.url);
+}
+
+async function getBlobFromUrl(url) {
+  try {
+    const resp = await fetch(url, { mode: 'cors' });
+    if (!resp.ok) throw new Error('fetch failed');
+    const blob = await resp.blob();
+    return blob;
+  } catch (e) {
+    console.warn('Erro ao baixar imagem:', e);
+    return null;
+  }
+}
+
+// ZeniaAI (sem worker)
+const ZeniaAI = {
     canvas: null,
     ctx: null,
     res: 256,
@@ -151,9 +92,8 @@ const SoraAI = {
     progressCanvas: null,
     progressCtx: null,
     tempCanvas: null,
-    worker: null,
-    workerUrl: null,
-    usingWorker: false,
+    lastSourceBlob: null,
+    lastSourceTitle: null,
 
     init() {
         this.canvas = document.getElementById('zenia-viewport');
@@ -168,64 +108,35 @@ const SoraAI = {
         document.getElementById('fileInput').addEventListener('change', async (e) => {
             const f = e.target.files && e.target.files[0];
             if (f) {
+                this.lastSourceBlob = f;
+                this.lastSourceTitle = f.name || 'Imagem local';
                 try {
-                    const imgBitmap = await createImageBitmap(f);
+                    const img = await this._loadImageFromBlob(f);
                     this.res = parseInt(document.getElementById('resSlider').value);
                     this.canvas.width = this.res; this.canvas.height = this.res;
                     this.ctx.clearRect(0,0,this.res,this.res);
-                    this.ctx.drawImage(imgBitmap, 0, 0, this.res, this.res);
+                    this.ctx.drawImage(img, 0, 0, this.res, this.res);
                     document.getElementById('status-text').innerText = "Imagem local carregada (preview)";
-                    try { imgBitmap.close(); } catch {}
+                    URL.revokeObjectURL(img.src);
                 } catch (err) {
                     console.error(err);
                     document.getElementById('status-text').innerText = "Erro ao carregar imagem local";
                 }
             }
         });
-
-        if (SUPPORTS_WORKER) {
-            try {
-                const created = createInlineWorker();
-                this.worker = created.worker;
-                this.workerUrl = created.url;
-                this.worker.onmessage = this._onWorkerMessage.bind(this);
-                this.usingWorker = true;
-                console.log('Worker inline criado e pronto.');
-            } catch (e) {
-                console.warn('Falha ao criar worker inline:', e);
-                this.usingWorker = false;
-            }
-        }
     },
 
-    _onWorkerMessage(e) {
-        const m = e.data;
-        const status = document.getElementById('status-text');
-        const bar = document.getElementById('status-bar');
-
-        if (m.type === 'progress') {
-            const bitmap = m.bitmap;
-            this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-            this.ctx.drawImage(bitmap, 0, 0, this.canvas.width, this.canvas.height);
-            bar.style.width = `${Math.round(m.progress * 100)}%`;
-            this.updateProgress(m.progress);
-            status.innerText = `Renderizando... ${Math.round(m.progress*100)}%`;
-            try { bitmap.close(); } catch {}
-        } else if (m.type === 'done') {
-            const bitmap = m.bitmap;
-            this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-            this.ctx.drawImage(bitmap, 0, 0, this.canvas.width, this.canvas.height);
-            this.updateProgress(1);
-            document.getElementById('status-bar').style.width = '100%';
-            status.innerText = "Preview completo (worker)";
-            try { bitmap.close(); } catch {}
-            document.getElementById('cancelBtn').style.display = 'none';
-            this.disableControls(false);
-        } else if (m.type === 'error') {
-            status.innerText = "Erro no worker: " + (m.message || '');
-            document.getElementById('cancelBtn').style.display = 'none';
-            this.disableControls(false);
-        }
+    _loadImageFromBlob(blob) {
+        return new Promise((resolve, reject) => {
+            const url = URL.createObjectURL(blob);
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = () => {
+                URL.revokeObjectURL(url);
+                reject(new Error('Erro ao carregar imagem'));
+            };
+            img.src = url;
+        });
     },
 
     async paint() {
@@ -235,87 +146,100 @@ const SoraAI = {
 
         const promptRaw = document.getElementById('prompt').value || "";
         const promptKey = promptRaw.trim().toLowerCase();
-        const status = document.getElementById('status-text');
+        const statusEl = document.getElementById('status-text');
         const bar = document.getElementById('status-bar');
         this.res = parseInt(document.getElementById('resSlider').value);
         this.canvas.width = this.res; this.canvas.height = this.res;
         bar.style.width = "0%";
-        status.innerText = "Preparando...";
+        statusEl.innerText = "Preparando...";
 
-        let imgBitmap = null;
-
-        let matchedUrl = null;
-        for (const k of Object.keys(dataset)) {
-            if (!promptKey) break;
-            if (k.includes(promptKey) || promptKey.includes(k)) { matchedUrl = dataset[k]; break; }
-        }
+        let imgBlob = null;
+        let imageTitle = null;
+        let imagePageUrl = null;
+        this.lastSourceBlob = null;
+        this.lastSourceTitle = null;
 
         const fInput = document.getElementById('fileInput');
         if (fInput.files && fInput.files[0]) {
-            try {
-                imgBitmap = await createImageBitmap(fInput.files[0]);
-            } catch (e) { console.warn("Erro createImageBitmap local:", e); imgBitmap = null; }
-        } else if (matchedUrl) {
-            try {
-                status.innerText = "Carregando imagem remota...";
-                const resp = await fetch(matchedUrl, { mode: 'cors' });
-                if (!resp.ok) throw new Error("fetch failed");
-                const blob = await resp.blob();
-                imgBitmap = await createImageBitmap(blob);
-            } catch (e) {
-                console.warn("Falha ao carregar imagem remota (CORS?):", e);
-                imgBitmap = null;
+            imgBlob = fInput.files[0];
+            imageTitle = imgBlob.name || 'Imagem local';
+            this.lastSourceBlob = imgBlob;
+            this.lastSourceTitle = imageTitle;
+        } else {
+            if (promptKey) {
+                const results = await fetchWikimediaSearch(promptKey, 30, 512);
+                if (results.length > 0) {
+                    const pick = results[Math.floor(Math.random() * results.length)];
+                    imageTitle = pick.title;
+                    imagePageUrl = 'https://commons.wikimedia.org/wiki/' + encodeURIComponent(pick.title);
+                    imgBlob = await getBlobFromUrl(pick.url);
+                    if (imgBlob) {
+                        this.lastSourceBlob = imgBlob;
+                        this.lastSourceTitle = imageTitle;
+                    } else {
+                        console.warn('Não foi possível baixar a imagem do Commons. Fallback será usado.');
+                    }
+                } else {
+                    console.log('Nenhum resultado encontrado no Commons para:', promptKey);
+                }
+            } else {
+                const results = await fetchWikimediaCategory('Category:CommonsRoot', 50, 512);
+                if (results.length > 0) {
+                    const pick = results[Math.floor(Math.random() * results.length)];
+                    imageTitle = pick.title;
+                    imagePageUrl = 'https://commons.wikimedia.org/wiki/' + encodeURIComponent(pick.title);
+                    imgBlob = await getBlobFromUrl(pick.url);
+                    if (imgBlob) {
+                        this.lastSourceBlob = imgBlob;
+                        this.lastSourceTitle = imageTitle;
+                    } else {
+                        console.warn('Falha ao baixar imagem aleatória do Commons.');
+                    }
+                }
             }
         }
 
-        if (this.usingWorker && this.worker) {
+        if (imgBlob) {
             try {
-                const msg = {
-                    type: 'render',
-                    width: this.res,
-                    height: this.res,
-                    promptKey,
-                    tile: this.tile,
-                    colors: promptColors
-                };
-                const transfer = [];
-                if (imgBitmap) {
-                    msg.hasImageBitmap = true;
-                    msg.imageBitmap = imgBitmap;
-                    transfer.push(imgBitmap);
+                const img = await this._loadImageFromBlob(imgBlob);
+                this.ctx.clearRect(0, 0, this.res, this.res);
+                this.ctx.drawImage(img, 0, 0, this.res, this.res);
+                URL.revokeObjectURL(img.src);
+                if (imageTitle) {
+                    if (!imagePageUrl) imagePageUrl = 'https://commons.wikimedia.org/wiki/' + encodeURIComponent(imageTitle);
+                    statusEl.innerHTML = `Fonte: <a href="${imagePageUrl}" target="_blank" rel="noopener noreferrer">${imageTitle}</a>`;
                 } else {
-                    msg.hasImageBitmap = false;
+                    statusEl.innerText = "Imagem carregada (preview)";
                 }
-                this.worker.postMessage(msg, transfer);
-            } catch (e) {
-                console.warn('Erro ao usar worker — fallback no thread principal:', e);
-                if (imgBitmap) try { imgBitmap.close(); } catch {}
-                await this._paintMainThread(imgBitmap, promptKey);
+            } catch (err) {
+                console.warn('Erro ao carregar imagem para preview (img element):', err);
+                imgBlob = null;
+                statusEl.innerText = "Preview falhou — usando fallback artístico";
             }
         } else {
-            await this._paintMainThread(imgBitmap, promptKey);
+            statusEl.innerText = "Nenhuma imagem externa disponível — usando fallback artístico";
         }
-    },
 
-    async _paintMainThread(imgBitmap, promptKey) {
-        const status = document.getElementById('status-text');
-        const bar = document.getElementById('status-bar');
         let imageData = null;
-
-        if (imgBitmap) {
+        if (imgBlob) {
             const off = this.tempCanvas;
             off.width = this.res; off.height = this.res;
-            const offCtx = off.getContext('2d');
-            offCtx.clearRect(0,0,off.width,off.height);
-            offCtx.drawImage(imgBitmap, 0, 0, off.width, off.height);
-            imageData = offCtx.getImageData(0,0,off.width,off.height);
-            try { imgBitmap.close(); } catch {}
+            const offCtx = off.getContext('2d', { willReadFrequently: true });
+            try {
+                const img = await this._loadImageFromBlob(imgBlob);
+                offCtx.clearRect(0,0,off.width,off.height);
+                offCtx.drawImage(img, 0, 0, off.width, off.height);
+                URL.revokeObjectURL(img.src);
+                imageData = offCtx.getImageData(0,0,off.width,off.height);
+            } catch (e) {
+                console.warn('Erro ao usar blob para obter ImageData:', e);
+                imageData = this.generateArtFallback(promptKey);
+            }
         } else {
-            status.innerText = "Usando fallback artístico...";
             imageData = this.generateArtFallback(promptKey);
         }
 
-        status.innerText = "Renderizando...";
+        statusEl.innerText = "Renderizando...";
         const imgData = imageData;
         const res = this.res;
         const tile = this.tile;
@@ -323,7 +247,7 @@ const SoraAI = {
         const totalPasses = Math.ceil(res / tile);
 
         for (let pass = 0; pass < totalPasses; pass++) {
-            if (controller.cancelled) { status.innerText = "Cancelado"; break; }
+            if (controller.cancelled) { statusEl.innerText = "Cancelado"; break; }
             const yStart = pass * tile;
             const yEnd = Math.min(yStart + tile, res);
             for (let y = yStart; y < yEnd; y++) {
@@ -343,7 +267,7 @@ const SoraAI = {
         }
 
         if (!controller.cancelled) {
-            status.innerText = "Preview completo";
+            statusEl.innerText = "Preview completo";
             bar.style.width = "100%";
             this.updateProgress(1);
         }
@@ -351,56 +275,203 @@ const SoraAI = {
         this.disableControls(false);
     },
 
-    generateArtFallback(promptKey) {
-        const colors = promptColors[promptKey] || ["#777777", "#999999", "#555555"];
-        const res = this.res;
-        const imgData = this.ctx.createImageData(res, res);
-
-        function hexToRgb(hex) {
-            const h = hex.replace('#','');
-            return [
-                parseInt(h.substr(0,2),16),
-                parseInt(h.substr(2,2),16),
-                parseInt(h.substr(4,2),16)
-            ];
-        }
-        const c0 = hexToRgb(colors[0]);
-        const c1 = hexToRgb(colors[1] || colors[0]);
-
-        for (let y = 0; y < res; y++) {
-            const t = y / (res - 1 || 1);
-            for (let x = 0; x < res; x++) {
-                const i = (y * res + x) * 4;
-                const r = Math.floor(c0[0] * (1 - t) + c1[0] * t) + Math.floor(Math.random() * 20 - 10);
-                const g = Math.floor(c0[1] * (1 - t) + c1[1] * t) + Math.floor(Math.random() * 20 - 10);
-                const b = Math.floor(c0[2] * (1 - t) + c1[2] * t) + Math.floor(Math.random() * 20 - 10);
-                const brushNoise = Math.random() * 40 - 20;
-                imgData.data[i] = Math.min(Math.max(r + brushNoise, 0), 255);
-                imgData.data[i+1] = Math.min(Math.max(g + brushNoise, 0), 255);
-                imgData.data[i+2] = Math.min(Math.max(b + brushNoise, 0), 255);
-                imgData.data[i+3] = 255;
+    async download() {
+        const status = document.getElementById('status-text');
+        this.disableControls(true);
+        try {
+            if (this.lastSourceBlob) {
+                const url = URL.createObjectURL(this.lastSourceBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                let filename = 'zenia_image';
+                if (this.lastSourceTitle) filename = this.lastSourceTitle.replace(/^File:/i, '').replace(/\s+/g, '_');
+                const ext = (this.lastSourceBlob.type && this.lastSourceBlob.type.split('/')[1]) ? '.' + this.lastSourceBlob.type.split('/')[1] : '';
+                a.download = filename + (ext || '');
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                status.innerText = "Download do arquivo original concluído";
+            } else {
+                const f = document.createElement('canvas');
+                f.width = finalSize; f.height = finalSize;
+                f.getContext('2d').drawImage(this.canvas, 0, 0, finalSize, finalSize);
+                const dataUrl = f.toDataURL('image/png');
+                const a = document.createElement('a');
+                a.href = dataUrl;
+                a.download = `zenia_${finalSize}x${finalSize}.png`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                status.innerText = "Download (PNG gerado do canvas) concluído";
             }
+        } catch (e) {
+            console.error(e);
+            status.innerText = "Erro no download";
+        } finally {
+            this.disableControls(false);
         }
+    },
 
+    async randomImage() {
+        const results = await fetchWikimediaCategory('Category:CommonsRoot', 50, 512);
+        if (results.length === 0) return;
+        const pick = results[Math.floor(Math.random() * results.length)];
+        document.getElementById('prompt').value = pick.title.replace(/^File:/i, '');
+        await this.paint();
+    },
+
+    cancel() {
+        controller.cancelled = true;
+        document.getElementById('cancelBtn').style.display = 'none';
+        this.disableControls(false);
+        document.getElementById('status-text').innerText = 'Cancelado';
+    },
+
+    disableControls(state) {
+        document.getElementById('generateBtn').disabled = state;
+        document.getElementById('downloadBtn').disabled = state;
+        document.getElementById('resSlider').disabled = state;
+        document.getElementById('fileInput').disabled = state;
+    },
+
+    generateArtFallback(promptKey) {
+        const basePalettes = {
+            "vulcão": {
+                rock: ["#2b2b2b", "#3b3b3b", "#1f1f1f"],
+                lava: ["#FFEE88", "#FF8C00", "#FF4500"],
+                smoke: ["rgba(20,20,25,0.9)", "rgba(60,60,70,0.6)"],
+                accent: ["#FFDAB3"]
+            }
+        };
+
+        const palette = basePalettes[promptKey] || {
+            rock: ["#555555","#333333","#222222"],
+            lava: ["#FFEE88","#FF8C00","#FF4500"],
+            smoke: ["rgba(30,30,35,0.8)","rgba(60,60,70,0.5)"],
+            accent: ["#FFDAB3"]
+        };
+
+        const res = this.res;
         const tmp = this.tempCanvas;
         tmp.width = res; tmp.height = res;
-        const tctx = tmp.getContext('2d');
-        tctx.putImageData(imgData, 0, 0);
+        const ctx = tmp.getContext('2d', { willReadFrequently: true });
 
-        for (let i = 0; i < 600; i++) {
-            const colorIdx = Math.floor(Math.random() * colors.length);
-            const alphaVal = (Math.floor(Math.random() * 60) + 100).toString(16).padStart(2, '0');
-            const fill = colors[colorIdx] + alphaVal;
-            tctx.fillStyle = fill;
-            tctx.beginPath();
-            const px = Math.random() * res;
-            const py = Math.random() * res;
-            const radius = Math.random() * 6 + 2;
-            tctx.arc(px, py, radius, 0, Math.PI * 2);
-            tctx.fill();
+        const g = ctx.createLinearGradient(0, 0, 0, res);
+        g.addColorStop(0, '#0b0c0f');
+        g.addColorStop(1, '#1b1a1e');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, res, res);
+
+        ctx.save();
+        ctx.translate(res / 2, res * 0.65);
+        const mountainWidth = res * 0.9;
+        const mountainHeight = res * 0.7;
+
+        ctx.beginPath();
+        ctx.moveTo(-mountainWidth * 0.5, 0);
+        ctx.quadraticCurveTo(-mountainWidth * 0.25, -mountainHeight * 0.9, 0, -mountainHeight);
+        ctx.quadraticCurveTo(mountainWidth * 0.25, -mountainHeight * 0.9, mountainWidth * 0.5, 0);
+        ctx.closePath();
+
+        const mGrad = ctx.createLinearGradient(0, -mountainHeight, 0, 0);
+        mGrad.addColorStop(0, palette.rock[0]);
+        mGrad.addColorStop(0.6, palette.rock[1]);
+        mGrad.addColorStop(1, palette.rock[2]);
+        ctx.fillStyle = mGrad;
+        ctx.fill();
+
+        for (let i = 0; i < Math.floor(res * 0.06); i++) {
+            ctx.beginPath();
+            const x = (Math.random() - 0.5) * mountainWidth;
+            const y = -mountainHeight * Math.random() * (0.8 + Math.random() * 0.4);
+            const r = Math.random() * (res * 0.02) + (res * 0.003);
+            ctx.fillStyle = `rgba(0,0,0,${0.08 + Math.random() * 0.12})`;
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fill();
         }
 
-        return tctx.getImageData(0,0,res,res);
+        const craterRadius = res * 0.12;
+        const craterX = 0, craterY = -mountainHeight + craterRadius * 0.2;
+        const lavaGrad = ctx.createRadialGradient(craterX, craterY, craterRadius * 0.06, craterX, craterY, craterRadius * 1.6);
+        lavaGrad.addColorStop(0, palette.lava[0]);
+        lavaGrad.addColorStop(0.35, palette.lava[1]);
+        lavaGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.beginPath();
+        ctx.arc(craterX, craterY, craterRadius, 0, Math.PI * 2);
+        ctx.fillStyle = lavaGrad;
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+
+        ctx.beginPath();
+        ctx.moveTo(craterX + craterRadius * 0.3, craterY + craterRadius * 0.2);
+        ctx.bezierCurveTo(craterX + craterRadius * 0.9, craterY + craterRadius * 0.9, craterX + mountainWidth * 0.15, 10, craterX + mountainWidth * 0.25, res * 0.05);
+        const flowGrad = ctx.createLinearGradient(craterX, craterY, craterX + mountainWidth * 0.25, res * 0.05);
+        flowGrad.addColorStop(0, palette.lava[1]);
+        flowGrad.addColorStop(0.6, palette.lava[2]);
+        flowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.lineWidth = mountainWidth * 0.06;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = flowGrad;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(craterX, craterY, craterRadius * 1.2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,140,30,0.08)';
+        ctx.fill();
+
+        for (let i = 0; i < Math.floor(res * 0.02); i++) {
+            const px = craterX + (Math.random() - 0.5) * craterRadius * 2.2;
+            const py = craterY + (Math.random() - 1.2) * craterRadius * 1.8;
+            const pr = Math.random() * 2 + 0.5;
+            ctx.beginPath();
+            ctx.fillStyle = palette.accent[0];
+            ctx.globalAlpha = 0.6 * Math.random();
+            ctx.arc(px, py, pr, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+
+        ctx.restore();
+        for (let layer = 0; layer < 6; layer++) {
+            ctx.save();
+            const alpha = 0.16 * (1 - layer / 6);
+            ctx.globalAlpha = alpha;
+            ctx.filter = `blur(${1 + layer * 2}px)`;
+            ctx.beginPath();
+            const sx = res / 2 + (Math.random() - 0.5) * res * 0.08;
+            const sy = res * 0.18 - layer * res * 0.02;
+            ctx.ellipse(sx, sy, res * (0.18 + layer * 0.08), res * (0.06 + layer * 0.06), Math.random() * 0.4, 0, Math.PI * 2);
+            ctx.fillStyle = palette.smoke[0];
+            ctx.fill();
+            ctx.filter = 'none';
+            ctx.globalAlpha = 1;
+            ctx.restore();
+        }
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'multiply';
+        const overlayGrad = ctx.createLinearGradient(0, 0, 0, res);
+        overlayGrad.addColorStop(0, 'rgba(20,14,10,0.06)');
+        overlayGrad.addColorStop(1, 'rgba(0,0,0,0.18)');
+        ctx.fillStyle = overlayGrad;
+        ctx.fillRect(0, 0, res, res);
+        ctx.restore();
+
+        ctx.save();
+        for (let i = 0; i < Math.floor(res * 0.08); i++) {
+            const x = Math.random() * res;
+            const y = Math.random() * res;
+            const r = Math.random() * 1.8;
+            ctx.fillStyle = `rgba(0,0,0,${0.03 + Math.random() * 0.06})`;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.restore();
+
+        return ctx.getImageData(0, 0, res, res);
     },
 
     updateProgress(p) {
@@ -421,56 +492,7 @@ const SoraAI = {
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(Math.round(p * 100) + "%", cx, cy);
-    },
-
-    async download() {
-        const status = document.getElementById('status-text');
-        this.disableControls(true);
-        try {
-            const f = document.createElement('canvas');
-            f.width = finalSize; f.height = finalSize;
-            f.getContext('2d').drawImage(this.canvas, 0, 0, finalSize, finalSize);
-            const blob = await new Promise(resolve => f.toBlob(resolve, 'image/png'));
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `sora_${finalSize}x${finalSize}.png`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(url);
-            status.innerText = "Download concluído";
-        } catch (e) {
-            console.error(e);
-            status.innerText = "Erro no download";
-        } finally {
-            this.disableControls(false);
-        }
-    },
-
-    async randomImage() {
-        const keys = Object.keys(dataset);
-        const r = keys[Math.floor(Math.random() * keys.length)];
-        document.getElementById('prompt').value = r;
-        await this.paint();
-    },
-
-    cancel() {
-        controller.cancelled = true;
-        if (this.usingWorker && this.worker) {
-            try { this.worker.postMessage({type:'cancel'}); } catch {}
-        }
-        document.getElementById('cancelBtn').style.display = 'none';
-        this.disableControls(false);
-        document.getElementById('status-text').innerText = 'Cancelado';
-    },
-
-    disableControls(state) {
-        document.getElementById('generateBtn').disabled = state;
-        document.getElementById('downloadBtn').disabled = state;
-        document.getElementById('resSlider').disabled = state;
-        document.getElementById('fileInput').disabled = state;
     }
 };
 
-window.onload = () => { SoraAI.init(); document.getElementById('randomBtn').style.display = 'none'; };
+window.onload = () => { ZeniaAI.init(); document.getElementById('randomBtn').style.display = 'none'; };

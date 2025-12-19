@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zenia image creator by @inacio.u.daniel</title>
+<title>Zenia Text-to-Image - @inacio.u.daniel</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -18,13 +18,15 @@ button:hover:not([disabled]) { background: linear-gradient(145deg, rgba(125,179,
 .progress-circle { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); pointer-events:none; }
 .progress-bar-container { position:relative; width:60%; height:10px; background:rgba(0,0,0,0.4); border-radius:6px; overflow:hidden; margin-top:8px; }
 .progress-bar { position:absolute; height:100%; width:0%; background:#7db3ff; border-radius:6px; transition:width 0.1s; }
+.footer-credit { margin-top:1rem; font-size:12px; color:#9fbff9; }
+.footer-credit a { color:#cfe8ff; text-decoration:underline; }
 </style>
 </head>
 <body class="flex flex-col md:flex-row min-h-screen p-6 gap-6">
 
 <!-- Sidebar -->
 <div class="sidebar w-full md:w-80">
-  <h2 class="text-[#7db3ff] text-3xl font-bold">Zenia image creator v1.0 by @inacio.u.daniel</h2>
+  <h2 class="text-[#7db3ff] text-3xl font-bold">Zenia Text-to-Image</h2>
   
   <label class="text-gray-400 mt-2">Modelo:</label>
   <div class="flex flex-wrap gap-2">
@@ -34,17 +36,17 @@ button:hover:not([disabled]) { background: linear-gradient(145deg, rgba(125,179,
     <button onclick="setVersion('v2.1')">v2.1 Cinemática</button>
   </div>
 
-  <input id="prompt" type="text" placeholder="Digite seu prompt" class="px-3 py-2 rounded text-black mt-2">
+  <input id="prompt" type="text" placeholder="Digite seu prompt (ex: vulcão)" class="px-3 py-2 rounded text-black mt-2">
 
   <!-- Upload local image -->
   <label class="text-gray-400 mt-2">Ou carregue uma imagem local:</label>
   <input id="fileInput" type="file" accept="image/*" class="mt-1 text-sm">
 
   <div class="flex flex-col gap-2 mt-2">
-    <button id="generateBtn" onclick="SoraAI.paint()">GERAR IMAGEM</button>
-    <button id="downloadBtn" onclick="SoraAI.download()">BAIXAR IMAGEM</button>
-    <button onclick="SoraAI.randomImage()" id="randomBtn">ALEATÓRIA (v2.1)</button>
-    <button id="cancelBtn" onclick="SoraAI.cancel()" style="display:none">CANCELAR</button>
+    <button id="generateBtn" onclick="ZeniaAI.paint()">GERAR IMAGEM</button>
+    <button id="downloadBtn" onclick="ZeniaAI.download()">BAIXAR IMAGEM</button>
+    <button onclick="ZeniaAI.randomImage()" id="randomBtn">ALEATÓRIA (v2.1)</button>
+    <button id="cancelBtn" onclick="ZeniaAI.cancel()" style="display:none">CANCELAR</button>
   </div>
 
   <label class="text-gray-400 mt-4">Tamanho final:</label>
@@ -57,6 +59,10 @@ button:hover:not([disabled]) { background: linear-gradient(145deg, rgba(125,179,
   <div class="mt-auto">
     <label class="text-gray-400">Resolução preview:</label>
     <input type="range" id="resSlider" min="128" max="512" value="256" step="32" class="w-full mt-1">
+    <div class="footer-credit">
+      Zenia Image — módulo de <a href="https://ia-zenia.netlify.app" target="_blank" rel="noopener noreferrer">ia-zenia.netlify.app</a><br>
+      Feito por <a href="https://github.com/InacioDaniel" target="_blank" rel="noopener noreferrer">@ináci.u.daniel</a>
+    </div>
   </div>
 </div>
 
@@ -74,5 +80,4 @@ button:hover:not([disabled]) { background: linear-gradient(145deg, rgba(125,179,
 
 <script src="script.js"></script>
 </body>
-
 </html>
