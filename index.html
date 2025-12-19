@@ -3,8 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Zenia IA — Wikimedia multimodal (sem backend)</title>
-  <link rel="shortcut icon" href="favicon.png" type="image/x-icon">
+  <title>Zenia — by @inacio.u.daniel (Wikimedia) v2</title>
   <style>
     :root{
       --bg:#0f172a; --card:#102235; --accent1:#7c3aed; --accent2:#06b6d4;
@@ -12,28 +11,23 @@
     }
     *{box-sizing:border-box}
     body{font-family:Inter,system-ui,Arial;margin:0;background:var(--bg);color:var(--text)}
-    .wrap{max-width:1200px;margin:18px auto;display:grid;grid-template-columns:330px 1fr;gap:16px;padding:0 16px}
+    .wrap{max-width:1100px;margin:18px auto;display:grid;grid-template-columns:320px 1fr;gap:16px;padding:0 16px}
     .card{background:var(--card);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.06)}
     .logo{display:flex;gap:10px;align-items:center}
     .logo-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,var(--accent1),#764ba2)}
     .small{font-size:13px;color:var(--muted)}
     .controls{display:flex;gap:8px;align-items:center;margin-bottom:10px}
-    #chatArea{height:52vh; overflow:auto; padding:10px; background:linear-gradient(180deg, rgba(255,255,255,0.015), transparent); border-radius:8px}
+    #chatArea{height:60vh; overflow:auto; padding:10px; background:linear-gradient(180deg, rgba(255,255,255,0.015), transparent); border-radius:8px}
     .msg{padding:10px;margin:8px 0;border-radius:10px;max-width:78%}
     .msg.user{background:rgba(125,179,255,0.12); color:#021124; margin-left:auto}
     .msg.zenia{background:rgba(255,255,255,0.06)}
     input[type="text"], select {flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:var(--text)}
     button{padding:9px 12px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:white;cursor:pointer}
     #status {font-size:13px;color:var(--muted);margin-top:8px}
-    .sources a{display:inline-block;margin-right:8px;color:var(--muted);text-decoration:none}
     .progress{height:8px;background:#0b1320;border-radius:999px;overflow:hidden;margin-top:8px}
     .progress > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--accent1),var(--accent2));transition:width .2s}
-    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-    .media-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:8px}
-    .media-card img, .media-card video{width:100%;border-radius:8px;display:block}
-    .media-tools{display:flex;gap:8px;margin-top:8px}
-    canvas{max-width:100%;border:1px solid rgba(255,255,255,0.12);border-radius:8px}
-    @media(max-width:950px){.wrap{grid-template-columns:1fr}}
+    .toolbox{display:flex;gap:8px;margin-top:10px}
+    @media(max-width:900px){.wrap{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -42,8 +36,8 @@
       <div class="logo">
         <div class="logo-icon">🧠</div>
         <div>
-          <div style="font-weight:700">Zenia IA</div>
-          <div class="small">Wikimedia multimodal — 100% no navegador</div>
+          <div style="font-weight:700">Zenia by @inacio.u.daniel</div>
+          <div class="small">Conversa natural com Wikimedia</div>
         </div>
       </div>
 
@@ -61,19 +55,14 @@
       <div id="status" style="margin-top:12px">Status: pronto</div>
       <div class="progress" aria-hidden><i id="modelProgress"></i></div>
 
-      <div style="margin-top:12px">
-        <h4 class="small">Recursos</h4>
-        <ul class="small" style="padding-left:16px;margin-top:6px">
-          <li>Busca Wikipedia + Wikimedia Commons</li>
-          <li>RAG extrativo (TF‑IDF + coseno)</li>
-          <li>Entrada de voz (Web Speech API) e leitura (TTS)</li>
-          <li>Reconhecimento de objetos (TensorFlow.js COCO‑SSD)</li>
-          <li>Análise de imagens (upload ou da Commons)</li>
-        </ul>
+      <div class="toolbox">
+        <button id="micBtn" title="Falar">🎤 Falar</button>
+        <button id="ttsBtn" title="Ler resposta">🔊 Ler</button>
       </div>
 
-      <div style="margin-top:8px" class="small">
-        Dica: faça perguntas factuais ou conceituais para melhores respostas. Use o painel multimídia para buscar imagens, vídeos e áudios.
+      <div class="toolbox">
+        <button id="openImageGen">🖼️ Gerador de imagens</button>
+        <button id="openVideoGen">🎬 Gerador de vídeos</button>
       </div>
 
       <div style="margin-top:8px">
@@ -83,58 +72,14 @@
 
     <main class="card">
       <div class="controls">
-        <input id="userInput" type="text" placeholder="Pergunte à Zenia (ex: O que é um vulcão?)" />
-        <button id="micBtn" title="Falar">🎤</button>
+        <input id="userInput" type="text" placeholder="Converse com a Zenia (ex: Olá, como vai?)" />
         <button id="sendBtn">Enviar</button>
-        <button id="ttsBtn" title="Ler resposta">🔊</button>
       </div>
 
       <div id="chatArea" role="log" aria-live="polite"></div>
-      <div class="sources" id="sources"></div>
-
-      <hr style="margin:14px 0;border:none;border-top:1px solid rgba(255,255,255,0.12)">
-
-      <section>
-        <h4 class="small">Multimídia da Wikimedia Commons</h4>
-        <div class="controls">
-          <input id="mediaQuery" type="text" placeholder="Buscar mídia (ex: Etna, aves, arquitetura)" />
-          <select id="mediaType">
-            <option value="">Todos</option>
-            <option value="bitmap">Imagens</option>
-            <option value="video">Vídeos</option>
-            <option value="audio">Áudio</option>
-          </select>
-          <button id="mediaSearchBtn">Buscar</button>
-        </div>
-        <div id="mediaGrid" class="grid"></div>
-      </section>
-
-      <hr style="margin:14px 0;border:none;border-top:1px solid rgba(255,255,255,0.12)">
-
-      <section>
-        <h4 class="small">Análise de imagem</h4>
-        <div class="media-tools">
-          <input type="file" id="imageUpload" accept="image/*" />
-          <button id="analyzeBtn">Reconhecer objetos</button>
-          <span id="analyzeStatus" class="small" style="margin-left:auto;color:var(--muted)"></span>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
-          <div>
-            <img id="previewImg" alt="Pré-visualização" style="max-width:100%;display:none;border-radius:8px"/>
-          </div>
-          <div>
-            <canvas id="previewCanvas"></canvas>
-          </div>
-        </div>
-      </section>
     </main>
   </div>
 
-  <!-- TensorFlow.js + COCO-SSD para reconhecimento de objetos -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2/dist/coco-ssd.min.js"></script>
-
-  <!-- Script principal -->
   <script src="script.js"></script>
 </body>
 </html>
