@@ -1,46 +1,163 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-ao">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zenia Text-to-Image - @inacio.u.daniel</title>
+<title>Zenia Image</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="../3.4.17.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
 <style>
-body { font-family:'Fira Code', monospace; margin:0; background: linear-gradient(135deg,#0c0f1e,#1a1f35); color:#eee; }
-.sidebar { backdrop-filter: blur(20px) saturate(180%); background-color: rgba(20,25,40,0.7); border-radius:24px; padding:2rem; display:flex; flex-direction:column; gap:1rem; box-shadow: 0 15px 40px rgba(0,0,0,0.7); }
-button { backdrop-filter: blur(8px); background: linear-gradient(145deg, rgba(125,179,255,0.25), rgba(125,179,255,0.15)); border-radius:16px; padding:0.5rem 1rem; font-weight:600; text-align:center; transition:0.25s; box-shadow: 0 4px 15px rgba(0,0,0,0.4); cursor:pointer; }
-button[disabled] { opacity:0.5; cursor:not-allowed; transform:none; }
-button:hover:not([disabled]) { background: linear-gradient(145deg, rgba(125,179,255,0.4), rgba(125,179,255,0.25)); box-shadow: 0 6px 20px rgba(0,0,0,0.5); transform: translateY(-1px); }
-#zenia-viewport { border-radius:32px; box-shadow: 0 15px 40px rgba(0,0,0,0.7), inset 0 0 20px rgba(0,0,0,0.3); background:#000; display:block; margin:auto; }
-.badge { backdrop-filter: blur(8px); background-color: rgba(125,179,255,0.2); padding: 0.25rem 0.8rem; border-radius:9999px; transition:0.25s; display:inline-block; font-weight:500; }
-.badge:hover { background-color: rgba(125,179,255,0.35); transform: translateY(-2px) scale(1.05); box-shadow:0 6px 20px rgba(0,0,0,0.5);}
-.progress-circle { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); pointer-events:none; }
-.progress-bar-container { position:relative; width:60%; height:10px; background:rgba(0,0,0,0.4); border-radius:6px; overflow:hidden; margin-top:8px; }
-.progress-bar { position:absolute; height:100%; width:0%; background:#7db3ff; border-radius:6px; transition:width 0.1s; }
-.footer-credit { margin-top:1rem; font-size:12px; color:#9fbff9; }
-.footer-credit a { color:#cfe8ff; text-decoration:underline; }
+  body { 
+    font-family:'Fira Code', monospace; 
+    margin:0; 
+    background: linear-gradient(135deg,#25157b,#2a247a); 
+    color:#eee; 
+  }
+
+  .sidebar { 
+   backdrop-filter: blur(20px) saturate(180%); 
+   background-color: #260e7cb3; 
+   border-radius:24px; 
+   padding:2rem; 
+   display:flex; 
+   flex-direction:column; 
+   gap:1rem; 
+   box-shadow: 0 15px 40px rgba(0,0,0,0.7); 
+  }
+
+  button { 
+   backdrop-filter: blur(8px); 
+   background: linear-gradient(145deg, rgba(125,179,255,0.25), rgba(125,179,255,0.15)); 
+   border-radius:16px; 
+   padding:0.5rem 1rem; 
+   font-weight:600; 
+   text-align:center; 
+   transition:0.25s; 
+   box-shadow: 0 4px 15px rgba(0,0,0,0.4); 
+   cursor:pointer; 
+  }
+
+  button[disabled] { 
+   opacity:0.5; 
+   cursor:not-allowed; 
+   transform:none; 
+  }
+
+  button:hover:not([disabled]) { 
+   background: linear-gradient(145deg, rgba(125,179,255,0.4), rgba(125,179,255,0.25)); 
+   box-shadow: 0 6px 20px rgba(0,0,0,0.5); 
+   transform: translateY(-1px); 
+  }
+
+  #zenia-viewport { 
+   border-radius:32px; 
+   box-shadow: 0 15px 40px rgba(0,0,0,0.7), inset 0 0 20px rgba(0,0,0,0.3); 
+   background:#000; 
+   display:block; 
+   margin:auto; 
+  }
+
+  .badge { 
+    backdrop-filter: blur(8px); 
+    background-color: rgba(125,179,255,0.2); 
+    padding: 0.25rem 0.8rem; 
+    border-radius:9999px; 
+    transition:0.25s; 
+    display:inline-block; 
+    font-weight:500; 
+  }
+
+  .badge:hover { 
+   background-color: rgba(125,179,255,0.35); 
+   transform: translateY(-2px) scale(1.05); 
+   box-shadow:0 6px 20px rgba(0,0,0,0.5);
+  }
+
+  .progress-circle { 
+    position:absolute; 
+    top:50%; 
+    left:50%; 
+    transform:translate(-50%, -50%); 
+     pointer-events:none; 
+  }
+
+  .progress-bar-container { 
+    position:relative; 
+    width:60%; 
+    height:10px; 
+    background:rgba(0,0,0,0.4); 
+    border-radius:6px; 
+    overflow:hidden; 
+    margin-top:8px; 
+  }
+
+  .progress-bar {
+    position:absolute; 
+    height:100%; 
+    width:0%; 
+    background:#7db3ff; 
+    border-radius:6px; 
+    transition:width 0.1s; 
+    }
+
+  .footer-credit { 
+    margin-top:1rem; 
+    font-size:12px; 
+    color:#9fbff9; 
+  }
+
+  .footer-credit a { 
+    color:#cfe8ff; 
+    text-decoration:underline; 
+  }
+  nav { 
+	background: #222; 
+	color: #fff; 
+	padding: 10px 20px; 
+	display: flex; 
+	justify-content: space-between; 
+	align-items: center; 
+	} 
+  nav .logo { 
+	font-weight: bold; 
+	}
+  nav ul { 
+	list-style: none; 
+	display: flex; 
+	gap: 20px; 
+	} 
+  nav ul li a { 
+	color: #fff; 
+	text-decoration: none; 
+   }
 </style>
 </head>
-<body class="flex flex-col md:flex-row min-h-screen p-6 gap-6">
-
+<body>
+  <!-- Navbar --> 
+  <nav> 
+   <div class="logo">Zenia-Projects</div> 
+    <ul> 
+		<li><a href="https://zenia-projects.netlify.app">Zenia-Projects</a></li> 
+		<li><a href="https://ia-zenia.netlify.app">IA-Zenia</a></li> 
+		<li><a href="https://ia-zenia.netlify.app/zenia-image">Zenia-Image</a></li> 
+		<li><a href="https://ia-zenia.netlify.app/zenia-video">Zenia-Video</a></li> 
+	</ul> 
+   </nav>
+<header class="flex flex-col md:flex-row min-h-screen p-6 gap-6">
 <!-- Sidebar -->
 <div class="sidebar w-full md:w-80">
   <h2 class="text-[#7db3ff] text-2xl font-bold">Zenia Text-to-Image</h2>
   
-  <label class="text-gray-400 mt-2">Modelo:</label>
+  <label class="text-gray-400 mt-2">Modelos:</label>
   <div class="flex flex-wrap gap-2">
     <button onclick="setVersion('v1.0')">v1.0 Artística</button>
     <button onclick="setVersion('v1.1')">v1.1 Realista</button>
-    <button onclick="setVersion('v2.0')">v2.0 Realista+</button>
-    <button onclick="setVersion('v2.1')">v2.1 Cinemática</button>
+    <button onclick="setVersion('v2.0')">v2.0 Realista plus</button>
+    <button onclick="setVersion('v2.1')">v2.1 Biblioteca Realista</button>
   </div>
 
   <input id="prompt" type="text" placeholder="Digite seu prompt (ex: vulcão)" class="px-3 py-2 rounded text-black mt-2">
-
-  <!-- Upload local image -->
-  <label class="text-gray-400 mt-2">Ou carregue uma imagem local:</label>
-  <input id="fileInput" type="file" accept="image/*" class="mt-1 text-sm">
 
   <div class="flex flex-col gap-2 mt-2">
     <button id="generateBtn" onclick="ZeniaAI.paint()">GERAR IMAGEM</button>
@@ -61,7 +178,7 @@ button:hover:not([disabled]) { background: linear-gradient(145deg, rgba(125,179,
     <input type="range" id="resSlider" min="128" max="512" value="256" step="32" class="w-full mt-1">
     <div class="footer-credit">
       Zenia Image — módulo de <a href="https://ia-zenia.netlify.app" target="_blank" rel="noopener noreferrer">ia-zenia.netlify.app</a><br>
-      Feito por <a href="https://github.com/InacioDaniel" target="_blank" rel="noopener noreferrer">@ináci.u.daniel</a>
+      Feito por <a href="https://github.com/InacioDaniel" target="_blank" rel="noopener noreferrer">@inácio.u.daniel</a>
     </div>
   </div>
 </div>
@@ -77,7 +194,7 @@ button:hover:not([disabled]) { background: linear-gradient(145deg, rgba(125,179,
     <span id="status-text">Core: Standby</span>
   </div>
 </div>
-
+</header>
 <script src="script.js"></script>
 </body>
 
