@@ -20,71 +20,9 @@
     }
     const previewCtx = canvas.getContext('2d', { willReadFrequently: true });
 
-    // Chat UI (simple, backed by Wikipedia lookups)
-    const chatEl = $('chat');
-    const chatInput = $('chatInput');
-    const chatSend = $('chatSend');
-    const convo = [];
-    function renderChat() {
-      if (!chatEl) return;
-      chatEl.innerHTML = '';
-      for (const m of convo) {
-        const div = document.createElement('div');
-        div.className = 'chat-message ' + (m.role === 'user' ? 'user' : 'zenia');
-        div.innerHTML = `<div>${escapeHtml(m.text).replace(/\n/g,'<br>')}</div>`;
-        if (m.attachment) {
-          if (m.attachment.type === 'image' && m.attachment.url) {
-            const img = document.createElement('img');
-            img.src = m.attachment.url; img.className = 'thumbnail'; div.appendChild(img);
-          }
-        }
-        chatEl.appendChild(div);
-      }
-      chatEl.scrollTop = chatEl.scrollHeight;
-    }
-    convo.push({ role:'zenia', text: 'Oi — sou a Zenia. Posso gerar imagens e vídeos procedurais de personagens. Pergunte algo!' });
-    renderChat();
+    // PROCESSO DE RENDERIZAÇÃO E ANIMAÇÃO DO PERSONAGEM
 
-    async function wikiSearchAndExtract(term) {
-      if (!term) return null;
-      const api = 'https://pt.wikipedia.org/w/api.php';
-      try {
-        const sparams = new URLSearchParams({ action:'query', list:'search', srsearch:term, srlimit:'1', format:'json', origin:'*' });
-        const sres = await fetch(`${api}?${sparams.toString()}`);
-        if (!sres.ok) return null;
-        const sjson = await sres.json();
-        const sr = (sjson.query && sjson.query.search && sjson.query.search[0]) || null;
-        if (!sr) return null;
-        const pageid = sr.pageid;
-        const qparams = new URLSearchParams({ action:'query', pageids:String(pageid), prop:'extracts', exintro:'1', explaintext:'1', format:'json', origin:'*' });
-        const qres = await fetch(`${api}?${qparams.toString()}`);
-        if (!qres.ok) return null;
-        const qjson = await qres.json();
-        const page = qjson.query && qjson.query.pages && qjson.query.pages[pageid];
-        return { title: sr.title, extract: page?.extract || null, pageUrl: `https://pt.wikipedia.org/wiki/${encodeURIComponent(sr.title)}` };
-      } catch (e) { console.warn(e); return null; }
-    }
-
-    chatSend?.addEventListener('click', async () => {
-      const v = chatInput.value; if (!v) return; chatInput.value = '';
-      convo.push({ role:'user', text: v }); renderChat();
-      convo.push({ role:'zenia', text: 'Deixa eu procurar isso pra você...' }); renderChat();
-      const wiki = await wikiSearchAndExtract(v);
-      convo.pop(); // remove "procurando"
-      if (wiki && wiki.extract) {
-        convo.push({ role:'zenia', text: `Encontrei: ${wiki.title}\n\n${wiki.extract}\n\n${wiki.pageUrl}` });
-      } else {
-        convo.push({ role:'zenia', text: 'Não encontrei resumo direto. Posso gerar animações de personagens com base no prompt. Quer tentar?' });
-      }
-      renderChat();
-    });
-    chatInput?.addEventListener('keypress', (e) => { if (e.key === 'Enter') chatSend.click(); });
-
-    // ------------------------------------------------------------------
-    // Procedural character renderer + video recorder
-    // ------------------------------------------------------------------
-
-    // draw one character (cartoon-ish) using simple skeleton
+    // DESENHO DO PERSONAGEM, ANIMAÇÃO POR ESQUELETO
     function drawCharacter(ctx, w, h, pose, style){
       const x = pose.x * w;
       const y = pose.y * h;

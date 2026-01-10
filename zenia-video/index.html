@@ -1,96 +1,248 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-ao">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Zenia Text-to-Image + Video — Conversa & Animação</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Zenia Video</title>
+<script src="../3.4.17.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
 <style>
-body { font-family:'Fira Code', monospace; margin:0; background: linear-gradient(135deg,#0c0f1e,#1a1f35); color:#eee; }
-.sidebar { backdrop-filter: blur(18px); background-color: rgba(20,25,40,0.75); border-radius:18px; padding:1rem; display:flex; flex-direction:column; gap:0.6rem; width:320px; }
-button { background: linear-gradient(145deg, rgba(125,179,255,0.18), rgba(125,179,255,0.08)); border-radius:10px; padding:0.5rem 0.8rem; font-weight:600; cursor:pointer; }
-button[disabled]{opacity:.5;cursor:not-allowed}
-.chat { display:flex; flex-direction:column; gap:0.4rem; max-height:180px; overflow:auto; padding:0.4rem; background: rgba(255,255,255,0.02); border-radius:8px; }
-.chat-message { padding:0.45rem; border-radius:8px; max-width:100%; word-wrap:break-word; }
-.chat-message.user { background: rgba(125,179,255,0.15); color:#021124; align-self:flex-end; }
-.chat-message.zenia { background: rgba(255,255,255,0.03); color:#e6f3ff; align-self:flex-start; }
-.thumbnail { max-width:100%; border-radius:6px; margin-top:6px; display:block; }
-.sidebar .label { font-size:12px; color:#9fbff9; margin-top:6px; }
-.footer-credit { margin-top:8px; font-size:12px; color:#9fbff9; }
-.canvas-wrap { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1rem; }
-#zenia-viewport { border-radius:18px; width:512px; height:512px; background:#000; box-shadow: 0 12px 32px rgba(0,0,0,0.6); }
-.controls-row { display:flex; gap:8px; align-items:center; }
-.small { font-size:12px; color:#cfe8ff; }
-.progress-bar-container { width:60%; height:10px; background:rgba(0,0,0,0.35); border-radius:6px; overflow:hidden; margin-top:8px; }
-.progress-bar { height:100%; width:0%; background:#7db3ff; border-radius:6px; transition:width .12s; }
+  body { 
+   font-family:'Fira Code', monospace; 
+   margin:0; 
+   background: linear-gradient(135deg,#25157b,#2a247a); color:#eee; 
+  }
+
+  .sidebar { 
+   backdrop-filter: blur(18px); 
+   background-color: #3b09b0b3; 
+   border-radius:18px; 
+   padding:1rem; 
+   display:flex; 
+   flex-direction:column; 
+   box-shadow: 0 15px 40px rgba(0,0,0,0.7);  
+   gap:0.6rem; 
+   width:365px;   
+  }
+
+  button { 
+   background: linear-gradient(145deg, rgba(125,179,255,0.18), rgba(125,179,255,0.08)); 
+   border-radius:10px; 
+   padding:0.5rem 0.8rem; 
+   font-weight:600; 
+   cursor:pointer; 
+  }
+
+  button:hover {
+    background-color: #0702207c;
+  }
+
+  button[disabled]{
+    opacity:.5;
+    cursor:not-allowed;
+  }
+
+  #chatArea { 
+   display:flex; 
+   flex-direction:column; 
+   gap:0.4rem; 
+   max-height:180px; 
+   overflow:auto; 
+   padding:0.4rem; 
+   background: #ffffff05; 
+   border-radius:8px; 
+  }
+
+  .chat-message { 
+   padding:0.45rem; 
+   border-radius:8px; 
+   max-width:100%; 
+   word-wrap:break-word; 
+  }
+
+  .chat-message.user { 
+   background: #7db3ff26; 
+   color:#021124; 
+   align-self:flex-end; 
+  }
+
+  .chat-message.zenia { 
+   background: #ffffff08; 
+   color:#e6f3ff; 
+   align-self:flex-start; 
+  }
+
+  .thumbnail { 
+   max-width:100%; 
+   border-radius:6px; 
+   margin-top:6px; 
+   display:block; 
+  }
+
+  .sidebar .label { 
+   font-size:12px; 
+   color:#9fbff9; 
+   margin-top:6px; 
+  }
+
+  .footer-credit { 
+   margin-top:8px; 
+   font-size:12px; 
+   color:#9fbff9; 
+  }
+
+  .canvas-wrap { 
+   flex:1; 
+   display:flex; 
+   flex-direction:column; 
+   align-items:center; 
+   justify-content:center; 
+   padding:1rem; 
+  }
+
+  #zenia-viewport { 
+   border-radius:18px; 
+   width:512px; 
+   height:512px; 
+   background:#000; 
+   box-shadow: 0 12px 32px #00000099; 
+  }
+
+  .controls-row { 
+   display:flex; 
+   gap:8px; 
+   align-items:center; 
+  }
+
+  .small { 
+   font-size:12px; 
+   color:#cfe8ff; 
+  }
+
+  .progress-bar-container { 
+   width:60%; 
+   height:10px; 
+   background:#00000059; 
+   border-radius:6px; 
+   overflow:hidden; 
+   margin-top:8px; 
+  }
+
+  .progress-bar { 
+   height:100%; 
+   width:0%; 
+   background:#7db3ff; 
+   border-radius:6px; 
+   transition:width .12s; 
+  }
+  nav { 
+	background: #222; 
+	color: #fff; 
+	padding: 10px 20px; 
+	display: flex; 
+	justify-content: space-between; 
+	align-items: center; 
+	} 
+  nav .logo { 
+	font-weight: bold; 
+	}
+  nav ul { 
+	list-style: none; 
+	display: flex; 
+	gap: 20px; 
+	} 
+  nav ul li a { 
+	color: #fff; 
+	text-decoration: none; 
+   }
 </style>
 </head>
-<body class="flex gap-6 p-6">
-
-<!-- Sidebar -->
-<div class="sidebar">
-  <h2 class="text-[#7db3ff] text-2xl font-bold">Zenia — Imagem & Vídeo</h2>
-
-  <div class="label">Conversa com Zenia</div>
-  <div id="chat" class="chat" aria-live="polite"></div>
-  <div class="controls-row">
-    <input id="chatInput" class="px-2 py-1 rounded text-black flex-grow" placeholder="Pergunte à Zenia..." />
-    <button id="chatSend">ENVIAR</button>
-  </div>
-
-  <hr>
-
-  <div class="label">Prompt para imagem / vídeo</div>
-  <input id="prompt" class="px-2 py-1 rounded text-black" placeholder="ex: criança brincando em parque" />
-
-  <div class="label">Preview resolution</div>
-  <input id="resSlider" type="range" min="128" max="512" value="256" step="32" />
-
-  <div class="label">Geração de vídeo (procedural)</div>
-  <div class="controls-row">
-    <label class="small">Ação</label>
-    <select id="videoAction" class="px-2 py-1 rounded text-black">
-      <option value="idle">idle</option>
-      <option value="run" selected>run</option>
-      <option value="jump">jump</option>
-      <option value="dance">dance</option>
-      <option value="play">play</option>
+<body>
+  <!-- Navbar --> 
+  <nav> 
+   <div class="logo">Zenia-Projects</div> 
+    <ul> 
+		<li><a href="https://zenia-projects.netlify.app">Zenia-Projects</a></li> 
+		<li><a href="https://ia-zenia.netlify.app">IA-Zenia</a></li> 
+		<li><a href="https://ia-zenia.netlify.app/zenia-image">Zenia-Image</a></li> 
+		<li><a href="https://ia-zenia.netlify.app/zenia-video">Zenia-Video</a></li> 
+	</ul> 
+   </nav>
+<header class="flex gap-6 p-6"> 
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2 class="text-[#7db3ff] text-2xl font-bold">Zenia — text-to-Vídeo</h2>
+    <h3 class="text-[#7db3ff] text-1xl font-bold">v1.0 Desenho+Animado</h3>
+    <div class="label">Conversa com Zenia</div>
+    <label class="small">Idioma</label>
+    <select id="langSelect">
+      <option value="pt" selected>Português (pt-AO)</option>
+      <option value="en">English (en-USA)</option>
+      <option value="es">Español (es-es)</option>
     </select>
+  <div id="status" style="margin-top:12px">Estado: pronto</div>
+  <div class="progress" aria-hidden><i id="modelProgress"></i></div>
+      <main class="card">
+      <div class="controls-row">
+        <input id="userInput" class="px-2 py-1 rounded text-black flex-grow"  type="text" placeholder="Pergunte à Zenia (ex: O que é um vulcão?)" />
+        <button id="sendBtn">Enviar</button>
+        <button id="ttsBtnTop" title="Ler resposta">🔊</button>
+        <div id="chatArea" role="log" aria-live="polite"></div>
+      </div>
+
+    <hr>
+
+    <div class="label">Prompt para imagem / vídeo</div>
+    <input id="prompt" class="px-2 py-1 rounded text-black" placeholder="ex: criança brincando em parque" />
+
+    <div class="label">Preview resolution</div>
+    <input id="resSlider" type="range" min="128" max="512" value="256" step="32" />
+
+    <div class="label">Geração de vídeo (procedural)</div>
+    <div class="controls-row">
+      <label class="small">Ação</label>
+      <select id="videoAction" class="px-2 py-1 rounded text-black">
+        <option value="idle">idle</option>
+        <option value="run" selected>run</option>
+        <option value="jump">jump</option>
+        <option value="dance">dance</option>
+        <option value="play">play</option>
+      </select>
+    </div>
+
+    <div class="controls-row">
+      <label class="small">Personagens</label>
+      <input id="videoChars" type="number" min="1" max="6" value="1" class="px-2 py-1 rounded text-black w-20" />
+      <label class="small">Duração (s)</label>
+      <input id="videoDuration" type="number" min="1" max="30" value="4" class="px-2 py-1 rounded text-black w-20" />
+    </div>
+
+    <div class="controls-row">
+      <label class="small">FPS</label>
+      <input id="videoFps" type="number" min="6" max="30" value="12" class="px-2 py-1 rounded text-black w-20" />
+      <button id="generateVideoBtn">GERAR VÍDEO</button>
+      <button id="downloadVideoBtn" disabled>BAIXAR VÍDEO</button>
+    </div>
+
+    <div class="footer-credit">
+      Zenia Image — módulo de <a href="https://ia-zenia.netlify.app" target="_blank" rel="noopener noreferrer">ia-zenia.netlify.app</a><br>
+      Feito por <a href="https://github.com/InacioDaniel" target="_blank" rel="noopener noreferrer">@inácio.u.daniel</a>
+    </div>
   </div>
 
-  <div class="controls-row">
-    <label class="small">Personagens</label>
-    <input id="videoChars" type="number" min="1" max="6" value="1" class="px-2 py-1 rounded text-black w-20" />
-    <label class="small">Duração (s)</label>
-    <input id="videoDuration" type="number" min="1" max="30" value="4" class="px-2 py-1 rounded text-black w-20" />
+  <!-- Canvas / Preview -->
+  <div class="canvas-wrap" style="flex:1">
+    <canvas id="zenia-viewport"></canvas>
+    <div class="progress-bar-container" style="margin-top:12px">
+      <div id="status-bar" class="progress-bar"></div>
+    </div>
+    <div style="display:flex; gap:12px; margin-top:8px; width:60%; justify-content:space-between">
+     <div id="status-text" class="small">Standby</div>
+     <div id="mode-text" class="small">Modo: procedural vídeo</div>
+    </div>
   </div>
-
-  <div class="controls-row">
-    <label class="small">FPS</label>
-    <input id="videoFps" type="number" min="6" max="30" value="12" class="px-2 py-1 rounded text-black w-20" />
-    <button id="generateVideoBtn">GERAR VÍDEO</button>
-    <button id="downloadVideoBtn" disabled>BAIXAR VÍDEO</button>
-  </div>
-
-  <div class="footer-credit">
-    Zenia Image — módulo de <a href="https://ia-zenia.netlify.app" target="_blank" rel="noopener noreferrer">ia-zenia.netlify.app</a><br>
-    Feito por <a href="https://github.com/InacioDaniel" target="_blank" rel="noopener noreferrer">@inácio.u.daniel</a>
-  </div>
-</div>
-
-<!-- Canvas / Preview -->
-<div class="canvas-wrap" style="flex:1">
-  <canvas id="zenia-viewport"></canvas>
-  <div class="progress-bar-container" style="margin-top:12px">
-    <div id="status-bar" class="progress-bar"></div>
-  </div>
-  <div style="display:flex; gap:12px; margin-top:8px; width:60%; justify-content:space-between">
-    <div id="status-text" class="small">Standby</div>
-    <div id="mode-text" class="small">Modo: procedural vídeo</div>
-  </div>
-</div>
-
-<script src="script.js"></script>
+</header>
+  <script src="script.js"></script>
+  <script src="../script.js"></script>
 </body>
 </html>
