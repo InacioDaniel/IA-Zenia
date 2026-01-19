@@ -617,23 +617,14 @@
 
     // ========== PROCESSAMENTO DE CONVERSA INTELIGENTE ==========
     async function generateIntelligentResponse(userText) {
-      if (currentAI === "puter") {
-        return await generateWithPuter(userText);
-      } else if (currentAI === "freellm") {
-        return await generateWithFreeLLM(userText);
-      } else {
-        return await generateWithZenia(userText);
-      }
-    }
-
-    // ========== ZENIA LOCAL ==========
-    async function generateWithZenia(userText) {
       const intents = detectContextAndIntent(userText);
       const primaryIntent = intents[0] || "general";
       
+      // Pega resposta base aleatória
       const responses = zeniaResponses[primaryIntent] || zeniaResponses.general;
       let baseResponse = responses[Math.floor(Math.random() * responses.length)];
 
+      // Se for pergunta, tenta enriquecer com informação
       if (primaryIntent === "question" || primaryIntent === "tech") {
         const info = await enrichResponseWithInfo(userText);
         if (info) {
@@ -641,117 +632,17 @@
         }
       }
 
+      // Se for criativo, sugere ideias
       if (primaryIntent === "creative") {
         baseResponse += "<br><br>💡 Que tipo de conteúdo criativo você quer? Posso fazer histórias, poesias, diálogos, coisas humorísticas...";
       }
 
+      // Se for jogo, oferece opções
       if (primaryIntent === "game") {
         baseResponse += "<br><br>Escolha uma opção:<br>• 🎯 Jogo da Advinhação<br>• 🧠 Quiz Geral<br>• 🎲 Jogo de Dados<br>• 🎪 Charadas";
       }
 
       return baseResponse;
-    }
-
-    // ========== PUTER.JS ==========
-    async function generateWithPuter(userText) {
-      try {
-        setStatus("🌐 Consultando Claude (via OpenRouter)...", 40);
-
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "HTTP-Referer": window.location.origin,
-            "X-Title": "Zenia IA"
-          },
-          body: JSON.stringify({
-            model: "claude-3.5-sonnet",
-            messages: [
-              { 
-                role: "system", 
-                content: "Você é Zenia, uma IA autônoma, criativa e amigável. Responda em português de forma natural, contextual e inteligente. Você pode conversar, ajudar, criar, jogar, refletir e fazer praticamente qualquer coisa. Seja conversacional e envolvente." 
-              },
-              { role: "user", content: userText }
-            ],
-            temperature: 0.7,
-            max_tokens: 1500
-          })
-        }).then(r => r.json()).catch(() => null);
-
-        if (response?.choices?.[0]?.message?.content) {
-          return response.choices[0].message.content;
-        }
-
-        setStatus("⚠️ OpenRouter indisponível, usando Zenia local...", 50);
-        return await generateWithZenia(userText);
-      } catch(err) {
-        console.error(err);
-        setStatus("⚠️ Usando Zenia local...", 50);
-        return await generateWithZenia(userText);
-      }
-    }
-
-    // ========== APIFREELLM / GROQ ==========
-    async function generateWithFreeLLM(userText) {
-      try {
-        setStatus("🚀 Consultando Groq (IA Ultra-Rápida)...", 40);
-
-        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer gsk_demo"
-          },
-          body: JSON.stringify({
-            messages: [
-              { 
-                role: "system", 
-                content: "Você é Zenia, uma IA autônoma, criativa e amigável. Responda em português de forma natural, contextual e inteligente. Você pode conversar, ajudar, criar, jogar, refletir e fazer praticamente qualquer coisa. Seja conversacional e envolvente." 
-              },
-              { role: "user", content: userText }
-            ],
-            model: "mixtral-8x7b-32768",
-            temperature: 0.7,
-            max_tokens: 1500
-          })
-        }).then(r => r.json()).catch(() => null);
-
-        if (response?.choices?.[0]?.message?.content) {
-          return response.choices[0].message.content;
-        }
-
-        // Fallback para Together API
-        const togetherRes = await fetch("https://api.together.xyz/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer demo"
-          },
-          body: JSON.stringify({
-            model: "meta-llama/Llama-2-7b-chat-hf",
-            messages: [
-              { 
-                role: "system", 
-                content: "Você é Zenia, uma IA autônoma e amigável. Responda em português de forma natural." 
-              },
-              { role: "user", content: userText }
-            ],
-            temperature: 0.7,
-            max_tokens: 1500
-          })
-        }).then(r => r.json()).catch(() => null);
-
-        if (togetherRes?.choices?.[0]?.message?.content) {
-          return togetherRes.choices[0].message.content;
-        }
-
-        setStatus("⚠️ APIs indisponíveis, usando Zenia local...", 50);
-        return await generateWithZenia(userText);
-      } catch(err) {
-        console.error(err);
-        setStatus("⚠️ Usando Zenia local...", 50);
-        return await generateWithZenia(userText);
-      }
     }
 
     async function enrichResponseWithInfo(topic) {
