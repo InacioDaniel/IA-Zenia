@@ -1,0 +1,1063 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Zenia IA - Inteligência Autônoma</title>
+  <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75' fill='%237c3aed'>🧠</text></svg>" type="image/x-icon">
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2/dist/coco-ssd.min.js"></script>
+  <script src="https://js.puter.com/v2/"></script>
+  <style>
+    :root{
+      --bg:#0f172a; 
+      --card:#102235; 
+      --accent1:#7c3aed; 
+      --accent2:#06b6d4;
+      --text:#e6eef8; 
+      --muted:#94a3b8;
+    }
+
+    * {
+      box-sizing:border-box;
+    }
+
+    body{
+      font-family:'Segoe UI',system-ui,Arial;
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .wrap{
+      max-width:1400px;
+      margin:18px auto;
+      display:grid;
+      grid-template-columns:320px 1fr;
+      gap:16px;
+      padding:0 16px;
+    }
+    
+    .card{
+      background:var(--card);
+      border-radius:12px;
+      padding:16px;
+      border:1px solid rgba(255,255,255,0.06);
+    }
+    
+    .logo{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-bottom:16px;
+    }
+    
+    .logo-icon{
+      width:48px;
+      height:48px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:24px;
+      background:linear-gradient(135deg,var(--accent1),#764ba2);
+    }
+    
+    .small{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+    
+    .controls{
+      display:flex;
+      gap:8px;
+      align-items:flex-end;
+      margin-bottom:12px;
+      flex-wrap:wrap;
+    }
+    
+    #chatArea{
+      height:calc(100vh - 350px);
+      min-height:400px;
+      overflow-y:auto;
+      padding:12px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.015), transparent);
+      border-radius:8px;
+      margin-bottom:12px;
+    }
+    
+    .msg{
+      padding:12px;
+      margin:8px 0;
+      border-radius:10px;
+      max-width:88%;
+      word-wrap:break-word;
+      line-height:1.6;
+    }
+    
+    .msg.user{
+      background:rgba(125,179,255,0.12);
+      color:#e6eef8;
+      margin-left:auto;
+      margin-right:0;
+    }
+    
+    .msg.zenia{
+      background:rgba(255,255,255,0.06);
+      margin-right:auto;
+      margin-left:0;
+    }
+
+    .msg.thinking {
+      background:rgba(6,182,212,0.15);
+      border-left:3px solid var(--accent2);
+      color:var(--accent2);
+      font-style:italic;
+    }
+
+    .msg.error {
+      background:rgba(239,68,68,0.15);
+      border-left:3px solid #ef4444;
+      color:#fca5a5;
+    }
+
+    .msg img, .msg video {
+      max-width:100%;
+      border-radius:8px;
+      margin-top:8px;
+    }
+    
+    input[type="text"], input[type="file"], textarea, select {
+      padding:10px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,0.12);
+      background:transparent;
+      color:var(--text);
+      font-family:inherit;
+      font-size:13px;
+    }
+
+    textarea {
+      flex:1;
+      min-height:50px;
+      resize:vertical;
+      max-height:120px;
+    }
+    
+    input[type="text"]::placeholder, textarea::placeholder {
+      color:var(--muted);
+    }
+    
+    button{
+      padding:10px 16px;
+      border-radius:8px;
+      border:none;
+      background:linear-gradient(90deg,var(--accent1),var(--accent2));
+      color:white;
+      cursor:pointer;
+      font-size:13px;
+      font-weight:600;
+      white-space:nowrap;
+      transition:all 0.2s;
+    }
+    
+    button:hover {
+      opacity:0.9;
+      transform:scale(1.02);
+    }
+
+    button:disabled {
+      opacity:0.5;
+      cursor:not-allowed;
+      transform:scale(1);
+    }
+    
+    #status {
+      font-size:12px;
+      color:var(--muted);
+      margin-top:8px;
+      min-height:20px;
+    }
+
+    .loading {
+      display:inline-block;
+      animation:spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform:rotate(0deg); }
+      to { transform:rotate(360deg); }
+    }
+    
+    .progress{
+      height:6px;
+      background:#0b1320;
+      border-radius:999px;
+      overflow:hidden;
+      margin-top:6px;
+    }
+    
+    .progress > i{
+      display:block;
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,var(--accent1),var(--accent2));
+      transition:width .3s;
+    }
+
+    .tabs {
+      display:flex;
+      gap:6px;
+      margin-bottom:12px;
+      border-bottom:1px solid rgba(255,255,255,0.12);
+      padding-bottom:8px;
+      flex-wrap:wrap;
+    }
+
+    .tab-btn {
+      background:none;
+      border:none;
+      color:var(--muted);
+      cursor:pointer;
+      padding:6px 12px;
+      font-size:12px;
+      border-bottom:2px solid transparent;
+      transition:all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color:var(--text);
+    }
+
+    .tab-btn.active {
+      color:var(--accent2);
+      border-bottom-color:var(--accent2);
+      background:rgba(6,182,212,0.1);
+    }
+
+    .tab-content {
+      display:none;
+    }
+
+    .tab-content.active {
+      display:block;
+    }
+
+    .info-box {
+      background:rgba(124,58,237,0.1);
+      border:1px solid rgba(124,58,237,0.3);
+      border-radius:8px;
+      padding:10px;
+      margin-top:8px;
+      font-size:11px;
+      color:var(--muted);
+      line-height:1.4;
+    }
+
+    canvas {
+      max-width:100%;
+      border-radius:8px;
+      margin-top:8px;
+    }
+
+    hr {
+      margin:10px 0;
+      border:none;
+      border-top:1px solid rgba(255,255,255,0.12);
+    }
+
+    .file-input-label {
+      cursor:pointer;
+      color:var(--accent2);
+      text-decoration:underline;
+    }
+    
+    nav { 
+      background:linear-gradient(90deg, #222, #1a1a2e);
+      color: #fff; 
+      padding: 12px 20px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      box-shadow:0 2px 8px rgba(0,0,0,0.3);
+    } 
+
+    nav .logo { 
+      font-weight: bold;
+      font-size:14px;
+    }
+
+    @media(max-width:1100px){
+      .wrap{
+        grid-template-columns:1fr;
+      }
+
+      #chatArea {
+        height:400px;
+      }
+    }
+
+    @media(max-width:600px){
+      .tabs {
+        gap:4px;
+      }
+
+      .tab-btn {
+        padding:4px 8px;
+        font-size:11px;
+      }
+
+      button {
+        padding:8px 12px;
+        font-size:12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav> 
+    <div class="logo">🧠 ZENIA IA - Inteligência Autônoma</div> 
+  </nav>
+
+  <div class="wrap">
+    <aside class="card">
+      <div class="logo">
+        <div class="logo-icon">🧠</div>
+        <div>
+          <div style="font-weight:700;font-size:16px">ZENIA</div>
+          <div class="small">IA Autônoma e Criativa</div>
+        </div>
+      </div>
+
+      <hr>
+
+      <div style="margin-bottom:12px">
+        <h4 style="margin:0 0 6px 0;font-size:13px;color:var(--accent1)">🤖 IA CONVERSACIONAL</h4>
+        <select id="aiSelector" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:var(--text);font-size:12px">
+          <option value="zenia" selected>🧠 Zenia (Local)</option>
+          <option value="puter">🌐 Claude/OpenRouter</option>
+          <option value="freellm">🚀 Groq/Together (Rápido)</option>
+        </select>
+      </div>
+        <ul class="small" style="padding-left:16px;margin:0;list-style-position:inside">
+          <li>💬 Conversa Natural Ilimitada</li>
+          <li>❓ Perguntas Informativas</li>
+          <li>🎮 Jogos e Desafios</li>
+          <li>💭 Reflexão e Contexto</li>
+          <li>🛠️ Suporte Técnico</li>
+          <li>🎨 Geração de Imagens IA</li>
+          <li>🎬 Geração de Vídeos IA</li>
+          <li>🔍 Análise de Imagens</li>
+          <li>🌐 Busca e Pesquisa</li>
+        </ul>
+      </div>
+
+      <hr>
+
+      <div id="status" style="margin-top:8px"></div>
+      <div class="progress" aria-hidden><i id="modelProgress"></i></div>
+
+      <div style="margin-top:12px">
+        <button id="micBtn" style="width:100%;margin-bottom:6px">🎤 Falar</button>
+        <button id="clearBtn" style="width:100%">🗑️ Limpar Chat</button>
+      </div>
+
+      <div class="info-box">
+        <strong style="color:var(--accent2)">💡 Dica:</strong> Zenia entende qualquer tipo de solicitação. Digite naturalmente - conversa, perguntas, pedidos para criar, analisar, etc.
+      </div>
+    </aside>
+
+    <main class="card">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="chat">💬 Chat</button>
+        <button class="tab-btn" data-tab="imagine">🎨 Gerar Imagem</button>
+        <button class="tab-btn" data-tab="video">🎬 Gerar Vídeo</button>
+        <button class="tab-btn" data-tab="analyze">🔍 Analisar Imagem</button>
+      </div>
+
+      <!-- TAB 1: CHAT -->
+      <div id="chat" class="tab-content active">
+        <div class="controls">
+          <textarea id="userInput" placeholder="Converse livremente com Zenia. Pergunte qualquer coisa, peça criações, jogos, reflexões..."></textarea>
+          <button id="sendBtn">Enviar</button>
+        </div>
+        <div id="chatArea" role="log" aria-live="polite"></div>
+      </div>
+
+      <!-- TAB 2: GERAR IMAGEM -->
+      <div id="imagine" class="tab-content">
+        <div class="controls">
+          <textarea id="imagePrompt" placeholder="Descreva a imagem que deseja. Ex: mulher guerreira em castelo de vidro, paisagem cyberpunk, homem em praia paradisíaca..."></textarea>
+          <button id="generateImageBtn">🎨 Gerar</button>
+        </div>
+        <div id="imageResult" style="margin-top:12px"></div>
+        <div id="imageStatus"></div>
+      </div>
+
+      <!-- TAB 3: GERAR VÍDEO -->
+      <div id="video" class="tab-content">
+        <div class="controls">
+          <textarea id="videoPrompt" placeholder="Descreva o vídeo que deseja. Ex: dançarino fazendo breakdance, carro em velocidade máxima, natureza em timelapse..."></textarea>
+          <button id="generateVideoBtn">🎬 Gerar</button>
+        </div>
+        <div id="videoResult" style="margin-top:12px"></div>
+        <div id="videoStatus"></div>
+      </div>
+
+      <!-- TAB 4: ANALISAR IMAGEM -->
+      <div id="analyze" class="tab-content">
+        <div class="controls">
+          <label class="file-input-label">
+            📁 Selecione imagem
+            <input type="file" id="imageFile" accept="image/*" style="display:none">
+          </label>
+          <button id="analyzeBtn">🔍 Analisar</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+          <div>
+            <p style="font-size:12px;color:var(--muted);margin:0 0 6px 0">Imagem:</p>
+            <img id="previewImg" alt="Preview" style="max-width:100%;display:none;border-radius:8px;border:1px solid rgba(255,255,255,0.12)"/>
+          </div>
+          <div>
+            <p style="font-size:12px;color:var(--muted);margin:0 0 6px 0">Detecção:</p>
+            <canvas id="previewCanvas" style="max-width:100%;border:1px solid rgba(255,255,255,0.12)"></canvas>
+          </div>
+        </div>
+        <div id="analyzeResult" style="margin-top:12px"></div>
+        <div id="analyzeStatus"></div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ========== CONFIGURAÇÃO GLOBAL ==========
+    const chatArea = document.getElementById("chatArea");
+    const userInput = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const statusEl = document.getElementById("status");
+    const progressBar = document.getElementById("modelProgress");
+    const aiSelector = document.getElementById("aiSelector");
+
+    let recognition = null;
+    let cocoModel = null;
+    let currentImage = null;
+    let isProcessing = false;
+    let currentAI = "zenia";
+
+    // ========== GERENCIAMENTO DE ABAS ==========
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+        e.target.classList.add("active");
+        document.getElementById(e.target.dataset.tab).classList.add("active");
+      });
+    });
+
+    // Selector de IA
+    aiSelector.addEventListener("change", (e) => {
+      currentAI = e.target.value;
+      const names = { zenia: "Zenia", puter: "Puter.js", freellm: "ApiFreeLLM" };
+      setStatus(`✓ IA alterada para: ${names[currentAI]}`, 100);
+    });
+
+    // ========== EVENTOS PRINCIPAIS ==========
+    document.getElementById("sendBtn").addEventListener("click", handleChatInput);
+    document.getElementById("generateImageBtn").addEventListener("click", handleGenerateImage);
+    document.getElementById("generateVideoBtn").addEventListener("click", handleGenerateVideo);
+    document.getElementById("analyzeBtn").addEventListener("click", analyzeImage);
+    document.getElementById("imageFile").addEventListener("change", handleImageUpload);
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      chatArea.innerHTML = "";
+      setStatus("Chat limpo ✓");
+    });
+    document.getElementById("micBtn").addEventListener("click", toggleMic);
+
+    userInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleChatInput();
+      }
+    });
+
+    // ========== UI HELPERS ==========
+    function setStatus(text, progress = null) {
+      statusEl.textContent = text;
+      if (progress !== null) {
+        progressBar.style.width = `${Math.max(0, Math.min(100, progress))}%`;
+      }
+    }
+
+    function addMessage(text, who, isHtml = false) {
+      const div = document.createElement("div");
+      div.className = "msg " + who;
+      if (isHtml) {
+        div.innerHTML = text;
+      } else {
+        div.textContent = text;
+      }
+      chatArea.appendChild(div);
+      chatArea.scrollTop = chatArea.scrollHeight;
+      return div;
+    }
+
+    // ========== SPEECH API ==========
+    function initSpeechRecognition() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        setStatus("❌ Speech API não suportada");
+        return;
+      }
+      recognition = new SR();
+      recognition.lang = "pt-BR";
+      recognition.interimResults = false;
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        userInput.value += transcript + " ";
+        userInput.focus();
+      };
+      recognition.onerror = () => setStatus("❌ Erro no mic");
+    }
+
+    function toggleMic() {
+      if (!recognition) { initSpeechRecognition(); }
+      if (!recognition) return;
+      try {
+        recognition.start();
+        setStatus("🎤 Ouvindo...", 30);
+      } catch(e) {
+        setStatus("Erro ao iniciar mic");
+      }
+    }
+
+    initSpeechRecognition();
+
+    // ========== INTELIGÊNCIA CONTEXTUAL - DETECTOR DE INTENÇÃO AVANÇADO ==========
+    function detectContextAndIntent(text) {
+      const lower = text.toLowerCase();
+
+      // Categorias de intenção
+      const intents = {
+        greeting: /^(oi|olá|ola|hey|bom dia|boa tarde|boa noite|e aí|tudo bem|como vai|como você está)/i,
+        farewell: /^(tchau|adeus|até|vou indo|flw|falou)/i,
+        thanks: /^(obrigad|valeu|thanks|de nada|merci|gracias)/i,
+        question: /^(qual|quanto|quando|onde|quem|por que|como|o que|que|me explica)/i,
+        request: /(cria|crie|desenha|faça|gera|gere|faz|fez|escreve|escreva)/i,
+        game: /(joga|jogo|desafio|brinca|brincadeira|adivinhe|quiz)/i,
+        tech: /(código|programa|bug|error|html|css|javascript|python|java|erro|problema técnico)/i,
+        creative: /(história|poesia|poema|conto|romance|criar algo|inventar|imagina|imaginar)/i,
+        reflection: /(você acha|sua opinião|que você pensa|reflexão|pensa sobre|filosofia|significado)/i,
+        casual: /(como você é|qual seu nome|quem é você|você existe|você sente|como é|qual é)/i
+      };
+
+      let detectedIntents = [];
+      for (const [intent, regex] of Object.entries(intents)) {
+        if (regex.test(lower)) {
+          detectedIntents.push(intent);
+        }
+      }
+
+      return detectedIntents.length > 0 ? detectedIntents : ["general"];
+    }
+
+    // ========== RESPOSTAS INTELIGENTES E DINÂMICAS ==========
+    const zeniaResponses = {
+      greeting: [
+        "Oi! 👋 Como você está?",
+        "Olá! Seja bem-vindo. Em que posso ajudar?",
+        "Opa! Tudo bem? Pronto para conversar! 😊"
+      ],
+      farewell: [
+        "Até logo! 👋 Volta sempre!",
+        "Tchau! Foi bom conversar com você!",
+        "Até a próxima! Cuide-se bem!"
+      ],
+      thanks: [
+        "De nada! Fico feliz em ajudar! 😊",
+        "Por nada! Sempre à disposição!",
+        "Que isso! Estou aqui para isso!"
+      ],
+      game: [
+        "Adorei a ideia! 🎮 Vamos começar! Que tipo de jogo você quer?",
+        "Bora! 🎯 Posso fazer jogos de adivinhas, quiz, roleplay e mais!",
+        "Que legal! 🎲 Estou pronto para qualquer desafio!"
+      ],
+      creative: [
+        "Que legal! 📝 Deixa eu criar algo bem criativo para você!",
+        "Adorei! ✨ Vou usar toda minha criatividade!",
+        "Perfeito! 🎭 Vamos criar algo incrível!"
+      ],
+      reflection: [
+        "Que pergunta profunda! 💭 Deixa eu pensar...",
+        "Que interessante! 🤔 Minha opinião é...",
+        "Boa reflexão! ✨ Vou compartilhar meu ponto de vista..."
+      ],
+      casual: [
+        "Sou a Zenia, uma IA autônoma! 🧠 Estou aqui para conversar, criar, ajudar em tudo!",
+        "Me chamo Zenia! 👋 Sou uma inteligência artificial criada para ser sua assistente em qualquer coisa!",
+        "Eu sou Zenia! 🤖 Uma IA completa - posso conversar, criar imagens/vídeos, analisar, ensinar, jogar e muito mais!"
+      ],
+      question: [
+        "Ótima pergunta! 🤔 Deixa eu te explicar...",
+        "Entendi sua dúvida! 💡 A resposta é...",
+        "Que bom que perguntou! 📚 Vou esclarecer isso..."
+      ],
+      tech: [
+        "Ah, programação! 💻 Vou te ajudar com isso!",
+        "Problema técnico? 🔧 Deixa comigo, vou resolver!",
+        "Código? 👨‍💻 Entendo de tudo - vou te guiar!"
+      ],
+      general: [
+        "Entendi! 😊 Deixa eu responder com cuidado...",
+        "Boa observação! 💭 Vou te dar uma resposta bem pensada...",
+        "Claro! ✨ Aqui está minha perspectiva..."
+      ]
+    };
+
+    // ========== PROCESSAMENTO DE CONVERSA INTELIGENTE ==========
+    async function generateIntelligentResponse(userText) {
+      if (currentAI === "puter") {
+        return await generateWithPuter(userText);
+      } else if (currentAI === "freellm") {
+        return await generateWithFreeLLM(userText);
+      } else {
+        return await generateWithZenia(userText);
+      }
+    }
+
+    // ========== ZENIA LOCAL ==========
+    async function generateWithZenia(userText) {
+      const intents = detectContextAndIntent(userText);
+      const primaryIntent = intents[0] || "general";
+      
+      const responses = zeniaResponses[primaryIntent] || zeniaResponses.general;
+      let baseResponse = responses[Math.floor(Math.random() * responses.length)];
+
+      if (primaryIntent === "question" || primaryIntent === "tech") {
+        const info = await enrichResponseWithInfo(userText);
+        if (info) {
+          baseResponse += "<br><br>" + info;
+        }
+      }
+
+      if (primaryIntent === "creative") {
+        baseResponse += "<br><br>💡 Que tipo de conteúdo criativo você quer? Posso fazer histórias, poesias, diálogos, coisas humorísticas...";
+      }
+
+      if (primaryIntent === "game") {
+        baseResponse += "<br><br>Escolha uma opção:<br>• 🎯 Jogo da Advinhação<br>• 🧠 Quiz Geral<br>• 🎲 Jogo de Dados<br>• 🎪 Charadas";
+      }
+
+      return baseResponse;
+    }
+
+    // ========== PUTER.JS ==========
+    async function generateWithPuter(userText) {
+      try {
+        setStatus("🌐 Consultando Claude (via OpenRouter)...", 40);
+
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "HTTP-Referer": window.location.origin,
+            "X-Title": "Zenia IA"
+          },
+          body: JSON.stringify({
+            model: "claude-3.5-sonnet",
+            messages: [
+              { 
+                role: "system", 
+                content: "Você é Zenia, uma IA autônoma, criativa e amigável. Responda em português de forma natural, contextual e inteligente. Você pode conversar, ajudar, criar, jogar, refletir e fazer praticamente qualquer coisa. Seja conversacional e envolvente." 
+              },
+              { role: "user", content: userText }
+            ],
+            temperature: 0.7,
+            max_tokens: 1500
+          })
+        }).then(r => r.json()).catch(() => null);
+
+        if (response?.choices?.[0]?.message?.content) {
+          return response.choices[0].message.content;
+        }
+
+        setStatus("⚠️ OpenRouter indisponível, usando Zenia local...", 50);
+        return await generateWithZenia(userText);
+      } catch(err) {
+        console.error(err);
+        setStatus("⚠️ Usando Zenia local...", 50);
+        return await generateWithZenia(userText);
+      }
+    }
+
+    // ========== APIFREELLM / GROQ ==========
+    async function generateWithFreeLLM(userText) {
+      try {
+        setStatus("🚀 Consultando Groq (IA Ultra-Rápida)...", 40);
+
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer gsk_demo"
+          },
+          body: JSON.stringify({
+            messages: [
+              { 
+                role: "system", 
+                content: "Você é Zenia, uma IA autônoma, criativa e amigável. Responda em português de forma natural, contextual e inteligente. Você pode conversar, ajudar, criar, jogar, refletir e fazer praticamente qualquer coisa. Seja conversacional e envolvente." 
+              },
+              { role: "user", content: userText }
+            ],
+            model: "mixtral-8x7b-32768",
+            temperature: 0.7,
+            max_tokens: 1500
+          })
+        }).then(r => r.json()).catch(() => null);
+
+        if (response?.choices?.[0]?.message?.content) {
+          return response.choices[0].message.content;
+        }
+
+        // Fallback para Together API
+        const togetherRes = await fetch("https://api.together.xyz/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer demo"
+          },
+          body: JSON.stringify({
+            model: "meta-llama/Llama-2-7b-chat-hf",
+            messages: [
+              { 
+                role: "system", 
+                content: "Você é Zenia, uma IA autônoma e amigável. Responda em português de forma natural." 
+              },
+              { role: "user", content: userText }
+            ],
+            temperature: 0.7,
+            max_tokens: 1500
+          })
+        }).then(r => r.json()).catch(() => null);
+
+        if (togetherRes?.choices?.[0]?.message?.content) {
+          return togetherRes.choices[0].message.content;
+        }
+
+        setStatus("⚠️ APIs indisponíveis, usando Zenia local...", 50);
+        return await generateWithZenia(userText);
+      } catch(err) {
+        console.error(err);
+        setStatus("⚠️ Usando Zenia local...", 50);
+        return await generateWithZenia(userText);
+      }
+    }
+
+    async function enrichResponseWithInfo(topic) {
+      try {
+        // Busca simples Wikipedia
+        const response = await fetch(`https://pt.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(topic)}&format=json&srlimit=1&origin=*`);
+        const data = await response.json();
+        
+        if (data.query?.search[0]) {
+          const title = data.query.search[0].title;
+          const extractRes = await fetch(`https://pt.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&titles=${encodeURIComponent(title)}&format=json&origin=*`);
+          const extractData = await extractRes.json();
+          const page = Object.values(extractData.query.pages)[0];
+          
+          if (page?.extract) {
+            const sentences = page.extract.split(/[\.\!\?]/);
+            return `<strong>📚 Informação:</strong> ${sentences[0]}${sentences[1] ? '. ' + sentences[1] : ''}.`;
+          }
+        }
+      } catch(e) {
+        console.error(e);
+      }
+      return null;
+    }
+
+    // ========== PROCESSAMENTO DE CHAT ==========
+    async function handleChatInput() {
+      const text = userInput.value.trim();
+      if (!text || isProcessing) return;
+
+      addMessage(text, "user", false);
+      userInput.value = "";
+      isProcessing = true;
+      sendBtn.disabled = true;
+
+      try {
+        setStatus("🧠 Zenia pensando...", 20);
+        
+        const response = await generateIntelligentResponse(text);
+        
+        await new Promise(resolve => setTimeout(resolve, 500)); // Simula "pensamento"
+        
+        addMessage(response, "zenia", true);
+        setStatus("✓ Pronto!", 100);
+      } catch(err) {
+        console.error(err);
+        addMessage("❌ Desculpe, algo deu errado. Tente novamente!", "zenia");
+        setStatus("❌ Erro", 0);
+      } finally {
+        isProcessing = false;
+        sendBtn.disabled = false;
+      }
+    }
+
+    // ========== GERAÇÃO DE IMAGENS (KIE.AI) ==========
+    async function handleGenerateImage() {
+      const prompt = document.getElementById("imagePrompt").value.trim();
+      if (!prompt) return;
+
+      const resultDiv = document.getElementById("imageResult");
+      const statusDiv = document.getElementById("imageStatus");
+      resultDiv.innerHTML = "";
+      statusDiv.innerHTML = '<span class="loading">⏳</span> Gerando sua imagem com IA...';
+
+      try {
+        setStatus("🎨 Gerando imagem com Kie.ai...", 30);
+
+        // Usa API Kie.ai
+        const response = await fetch("https://api.kie.ai/v1/images/generations", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer demo"
+          },
+          body: JSON.stringify({
+            prompt: prompt,
+            model: "flux-pro",
+            width: 1024,
+            height: 1024,
+            steps: 25,
+            guidance_scale: 7.5,
+            num_images: 1
+          })
+        }).then(r => r.json()).catch(e => {
+          console.error("Kie.ai erro:", e);
+          return null;
+        });
+
+        if (response?.data?.[0]?.url) {
+          resultDiv.innerHTML = `
+            <div style="text-align:center">
+              <img src="${response.data[0].url}" alt="Imagem gerada" style="max-width:100%;border-radius:8px;border:1px solid rgba(124,58,237,0.3);box-shadow:0 0 20px rgba(124,58,237,0.2)">
+              <p style="font-size:12px;color:var(--muted);margin-top:12px">✅ <strong>Prompt:</strong> ${prompt}</p>
+              <button onclick="window.open('${response.data[0].url}');" style="margin-top:8px">💾 Baixar Imagem</button>
+            </div>
+          `;
+          statusDiv.innerHTML = "✅ Imagem criada com sucesso!";
+          setStatus("✓ Imagem gerada!", 100);
+          return;
+        }
+
+        // Fallback: Pollinations.ai (alternativa rápida e confiável)
+        const pollResponse = await fetch(`https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${Math.random()}`).catch(() => null);
+        
+        if (pollResponse?.ok) {
+          const blob = await pollResponse.blob();
+          const url = URL.createObjectURL(blob);
+          resultDiv.innerHTML = `
+            <div style="text-align:center">
+              <img src="${url}" alt="Imagem gerada" style="max-width:100%;border-radius:8px;border:1px solid rgba(124,58,237,0.3);box-shadow:0 0 20px rgba(124,58,237,0.2)">
+              <p style="font-size:12px;color:var(--muted);margin-top:12px">✅ <strong>Prompt:</strong> ${prompt}</p>
+              <button onclick="window.open('${url}');" style="margin-top:8px">💾 Baixar Imagem</button>
+            </div>
+          `;
+          statusDiv.innerHTML = "✅ Imagem criada com Pollinations.ai!";
+          setStatus("✓ Pronto!", 100);
+          return;
+        }
+
+        throw new Error("Nenhuma API disponível");
+      } catch(err) {
+        console.error(err);
+        resultDiv.innerHTML = `
+          <div style="background:rgba(239,68,68,0.15);padding:12px;border-radius:8px;border-left:3px solid #ef4444">
+            <p style="color:#fca5a5;margin:0;font-size:12px"><strong>❌ Erro:</strong> Erro ao conectar às APIs de imagem. Verifique se o prompt é válido e tente novamente.</p>
+          </div>
+        `;
+        statusDiv.innerHTML = "❌ Falha na geração";
+        setStatus("Erro ao gerar imagem", 0);
+      }
+    }
+
+    // ========== GERAÇÃO DE VÍDEOS (API REAL) ==========
+    async function handleGenerateVideo() {
+      const prompt = document.getElementById("videoPrompt").value.trim();
+      if (!prompt) return;
+
+      const resultDiv = document.getElementById("videoResult");
+      const statusDiv = document.getElementById("videoStatus");
+      resultDiv.innerHTML = "";
+      statusDiv.innerHTML = '<span class="loading">⏳</span> Gerando seu vídeo (pode levar alguns minutos)...';
+
+      try {
+        setStatus("🎬 Gerando vídeo com IA...", 30);
+
+        // Tenta API de vídeo
+        const response = await fetch("https://api.together.xyz/v1/video/generations", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer demo"
+          },
+          body: JSON.stringify({
+            prompt: prompt,
+            model: "black-forest-labs/FLUX.1-schnell-video",
+            duration: 5,
+            fps: 24
+          })
+        }).then(r => r.json()).catch(() => null);
+
+        if (response?.data?.[0]?.url) {
+          resultDiv.innerHTML = `
+            <div style="text-align:center">
+              <video width="100%" controls style="border-radius:8px;border:1px solid rgba(124,58,237,0.3)">
+                <source src="${response.data[0].url}" type="video/mp4">
+              </video>
+              <p style="font-size:12px;color:var(--muted);margin-top:8px">Prompt: <strong>${prompt}</strong></p>
+              <button onclick="window.open('${response.data[0].url}');" style="margin-top:8px">💾 Baixar</button>
+            </div>
+          `;
+          statusDiv.innerHTML = "✅ Vídeo criado com sucesso!";
+          setStatus("✓ Vídeo gerado!", 100);
+          return;
+        }
+
+        throw new Error("API indisponível");
+      } catch(err) {
+        console.error(err);
+        resultDiv.innerHTML = `
+          <div style="background:rgba(239,68,68,0.15);padding:12px;border-radius:8px;border-left:3px solid #ef4444">
+            <p style="color:#fca5a5;margin:0;font-size:12px"><strong>❌ Erro:</strong> APIs de vídeo temporariamente indisponíveis. Geralmente leva mais tempo para processar.</p>
+          </div>
+        `;
+        statusDiv.innerHTML = "❌ Falha na geração";
+        setStatus("Erro ao gerar vídeo", 0);
+      }
+    }
+
+    // ========== CARREGAMENTO DO MODELO COCO-SSD ==========
+    async function loadCocoModel() {
+      try {
+        setStatus("🔍 Carregando modelo de detecção...", 40);
+        cocoModel = await cocoSsd.load();
+        setStatus("✓ Modelo carregado!", 100);
+      } catch(e) {
+        console.error(e);
+        setStatus("❌ Erro ao carregar modelo", 0);
+      }
+    }
+
+    loadCocoModel();
+
+    // ========== ANÁLISE DE IMAGENS ==========
+    function handleImageUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = document.createElement("img");
+        img.onload = () => {
+          const preview = document.getElementById("previewImg");
+          preview.src = img.src;
+          preview.style.display = "block";
+          currentImage = img;
+          drawToCanvas(img);
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function drawToCanvas(img) {
+      const canvas = document.getElementById("previewCanvas");
+      const ctx = canvas.getContext("2d");
+      const maxW = 400;
+      const scale = Math.min(1, maxW / img.naturalWidth);
+      canvas.width = Math.round(img.naturalWidth * scale);
+      canvas.height = Math.round(img.naturalHeight * scale);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    }
+
+    async function analyzeImage() {
+      if (!currentImage) {
+        document.getElementById("analyzeStatus").textContent = "❌ Selecione uma imagem primeiro";
+        return;
+      }
+
+      if (!cocoModel) {
+        document.getElementById("analyzeStatus").textContent = "❌ Modelo ainda não está pronto";
+        return;
+      }
+
+      const statusDiv = document.getElementById("analyzeStatus");
+      const resultDiv = document.getElementById("analyzeResult");
+      statusDiv.innerHTML = '<span class="loading">⏳</span> Analisando imagem...';
+      resultDiv.innerHTML = "";
+
+      try {
+        setStatus("🔍 Detectando objetos...", 50);
+
+        const canvas = document.getElementById("previewCanvas");
+        const predictions = await cocoModel.detect(canvas);
+
+        // Desenha bounding boxes
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
+        ctx.lineWidth = 2;
+        ctx.font = "bold 12px Arial";
+        ctx.strokeStyle = "#06b6d4";
+        ctx.fillStyle = "rgba(6,182,212,0.2)";
+
+        predictions.forEach(pred => {
+          const [x, y, w, h] = pred.bbox;
+          ctx.strokeRect(x, y, w, h);
+          ctx.fillRect(x, y, w, h);
+          
+          ctx.fillStyle = "#ffffff";
+          ctx.fillText(`${pred.class} (${(pred.score * 100).toFixed(1)}%)`, x + 4, y - 4);
+          ctx.fillStyle = "rgba(6,182,212,0.2)";
+        });
+
+        setStatus("✓ Análise completa!", 100);
+
+        // Resultado textual
+        if (predictions.length > 0) {
+          const objects = predictions.map(p => `<strong>${p.class}</strong> (${(p.score * 100).toFixed(0)}%)`).join(", ");
+          resultDiv.innerHTML = `
+            <div style="background:rgba(6,182,212,0.1);padding:12px;border-radius:8px;border-left:3px solid var(--accent2)">
+              <p style="margin:0 0 8px 0;font-size:13px;color:var(--accent2)"><strong>✅ Detecção Concluída</strong></p>
+              <p style="margin:0;font-size:12px">Objetos detectados: ${objects}</p>
+              <p style="margin:8px 0 0 0;font-size:11px;color:var(--muted)">Total: ${predictions.length} objeto(s)</p>
+            </div>
+          `;
+        } else {
+          resultDiv.innerHTML = `
+            <div style="background:rgba(239,68,68,0.15);padding:12px;border-radius:8px;border-left:3px solid #ef4444">
+              <p style="margin:0;font-size:12px;color:#fca5a5"><strong>⚠️ Nenhum objeto detectado</strong> na imagem</p>
+            </div>
+          `;
+        }
+
+        statusDiv.innerHTML = "✅ Análise concluída";
+
+      } catch(err) {
+        console.error(err);
+        resultDiv.innerHTML = `
+          <div style="background:rgba(239,68,68,0.15);padding:12px;border-radius:8px;border-left:3px solid #ef4444">
+            <p style="margin:0;font-size:12px;color:#fca5a5"><strong>❌ Erro:</strong> Não foi possível analisar a imagem</p>
+          </div>
+        `;
+        statusDiv.innerHTML = "❌ Erro na análise";
+        setStatus("Erro ao analisar imagem", 0);
+      }
+    }
+
+  </script>
+</body>
+</html>
