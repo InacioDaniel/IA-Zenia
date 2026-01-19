@@ -5,308 +5,295 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Zenia IA - Inteligência Autônoma</title>
   <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75' fill='%237c3aed'>🧠</text></svg>" type="image/x-icon">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2/dist/coco-ssd.min.js"></script>
+  
   <style>
-    :root{
-      --bg:#0f172a; 
-      --card:#102235; 
-      --accent1:#7c3aed; 
-      --accent2:#06b6d4;
-      --text:#e6eef8; 
-      --muted:#94a3b8;
+    :root {
+      --bg: #0f172a; --card: #1e293b; --accent: #7c3aed;
     }
-
-    * { box-sizing:border-box; }
-    body{ font-family:'Segoe UI',system-ui,Arial; margin:0; background:var(--bg); color:var(--text); }
-    .wrap{ max-width:1400px; margin:18px auto; display:grid; grid-template-columns:320px 1fr; gap:16px; padding:0 16px; }
-    .card{ background:var(--card); border-radius:12px; padding:16px; border:1px solid rgba(255,255,255,0.06); }
-    .logo{ display:flex; gap:10px; align-items:center; margin-bottom:16px; }
-    .logo-icon{ width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; background:linear-gradient(135deg,var(--accent1),#764ba2); }
-    .small{ font-size:12px; color:var(--muted); line-height:1.5; }
-    .controls{ display:flex; gap:8px; align-items:flex-end; margin-bottom:12px; flex-wrap:wrap; }
-    #chatArea{ height:calc(100vh - 350px); min-height:400px; overflow-y:auto; padding:12px; background:linear-gradient(180deg, rgba(255,255,255,0.015), transparent); border-radius:8px; margin-bottom:12px; }
-    .msg{ padding:12px; margin:8px 0; border-radius:10px; max-width:88%; word-wrap:break-word; line-height:1.6; }
-    .msg.user{ background:rgba(125,179,255,0.12); color:#e6eef8; margin-left:auto; margin-right:0; }
-    .msg.zenia{ background:rgba(255,255,255,0.06); margin-right:auto; margin-left:0; }
-    .msg.thinking { background:rgba(6,182,212,0.15); border-left:3px solid var(--accent2); color:var(--accent2); font-style:italic; }
-    .msg.error { background:rgba(239,68,68,0.15); border-left:3px solid #ef4444; color:#fca5a5; }
-    .msg img, .msg video, .msg audio { max-width:100%; border-radius:8px; margin-top:8px; }
-    input[type="text"], input[type="file"], textarea, select { padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.12); background:transparent; color:var(--text); font-family:inherit; font-size:13px; }
-    textarea { flex:1; min-height:50px; resize:vertical; max-height:120px; }
-    input[type="text"]::placeholder, textarea::placeholder { color:var(--muted); }
-    button{ padding:10px 16px; border-radius:8px; border:none; background:linear-gradient(90deg,var(--accent1),var(--accent2)); color:white; cursor:pointer; font-size:13px; font-weight:600; white-space:nowrap; transition:all 0.2s; }
-    button:hover { opacity:0.9; transform:scale(1.02); }
-    button:disabled { opacity:0.5; cursor:not-allowed; transform:scale(1); }
-    #status { font-size:12px; color:var(--muted); margin-top:8px; min-height:20px; }
-    .loading { display:inline-block; animation:spin 1s linear infinite; }
-    @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
-    .progress{ height:6px; background:#0b1320; border-radius:999px; overflow:hidden; margin-top:6px; }
-    .progress > i{ display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--accent1),var(--accent2)); transition:width .3s; }
-    .tabs { display:flex; gap:6px; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.12); padding-bottom:8px; flex-wrap:wrap; }
-    .tab-btn { background:none; border:none; color:var(--muted); cursor:pointer; padding:6px 12px; font-size:12px; border-bottom:2px solid transparent; transition:all 0.2s; }
-    .tab-btn:hover { color:var(--text); }
-    .tab-btn.active { color:var(--accent2); border-bottom-color:var(--accent2); background:rgba(6,182,212,0.1); }
-    .tab-content { display:none; }
-    .tab-content.active { display:block; }
-    .info-box { background:rgba(124,58,237,0.1); border:1px solid rgba(124,58,237,0.3); border-radius:8px; padding:10px; margin-top:8px; font-size:11px; color:var(--muted); line-height:1.4; }
-    canvas { max-width:100%; border-radius:8px; margin-top:8px; }
-    hr { margin:10px 0; border:none; border-top:1px solid rgba(255,255,255,0.12); }
-    .file-input-label { cursor:pointer; color:var(--accent2); text-decoration:underline; }
-    nav { background:linear-gradient(90deg, #222, #1a1a2e); color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow:0 2px 8px rgba(0,0,0,0.3); } 
-    nav .logo { font-weight: bold; font-size:14px; }
-    @media(max-width:1100px){ .wrap{ grid-template-columns:1fr; } #chatArea { height:400px; } }
-    @media(max-width:600px){ .tabs { gap:4px; } .tab-btn { padding:4px 8px; font-size:11px; } button { padding:8px 12px; font-size:12px; } }
+    body { background-color: var(--bg); color: #e2e8f0; }
+    .custom-scroll::-webkit-scrollbar { width: 6px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .msg-zenia { background: rgba(255,255,255,0.05); border-left: 3px solid var(--accent); }
+    .msg-user { background: rgba(124,58,237,0.1); border-right: 3px solid #06b6d4; }
   </style>
 </head>
-<body>
-  <nav> 
-    <div class="logo">🧠 ZENIA IA - Inteligência Autônoma</div> 
+<body class="min-h-screen">
+
+  <nav class="bg-slate-900 border-b border-slate-700 p-4 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-2 font-bold text-lg">
+        <span class="text-2xl">🧠</span> ZENIA IA <span class="text-xs bg-purple-600 px-2 py-0.5 rounded text-white ml-2">KIE.AI POWERED</span>
+      </div>
+      <div class="text-xs text-slate-400 hidden md:block">Processando via Nuvem Híbrida</div>
+    </div>
   </nav>
 
-  <div class="wrap">
-    <aside class="card">
-      <div class="logo">
-        <div class="logo-icon">🧠</div>
-        <div>
-          <div style="font-weight:700;font-size:16px">ZENIA</div>
-          <div class="small">IA Autônoma e Criativa</div>
-        </div>
-      </div>
-
-      <hr>
-
-      <div style="margin-bottom:12px">
-        <h4 style="margin:0 0 6px 0;font-size:13px;color:var(--accent1)">⚡ CAPACIDADES</h4>
-        <ul class="small" style="padding-left:16px;margin:0;list-style-position:inside">
-          <li>💬 Conversa Natural Ilimitada</li>
-          <li>❓ Perguntas Informativas</li>
-          <li>🎮 Jogos e Desafios</li>
-          <li>💭 Reflexão e Contexto</li>
-          <li>🛠️ Suporte Técnico</li>
-          <li>🎨 Geração de Imagens IA</li>
-          <li>🎬 Geração de Vídeos IA</li>
-          <li>🎵 Geração de Música IA</li>
-          <li>🔍 Análise de Imagens</li>
-          <li>🌐 Busca e Pesquisa</li>
+  <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6 p-4">
+    
+    <aside class="lg:col-span-1 space-y-4">
+      <div class="bg-slate-800 rounded-xl p-5 border border-slate-700">
+        <h3 class="text-purple-400 font-bold mb-3 flex items-center gap-2">⚡ CAPACIDADES</h3>
+        <ul class="text-sm space-y-2 text-slate-300">
+          <li>💬 Chat Cognitivo (Kie.ai)</li>
+          <li>🎨 Imagens Pro (Flux/Kie)</li>
+          <li>🎬 Vídeos Realistas (Kie.ai)</li>
+          <li>🎵 Geração de Música (Kie.ai)</li>
+          <li>🔍 Visão Computacional</li>
         </ul>
+        <hr class="my-4 border-slate-700">
+        <div id="status" class="text-xs text-slate-500 mb-2">Sistema Pronto</div>
+        <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+          <div id="progressBar" class="bg-purple-600 h-full w-0 transition-all duration-300"></div>
+        </div>
+        <button id="micBtn" class="w-full mt-4 bg-slate-700 hover:bg-slate-600 p-2 rounded-lg text-sm transition">🎤 Comand de Voz</button>
       </div>
-
-      <hr>
-
-      <div id="status" style="margin-top:8px"></div>
-      <div class="progress" aria-hidden><i id="modelProgress"></i></div>
-
-      <div style="margin-top:12px">
-        <button id="micBtn" style="width:100%;margin-bottom:6px">🎤 Falar</button>
-        <button id="clearBtn" style="width:100%">🗑️ Limpar Chat</button>
-      </div>
-
-      <div class="info-box">
-        <strong style="color:var(--accent2)">💡 Dica:</strong> Zenia entende qualquer tipo de solicitação. Digite naturalmente ou use voz.
+      
+      <div class="p-4 bg-purple-900/20 border border-purple-500/30 rounded-xl">
+        <p class="text-xs text-purple-300 italic">"Zenia agora utiliza os modelos avançados da Kie.ai para todas as tarefas criativas."</p>
       </div>
     </aside>
 
-    <main class="card">
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="chat">💬 Chat</button>
-        <button class="tab-btn" data-tab="imagine">🎨 Gerar Imagem</button>
-        <button class="tab-btn" data-tab="video">🎬 Gerar Vídeo</button>
-        <button class="tab-btn" data-tab="music">🎵 Gerar Música</button>
-        <button class="tab-btn" data-tab="analyze">🔍 Analisar Imagem</button>
+    <main class="lg:col-span-3 bg-slate-800 rounded-xl border border-slate-700 flex flex-col overflow-hidden">
+      
+      <div class="flex overflow-x-auto border-b border-slate-700 bg-slate-900/50 p-2 gap-2">
+        <button class="tab-btn active px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-purple-600" data-tab="chat">💬 Chat</button>
+        <button class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap hover:bg-slate-700" data-tab="imagine">🎨 Imagem</button>
+        <button class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap hover:bg-slate-700" data-tab="video">🎬 Vídeo</button>
+        <button class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap hover:bg-slate-700" data-tab="music">🎵 Música</button>
+        <button class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap hover:bg-slate-700" data-tab="vision">🔍 Visão</button>
       </div>
 
-      <!-- TAB 1: CHAT -->
-      <div id="chat" class="tab-content active">
-        <div class="controls">
-          <textarea id="userInput" placeholder="Converse livremente com Zenia. Pergunte qualquer coisa..."></textarea>
-          <button id="sendBtn">Enviar</button>
-        </div>
-        <div id="chatArea" role="log" aria-live="polite"></div>
-      </div>
-
-      <!-- TAB 2: GERAR IMAGEM -->
-      <div id="imagine" class="tab-content">
-        <div class="controls">
-          <textarea id="imagePrompt" placeholder="Descreva a imagem que deseja..."></textarea>
-          <button id="generateImageBtn">🎨 Gerar</button>
-        </div>
-        <div id="imageResult" style="margin-top:12px"></div>
-        <div id="imageStatus"></div>
-      </div>
-
-      <!-- TAB 3: GERAR VÍDEO -->
-      <div id="video" class="tab-content">
-        <div class="controls">
-          <textarea id="videoPrompt" placeholder="Descreva o vídeo que deseja..."></textarea>
-          <button id="generateVideoBtn">🎬 Gerar</button>
-        </div>
-        <div id="videoResult" style="margin-top:12px"></div>
-        <div id="videoStatus"></div>
-      </div>
-
-      <!-- TAB 4: GERAR MÚSICA -->
-      <div id="music" class="tab-content">
-        <div class="controls">
-          <textarea id="musicPrompt" placeholder="Descreva a música que deseja..."></textarea>
-          <button id="generateMusicBtn">🎵 Gerar Música</button>
-        </div>
-        <div id="musicResult" style="margin-top:12px"></div>
-        <div id="musicStatus"></div>
-      </div>
-
-      <!-- TAB 5: ANALISAR IMAGEM -->
-      <div id="analyze" class="tab-content">
-        <div class="controls">
-          <label class="file-input-label">
-            📁 Selecione imagem
-            <input type="file" id="imageFile" accept="image/*" style="display:none">
-          </label>
-          <button id="analyzeBtn">🔍 Analisar</button>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
-          <div>
-            <p style="font-size:12px;color:var(--muted);margin:0 0 6px 0">Imagem:</p>
-            <img id="previewImg" alt="Preview" style="max-width:100%;display:none;border-radius:8px;border:1px solid rgba(255,255,255,0.12)"/>
+      <div class="p-4 flex-1">
+        
+        <div id="chat" class="tab-content active flex flex-col h-[600px]">
+          <div id="chatArea" class="flex-1 overflow-y-auto custom-scroll space-y-4 p-2">
+            <div class="msg-zenia p-3 rounded-lg text-sm max-w-[85%]">Olá! Sou Zenia, conectada à API Kie.ai. Como posso te inspirar hoje?</div>
           </div>
-          <div>
-            <p style="font-size:12px;color:var(--muted);margin:0 0 6px 0">Detecção:</p>
-            <canvas id="previewCanvas" style="max-width:100%;border:1px solid rgba(255,255,255,0.12)"></canvas>
+          <div class="mt-4 flex gap-2">
+            <textarea id="userInput" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm focus:ring-2 focus:ring-purple-500 outline-none resize-none" placeholder="Pergunte qualquer coisa..."></textarea>
+            <button id="sendBtn" class="bg-purple-600 hover:bg-purple-500 px-6 rounded-lg font-bold transition">Enviar</button>
           </div>
         </div>
-        <div id="analyzeResult" style="margin-top:12px"></div>
-        <div id="analyzeStatus"></div>
+
+        <div id="imagine" class="tab-content text-center py-10">
+          <h2 class="text-xl font-bold mb-4">Gerador de Imagens Artísticas</h2>
+          <textarea id="imgPrompt" class="w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-xl p-4 mb-4" placeholder="Ex: Um astronauta andando em um campo de flores de neon, estilo cyberpunk..."></textarea>
+          <br>
+          <button id="genImgBtn" class="bg-gradient-to-r from-purple-600 to-blue-500 px-8 py-3 rounded-full font-bold hover:scale-105 transition">Gerar Obra de Arte</button>
+          <div id="imgResult" class="mt-8 grid place-items-center"></div>
+        </div>
+
+        <div id="video" class="tab-content text-center py-10">
+          <h2 class="text-xl font-bold mb-4">Gerador de Vídeo IA</h2>
+          <textarea id="vidPrompt" class="w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-xl p-4 mb-4" placeholder="Descreva o movimento, ex: Cachoeira de lava fluindo em Marte, 4k cinematic..."></textarea>
+          <br>
+          <button id="genVidBtn" class="bg-gradient-to-r from-pink-600 to-purple-600 px-8 py-3 rounded-full font-bold hover:scale-105 transition">Gerar Vídeo</button>
+          <div id="vidResult" class="mt-8 grid place-items-center"></div>
+        </div>
+
+        <div id="music" class="tab-content text-center py-10">
+          <h2 class="text-xl font-bold mb-4">Compositor de Música IA</h2>
+          <textarea id="musPrompt" class="w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-xl p-4 mb-4" placeholder="Ex: Lo-fi hip hop calmo com batidas de jazz e som de chuva..."></textarea>
+          <br>
+          <button id="genMusBtn" class="bg-gradient-to-r from-green-600 to-teal-500 px-8 py-3 rounded-full font-bold hover:scale-105 transition">Compor Música</button>
+          <div id="musResult" class="mt-8 grid place-items-center"></div>
+        </div>
+
+        <div id="vision" class="tab-content">
+           <div class="flex flex-col md:flex-row gap-4 h-full">
+              <div class="flex-1 bg-slate-900 p-4 rounded-xl border border-dashed border-slate-600 flex flex-col items-center justify-center">
+                <input type="file" id="fileInput" class="hidden" accept="image/*">
+                <label for="fileInput" class="cursor-pointer text-purple-400 hover:text-purple-300">Clique para carregar imagem</label>
+                <img id="preview" class="mt-4 max-h-64 rounded hidden">
+              </div>
+              <div class="flex-1 bg-slate-900 p-4 rounded-xl border border-slate-700">
+                <h4 class="text-sm font-bold mb-2">Objetos Detectados:</h4>
+                <canvas id="visionCanvas" class="w-full h-auto rounded"></canvas>
+                <div id="visionLabels" class="mt-2 text-xs text-slate-400"></div>
+              </div>
+           </div>
+        </div>
+
       </div>
     </main>
   </div>
 
   <script>
-    // ======= ABAS =======
-    document.querySelectorAll(".tab-btn").forEach(btn=>{
-      btn.addEventListener("click",e=>{
-        document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
-        document.querySelectorAll(".tab-content").forEach(t=>t.classList.remove("active"));
-        e.target.classList.add("active");
-        document.getElementById(e.target.dataset.tab).classList.add("active");
+    // --- CONFIGURAÇÃO KIE.AI ---
+    // Substitua 'SUA_CHAVE_AQUI' pela sua chave real da Kie.ai
+    const KIE_API_KEY = 'demo'; 
+    const KIE_BASE_URL = 'https://api.kie.ai/v1';
+
+    // --- SELETORES ---
+    const chatArea = document.getElementById('chatArea');
+    const statusText = document.getElementById('status');
+    const progressBar = document.getElementById('progressBar');
+
+    // --- NAVEGAÇÃO ---
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.classList.remove('active', 'bg-purple-600');
+          b.classList.add('hover:bg-slate-700');
+        });
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        btn.classList.add('active', 'bg-purple-600');
+        document.getElementById(btn.dataset.tab).classList.add('active');
       });
     });
 
-    // ======= ELEMENTOS =======
-    const chatArea = document.getElementById("chatArea");
-    const userInput = document.getElementById("userInput");
-    const sendBtn = document.getElementById("sendBtn");
-    const statusEl = document.getElementById("status");
-    const progressBar = document.getElementById("modelProgress");
-    let isProcessing=false;
-
-    // ======= FUNÇÕES =======
-    function setStatus(text,progress=null){
-      statusEl.textContent=text;
-      if(progress!==null) progressBar.style.width=`${Math.max(0,Math.min(100,progress))}%`;
+    // --- FUNÇÕES DE INTERFACE ---
+    function updateStatus(text, progress) {
+      statusText.innerText = text;
+      progressBar.style.width = progress + '%';
     }
-    function addMessage(text,who,isHtml=false){
-      const div=document.createElement("div");
-      div.className="msg "+who;
-      if(isHtml) div.innerHTML=text; else div.textContent=text;
+
+    function addMsg(content, role) {
+      const div = document.createElement('div');
+      div.className = `p-3 rounded-lg text-sm max-w-[85%] ${role === 'user' ? 'msg-user ml-auto' : 'msg-zenia'}`;
+      div.innerHTML = content;
       chatArea.appendChild(div);
-      chatArea.scrollTop=chatArea.scrollHeight;
-      return div;
+      chatArea.scrollTop = chatArea.scrollHeight;
     }
 
-    // ======= CHAT COM KIE.AI =======
-    async function handleChatInput(){
-      const text=userInput.value.trim();
-      if(!text||isProcessing) return;
-      addMessage(text,"user");
-      userInput.value="";
-      isProcessing=true;
-      sendBtn.disabled=true;
-      setStatus("🧠 Pensando...",20);
-      try{
-        const res=await fetch("https://api.kie.ai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer demo"},body:JSON.stringify({prompt:text,model:"chat-pro",max_tokens:200})});
-        const data=await res.json();
-        const answer=data?.choices?.[0]?.text||"❌ Sem resposta";
-        addMessage(answer,"zenia",true);
-        setStatus("✓ Pronto!",100);
-      }catch(e){console.error(e);addMessage("❌ Erro no chat","zenia");setStatus("❌ Erro",0);}
-      finally{isProcessing=false;sendBtn.disabled=false;}
+    // --- INTEGRAÇÃO KIE.AI: CHAT ---
+    document.getElementById('sendBtn').onclick = async () => {
+      const input = document.getElementById('userInput');
+      const text = input.value.trim();
+      if(!text) return;
+
+      addMsg(text, 'user');
+      input.value = '';
+      updateStatus('Zenia pensando...', 40);
+
+      try {
+        const response = await fetch(`${KIE_BASE_URL}/chat/completions`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${KIE_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: "gpt-4-o", // Ou modelo disponível na Kie.ai
+            messages: [{role: "user", content: text}]
+          })
+        });
+        const data = await response.json();
+        const reply = data.choices[0].message.content;
+        addMsg(reply, 'zenia');
+        updateStatus('Pronto', 100);
+      } catch (err) {
+        addMsg('Erro ao conectar com Kie.ai. Verifique a chave de API.', 'zenia');
+        updateStatus('Erro na conexão', 0);
+      }
+    };
+
+    // --- INTEGRAÇÃO KIE.AI: IMAGEM ---
+    document.getElementById('genImgBtn').onclick = async () => {
+      const prompt = document.getElementById('imgPrompt').value;
+      const resultDiv = document.getElementById('imgResult');
+      resultDiv.innerHTML = '<div class="animate-spin text-4xl">⏳</div>';
+      updateStatus('Gerando imagem...', 50);
+
+      try {
+        const res = await fetch(`${KIE_BASE_URL}/images/generations`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${KIE_API_KEY}` },
+          body: JSON.stringify({ prompt, model: "flux-pro" })
+        });
+        const data = await res.json();
+        resultDiv.innerHTML = `<img src="${data.data[0].url}" class="rounded-xl shadow-2xl border-4 border-slate-700 max-w-full h-auto">`;
+        updateStatus('Imagem Criada!', 100);
+      } catch (e) { resultDiv.innerText = 'Falha ao gerar imagem.'; }
+    };
+
+    // --- INTEGRAÇÃO KIE.AI: VÍDEO ---
+    document.getElementById('genVidBtn').onclick = async () => {
+      const prompt = document.getElementById('vidPrompt').value;
+      const resultDiv = document.getElementById('vidResult');
+      resultDiv.innerHTML = '<p class="animate-pulse">Iniciando renderização de vídeo (Kie.ai)...</p>';
+      
+      try {
+        const res = await fetch(`${KIE_BASE_URL}/video/generations`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${KIE_API_KEY}` },
+          body: JSON.stringify({ prompt, model: "kling-v1" })
+        });
+        const data = await res.json();
+        resultDiv.innerHTML = `<video src="${data.data[0].url}" controls class="rounded-xl w-full max-w-md"></video>`;
+        updateStatus('Vídeo Pronto!', 100);
+      } catch (e) { resultDiv.innerText = 'Serviço de vídeo indisponível.'; }
+    };
+
+    // --- INTEGRAÇÃO KIE.AI: MÚSICA ---
+    document.getElementById('genMusBtn').onclick = async () => {
+      const prompt = document.getElementById('musPrompt').value;
+      const resultDiv = document.getElementById('musResult');
+      resultDiv.innerHTML = '<p class="animate-bounce">Compondo melodia...</p>';
+
+      try {
+        const res = await fetch(`${KIE_BASE_URL}/audio/generations`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${KIE_API_KEY}` },
+          body: JSON.stringify({ prompt, model: "suno-v3" })
+        });
+        const data = await res.json();
+        resultDiv.innerHTML = `
+          <div class="bg-slate-900 p-6 rounded-2xl border border-slate-700 w-full max-w-md">
+            <div class="mb-4 text-2xl">🎵</div>
+            <audio src="${data.data[0].url}" controls class="w-full"></audio>
+            <p class="text-xs mt-2 text-slate-400">Gerado por Kie.ai Music Engine</p>
+          </div>`;
+        updateStatus('Música Composta!', 100);
+      } catch (e) { resultDiv.innerText = 'Erro ao compor música.'; }
+    };
+
+    // --- VISÃO COMPUTACIONAL (Tensorflow Local) ---
+    let net;
+    async function loadModel() {
+      updateStatus('Carregando Visão...', 30);
+      net = await cocoSsd.load();
+      updateStatus('Visão Pronta', 100);
     }
+    loadModel();
 
-    sendBtn.addEventListener("click",handleChatInput);
-    userInput.addEventListener("keypress",(e)=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();handleChatInput();}});
+    document.getElementById('fileInput').onchange = (e) => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (f) => {
+        const img = document.getElementById('preview');
+        img.src = f.target.result;
+        img.classList.remove('hidden');
+        img.onload = () => detectObjects(img);
+      };
+      reader.readAsDataURL(file);
+    };
 
-    // ======= GERAR IMAGEM KIE.AI =======
-    document.getElementById("generateImageBtn").addEventListener("click",async()=>{
-      const prompt=document.getElementById("imagePrompt").value.trim();
-      if(!prompt) return;
-      const resultDiv=document.getElementById("imageResult");
-      const statusDiv=document.getElementById("imageStatus");
-      resultDiv.innerHTML=""; statusDiv.innerHTML='<span class="loading">⏳</span> Gerando...';
-      try{
-        setStatus("🎨 Gerando imagem...",30);
-        const res=await fetch("https://api.kie.ai/v1/images/generations",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer demo"},body:JSON.stringify({prompt,width:1024,height:1024,num_images:1,model:"flux-pro",steps:25,guidance_scale:7.5})});
-        const data=await res.json();
-        if(data?.data?.[0]?.url){
-          const url=data.data[0].url;
-          resultDiv.innerHTML=`<div style="text-align:center"><img src="${url}" style="max-width:100%;border-radius:8px"/><p style="font-size:12px;color:var(--muted)">Prompt: ${prompt}</p><button onclick="window.open('${url}');">💾 Baixar</button></div>`;
-          statusDiv.textContent="✅ Pronto!"; setStatus("✓ Imagem gerada!",100);
-        } else throw new Error("API falhou");
-      }catch(e){console.error(e);resultDiv.innerHTML='<p style="color:#fca5a5">❌ Erro</p>';statusDiv.textContent="❌ Falha";setStatus("Erro",0);}
-    });
+    async function detectObjects(img) {
+      const canvas = document.getElementById('visionCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
 
-    // ======= GERAR VÍDEO KIE.AI =======
-    document.getElementById("generateVideoBtn").addEventListener("click",async()=>{
-      const prompt=document.getElementById("videoPrompt").value.trim();
-      if(!prompt) return;
-      const resultDiv=document.getElementById("videoResult");
-      const statusDiv=document.getElementById("videoStatus");
-      resultDiv.innerHTML=""; statusDiv.innerHTML='<span class="loading">⏳</span> Gerando...';
-      try{
-        setStatus("🎬 Gerando vídeo...",30);
-        const res=await fetch("https://api.kie.ai/v1/video/generations",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer demo"},body:JSON.stringify({prompt,model:"flux-video-pro",duration:5,fps:24})});
-        const data=await res.json();
-        if(data?.data?.[0]?.url){
-          const url=data.data[0].url;
-          resultDiv.innerHTML=`<div style="text-align:center"><video width="100%" controls><source src="${url}" type="video/mp4"></video><p style="font-size:12px;color:var(--muted)">Prompt: ${prompt}</p><button onclick="window.open('${url}');">💾 Baixar</button></div>`;
-          statusDiv.textContent="✅ Pronto!"; setStatus("✓ Vídeo gerado!",100);
-        } else throw new Error("API falhou");
-      }catch(e){console.error(e);resultDiv.innerHTML='<p style="color:#fca5a5">❌ Erro</p>';statusDiv.textContent="❌ Falha";setStatus("Erro",0);}
-    });
+      const predictions = await net.detect(img);
+      ctx.strokeStyle = '#7c3aed';
+      ctx.lineWidth = 4;
+      ctx.font = '18px Arial';
+      ctx.fillStyle = '#7c3aed';
 
-    // ======= GERAR MÚSICA KIE.AI =======
-    document.getElementById("generateMusicBtn").addEventListener("click",async()=>{
-      const prompt=document.getElementById("musicPrompt").value.trim();
-      if(!prompt) return;
-      const resultDiv=document.getElementById("musicResult");
-      const statusDiv=document.getElementById("musicStatus");
-      resultDiv.innerHTML=""; statusDiv.innerHTML='<span class="loading">⏳</span> Gerando música...';
-      try{
-        setStatus("🎵 Gerando música...",30);
-        const res=await fetch("https://api.kie.ai/v1/audio/generations",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer demo"},body:JSON.stringify({prompt,duration:15,model:"music-pro"})});
-        const data=await res.json();
-        if(data?.data?.[0]?.url){
-          const url=data.data[0].url;
-          resultDiv.innerHTML=`<div style="text-align:center"><audio controls src="${url}"></audio><p style="font-size:12px;color:var(--muted)">Prompt: ${prompt}</p><button onclick="window.open('${url}');">💾 Baixar</button></div>`;
-          statusDiv.textContent="✅ Pronto!"; setStatus("✓ Música gerada!",100);
-        } else throw new Error("API falhou");
-      }catch(e){console.error(e);resultDiv.innerHTML='<p style="color:#fca5a5">❌ Erro</p>';statusDiv.textContent="❌ Falha";setStatus("Erro",0);}
-    });
-
-    // ======= MIC =======
-    let recognition=null;
-    function initSpeechRecognition(){
-      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-      if(!SR){setStatus("❌ Mic não suportado"); return;}
-      recognition=new SR();
-      recognition.lang="pt-BR";
-      recognition.interimResults=false;
-      recognition.onresult=(e)=>{userInput.value+=e.results[0][0].transcript+" ";userInput.focus();}
-      recognition.onerror=()=>setStatus("❌ Erro no mic");
+      predictions.forEach(p => {
+        ctx.strokeRect(...p.bbox);
+        ctx.fillText(`${p.class} (${Math.round(p.score*100)}%)`, p.bbox[0], p.bbox[1] > 20 ? p.bbox[1]-10 : 20);
+      });
     }
-    function toggleMic(){if(!recognition)initSpeechRecognition();if(!recognition)return;try{recognition.start();setStatus("🎤 Ouvindo...",30);}catch(e){setStatus("Erro mic");}}
-    initSpeechRecognition();
-    document.getElementById("micBtn").addEventListener("click",toggleMic);
-
   </script>
 </body>
 </html>
