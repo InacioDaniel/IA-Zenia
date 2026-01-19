@@ -149,7 +149,8 @@
     let activeTab = 'chat';
     const IDENTITY = "Seu nome é IA ZÉNIA. Criador: Inácio Daniel. Origem: Angola. Você é uma especialista em Angola (História, Geografia, Cultura, Semba, Kizomba). ";
     const KLING_API_KEY = "0991f4139a1f5caf1fcf3b4f497930ab";
-    const KLING_API_URL = "https://api.kie.ai/api/v1/jobs/createTask";
+    const KLING_CREATE_URL = "https://api.kie.ai/v1/text-to-video/async/run";
+    const KLING_QUERY_URL = "https://api.kie.ai/v1/text-to-video/async/query";
 
     function switchTab(e, tab) {
       activeTab = tab;
@@ -193,46 +194,56 @@
       
       const checkStatus = async () => {
         try {
-          const response = await fetch(`https://api.kie.ai/api/v1/jobs/${taskId}`, {
+          const response = await fetch(KLING_QUERY_URL, {
+            method: 'POST',
             headers: {
-              'Authorization': `Bearer ${KLING_API_KEY}`
-            }
+              'Authorization': `Bearer ${KLING_API_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ task_id: taskId })
           });
           
           const data = await response.json();
           
-          if (data.status === 'COMPLETED' && data.result && data.result.url) {
-            resArea.innerHTML = `
-              <div class="bg-slate-900 p-6 rounded-3xl border-2 border-red-500/20 w-full max-w-2xl">
-                <div class="text-[10px] text-red-400 font-bold mb-4 uppercase text-center flex items-center justify-center gap-2">
-                  🎬 <span>Kling AI 2.6 Video Engine</span>
-                </div>
-                <video controls autoplay loop class="rounded-2xl w-full shadow-2xl mb-4">
-                  <source src="${data.result.url}" type="video/mp4">
-                  Seu navegador não suporta vídeo.
-                </video>
-                <p class="text-xs text-slate-400 text-center italic">Vídeo gerado via Kling AI 2.6</p>
-                <a href="${data.result.url}" download class="block mt-3 text-center text-xs text-purple-400 hover:text-purple-300">
-                  ⬇️ Download
-                </a>
-              </div>`;
-            return;
-          } else if (data.status === 'FAILED') {
-            resArea.innerHTML = `
-              <div class="text-red-500 text-sm p-4 bg-red-500/10 rounded-xl border border-red-500/20">
-                ❌ Erro ao gerar vídeo. Tente novamente.
-              </div>`;
-            return;
-          } else if (data.status === 'PROCESSING' || data.status === 'PENDING') {
-            attempts++;
-            if (attempts < maxAttempts) {
-              setTimeout(checkStatus, 5000);
-            } else {
+          if (data.code === 200 && data.data) {
+            const taskData = data.data;
+            
+            if (taskData.status === 'succeed' && taskData.videos && taskData.videos.length > 0) {
+              const videoUrl = taskData.videos[0].url;
               resArea.innerHTML = `
-                <div class="text-yellow-500 text-sm p-4 bg-yellow-500/10 rounded-xl border border-yellow-500/20">
-                  ⏱️ Tempo limite excedido. O vídeo pode ainda estar processando.
+                <div class="bg-slate-900 p-6 rounded-3xl border-2 border-red-500/20 w-full max-w-2xl">
+                  <div class="text-[10px] text-red-400 font-bold mb-4 uppercase text-center flex items-center justify-center gap-2">
+                    🎬 <span>Kling AI 2.6 Video Engine</span>
+                  </div>
+                  <video controls autoplay loop class="rounded-2xl w-full shadow-2xl mb-4">
+                    <source src="${videoUrl}" type="video/mp4">
+                    Seu navegador não suporta vídeo.
+                  </video>
+                  <p class="text-xs text-slate-400 text-center italic">Vídeo gerado via Kling AI 2.6</p>
+                  <a href="${videoUrl}" download class="block mt-3 text-center text-xs text-purple-400 hover:text-purple-300">
+                    ⬇️ Download
+                  </a>
                 </div>`;
+              return;
+            } else if (taskData.status === 'failed') {
+              resArea.innerHTML = `
+                <div class="text-red-500 text-sm p-4 bg-red-500/10 rounded-xl border border-red-500/20">
+                  ❌ Erro ao gerar vídeo: ${taskData.error_message || 'Falha no processamento'}
+                </div>`;
+              return;
+            } else if (taskData.status === 'processing' || taskData.status === 'pending') {
+              attempts++;
+              if (attempts < maxAttempts) {
+                setTimeout(checkStatus, 5000);
+              } else {
+                resArea.innerHTML = `
+                  <div class="text-yellow-500 text-sm p-4 bg-yellow-500/10 rounded-xl border border-yellow-500/20">
+                    ⏱️ Tempo limite excedido. O vídeo pode ainda estar processando.
+                  </div>`;
+              }
             }
+          } else {
+            throw new Error(data.message || 'Resposta inesperada da API');
           }
         } catch (error) {
           resArea.innerHTML = `
@@ -258,7 +269,7 @@
       } 
       else if(type === 'video') {
         try {
-          const duration = document.getElementById('videoDuration').value;
+          const duration = parseInt(document.getElementById('videoDuration').value);
           const aspectRatio = document.getElementById('videoAspect').value;
           
           resArea.innerHTML = `
@@ -273,16 +284,18 @@
             </div>`;
 
           const requestBody = {
-            model: "kling-2.6/text-to-video",
-            input: {
-              prompt: prompt,
-              sound: true,
-              aspect_ratio: aspectRatio,
-              duration: duration
-            }
+            model_name: "kling-2.6/text-to-video",
+            prompt: prompt,
+            cfg_scale: 0.5,
+            mode: "std",
+            aspect_ratio: aspectRatio,
+            duration: duration,
+            sound: true
           };
 
-          const response = await fetch(KLING_API_URL, {
+          console.log('Enviando requisição:', JSON.stringify(requestBody, null, 2));
+
+          const response = await fetch(KLING_CREATE_URL, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${KLING_API_KEY}`,
@@ -292,14 +305,16 @@
           });
 
           const data = await response.json();
+          console.log('Resposta da API:', data);
           
-          if (data.taskId) {
-            checkKlingTaskStatus(data.taskId, resArea);
+          if (data.code === 200 && data.data && data.data.task_id) {
+            checkKlingTaskStatus(data.data.task_id, resArea);
           } else {
-            throw new Error('Falha ao criar tarefa de vídeo');
+            throw new Error(data.message || `Erro na API: ${JSON.stringify(data)}`);
           }
           
         } catch(error) {
+          console.error('Erro completo:', error);
           resArea.innerHTML = `
             <div class="text-red-500 text-sm p-4 bg-red-500/10 rounded-xl border border-red-500/20">
               ❌ Erro ao gerar vídeo: ${error.message}
