@@ -27,12 +27,32 @@
       border-radius: 1.5rem;
       min-height: 300px; width: 100%; max-width: 500px;
       display: flex; align-items: center; justify-content: center;
+      flex-direction: column;
+      gap: 1rem;
     }
     @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
     .glow-btn { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); transition: 0.3s; }
+    
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: rgba(139, 92, 246, 0.2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #8b5cf6, #ec4899);
+      animation: progress 2s ease-in-out infinite;
+    }
+    @keyframes progress {
+      0% { width: 0%; }
+      50% { width: 70%; }
+      100% { width: 100%; }
+    }
   </style>
 </head>
 <body class="flex flex-col">
@@ -82,7 +102,18 @@
 
       <div id="video" class="tab-content text-center py-10">
         <input type="text" id="videoInput" class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl p-4 text-sm mb-4" placeholder="Descreva o movimento do vídeo...">
-        <button onclick="runZeniaMedia('video')" class="bg-red-600 px-8 py-3 rounded-xl font-bold glow-btn uppercase">Processar Vídeo Real</button>
+        <div class="flex gap-3 justify-center mb-4">
+          <select id="videoDuration" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm">
+            <option value="5">5 segundos</option>
+            <option value="10">10 segundos</option>
+          </select>
+          <select id="videoAspect" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm">
+            <option value="16:9">16:9 (Horizontal)</option>
+            <option value="9:16">9:16 (Vertical)</option>
+            <option value="1:1">1:1 (Quadrado)</option>
+          </select>
+        </div>
+        <button onclick="runZeniaMedia('video')" class="bg-red-600 px-8 py-3 rounded-xl font-bold glow-btn uppercase">🎬 Gerar Vídeo Kling AI</button>
         <div id="videoResult" class="mt-8 flex justify-center"></div>
       </div>
 
@@ -117,6 +148,8 @@
   <script>
     let activeTab = 'chat';
     const IDENTITY = "Seu nome é IA ZÉNIA. Criador: Inácio Daniel. Origem: Angola. Você é uma especialista em Angola (História, Geografia, Cultura, Semba, Kizomba). ";
+    const KLING_API_KEY = "0991f4139a1f5caf1fcf3b4f497930ab";
+    const KLING_API_URL = "https://api.kie.ai/api/v1/jobs/createTask";
 
     function switchTab(e, tab) {
       activeTab = tab;
@@ -155,42 +188,129 @@
       xhr.send();
     }
 
+    async function checkKlingTaskStatus(taskId, resArea, maxAttempts = 60) {
+      let attempts = 0;
+      
+      const checkStatus = async () => {
+        try {
+          const response = await fetch(`https://api.kie.ai/api/v1/jobs/${taskId}`, {
+            headers: {
+              'Authorization': `Bearer ${KLING_API_KEY}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (data.status === 'COMPLETED' && data.result && data.result.url) {
+            resArea.innerHTML = `
+              <div class="bg-slate-900 p-6 rounded-3xl border-2 border-red-500/20 w-full max-w-2xl">
+                <div class="text-[10px] text-red-400 font-bold mb-4 uppercase text-center flex items-center justify-center gap-2">
+                  🎬 <span>Kling AI 2.6 Video Engine</span>
+                </div>
+                <video controls autoplay loop class="rounded-2xl w-full shadow-2xl mb-4">
+                  <source src="${data.result.url}" type="video/mp4">
+                  Seu navegador não suporta vídeo.
+                </video>
+                <p class="text-xs text-slate-400 text-center italic">Vídeo gerado via Kling AI 2.6</p>
+                <a href="${data.result.url}" download class="block mt-3 text-center text-xs text-purple-400 hover:text-purple-300">
+                  ⬇️ Download
+                </a>
+              </div>`;
+            return;
+          } else if (data.status === 'FAILED') {
+            resArea.innerHTML = `
+              <div class="text-red-500 text-sm p-4 bg-red-500/10 rounded-xl border border-red-500/20">
+                ❌ Erro ao gerar vídeo. Tente novamente.
+              </div>`;
+            return;
+          } else if (data.status === 'PROCESSING' || data.status === 'PENDING') {
+            attempts++;
+            if (attempts < maxAttempts) {
+              setTimeout(checkStatus, 5000);
+            } else {
+              resArea.innerHTML = `
+                <div class="text-yellow-500 text-sm p-4 bg-yellow-500/10 rounded-xl border border-yellow-500/20">
+                  ⏱️ Tempo limite excedido. O vídeo pode ainda estar processando.
+                </div>`;
+            }
+          }
+        } catch (error) {
+          resArea.innerHTML = `
+            <div class="text-red-500 text-sm p-4 bg-red-500/10 rounded-xl border border-red-500/20">
+              ❌ Erro ao verificar status: ${error.message}
+            </div>`;
+        }
+      };
+      
+      checkStatus();
+    }
+
     async function runZeniaMedia(type) {
       const prompt = document.getElementById(type + 'Input').value;
       const resArea = document.getElementById(type + 'Result');
       if(!prompt) return;
 
-      resArea.innerHTML = `<div class="loading-shimmer text-xs uppercase text-slate-500 italic">Zénia Core Engine está a gerar seu ${type}...</div>`;
-
       if(type === 'img') {
+        resArea.innerHTML = `<div class="loading-shimmer text-xs uppercase text-slate-500 italic">Zénia Core Engine está a gerar seu ${type}...</div>`;
         setTimeout(() => {
           resArea.innerHTML = `<img src="https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&nologo=true&seed=${Math.random()}" class="rounded-3xl border border-slate-700 max-w-full">`;
         }, 2000);
       } 
       else if(type === 'video') {
         try {
-          // Usando API real de geração de vídeo (Pollinations Video API)
-          const videoPrompt = `${prompt}. Cinematic, high quality, smooth motion`;
-          const videoUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(videoPrompt)}?width=768&height=768&model=flux&nologo=true&seed=${Date.now()}`;
+          const duration = document.getElementById('videoDuration').value;
+          const aspectRatio = document.getElementById('videoAspect').value;
           
-          setTimeout(() => {
-            resArea.innerHTML = `
-              <div class="bg-slate-900 p-6 rounded-3xl border-2 border-red-500/20 w-full max-w-2xl">
-                <div class="text-[10px] text-red-400 font-bold mb-4 uppercase text-center">🎬 Zénia Video Engine</div>
-                <img src="${videoUrl}" class="rounded-2xl w-full shadow-2xl mb-4">
-                <p class="text-xs text-slate-400 text-center italic">Vídeo gerado via Pollinations AI</p>
-              </div>`;
-          }, 4000);
+          resArea.innerHTML = `
+            <div class="loading-shimmer text-xs uppercase text-slate-500 italic">
+              <div class="animate-pulse text-2xl mb-2">🎬</div>
+              <div>Kling AI está processando seu vídeo...</div>
+              <div class="text-[10px] mt-2">Duração: ${duration}s | Formato: ${aspectRatio}</div>
+              <div class="progress-bar mt-4 w-64">
+                <div class="progress-fill"></div>
+              </div>
+              <div class="text-[9px] mt-2 text-slate-600">Isto pode levar até 5 minutos</div>
+            </div>`;
+
+          const requestBody = {
+            model: "kling-2.6/text-to-video",
+            input: {
+              prompt: prompt,
+              sound: true,
+              aspect_ratio: aspectRatio,
+              duration: duration
+            }
+          };
+
+          const response = await fetch(KLING_API_URL, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${KLING_API_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+          });
+
+          const data = await response.json();
+          
+          if (data.taskId) {
+            checkKlingTaskStatus(data.taskId, resArea);
+          } else {
+            throw new Error('Falha ao criar tarefa de vídeo');
+          }
+          
         } catch(error) {
-          resArea.innerHTML = `<div class="text-red-500 text-sm">Erro ao gerar vídeo: ${error.message}</div>`;
+          resArea.innerHTML = `
+            <div class="text-red-500 text-sm p-4 bg-red-500/10 rounded-xl border border-red-500/20">
+              ❌ Erro ao gerar vídeo: ${error.message}
+            </div>`;
         }
       } 
       else if(type === 'music') {
         try {
-          // Usando API real de geração de música (Suno AI via Pollinations)
-          const musicPrompt = encodeURIComponent(`Create ${prompt}. Angolan rhythms, modern production`);
+          resArea.innerHTML = `<div class="loading-shimmer text-xs uppercase text-slate-500 italic">Zénia está compondo sua melodia...</div>`;
           
-          // Gerando URL de áudio real
+          const musicPrompt = encodeURIComponent(`Create ${prompt}. Angolan rhythms, modern production`);
           const audioUrl = `https://audio.pollinations.ai/prompt/${musicPrompt}?seed=${Date.now()}`;
           
           setTimeout(() => {
