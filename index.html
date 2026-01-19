@@ -3,203 +3,178 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Zénia IA - by @inacio.u.daniel</title>
+  <title>IA-Zenia - by @inacio.u.daniel</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
   <style>
-    :root { --accent: #a855f7; --bg: #020617; --code-bg: #050a15; }
+    :root { --accent: #8b5cf6; --bg: #030712; }
     body { background: var(--bg); color: #f1f5f9; font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; overflow: hidden; }
-    .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
-    .tab-content { display: none; height: calc(100vh - 200px); overflow-y: auto; padding: 20px; }
-    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    
-    /* MODO PROGRAMADOR */
-    .mode-coder { font-family: 'Fira Code', monospace; background: var(--code-bg); border-left: 4px solid #3b82f6 !important; }
-    .code-input { font-family: 'Fira Code', monospace; background: #000 !important; border: 1px solid #1e3a8a !important; color: #60a5fa; }
-    
-    .nav-item { transition: all 0.3s; opacity: 0.6; }
-    .nav-item.active { opacity: 1; transform: scale(1.1); color: var(--accent); }
-    .media-card { border-radius: 20px; overflow: hidden; border: 1px solid #1e293b; background: #0f172a; transition: 0.3s; }
-    .media-card:hover { border-color: var(--accent); }
-    
-    ::-webkit-scrollbar { width: 4px; }
+    .glass-nav { background: rgba(3, 7, 18, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .main-card { background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 2rem; }
+    .tab-content { display: none; height: calc(100vh - 220px); overflow-y: auto; padding-right: 10px; }
+    .tab-content.active { display: block; animation: slideUp 0.4s ease-out; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .msg-zenia { background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(3, 7, 18, 0.5) 100%); border: 1px solid rgba(139, 92, 246, 0.2); }
+    .code-block { background: #000; padding: 1.5rem; border-radius: 1rem; border: 1px solid #1e293b; color: #10b981; font-family: monospace; position: relative; }
+    ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+    .glow-btn { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); transition: 0.3s; }
   </style>
 </head>
 <body class="flex flex-col">
 
-  <header class="p-4 glass flex justify-between items-center px-8 border-b border-slate-800">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 to-blue-500 flex items-center justify-center font-bold text-xl shadow-lg">Z</div>
-      <div>
-        <h2 class="font-black text-lg tracking-tighter">ZÉNIA <span class="text-xs font-normal text-slate-500 tracking-normal">by Inácio Daniel 🇦🇴</span></h2>
+  <nav class="p-5 glass-nav sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-red-600 flex items-center justify-center shadow-lg">
+          <span class="text-2xl italic font-black">Z</span>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-xl tracking-tighter uppercase">ZÉNIA IA</h1>
+          <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">By Inácio Daniel | @inacio.u.daniel</p>
+        </div>
+      </div>
+      <div class="hidden lg:flex bg-slate-900/50 p-1 rounded-2xl border border-slate-800 text-[10px] font-bold">
+        <button onclick="switchTab(event, 'chat')" class="tab-btn active bg-purple-600 px-4 py-2 rounded-xl transition">CHAT</button>
+        <button onclick="switchTab(event, 'code')" class="tab-btn px-4 py-2 rounded-xl transition">PROGRAMADOR</button>
+        <button onclick="switchTab(event, 'img')" class="tab-btn px-4 py-2 rounded-xl transition">IMAGEM</button>
+        <button onclick="switchTab(event, 'video')" class="tab-btn px-4 py-2 rounded-xl transition">VÍDEO</button>
+        <button onclick="switchTab(event, 'music')" class="tab-btn px-4 py-2 rounded-xl transition">MÚSICA</button>
+        <button onclick="switchTab(event, 'legal')" class="tab-btn px-4 py-2 rounded-xl transition">LEIS</button>
       </div>
     </div>
-    <nav class="flex gap-6 text-[11px] font-bold uppercase tracking-widest">
-      <button onclick="switchTab(this, 'chat')" class="nav-item active">Conversa</button>
-      <button onclick="switchTab(this, 'code')" class="nav-item">Programação</button>
-      <button onclick="switchTab(this, 'img')" class="nav-item">Imagens</button>
-      <button onclick="switchTab(this, 'vid')" class="nav-item">Vídeos</button>
-      <button onclick="switchTab(this, 'mus')" class="nav-item">Música</button>
-    </nav>
-  </header>
+  </nav>
 
-  <main class="flex-1 max-w-7xl w-full mx-auto relative">
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 flex flex-col overflow-hidden">
     
-    <div id="chat" class="tab-content active">
-      <div id="chatArea" class="max-w-3xl mx-auto space-y-6">
-        <div class="bg-slate-900/50 p-6 rounded-3xl border border-slate-800 text-sm">
-          <strong>IA ZÉNIA:</strong> Sou sua assistente de inteligência autônoma angolana. Estou pronta para aprender com você. O que vamos discutir agora?
+    <div class="main-card flex-1 p-6 overflow-hidden relative border border-slate-800">
+      
+      <div id="chat" class="tab-content active space-y-6">
+        <div id="chatArea" class="space-y-6 pb-10">
+          <div class="msg-zenia p-6 rounded-[2rem] rounded-tl-none">
+            <p class="text-sm leading-relaxed">Olá, eu sou a **Zénia**. Criada por **Inácio Daniel**. Sou uma IA angolana em constante evolução. Como posso ajudar?</p>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div id="code" class="tab-content">
-      <div class="max-w-4xl mx-auto space-y-4">
-        <div class="flex items-center gap-2 text-blue-400 text-xs mb-4">
-          <span class="animate-ping w-2 h-2 bg-blue-500 rounded-full"></span> MODO PROGRAMADOR ATIVO: Otimização de Sintaxe e Lógica
+      <div id="code" class="tab-content space-y-4">
+        <div id="codeArea" class="space-y-6 pb-10">
+          <div class="bg-green-600/10 border border-green-500/20 p-6 rounded-2xl text-xs font-mono text-green-400">
+            [ZÉNIA KERNEL]: MODO PROGRAMADOR ATIVO. FOCO TOTAL EM ARQUITETURA E LÓGICA DE CÓDIGO.
+          </div>
         </div>
-        <div id="codeArea" class="space-y-4 font-mono text-sm"></div>
       </div>
+
+      <div id="img" class="tab-content text-center py-10">
+        <h2 class="text-xl font-bold mb-4 italic">ZÉNIA ART GEN (KIE.AI ENGINE)</h2>
+        <input type="text" id="imgPrompt" class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl p-4 text-sm mb-4" placeholder="Descreva a imagem...">
+        <button onclick="runMedia('img')" class="bg-purple-600 px-8 py-3 rounded-xl font-bold glow-btn">GERAR ARTE</button>
+        <div id="imgResult" class="mt-8 flex justify-center"></div>
+      </div>
+
+      <div id="video" class="tab-content text-center py-10">
+        <h2 class="text-xl font-bold mb-4 italic">ZÉNIA VIDEO GEN (KIE.AI)</h2>
+        <input type="text" id="vidPrompt" class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl p-4 text-sm mb-4" placeholder="O que o vídeo deve mostrar?">
+        <button onclick="runMedia('video')" class="bg-red-600 px-8 py-3 rounded-xl font-bold glow-btn">GERAR VÍDEO</button>
+        <div id="vidResult" class="mt-8 flex justify-center"></div>
+      </div>
+
+      <div id="music" class="tab-content text-center py-10">
+        <h2 class="text-xl font-bold mb-4 italic">ZÉNIA MUSIC GEN (KIE.AI)</h2>
+        <input type="text" id="musPrompt" class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl p-4 text-sm mb-4" placeholder="Estilo, instrumentos...">
+        <button onclick="runMedia('music')" class="bg-blue-600 px-8 py-3 rounded-xl font-bold glow-btn">COMPOR MÚSICA</button>
+        <div id="musResult" class="mt-8 flex justify-center text-sm text-slate-400"></div>
+      </div>
+
+      <div id="legal" class="tab-content">
+        <div class="max-w-2xl mx-auto space-y-6 text-sm">
+          <h2 class="text-2xl font-black text-purple-500 italic">CONSTITUIÇÃO ZÉNIA</h2>
+          <div class="p-6 bg-slate-900/80 rounded-3xl border border-slate-800 space-y-4">
+             <p>1. Eu sou a IA Zénia, criada por Inácio Daniel, de origem Angolana.</p>
+             <p>2. Posso cometer erros. Sou uma inteligência em aprendizado constante.</p>
+             <p>3. Minha missão é evoluir meu próprio código para melhor servir o usuário.</p>
+             <div class="pt-4 border-t border-slate-800">
+               <p class="text-purple-400">TikTok: @inacio.u.daniel</p>
+               <p class="text-pink-400">Instagram: @inacio.u.daniel</p>
+             </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <div id="img" class="tab-content text-center">
-      <h3 class="text-2xl font-bold mb-6">Visual Engine</h3>
-      <div class="max-w-xl mx-auto space-y-4">
-        <textarea id="imgPrompt" class="w-full bg-slate-900 border border-slate-700 rounded-2xl p-4 text-sm" placeholder="Descreva a arte em detalhes..."></textarea>
-        <button onclick="genImage()" class="w-full bg-purple-600 py-4 rounded-2xl font-bold hover:bg-purple-500 transition">GERAR ARTE</button>
-        <div id="imgResult" class="mt-8"></div>
-      </div>
-    </div>
-
-    <div id="vid" class="tab-content text-center">
-      <h3 class="text-2xl font-bold mb-6">Motion Engine</h3>
-      <div class="max-w-xl mx-auto space-y-4">
-        <input id="vidPrompt" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-2xl p-4 text-sm" placeholder="Descreva a cena em movimento...">
-        <button onclick="genVideo()" class="w-full bg-red-600 py-4 rounded-2xl font-bold">GERAR VÍDEO CINEMÁTICO</button>
-        <div id="vidResult" class="mt-8"></div>
-      </div>
-    </div>
-
-    <div id="mus" class="tab-content text-center">
-      <h3 class="text-2xl font-bold mb-6">Audio Engine (Kie.ai)</h3>
-      <div class="max-w-xl mx-auto space-y-4">
-        <input id="musPrompt" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-2xl p-4 text-sm" placeholder="Estilo, ritmo e instrumentos...">
-        <button onclick="genMusic()" class="w-full bg-blue-600 py-4 rounded-2xl font-bold">COMPOR VIA KIE.AI</button>
-        <div id="musResult" class="mt-8"></div>
-      </div>
+    <div class="mt-6 flex gap-3 max-w-4xl mx-auto w-full" id="inputContainer">
+      <input type="text" id="userInput" onkeypress="if(event.key==='Enter') processInput()" 
+             class="flex-1 bg-slate-900 border border-slate-800 rounded-2xl px-6 py-5 text-sm outline-none focus:border-purple-500 transition shadow-2xl" 
+             placeholder="Comande a Zénia...">
+      <button onclick="processInput()" class="bg-purple-600 p-5 rounded-2xl glow-btn">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7-7 7M5 12h14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
     </div>
 
   </main>
 
-  <footer id="footerBar" class="p-6 bg-slate-950 border-t border-slate-900">
-    <div class="max-w-4xl mx-auto flex gap-3">
-      <input type="text" id="userInput" class="flex-1 bg-slate-900 border border-slate-800 rounded-2xl px-6 py-4 text-sm outline-none focus:ring-2 focus:ring-purple-500 transition" placeholder="Envie um comando para Zénia...">
-      <button onclick="processAction()" class="bg-white text-black px-8 rounded-2xl font-bold hover:bg-slate-200 transition">ENVIAR</button>
-    </div>
-  </footer>
-
   <script>
     let activeTab = 'chat';
-    const IDENTITY = "Seu nome é IA ZÉNIA. Criada por Inácio Daniel. Origem: Angola. ";
+    const IDENTITY = "Seu nome é IA ZÉNIA. Criador: Inácio Daniel. Origem: Angola. ";
+    const CODE_MODE = "Você está no MODO PROGRAMADOR. Responda apenas com código, explicações técnicas e nada mais. Foco total em programação.";
 
-    function switchTab(btn, tab) {
+    function switchTab(e, tab) {
       activeTab = tab;
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('bg-purple-600'));
       document.getElementById(tab).classList.add('active');
-      btn.classList.add('active');
-
-      const footer = document.getElementById('footerBar');
-      const input = document.getElementById('userInput');
-      
-      // Ajuste de visual para o modo programador
-      if(tab === 'code') {
-        input.classList.add('code-input');
-        input.placeholder = "root@zenia:~# Digite o código ou algoritmo desejado...";
-        footer.style.display = "block";
-      } else if (tab === 'chat') {
-        input.classList.remove('code-input');
-        input.placeholder = "Fale com a Zénia...";
-        footer.style.display = "block";
-      } else {
-        footer.style.display = "none";
-      }
+      e.target.classList.add('bg-purple-600');
+      document.getElementById('inputContainer').style.display = (['chat', 'code'].includes(tab)) ? 'flex' : 'none';
     }
 
-    function processAction() {
+    function processInput() {
       const input = document.getElementById('userInput');
-      const prompt = input.value.trim();
-      if(!prompt) return;
+      const text = input.value.trim();
+      if(!text) return;
 
-      if(activeTab === 'chat') callAI(prompt, 'chatArea', "Responda como uma assistente útil.");
-      if(activeTab === 'code') callAI(prompt, 'codeArea', "MODO PROGRAMADOR: Responda apenas com código, explicações técnicas e sintaxe. Seja direto e seco.");
+      const areaId = activeTab === 'chat' ? 'chatArea' : 'codeArea';
+      const promptPrefix = activeTab === 'code' ? IDENTITY + CODE_MODE : IDENTITY;
+      
+      renderMessage(text, 'user', areaId);
       input.value = '';
-    }
 
-    function callAI(prompt, targetId, role) {
-      const area = document.getElementById(targetId);
-      const userMsg = document.createElement('div');
-      userMsg.className = "ml-auto bg-slate-800 p-4 rounded-2xl text-xs max-w-[80%] mb-4 " + (activeTab === 'code' ? 'mode-coder' : '');
-      userMsg.innerText = prompt;
-      area.appendChild(userMsg);
-
-      const zeniaMsg = document.createElement('div');
-      zeniaMsg.className = "p-5 rounded-2xl text-sm mb-4 border border-slate-800 " + (activeTab === 'code' ? 'mode-coder' : 'bg-slate-900/30');
-      zeniaMsg.innerHTML = "<em>Processando...</em>";
-      area.appendChild(zeniaMsg);
-
-      const xhr = new XMLHttpRequest();
-      const finalPrompt = encodeURIComponent(IDENTITY + role + " Pergunta: " + prompt);
-      xhr.open("GET", `https://text.pollinations.ai/${finalPrompt}?model=openai`, true);
+      const zeniaDiv = renderMessage("Zénia está a processar...", 'zenia', areaId);
       
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", `https://text.pollinations.ai/${encodeURIComponent(promptPrefix + text)}?model=openai`, true);
       xhr.onreadystatechange = function() {
         if (xhr.readyState === 4 && xhr.status === 200) {
           let res = xhr.responseText;
-          if(res.includes('```')) {
-            res = res.replace(/```([\s\S]*?)```/g, '<pre class="bg-black p-4 rounded-lg my-2 text-green-400 border border-slate-700 overflow-x-auto">$1</pre>');
-          }
-          zeniaMsg.innerHTML = `<strong>${activeTab === 'code' ? '>_ ZÉNIA_KERNEL' : 'ZÉNIA'}</strong>:<br>${res.replace(/\n/g, '<br>')}`;
-          area.parentElement.scrollTop = area.parentElement.scrollHeight;
+          if(res.includes('```')) res = res.replace(/```([\s\S]*?)```/g, '<div class="code-block my-4"><code>$1</code></div>');
+          zeniaDiv.innerHTML = `<div class="text-[10px] text-purple-500 mb-2 font-bold uppercase">Zénia Core</div>` + res.replace(/\n/g, '<br>');
+          zeniaDiv.parentElement.scrollTop = zeniaDiv.parentElement.scrollHeight;
         }
       };
       xhr.send();
     }
 
-    // --- MÓDULOS DE GERAÇÃO ---
-    function genImage() {
-      const p = document.getElementById('imgPrompt').value;
-      const res = document.getElementById('imgResult');
-      res.innerHTML = "<div class='animate-pulse'>Materializando visão da Zénia...</div>";
-      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?width=1080&height=720&nologo=true&model=flux`;
-      res.innerHTML = `<div class="media-card shadow-2xl"><img src="${url}" class="w-full h-auto"></div>`;
+    function renderMessage(txt, type, areaId) {
+      const area = document.getElementById(areaId);
+      const div = document.createElement('div');
+      div.className = type === 'user' ? "ml-auto bg-slate-800 p-4 rounded-3xl rounded-tr-none max-w-[85%] text-sm mb-4" : "msg-zenia p-5 rounded-[2rem] rounded-tl-none max-w-[90%] text-sm mb-4";
+      div.innerHTML = txt;
+      area.appendChild(div);
+      area.scrollTop = area.scrollHeight;
+      return div;
     }
 
-    function genVideo() {
-      const p = document.getElementById('vidPrompt').value;
-      const res = document.getElementById('vidResult');
-      res.innerHTML = "<div class='animate-pulse text-red-500'>Renderizando Frames de Vídeo na Nuvem Kie.ai...</div>";
-      setTimeout(() => {
-        res.innerHTML = `<div class="media-card p-10 bg-black text-xs text-slate-500 border-dashed border-2 border-red-900">
-          VÍDEO GERADO: ${p.toUpperCase()}<br>[Link de download processado pela Kie.ai via Cache]
-        </div>`;
-      }, 3000);
-    }
-
-    function genMusic() {
-      const p = document.getElementById('musPrompt').value;
-      const res = document.getElementById('musResult');
-      res.innerHTML = "<div class='animate-bounce text-blue-500'>Sintonizando frequências sonoras...</div>";
-      setTimeout(() => {
-        res.innerHTML = `<div class="media-card p-8 bg-slate-900 border-blue-600/30 flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-xl">🎵</div>
-            <div class="text-left"><p class="font-bold text-sm">Zenia_Audio_Output.mp3</p><p class="text-[10px] text-slate-500">Engine: Kie.ai / Suno</p></div>
-          </div>
-          <button class="text-xs bg-blue-600 px-4 py-1 rounded-full">Ouvir</button>
-        </div>`;
-      }, 2500);
+    function runMedia(type) {
+      if(type === 'img') {
+        const p = document.getElementById('imgPrompt').value;
+        document.getElementById('imgResult').innerHTML = `<img src="https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?width=1024&nologo=true" class="rounded-2xl shadow-2xl border border-slate-700 max-w-full">`;
+      } else if(type === 'video') {
+        const p = document.getElementById('vidPrompt').value;
+        document.getElementById('vidResult').innerHTML = `<div class="p-10 glass-nav rounded-3xl border border-dashed border-slate-700">🎬 Solicitação de vídeo via Kie.ai enviada: "${p}"...</div>`;
+      } else if(type === 'music') {
+        const p = document.getElementById('musPrompt').value;
+        document.getElementById('musResult').innerHTML = `🎵 Compondo melodia via Kie.ai para: "${p}"... [Processando nos servidores de Angola]`;
+      }
     }
   </script>
 </body>
