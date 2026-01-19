@@ -149,8 +149,8 @@
     let activeTab = 'chat';
     const IDENTITY = "Seu nome é IA ZÉNIA. Criador: Inácio Daniel. Origem: Angola. Você é uma especialista em Angola (História, Geografia, Cultura, Semba, Kizomba). ";
     const KLING_API_KEY = "0991f4139a1f5caf1fcf3b4f497930ab";
-    const KLING_CREATE_URL = "https://api.kie.ai/v1/text-to-video/async/run";
-    const KLING_QUERY_URL = "https://api.kie.ai/v1/text-to-video/async/query";
+    const KLING_CREATE_URL = "https://api.kie.ai/api/v1/jobs/createTask";
+    const KLING_QUERY_URL = "https://api.kie.ai/api/v1/jobs/queryTask";
 
     function switchTab(e, tab) {
       activeTab = tab;
@@ -200,16 +200,17 @@
               'Authorization': `Bearer ${KLING_API_KEY}`,
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ task_id: taskId })
+            body: JSON.stringify({ taskId: taskId })
           });
           
           const data = await response.json();
+          console.log('Status da tarefa:', data);
           
           if (data.code === 200 && data.data) {
             const taskData = data.data;
             
-            if (taskData.status === 'succeed' && taskData.videos && taskData.videos.length > 0) {
-              const videoUrl = taskData.videos[0].url;
+            if (taskData.status === 'succeed' && taskData.works && taskData.works.length > 0) {
+              const videoUrl = taskData.works[0].resource.resource;
               resArea.innerHTML = `
                 <div class="bg-slate-900 p-6 rounded-3xl border-2 border-red-500/20 w-full max-w-2xl">
                   <div class="text-[10px] text-red-400 font-bold mb-4 uppercase text-center flex items-center justify-center gap-2">
@@ -246,6 +247,7 @@
             throw new Error(data.message || 'Resposta inesperada da API');
           }
         } catch (error) {
+          console.error('Erro ao verificar status:', error);
           resArea.innerHTML = `
             <div class="text-red-500 text-sm p-4 bg-red-500/10 rounded-xl border border-red-500/20">
               ❌ Erro ao verificar status: ${error.message}
@@ -284,13 +286,13 @@
             </div>`;
 
           const requestBody = {
-            model_name: "kling-2.6/text-to-video",
-            prompt: prompt,
-            cfg_scale: 0.5,
-            mode: "std",
-            aspect_ratio: aspectRatio,
-            duration: duration,
-            sound: true
+            model: "kling-2.6/text-to-video",
+            input: {
+              prompt: prompt,
+              sound: true,
+              aspect_ratio: aspectRatio,
+              duration: duration.toString()
+            }
           };
 
           console.log('Enviando requisição:', JSON.stringify(requestBody, null, 2));
@@ -304,20 +306,39 @@
             body: JSON.stringify(requestBody)
           });
 
-          const data = await response.json();
+          console.log('Status HTTP:', response.status);
+          
+          const responseText = await response.text();
+          console.log('Resposta raw:', responseText);
+          
+          let data;
+          try {
+            data = JSON.parse(responseText);
+          } catch(e) {
+            throw new Error(`Resposta não é JSON válido: ${responseText.substring(0, 200)}`);
+          }
+          
           console.log('Resposta da API:', data);
           
-          if (data.code === 200 && data.data && data.data.task_id) {
-            checkKlingTaskStatus(data.data.task_id, resArea);
+          if (data.code === 200 && data.data && data.data.taskId) {
+            console.log('Task ID criado:', data.data.taskId);
+            checkKlingTaskStatus(data.data.taskId, resArea);
+          } else if (data.code === 0 && data.data && data.data.taskId) {
+            // Algumas APIs retornam code: 0 para sucesso
+            console.log('Task ID criado:', data.data.taskId);
+            checkKlingTaskStatus(data.data.taskId, resArea);
           } else {
-            throw new Error(data.message || `Erro na API: ${JSON.stringify(data)}`);
+            const errorMsg = data.message || data.error || data.msg || JSON.stringify(data);
+            throw new Error(`API retornou: ${errorMsg}`);
           }
           
         } catch(error) {
           console.error('Erro completo:', error);
+          console.error('Stack:', error.stack);
           resArea.innerHTML = `
             <div class="text-red-500 text-sm p-4 bg-red-500/10 rounded-xl border border-red-500/20">
               ❌ Erro ao gerar vídeo: ${error.message}
+              <div class="mt-2 text-xs text-slate-400">Verifique o console (F12) para mais detalhes</div>
             </div>`;
         }
       } 
