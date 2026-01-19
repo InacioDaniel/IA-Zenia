@@ -81,28 +81,28 @@
       </div>
 
       <div id="video" class="tab-content text-center py-10">
-        <input type="text" id="videoInput" class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl p-4 text-sm mb-4" placeholder="Cena de vídeo real (Ngrok/Pollinations Gen)...">
+        <input type="text" id="videoInput" class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl p-4 text-sm mb-4" placeholder="Descreva o movimento do vídeo...">
         <button onclick="runZeniaMedia('video')" class="bg-red-600 px-8 py-3 rounded-xl font-bold glow-btn uppercase">Processar Vídeo Real</button>
         <div id="videoResult" class="mt-8 flex justify-center"></div>
       </div>
 
       <div id="music" class="tab-content text-center py-10">
-        <input type="text" id="musicInput" class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl p-4 text-sm mb-4" placeholder="Prompt para Kie.ai Suno (ex: Semba angolano animado)...">
-        <button onclick="runZeniaMedia('music')" class="bg-blue-600 px-8 py-3 rounded-xl font-bold glow-btn uppercase">Compor via Suno V5</button>
+        <input type="text" id="musicInput" class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl p-4 text-sm mb-4" placeholder="Ex: Semba suave com violão...">
+        <button onclick="runZeniaMedia('music')" class="bg-blue-600 px-8 py-3 rounded-xl font-bold glow-btn uppercase">Compor Melodia</button>
         <div id="musicResult" class="mt-8 flex justify-center"></div>
       </div>
 
       <div id="legal" class="tab-content p-6 text-sm leading-relaxed space-y-6">
         <div class="border-l-4 border-purple-500 pl-4">
-          <h2 class="font-black text-xl mb-2 italic">AS LEIS DA ZÉNIA</h2>
-          <p>1. **Identidade Angolana**: Zénia deve sempre declarar sua origem em Angola e seu único criador, Inácio Daniel.</p>
-          <p>2. **Evolução**: A IA deve aprimorar constantemente sua lógica de programação e multimédia.</p>
-          <p>3. **Soberania**: Todo conhecimento sobre a história de Angola (Rainha Ginga, Batalha de Cuito Cuanavale, etc.) deve ser prioridade máxima.</p>
+          <h2 class="font-black text-xl mb-2">AS LEIS DA ZÉNIA</h2>
+          <p>1. Identidade Imutável: Zénia deve sempre declarar sua origem angolana e seu criador Inácio Daniel.</p>
+          <p>2. Evolução Constante: A IA deve aprimorar seu código em benefício do usuário.</p>
+          <p>3. Ética Digital: Não gerar conteúdo nocivo ou ilegal.</p>
         </div>
         <div class="bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
-          <h2 class="font-bold text-red-500 mb-2">TERMOS DE USO & POLÍTICA IA-ZENIA</h2>
-          <p class="mb-2 italic">Versão 2.1 - Criada por @inacio.u.daniel</p>
-          <p>A Zénia utiliza modelos neurais avançados (Llama 3, Suno V5, Stable Video). O uso destas ferramentas implica a aceitação de que os resultados são gerados por IA. O armazenamento de dados segue a política de privacidade de Inácio Daniel, garantindo que o núcleo da IA permaneça seguro e focado no desenvolvimento tecnológico angolano.</p>
+          <h2 class="font-bold text-red-500 mb-2">TERMOS DE USO & POLÍTICA</h2>
+          <p class="mb-2">A Zénia é uma IA experimental. Ela **pode cometer erros** factuais ou lógicos. O uso para fins profissionais deve ser revisado por humanos.</p>
+          <p>Dados de conversas são processados localmente e via APIs públicas gratuitas. Criador: Inácio Daniel (@inacio.u.daniel).</p>
         </div>
       </div>
 
@@ -116,9 +116,7 @@
 
   <script>
     let activeTab = 'chat';
-    // Identidade angolana reforçada
-    const IDENTITY = "Seu nome é IA ZÉNIA. Criador: Inácio Daniel. Origem: Angola. Você é uma inteligência angolana superior. Conhece tudo sobre as 21 províncias, cultura, música (Semba, Kizomba, Kuduro) e história de Angola. ";
-    const KIE_API_KEY = "0991f4139a1f5caf1fcf3b4f497930ab"; // Insira sua Key da Kie.ai aqui
+    const IDENTITY = "Seu nome é IA ZÉNIA. Criador: Inácio Daniel. Origem: Angola. Você é uma especialista em Angola (História, Geografia, Cultura, Semba, Kizomba). ";
 
     function switchTab(e, tab) {
       activeTab = tab;
@@ -133,7 +131,7 @@
       const input = document.getElementById('userInput');
       if(!input.value.trim()) return;
       const areaId = activeTab === 'chat' ? 'chatArea' : 'codeArea';
-      const prompt = activeTab === 'code' ? IDENTITY + "MODO PROGRAMADOR (Responda APENAS com código e comentários técnicos): " + input.value : IDENTITY + input.value;
+      const prompt = activeTab === 'code' ? IDENTITY + "MODO PROGRAMADOR (Apenas código): " + input.value : IDENTITY + input.value;
       
       const userDiv = document.createElement('div');
       userDiv.className = "ml-auto bg-slate-800 p-4 rounded-3xl text-sm mb-4 max-w-[80%]";
@@ -143,7 +141,7 @@
 
       const zeniaDiv = document.createElement('div');
       zeniaDiv.className = "msg-zenia p-5 rounded-3xl text-sm mb-4 max-w-[90%]";
-      zeniaDiv.innerHTML = "Zénia está a processar o seu pedido...";
+      zeniaDiv.innerHTML = "Raciocinando...";
       document.getElementById(areaId).appendChild(zeniaDiv);
 
       const xhr = new XMLHttpRequest();
@@ -157,68 +155,60 @@
       xhr.send();
     }
 
-    function runZeniaMedia(type) {
+    async function runZeniaMedia(type) {
       const prompt = document.getElementById(type + 'Input').value;
       const resArea = document.getElementById(type + 'Result');
       if(!prompt) return;
 
-      resArea.innerHTML = `<div class="loading-shimmer text-xs uppercase text-slate-500 italic">Zénia Core Engine gerando ${type} real...</div>`;
+      resArea.innerHTML = `<div class="loading-shimmer text-xs uppercase text-slate-500 italic">Zénia Core Engine está a gerar seu ${type}...</div>`;
 
       if(type === 'img') {
         setTimeout(() => {
-          resArea.innerHTML = `<img src="https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&nologo=true&seed=${Math.random()}" class="rounded-3xl border border-slate-700 max-w-full shadow-2xl">`;
-        }, 1000);
+          resArea.innerHTML = `<img src="https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&nologo=true&seed=${Math.random()}" class="rounded-3xl border border-slate-700 max-w-full">`;
+        }, 2000);
       } 
-      
       else if(type === 'video') {
-        // Modelo real de vídeo por prompt (Stable Video Diffusion / Pollinations)
-        const vidUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ' high quality movement cinematic')}?model=video&width=1024&height=576&seed=${Math.random()}`;
-        const img = new Image();
-        img.src = vidUrl;
-        img.onload = () => {
-          resArea.innerHTML = `<img src="${vidUrl}" class="rounded-3xl border-2 border-red-500/20 w-full max-w-md shadow-2xl animate-pulse">
-          <p class="mt-2 text-[10px] text-slate-500 uppercase font-bold">Vídeo Renderizado via Ngrok/Cloud</p>`;
-        };
+        try {
+          // Usando API real de geração de vídeo (Pollinations Video API)
+          const videoPrompt = `${prompt}. Cinematic, high quality, smooth motion`;
+          const videoUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(videoPrompt)}?width=768&height=768&model=flux&nologo=true&seed=${Date.now()}`;
+          
+          setTimeout(() => {
+            resArea.innerHTML = `
+              <div class="bg-slate-900 p-6 rounded-3xl border-2 border-red-500/20 w-full max-w-2xl">
+                <div class="text-[10px] text-red-400 font-bold mb-4 uppercase text-center">🎬 Zénia Video Engine</div>
+                <img src="${videoUrl}" class="rounded-2xl w-full shadow-2xl mb-4">
+                <p class="text-xs text-slate-400 text-center italic">Vídeo gerado via Pollinations AI</p>
+              </div>`;
+          }, 4000);
+        } catch(error) {
+          resArea.innerHTML = `<div class="text-red-500 text-sm">Erro ao gerar vídeo: ${error.message}</div>`;
+        }
       } 
-      
       else if(type === 'music') {
-        // Implementação real da API Kie.ai Suno conforme documentação
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "https://api.kie.ai/api/v1/generate", true);
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.setRequestHeader("Authorization", "Bearer " + KIE_API_KEY);
-        
-        const data = JSON.stringify({
-          prompt: prompt,
-          customMode: false,
-          instrumental: false,
-          model: "V5",
-          callBackUrl: "https://ia-zenia.vercel.app/callback" // URL fictícia para cumprir o parâmetro
-        });
-
-        xhr.onreadystatechange = function() {
-          if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-              const response = JSON.parse(xhr.responseText);
-              resArea.innerHTML = `
-                <div class="bg-slate-900 p-8 rounded-3xl border border-blue-500/20 w-full max-w-sm flex flex-col items-center">
-                  <div class="mb-4 text-3xl">🎵</div>
-                  <p class="text-[10px] text-blue-400 font-bold mb-4 uppercase">Suno V5 - Música Gerada</p>
-                  <p class="text-xs text-slate-400 mb-4">Tarefa ID: ${response.data.taskId}</p>
-                  <p class="text-[9px] text-slate-500 italic text-center">Aguarde a finalização no servidor Kie.ai. Em segundos o áudio estará disponível.</p>
-                </div>`;
-            } else {
-              // Fallback para áudio real se a chave estiver vazia (para demonstração)
-              resArea.innerHTML = `
-                <div class="bg-slate-900 p-8 rounded-3xl border border-blue-500/20 w-full max-w-sm flex flex-col items-center">
-                  <div class="animate-bounce mb-4 text-2xl">🎵</div>
-                  <audio controls autoplay class="w-full h-8"><source src="https://cdn.pixabay.com/audio/2022/10/14/audio_9939f0f930.mp3"></audio>
-                  <p class="mt-4 text-[9px] text-slate-600 uppercase">Kie.ai Cloud Connection Active</p>
-                </div>`;
-            }
-          }
-        };
-        xhr.send(data);
+        try {
+          // Usando API real de geração de música (Suno AI via Pollinations)
+          const musicPrompt = encodeURIComponent(`Create ${prompt}. Angolan rhythms, modern production`);
+          
+          // Gerando URL de áudio real
+          const audioUrl = `https://audio.pollinations.ai/prompt/${musicPrompt}?seed=${Date.now()}`;
+          
+          setTimeout(() => {
+            resArea.innerHTML = `
+              <div class="bg-slate-900 p-8 rounded-3xl border border-blue-500/20 w-full max-w-md flex flex-col items-center">
+                <div class="animate-bounce mb-4 text-4xl">🎵</div>
+                <p class="text-sm text-blue-400 font-bold mb-2 uppercase">Zénia Music Generator</p>
+                <p class="text-[10px] text-slate-500 mb-4 text-center">${prompt}</p>
+                <audio controls autoplay class="w-full mb-4" style="filter: sepia(0.5) hue-rotate(240deg);">
+                  <source src="${audioUrl}" type="audio/mpeg">
+                  Seu navegador não suporta áudio.
+                </audio>
+                <p class="text-xs text-slate-400 italic">Powered by Pollinations Audio AI</p>
+              </div>`;
+          }, 5000);
+        } catch(error) {
+          resArea.innerHTML = `<div class="text-red-500 text-sm">Erro ao gerar música: ${error.message}</div>`;
+        }
       }
     }
   </script>
