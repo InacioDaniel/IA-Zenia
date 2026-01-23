@@ -13,44 +13,32 @@
     <style>
         :root { --accent: #3b82f6; --bg: #010409; --panel: #0d1117; --border: #30363d; }
         body { background: var(--bg); color: #e6edf3; font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; display: flex; overflow: hidden; margin: 0; }
-        
-        /* Sidebar e Histórico */
         .sidebar { width: 280px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; transition: 0.3s; }
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
-
         .hist-item { padding: 12px; border-radius: 10px; background: #161b22; margin-bottom: 8px; cursor: pointer; border: 1px solid transparent; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
         .hist-item:hover { border-color: var(--accent); background: #1c2128; }
         .hist-item.active { border-color: var(--accent); background: #1c2128; box-shadow: 0 0 10px rgba(59,130,246,0.2); }
-
-        /* Botão Nova Conversa */
         .btn-new { background: #238636; color: white; padding: 10px; border-radius: 8px; font-weight: 800; text-align: center; margin-bottom: 20px; cursor: pointer; transition: 0.2s; }
-        .btn-new:hover { background: #2ea043; }
-
-        /* Mensagens */
-        .msg-wrapper { display: flex; flex-direction: column; max-width: 90%; gap: 5px; }
+        .msg-wrapper { display: flex; flex-direction: column; max-width: 90%; gap: 5px; position: relative; }
         .msg { padding: 15px; border-radius: 18px; line-height: 1.6; border: 1px solid var(--border); }
         .ai-msg { background: #161b22; align-self: flex-start; }
         .user-msg { background: #1f6feb; align-self: flex-end; border: none; }
-
-        /* Estilo para Códigos */
+        .msg-controls { display: flex; gap: 10px; margin-top: 4px; padding: 0 10px; font-size: 11px; color: #8b949e; opacity: 0.6; }
+        .msg-wrapper:hover .msg-controls { opacity: 1; }
+        .ctrl-btn { cursor: pointer; transition: 0.2s; }
+        .ctrl-btn:hover { color: white; }
         .code-container { border-radius: 12px; overflow: hidden; margin: 15px 0; border: 1px solid var(--border); background: #0d1117; }
         .code-header { background: #161b22; padding: 8px 15px; display: flex; justify-content: space-between; align-items: center; }
         .btn-action { font-size: 10px; font-weight: bold; padding: 4px 8px; border-radius: 4px; background: #21262d; color: #8b949e; border: 1px solid var(--border); }
-        .btn-action:hover { color: white; border-color: white; }
-
-        /* Estilo para Matemática */
         .math-render { background: rgba(59, 130, 246, 0.05); padding: 15px; border-radius: 10px; margin: 10px 0; border-left: 4px solid var(--accent); }
     </style>
 </head>
 <body>
-
     <aside class="sidebar p-4">
         <div class="btn-new" onclick="startNewChat()">+ NOVA CONVERSA</div>
-        
         <h2 class="text-[10px] font-bold text-gray-500 uppercase mb-4 tracking-widest">Histórico Local</h2>
         <div id="historyList" class="flex-1 overflow-y-auto pr-1"></div>
-        
         <div class="mt-auto pt-4 border-t border-zinc-800 space-y-2">
             <h2 class="text-[9px] font-bold text-gray-600 uppercase mb-2">Minhas Irmãs</h2>
             <a href="https://zenia-projects.netlify.app" target="_blank" class="block text-xs text-blue-400 hover:underline">🌐 Zenia Projects</a>
@@ -61,14 +49,10 @@
 
     <main class="main-content">
         <header class="p-4 border-b border-zinc-800 flex justify-between items-center bg-black/30">
-            <div>
-                <h1 class="text-xl font-black italic">IA-ZÉNIA <span class="text-blue-500 text-xs font-normal">LUBANGO</span></h1>
-            </div>
+            <h1 class="text-xl font-black italic">IA-ZÉNIA <span class="text-blue-500 text-xs font-normal">LUBANGO</span></h1>
             <button onclick="clearAllData()" class="text-[10px] text-red-500 font-bold hover:underline">APAGAR TUDO</button>
         </header>
-
         <div id="chatBox" class="chat-container"></div>
-
         <div class="p-4 bg-[#010409]">
             <div class="max-w-5xl mx-auto bg-[#161b22] rounded-2xl p-2 border border-blue-500/30 flex items-end gap-2">
                 <textarea id="userInput" placeholder="Escreva aqui..." class="flex-1 bg-transparent border-none outline-none text-sm p-2 text-white h-12 max-h-48 resize-none" oninput="this.style.height='';this.style.height=this.scrollHeight+'px'"></textarea>
@@ -83,83 +67,27 @@
         let sessions = JSON.parse(localStorage.getItem('zenia_sessions') || '[]');
         let currentSessionId = null;
 
-        function init() {
-            renderHistory();
-            if(sessions.length > 0) {
-                loadSession(sessions[sessions.length - 1].id);
-            } else {
-                startNewChat();
-            }
-        }
+        function init() { renderHistory(); if(sessions.length > 0) loadSession(sessions[sessions.length-1].id); else startNewChat(); }
+        function startNewChat() { currentSessionId = Date.now(); chatBox.innerHTML = ''; addMessage("Mbwéte! Sou a IA-ZÉNIA. Como posso ajudar com seus códigos e cálculos?", false); renderHistory(); }
 
-        function startNewChat() {
-            currentSessionId = Date.now();
-            chatBox.innerHTML = '';
-            addMessage("Mbwéte! Sou a IA-ZÉNIA do Lubango. Em que posso ajudar hoje?", false);
-            renderHistory();
-        }
-
-        function renderHistory() {
-            historyList.innerHTML = '';
-            sessions.slice().reverse().forEach(s => {
-                const item = document.createElement('div');
-                item.className = `hist-item ${s.id === currentSessionId ? 'active' : ''}`;
-                item.innerHTML = `<span>${s.title}</span><button onclick="deleteSession(event, ${s.id})" class="text-gray-600 hover:text-red-500">❌</button>`;
-                item.onclick = () => loadSession(s.id);
-                historyList.appendChild(item);
-            });
-        }
-
-        function loadSession(id) {
-            currentSessionId = id;
-            const session = sessions.find(s => s.id === id);
-            chatBox.innerHTML = '';
-            if(session) {
-                session.messages.forEach(m => {
-                    if(m.role === 'ai') processResponse(m.text, false);
-                    else addMessage(m.text, true, false);
-                });
-            }
-            renderHistory();
-        }
-
-        async function handleSend() {
+        async function handleSend(textOverride = null) {
             const input = document.getElementById('userInput');
-            const query = input.value.trim();
+            const query = textOverride || input.value.trim();
             if(!query) return;
-
-            addMessage(query, true);
-            input.value = '';
-            input.style.height = '48px';
-            const loading = addMessage("IA-ZÉNIA está a pensar...", false);
-
+            addMessage(query, true); input.value = ''; input.style.height = '48px';
+            const loading = addMessage("Processando sinapses...", false);
             try {
-                const sys = `Você é IA-ZÉNIA do Lubango. Expert em Matemática, Física e Línguas Nacionais de Angola. Use LaTeX \( \) e \[ \] para matemática e markdown para código.`;
+                const sys = `Você é IA-ZÉNIA do Lubango. Use LaTeX \( \) e \[ \] para matemática. Bloqueie as tags HTML de resposta.`;
                 const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(sys + "\n" + query)}?model=mistral`);
-                const text = await res.text();
-                loading.remove();
-                
-                processResponse(text, true);
-                saveSession(query, text);
-            } catch(e) { loading.innerText = "Erro de conexão."; }
+                const text = await res.text(); loading.remove();
+                processResponse(text, query);
+            } catch(e) { loading.innerText = "Erro na conexão."; }
         }
 
-        function saveSession(q, a) {
-            let session = sessions.find(s => s.id === currentSessionId);
-            if(!session) {
-                session = { id: currentSessionId, title: q.substring(0, 20) + '...', messages: [] };
-                sessions.push(session);
-            }
-            session.messages.push({role: 'user', text: q}, {role: 'ai', text: a});
-            localStorage.setItem('zenia_sessions', JSON.stringify(sessions));
-            renderHistory();
-        }
-
-        function processResponse(text, isNew = true) {
+        function processResponse(text, query) {
             const wrapper = document.createElement('div');
             wrapper.className = 'msg-wrapper ai-wrapper';
             const parts = text.split(/```/);
-            
             parts.forEach((part, i) => {
                 if(i % 2 !== 0) {
                     const lines = part.split('\n');
@@ -173,54 +101,84 @@
                     wrapper.appendChild(msgDiv);
                 }
             });
+            const controls = document.createElement('div');
+            controls.className = 'msg-controls';
+            controls.innerHTML = `<span class="ctrl-btn" onclick="handleSend('${query.replace(/'/g, "\\'")}')">🔄 Reenviar</span>
+                                  <span class="ctrl-btn" onclick="this.closest('.msg-wrapper').remove()">❌ Remover</span>
+                                  <span class="ctrl-btn" onclick="this.innerHTML='❤️'">👍 Like</span>
+                                  <span class="ctrl-btn" onclick="this.innerHTML='💔'">👎 Unlike</span>`;
+            wrapper.appendChild(controls);
             chatBox.appendChild(wrapper);
+            saveSession(query, text);
             document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
             chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        function formatAI(t) {
-            return t.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-                    .replace(/\\\[([\s\S]*?)\\\]/g, '<div class="math-render">$$$1$$</div>')
-                    .replace(/\\\((.*?)\\\)/g, '$$$1$$')
-                    .replace(/\n/g, '<br>');
         }
 
         function createCodeBlock(code, lang) {
             const div = document.createElement('div');
             div.className = 'code-container';
-            div.innerHTML = `<div class="code-header"><span class="text-xs font-bold text-blue-400 uppercase">${lang}</span><div class="flex gap-2"><button class="btn-action" onclick="copy(this)">COPIAR</button><button class="btn-action" onclick="this.closest('.code-container').remove()">APAGAR</button></div></div><pre><code class="language-${lang}">${code.replace(/</g, '&lt;')}</code></pre>`;
+            div.innerHTML = `<div class="code-header"><span class="text-xs font-bold text-blue-400 uppercase">${lang}</span>
+                <div class="flex gap-2">
+                    <button class="btn-action" onclick="downloadFile('${code.replace(/'/g, "\\'")}', '${lang}')">📥 BAIXAR</button>
+                    <button class="btn-action" onclick="copy(this)">COPIAR</button>
+                </div></div><pre><code class="language-${lang}">${code.replace(/</g, '&lt;')}</code></pre>`;
             return div;
         }
 
-        function addMessage(t, isUser, isNew = true) {
+        function downloadFile(content, lang) {
+            const ext = { javascript: 'js', python: 'py', html: 'html', css: 'css' }[lang] || 'txt';
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `zenia_file_${Date.now()}.${ext}`; a.click();
+        }
+
+        function addMessage(t, isUser) {
             const w = document.createElement('div');
             w.className = `msg-wrapper ${isUser ? 'user-wrapper' : 'ai-wrapper'}`;
-            w.innerHTML = `<div class="msg ${isUser ? 'user-msg' : 'ai-msg'}">${t}</div>`;
+            w.innerHTML = `<div class="msg ${isUser ? 'user-msg' : 'ai-msg'}">${isUser ? t : formatAI(t)}</div>`;
+            if(isUser) {
+                const editCtrl = document.createElement('div');
+                editCtrl.className = 'msg-controls self-end';
+                editCtrl.innerHTML = `<span class="ctrl-btn" onclick="editMessage(this)">✏️ Editar</span>`;
+                w.appendChild(editCtrl);
+            }
             chatBox.appendChild(w);
             chatBox.scrollTop = chatBox.scrollHeight;
             return w;
         }
 
-        function copy(btn) {
-            const code = btn.closest('.code-container').querySelector('code').innerText;
-            navigator.clipboard.writeText(code);
-            btn.innerText = "COPIADO"; setTimeout(() => btn.innerText = "COPIAR", 2000);
+        function editMessage(btn) {
+            const wrapper = btn.closest('.msg-wrapper');
+            const oldText = wrapper.querySelector('.msg').innerText;
+            const newText = prompt("Edite sua mensagem:", oldText);
+            if(newText && newText !== oldText) { wrapper.remove(); handleSend(newText); }
         }
 
-        function deleteSession(e, id) {
-            e.stopPropagation();
-            if(confirm("Deseja eliminar esta conversa?")) {
-                sessions = sessions.filter(s => s.id !== id);
-                localStorage.setItem('zenia_sessions', JSON.stringify(sessions));
-                if(currentSessionId === id) startNewChat();
-                else renderHistory();
-            }
+        function formatAI(t) { return t.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\\\[([\s\S]*?)\\\]/g, '<div class="math-render">$$$1$$</div>').replace(/\\\((.*?)\\\)/g, '$$$1$$').replace(/\n/g, '<br>'); }
+        function copy(btn) { const code = btn.closest('.code-container').querySelector('code').innerText; navigator.clipboard.writeText(code); btn.innerText = "OK"; setTimeout(() => btn.innerText = "COPIAR", 1000); }
+        function saveSession(q, a) {
+            let session = sessions.find(s => s.id === currentSessionId);
+            if(!session) { session = { id: currentSessionId, title: q.substring(0, 20) + '...', messages: [] }; sessions.push(session); }
+            session.messages.push({role: 'user', text: q}, {role: 'ai', text: a});
+            localStorage.setItem('zenia_sessions', JSON.stringify(sessions)); renderHistory();
         }
-
-        function clearAllData() {
-            if(confirm("Apagar histórico permanente? Isso não pode ser desfeito.")) { localStorage.clear(); location.reload(); }
+        function renderHistory() {
+            historyList.innerHTML = '';
+            sessions.slice().reverse().forEach(s => {
+                const item = document.createElement('div');
+                item.className = `hist-item ${s.id === currentSessionId ? 'active' : ''}`;
+                item.innerHTML = `<span>${s.title}</span><button onclick="deleteSession(event, ${s.id})">❌</button>`;
+                item.onclick = () => loadSession(s.id); historyList.appendChild(item);
+            });
         }
-
+        function loadSession(id) {
+            currentSessionId = id; const session = sessions.find(s => s.id === id); chatBox.innerHTML = '';
+            if(session) session.messages.forEach(m => { if(m.role === 'ai') processResponse(m.text, ""); else addMessage(m.text, true); });
+            renderHistory();
+        }
+        function deleteSession(e, id) { e.stopPropagation(); sessions = sessions.filter(s => s.id !== id); localStorage.setItem('zenia_sessions', JSON.stringify(sessions)); startNewChat(); }
+        function clearAllData() { if(confirm("Limpar tudo?")) { localStorage.clear(); location.reload(); } }
         init();
     </script>
 </body>
