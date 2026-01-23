@@ -3,23 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA-ZÉNIA aNGOLA 2026</title>
+    <title>IA-ZÉNIA | Lubango Core</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         body { background: #010409; color: #e6edf3; font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; display: flex; overflow: hidden; margin: 0; }
-        
-        /* Barra Lateral */
-        .sidebar { width: 280px; background: #0d1117; border-right: 1px solid #30363d; display: flex; flex-direction: column; transition: all 0.3s; }
-        .history-item { padding: 10px; border-radius: 8px; cursor: pointer; font-size: 13px; margin-bottom: 5px; transition: 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; }
+        .sidebar { width: 280px; background: #0d1117; border-right: 1px solid #30363d; display: flex; flex-direction: column; }
+        .history-item { padding: 10px; border-radius: 8px; cursor: pointer; font-size: 13px; margin-bottom: 5px; transition: 0.2s; border: 1px solid transparent; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .history-item:hover { background: #161b22; border-color: #30363d; }
-        .sister-link { font-size: 12px; color: #58a6ff; display: block; padding: 8px; border-radius: 6px; text-decoration: none; transition: 0.2s; }
-        .sister-link:hover { background: rgba(88, 166, 255, 0.1); }
-
-        /* Main Content */
         .main-content { flex: 1; display: flex; flex-direction: column; position: relative; }
         .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
-        
         .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; }
         .ai-wrapper { align-self: flex-start; }
         .user-wrapper { align-self: flex-end; }
@@ -27,27 +20,32 @@
         .user-msg { background: #1f6feb; border: none; }
         .ai-msg { background: #161b22; }
 
-        /* Canvas Image Box */
-        .image-box { background: #000; padding: 10px; border-radius: 12px; border: 1px solid #30363d; margin-top: 10px; width: 270px; }
-        canvas { display: block; background: #fff; width: 250px; height: 250px; }
-        .img-tools { display: flex; gap: 5px; margin-top: 8px; }
-        .btn-img { font-size: 10px; background: #21262d; padding: 5px 8px; border-radius: 4px; color: #c9d1d9; font-weight: bold; }
+        /* Estilo para Blocos de Código e Canvas */
+        .container-box { background: #0d1117; border: 1px solid #30363d; border-radius: 12px; overflow: hidden; margin-top: 10px; width: 100%; max-width: 500px; }
+        .box-header { background: #161b22; padding: 8px; display: flex; gap: 5px; border-bottom: 1px solid #30363d; }
+        .tool-btn { font-size: 10px; padding: 5px 10px; border-radius: 4px; background: #21262d; color: #c9d1d9; font-weight: bold; border: 1px solid #30363d; }
+        .tool-btn:hover { background: #30363d; }
+        
+        /* Efeito de Progresso no Canvas */
+        .canvas-container { position: relative; width: 250px; height: 250px; margin: 10px auto; background: #000; }
+        .canvas-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); color: #58a6ff; font-size: 10px; font-weight: bold; z-index: 10; }
+        .progress-bar { width: 60%; height: 4px; background: #30363d; border-radius: 10px; overflow: hidden; margin-top: 5px; }
+        .progress-fill { width: 0%; height: 100%; background: #58a6ff; transition: width 0.5s; }
+        
+        pre { padding: 15px; overflow-x: auto; font-size: 12px; color: #79c0ff; max-height: 300px; }
+        iframe { width: 100%; height: 300px; border: none; display: none; background: white; }
+        .active { display: block !important; }
 
-        #fullScreenOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
+        .sister-link { font-size: 12px; color: #58a6ff; display: block; padding: 8px; border-radius: 6px; text-decoration: none; }
     </style>
 </head>
 <body>
 
-    <div id="fullScreenOverlay" onclick="this.style.display='none'">
-        <canvas id="fullCanvas" width="250" height="250" style="transform: scale(3);"></canvas>
-    </div>
-
     <aside class="sidebar p-4">
         <div class="mb-8">
             <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Histórico Local</h2>
-            <div id="historyList" class="overflow-y-auto max-h-[40vh]"></div>
+            <div id="historyList"></div>
         </div>
-        
         <div class="mt-auto border-t border-[#30363d] pt-4">
             <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Irmãs Zénia</h2>
             <a href="https://zenia-projects.netlify.app" target="_blank" class="sister-link">🌐 Zenia Projects</a>
@@ -60,18 +58,14 @@
         <header class="p-4 border-b border-[#30363d] bg-[#0d1117] flex justify-between items-center">
             <div>
                 <h1 class="text-xl font-black">IA-ZÉNIA <span class="text-blue-500">2026</span></h1>
-                <p class="text-[9px] text-gray-500 uppercase">Natural de: <span class="text-white">Lubango, Angola</span></p>
+                <p class="text-[9px] text-gray-500">NATURAL DO <span class="text-white">LUBANGO</span></p>
             </div>
         </header>
 
-        <div id="chatBox" class="chat-container">
-            <div class="msg-wrapper ai-wrapper">
-                <div class="msg ai-msg">Mbwéte! Sou a **IA-ZÉNIA**, nascida no Lubango. Meu sistema de imagem está otimizado para 250px. Como posso ajudar?</div>
-            </div>
-        </div>
+        <div id="chatBox" class="chat-container"></div>
 
         <div class="p-4 bg-[#0d1117]">
-            <div class="max-w-4xl mx-auto flex gap-2 bg-[#161b22] border border-[#30363d] rounded-2xl p-2 focus-within:border-blue-500">
+            <div class="max-w-4xl mx-auto flex gap-2 bg-[#161b22] border border-[#30363d] rounded-2xl p-2">
                 <textarea id="userInput" placeholder="Desenha um por do sol no Lubango..." class="flex-1 bg-transparent border-none outline-none p-2 text-sm text-white h-12 resize-none" maxlength="12000"></textarea>
                 <button onclick="handleSend()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 rounded-xl font-bold">Enviar</button>
             </div>
@@ -80,80 +74,114 @@
 
     <script>
         const chatBox = document.getElementById('chatBox');
-        const historyList = document.getElementById('historyList');
-
-        // Carregar Histórico Local
-        function loadHistory() {
-            const hist = JSON.parse(localStorage.getItem('zenia_chat_history') || '[]');
-            historyList.innerHTML = hist.map((q, i) => `<div class="history-item" onclick="document.getElementById('userInput').value='${q}'">${q}</div>`).reverse().join('');
+        
+        function saveToHistory(q) {
+            let hist = JSON.parse(localStorage.getItem('zenia_hist') || '[]');
+            if(!hist.includes(q)) hist.push(q);
+            localStorage.setItem('zenia_hist', JSON.stringify(hist.slice(-15)));
+            renderHistory();
         }
 
-        function saveHistory(q) {
-            let hist = JSON.parse(localStorage.getItem('zenia_chat_history') || '[]');
-            if(!hist.includes(q)) {
-                hist.push(q);
-                if(hist.length > 20) hist.shift();
-                localStorage.setItem('zenia_chat_history', JSON.stringify(hist));
-                loadHistory();
-            }
+        function renderHistory() {
+            const hist = JSON.parse(localStorage.getItem('zenia_hist') || '[]');
+            document.getElementById('historyList').innerHTML = hist.map(h => `<div class="history-item" onclick="document.getElementById('userInput').value='${h}'">${h}</div>`).reverse().join('');
         }
 
         async function handleSend() {
             const val = document.getElementById('userInput').value.trim();
             if(!val) return;
-
+            
             addMsg(val, true);
-            saveHistory(val);
+            saveToHistory(val);
             document.getElementById('userInput').value = '';
-
-            const isDraw = val.toLowerCase().includes('desenha') || val.toLowerCase().includes('gerar imagem');
-            const loading = addMsg("Processando...", false);
+            
+            const isDraw = val.toLowerCase().includes('desenha') || val.toLowerCase().includes('gere imagem');
+            const loading = addMsg("IA-ZÉNIA processando...", false);
 
             try {
-                const system = `IA-ZÉNIA. Natural: Lubango. Se pedir desenho, responda APENAS o código JS para canvas ID 'zeniaCanvas' (250x250).`;
-                const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(system + "\n" + val)}?model=openai`);
+                // Usando modelo 'flux' ou 'mistral' que são melhores para evitar o erro 502 de Cloudflare
+                const sys = `Nome: IA-ZÉNIA. Cidade: Lubango. Irmãs: zenia-projects, ia-zenia, antonia-ia. Se for desenho, responda apenas o código JS para canvas ID 'zeniaCanvas' (250x250).`;
+                const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(sys + "\n" + val)}?model=mistral&cache=false`);
                 const text = await res.text();
                 loading.remove();
 
                 if(isDraw && text.includes('```')) {
                     const code = text.match(/```(?:javascript|js)?([\s\S]*?)```/)[1];
-                    createImageBox(code);
+                    createCanvasBox(code);
+                } else if(text.includes('```html')) {
+                    const html = text.match(/```html([\s\S]*?)```/)[1];
+                    createCodeBox(html);
                 } else {
                     addMsg(text, false);
                 }
-            } catch(e) { loading.innerText = "Erro."; }
+            } catch(e) { loading.innerText = "Erro na sinapse. Tente novamente."; }
         }
 
-        function createImageBox(code) {
+        function createCanvasBox(code) {
+            const id = 'c' + Date.now();
             const wrapper = document.createElement('div');
             wrapper.className = 'msg-wrapper ai-wrapper';
             wrapper.innerHTML = `
-                <div class="image-box">
-                    <canvas id="zeniaCanvas" width="250" height="250"></canvas>
-                    <div class="img-tools">
-                        <button class="btn-img" onclick="viewFull()">Ecrã Completo</button>
-                        <button class="btn-img" onclick="downloadImg()">Download</button>
-                        <button class="btn-img text-red-500" onclick="this.closest('.msg-wrapper').remove()">Eliminar</button>
+                <div class="container-box">
+                    <div class="box-header">
+                        <button class="tool-btn" onclick="copyCode(\`${code.replace(/`/g, '\\`')}\`)">COPIAR</button>
+                        <button class="tool-btn text-red-500" onclick="this.closest('.msg-wrapper').remove()">APAGAR</button>
+                    </div>
+                    <div class="canvas-container">
+                        <div id="loader-${id}" class="canvas-loading">
+                            <div>DESENHANDO...<div class="progress-bar"><div id="fill-${id}" class="progress-fill"></div></div></div>
+                        </div>
+                        <canvas id="canvas-${id}" width="250" height="250" style="background:white"></canvas>
                     </div>
                 </div>`;
             chatBox.appendChild(wrapper);
-            setTimeout(() => { try { eval(code); } catch(e){} }, 50);
+            
+            // Efeito de Progresso
+            let p = 0;
+            const interval = setInterval(() => {
+                p += 10;
+                document.getElementById(`fill-${id}`).style.width = p + '%';
+                if(p >= 100) {
+                    clearInterval(interval);
+                    document.getElementById(`loader-${id}`).remove();
+                    // Executa o desenho no canvas específico
+                    const canvasCode = code.replace(/zeniaCanvas/g, `canvas-${id}`);
+                    try { eval(canvasCode); } catch(e) {}
+                }
+            }, 150);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        function viewFull() {
-            const mainCanvas = document.getElementById('zeniaCanvas');
-            const fullCanvas = document.getElementById('fullCanvas');
-            const fCtx = fullCanvas.getContext('2d');
-            fCtx.drawImage(mainCanvas, 0, 0);
-            document.getElementById('fullScreenOverlay').style.display = 'flex';
+        function createCodeBox(html) {
+            const id = 'f' + Date.now();
+            const wrapper = document.createElement('div');
+            wrapper.className = 'msg-wrapper ai-wrapper';
+            wrapper.innerHTML = `
+                <div class="container-box">
+                    <div class="box-header">
+                        <button class="tool-btn" onclick="toggleView('${id}', 'code')">CÓDIGO</button>
+                        <button class="tool-btn" onclick="toggleView('${id}', 'preview')">PREVISUALIZAR</button>
+                        <button class="tool-btn" onclick="copyCode(\`${html.replace(/`/g, '\\`')}\`)">COPIAR</button>
+                        <button class="tool-btn text-red-500" onclick="this.closest('.msg-wrapper').remove()">APAGAR</button>
+                    </div>
+                    <pre id="code-${id}" class="active"><code>${html.replace(/</g, '&lt;')}</code></pre>
+                    <iframe id="prev-${id}"></iframe>
+                </div>`;
+            chatBox.appendChild(wrapper);
+            document.getElementById(`prev-${id}`).srcdoc = html;
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        function downloadImg() {
-            const link = document.createElement('a');
-            link.download = 'zenia-art.png';
-            link.href = document.getElementById('zeniaCanvas').toDataURL();
-            link.click();
+        function toggleView(id, mode) {
+            const code = document.getElementById(`code-${id}`);
+            const prev = document.getElementById(`prev-${id}`);
+            if(mode === 'code') { code.classList.add('active'); prev.classList.remove('active'); }
+            else { code.classList.remove('active'); prev.classList.add('active'); }
+        }
+
+        function copyCode(txt) {
+            navigator.clipboard.writeText(txt);
+            alert("Copiado!");
         }
 
         function addMsg(txt, user) {
@@ -166,7 +194,7 @@
             return w;
         }
 
-        loadHistory();
+        renderHistory();
     </script>
 </body>
 </html>
