@@ -3,187 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA-ZÉNIA | Lubango Core</title>
+    <title>IA-ZÉNIA Angola 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { --accent: #3b82f6; --bg: #010409; --panel: #0d1117; --border: #30363d; }
         body { background: var(--bg); color: #e6edf3; font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; display: flex; overflow: hidden; margin: 0; }
         
-        /* Efeito de Decoração: Sinapse */
-        .synapse-glow { box-shadow: 0 0 15px rgba(59, 130, 246, 0.1); border: 1px solid var(--accent) !important; animation: pulseGlow 3s infinite; }
-        @keyframes pulseGlow { 0% { border-color: #30363d; } 50% { border-color: var(--accent); } 100% { border-color: #30363d; } }
-
         .sidebar { width: 280px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-        .main-content { flex: 1; display: flex; flex-direction: column; }
-        .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        .main-content { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; scrollbar-width: none; }
         
-        /* Mensagens e Estilo Negrito */
+        /* Mensagens e Formatação */
+        .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; position: relative; gap: 8px; }
+        .user-wrapper { align-self: flex-end; }
+        .ai-wrapper { align-self: flex-start; }
+
         .msg { padding: 15px; border-radius: 18px; line-height: 1.6; border: 1px solid var(--border); position: relative; }
-        .user-msg { background: #1f6feb; align-self: flex-end; border: none; max-width: 85%; }
-        .ai-msg { background: #161b22; align-self: flex-start; max-width: 90%; }
-        b, strong { color: var(--accent); font-weight: 800; }
+        .user-msg { background: #1f6feb; border: none; }
+        .ai-msg { background: #161b22; }
 
-        /* O QUADRADO UNIFICADO DE CÓDIGO/CANVAS */
-        .output-container { background: #000; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin: 15px 0; width: 100%; }
-        .output-header { background: #161b22; padding: 10px; display: flex; gap: 8px; border-bottom: 1px solid var(--border); }
-        .btn-tool { font-size: 10px; font-weight: 800; padding: 6px 12px; border-radius: 6px; background: #21262d; border: 1px solid var(--border); color: #8b949e; cursor: pointer; transition: 0.2s; }
-        .btn-tool:hover { background: var(--border); color: #fff; }
-        .btn-del { color: #f85149; } .btn-del:hover { background: #f85149; color: #fff; }
+        /* Estilização de Markdown nas mensagens */
+        .msg b { color: #60a5fa; font-weight: 800; }
+        .msg h1, .msg h2, .msg h3 { color: var(--accent); font-weight: 800; margin: 10px 0; display: block; }
+        .math-box { background: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--accent); padding: 10px; margin: 10px 0; border-radius: 4px; font-family: 'serif'; font-style: italic; }
 
-        /* Area de Visualização */
-        .display-area { position: relative; min-height: 250px; background: #fff; }
-        canvas { display: block; margin: 0 auto; background: #fff; }
-        iframe { width: 100%; height: 400px; border: none; display: none; background: #fff; }
-        pre { background: #0d1117; padding: 15px; color: #79c0ff; font-family: 'Fira Code', monospace; font-size: 12px; overflow: auto; display: block; margin: 0; }
-        
-        .loader-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; }
-        .bar { width: 150px; height: 4px; background: #333; border-radius: 10px; margin-top: 10px; overflow: hidden; }
-        .fill { width: 0%; height: 100%; background: var(--accent); transition: 0.3s; }
+        /* BLOCO DE CÓDIGO ADAPTÁVEL */
+        .code-block { border-radius: 12px; overflow: hidden; margin: 15px 0; border: 1px solid var(--border); background: #000; }
+        .code-header { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); }
+        .lang-tag { font-size: 10px; font-weight: 900; text-transform: uppercase; color: var(--accent); }
+        .code-tools { display: flex; gap: 8px; }
+        .c-btn { font-size: 10px; background: #21262d; padding: 4px 8px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); color: #8b949e; }
+        .c-btn:hover { color: white; border-color: white; }
+        pre { padding: 15px; margin: 0; font-family: 'Fira Code', monospace; font-size: 13px; overflow-x: auto; color: #d1d5db; }
+
+        /* Controles de Mensagem */
+        .msg-controls { display: flex; gap: 10px; opacity: 0; transition: 0.3s; padding: 0 10px; }
+        .msg-wrapper:hover .msg-controls { opacity: 1; }
+        .ctrl-btn { font-size: 11px; color: #8b949e; cursor: pointer; font-weight: bold; }
+        .ctrl-btn:hover { color: var(--accent); }
+
+        .synapse-glow { border: 1px solid var(--accent) !important; box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); }
     </style>
 </head>
 <body>
 
     <aside class="sidebar p-4">
-        <h2 class="text-[10px] font-bold text-gray-500 uppercase mb-4 tracking-tighter">Histórico</h2>
-        <div id="hist" class="flex-1 overflow-y-auto"></div>
-        <div class="mt-auto border-t border-zinc-800 pt-4 gap-2 flex flex-col">
-            <a href="https://zenia-projects.netlify.app" target="_blank" class="text-xs text-blue-400 hover:underline">🌐 Zenia Projects</a>
-            <a href="https://ia-zenia.netlify.app" target="_blank" class="text-xs text-blue-400 hover:underline">🌐 IA-Zénia Web</a>
-            <a href="https://antonia-ia.netlify.app" target="_blank" class="text-xs text-blue-400 hover:underline">🌐 Antónia IA</a>
+        <h2 class="text-[10px] font-bold text-gray-500 uppercase mb-4 tracking-widest">Histórico Local</h2>
+        <div id="hist" class="flex-1 overflow-y-auto space-y-2"></div>
+        <div class="mt-auto pt-4 border-t border-zinc-800 flex flex-col gap-2">
+            <a href="https://zenia-projects.netlify.app" target="_blank" class="text-xs text-blue-400">🌐 Zenia Projects</a>
+            <a href="https://ia-zenia.netlify.app" target="_blank" class="text-xs text-blue-400">🌐 IA-Zénia Web</a>
+            <a href="https://antonia-ia.netlify.app" target="_blank" class="text-xs text-blue-400">🌐 Antónia IA</a>
         </div>
     </aside>
 
     <main class="main-content">
-        <header class="p-4 border-b border-zinc-800 flex justify-between items-center">
-            <h1 class="text-xl font-black italic">IA-ZÉNIA <span class="text-blue-500 font-normal text-xs">LUBANGO v3.5</span></h1>
+        <header class="p-4 border-b border-zinc-800 flex justify-between items-center bg-black/20">
+            <h1 class="text-xl font-black italic">IA-ZÉNIA <span class="text-blue-500 font-normal text-[10px] ml-2">LUBANGO v2.0</span></h1>
         </header>
 
         <div id="chatBox" class="chat-container"></div>
 
         <div class="p-4">
-            <div class="max-w-4xl mx-auto flex gap-2 bg-[#161b22] p-2 rounded-2xl synapse-glow">
-                <textarea id="userInput" placeholder="Peça um desenho ou código..." class="flex-1 bg-transparent border-none outline-none text-sm p-2 text-white h-12 resize-none"></textarea>
-                <button onclick="send()" class="bg-blue-600 hover:bg-blue-500 px-6 rounded-xl font-bold transition-all">ENVIAR</button>
+            <div class="max-w-5xl mx-auto bg-[#161b22] rounded-2xl p-2 synapse-glow flex items-end gap-2">
+                <textarea id="userInput" placeholder="Digite sua dúvida de matemática, física ou peça um código..." class="flex-1 bg-transparent border-none outline-none text-sm p-2 text-white h-12 max-h-48 resize-none" oninput="this.style.height='';this.style.height=this.scrollHeight+'px'"></textarea>
+                <button onclick="handleSend()" class="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-xl font-bold transition-all">ENVIAR</button>
             </div>
         </div>
     </main>
 
     <script>
         const chatBox = document.getElementById('chatBox');
-        
-        function formatText(t) {
-            return t.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+
+        // Parser de Markdown e Embelezamento de Matemática
+        function parseZeniaContent(text) {
+            let t = text.replace(/Support Pollinations.*/gs, "").replace(/Antínia/gi, "IA-ZÉNIA");
+            // Negrito
+            t = t.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            // Títulos (#)
+            t = t.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+            t = t.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+            t = t.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+            // Blocos de Matemática/Exercícios
+            t = t.replace(/\[MATH\]([\s\S]*?)\[\/MATH\]/g, '<div class="math-box">$1</div>');
+            return t.replace(/\n/g, '<br>');
         }
 
-        async function send() {
+        async function handleSend(retryText = null) {
             const input = document.getElementById('userInput');
-            const val = input.value.trim();
+            const val = retryText || input.value.trim();
             if(!val) return;
 
-            addMsg(val, true);
+            if(!retryText) addMessage(val, true);
             input.value = '';
-            const loading = addMsg("Zénia está a processar no Lubango...", false);
+            input.style.height = '48px';
+
+            const loadingId = 'L' + Date.now();
+            addMessage(`<div id="${loadingId}" class="animate-pulse">Zénia está resolvendo...</div>`, false);
 
             try {
-                const sys = `Nome: IA-ZÉNIA. Cidade: Lubango. 
-                Sempre use markdown ** para negrito. 
-                Se for desenho JS ou site HTML, use blocos de código markdown.`;
+                const sys = `Você é IA-ZÉNIA do Lubango. Expert em Matemática e Física. 
+                Sempre embeleze resoluções de exercícios usando [MATH] para fórmulas.
+                Para códigos, use blocos markdown normais.`;
                 
-                const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(sys + "\n" + val)}?model=mistral`);
-                const text = await res.text();
-                loading.remove();
-
-                const codeMatch = text.match(/```(javascript|js|html)?([\s\S]*?)```/);
+                const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(sys + "\n" + val)}?model=mistral&seed=${Math.random()}`);
+                const responseText = await res.text();
                 
-                if(codeMatch) {
-                    const type = codeMatch[1] || 'html';
-                    const code = codeMatch[2].trim();
-                    const cleanText = text.replace(/```[\s\S]*?```/g, "").trim();
-                    if(cleanText) addMsg(cleanText, false);
-                    createOutputBox(code, type);
-                } else {
-                    addMsg(text, false);
-                }
-            } catch(e) { loading.innerText = "Erro ao conectar."; }
+                document.getElementById(loadingId).parentElement.parentElement.remove();
+                processAIResponse(responseText, val);
+            } catch(e) { document.getElementById(loadingId).innerText = "Erro na rede neural."; }
         }
 
-        function createOutputBox(code, type) {
-            const id = 'out' + Date.now();
-            const isCanvas = code.includes('getContext') || code.includes('canvas');
-            
+        function processAIResponse(fullText, originalQuery) {
+            const parts = fullText.split(/```/);
             const wrapper = document.createElement('div');
-            wrapper.className = 'output-container';
-            wrapper.innerHTML = `
-                <div class="output-header">
-                    <button class="btn-tool" onclick="showTab('${id}', 'code')">CÓDIGO</button>
-                    <button class="btn-tool" onclick="showTab('${id}', 'preview')">PREVISUALIZAR</button>
-                    <button class="btn-tool" onclick="copyCode('${id}')">COPIAR</button>
-                    <button class="btn-tool btn-del" onclick="this.closest('.output-container').remove()">APAGAR</button>
-                </div>
-                <div class="display-area">
-                    <div id="load-${id}" class="loader-overlay">
-                        <span class="text-[10px] font-bold text-blue-400">EXECUTANDO SINAPSE...</span>
-                        <div class="bar"><div id="bar-${id}" class="fill"></div></div>
-                    </div>
-                    <pre id="pre-${id}" class="hidden"><code>${code.replace(/</g, '&lt;')}</code></pre>
-                    <canvas id="can-${id}" width="250" height="250" class="${isCanvas ? 'active' : 'hidden'}"></canvas>
-                    <iframe id="ifr-${id}" class="${!isCanvas ? 'active' : 'hidden'}"></iframe>
-                </div>`;
-            chatBox.appendChild(wrapper);
+            wrapper.className = 'msg-wrapper ai-wrapper';
             
-            // Simulação de Progresso
-            let p = 0;
-            const int = setInterval(() => {
-                p += 5;
-                document.getElementById(`bar-${id}`).style.width = p + '%';
-                if(p >= 100) {
-                    clearInterval(int);
-                    document.getElementById(`load-${id}`).remove();
-                    if(isCanvas) {
-                        const finalCode = code.replace(/zeniaCanvas|canvas/g, `can-${id}`);
-                        try { eval(finalCode); } catch(e) { console.error(e); }
-                        showTab(id, 'preview');
-                    } else {
-                        document.getElementById(`ifr-${id}`).srcdoc = code;
-                        showTab(id, 'preview');
+            parts.forEach((part, index) => {
+                // Se o index for ímpar, é um bloco de código
+                if(index % 2 !== 0) {
+                    const lines = part.split('\n');
+                    const lang = lines[0].trim() || 'code';
+                    const code = lines.slice(1).join('\n').trim();
+                    wrapper.appendChild(createCodeBlock(code, lang));
+                } else {
+                    if(part.trim()) {
+                        const msgDiv = document.createElement('div');
+                        msgDiv.className = 'msg ai-msg';
+                        msgDiv.innerHTML = parseZeniaContent(part);
+                        wrapper.appendChild(msgDiv);
                     }
                 }
-            }, 50);
+            });
+
+            // Adiciona Controles de Mensagem
+            const controls = document.createElement('div');
+            controls.className = 'msg-controls';
+            controls.innerHTML = `
+                <span class="ctrl-btn" onclick="handleSend('${originalQuery.replace(/'/g, "\\'")}')">REENVIAR</span>
+                <span class="ctrl-btn" onclick="this.closest('.msg-wrapper').remove()">ELIMINAR</span>
+                <span class="ctrl-btn" onclick="alert('Obrigado pelo feedback!')">👍</span>
+                <span class="ctrl-btn" onclick="alert('Feedback anotado.')">👎</span>
+            `;
+            wrapper.appendChild(controls);
+            chatBox.appendChild(wrapper);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        function showTab(id, mode) {
-            const pre = document.getElementById(`pre-${id}`);
-            const can = document.getElementById(`can-${id}`);
-            const ifr = document.getElementById(`ifr-${id}`);
+        function createCodeBlock(code, lang) {
+            const container = document.createElement('div');
+            container.className = 'code-block';
+            // Adaptar cor pela linguagem
+            const colors = { html: '#ff5722', js: '#ffca28', javascript: '#ffca28', css: '#29b6f6', python: '#4caf50', shell: '#8b949e', bash: '#8b949e' };
+            const accentColor = colors[lang.toLowerCase()] || '#3b82f6';
             
-            pre.style.display = 'none';
-            can.style.display = 'none';
-            ifr.style.display = 'none';
-
-            if(mode === 'code') pre.style.display = 'block';
-            else {
-                if(can.classList.contains('active')) can.style.display = 'block';
-                else ifr.style.display = 'block';
-            }
+            container.innerHTML = `
+                <div class="code-header" style="border-bottom: 2px solid ${accentColor}">
+                    <span class="lang-tag" style="color: ${accentColor}">${lang}</span>
+                    <div class="code-tools">
+                        <button class="c-btn" onclick="copyCode(this)">COPIAR</button>
+                        <button class="c-btn" onclick="saveCode('${lang}', this)">SALVAR</button>
+                    </div>
+                </div>
+                <pre><code>${code.replace(/</g, '&lt;')}</code></pre>
+            `;
+            return container;
         }
 
-        function copyCode(id) {
-            const txt = document.getElementById(`pre-${id}`).innerText;
-            navigator.clipboard.writeText(txt);
-            alert("Copiado!");
-        }
-
-        function addMsg(t, u) {
+        function addMessage(txt, isUser) {
             const w = document.createElement('div');
-            w.className = `msg ${u ? 'user-msg' : 'ai-msg shadow-lg'}`;
-            const clean = t.replace(/Support Pollinations.*/gs, "").replace(/Antínia/gi, "IA-ZÉNIA");
-            w.innerHTML = formatText(clean);
+            w.className = `msg-wrapper ${isUser ? 'user-wrapper' : 'ai-wrapper'}`;
+            w.innerHTML = `
+                <div class="msg ${isUser ? 'user-msg' : 'ai-msg'}">${isUser ? txt : parseZeniaContent(txt)}</div>
+                ${isUser ? '<span class="ctrl-btn self-end mr-2" onclick="editMsg(this)">EDITAR</span>' : ''}
+            `;
             chatBox.appendChild(w);
             chatBox.scrollTop = chatBox.scrollHeight;
             return w;
         }
+
+        function copyCode(btn) {
+            const code = btn.closest('.code-block').querySelector('code').innerText;
+            navigator.clipboard.writeText(code);
+            btn.innerText = "COPIADO!";
+            setTimeout(() => btn.innerText = "COPIAR", 2000);
+        }
+
+        function saveCode(lang, btn) {
+            const code = btn.closest('.code-block').querySelector('code').innerText;
+            const blob = new Blob([code], {type: 'text/plain'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `zenia_code.${lang || 'txt'}`;
+            a.click();
+        }
+
+        function editMsg(btn) {
+            const msgDiv = btn.parentElement.querySelector('.msg');
+            const newVal = prompt("Editar mensagem:", msgDiv.innerText);
+            if(newVal) msgDiv.innerText = newVal;
+        }
+
+        document.getElementById('userInput').addEventListener('keydown', (e) => {
+            if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+        });
     </script>
 </body>
 </html>
