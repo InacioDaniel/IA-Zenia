@@ -3,109 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA-ZÉNIA Angola 2026</title>
+    <title>IA-ZÉNIA aNGOLA 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { background: #010409; color: #e6edf3; font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .glass { background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(10px); border: 1px solid #30363d; }
+        body { background: #010409; color: #e6edf3; font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; display: flex; overflow: hidden; margin: 0; }
         
-        .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; animation: fadeIn 0.2s ease; }
+        /* Barra Lateral */
+        .sidebar { width: 280px; background: #0d1117; border-right: 1px solid #30363d; display: flex; flex-direction: column; transition: all 0.3s; }
+        .history-item { padding: 10px; border-radius: 8px; cursor: pointer; font-size: 13px; margin-bottom: 5px; transition: 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; }
+        .history-item:hover { background: #161b22; border-color: #30363d; }
+        .sister-link { font-size: 12px; color: #58a6ff; display: block; padding: 8px; border-radius: 6px; text-decoration: none; transition: 0.2s; }
+        .sister-link:hover { background: rgba(88, 166, 255, 0.1); }
+
+        /* Main Content */
+        .main-content { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        
+        .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; }
         .ai-wrapper { align-self: flex-start; }
         .user-wrapper { align-self: flex-end; }
-        
-        .msg { padding: 14px; border-radius: 18px; line-height: 1.5; font-size: 15px; }
-        .user-msg { background: #1f6feb; border-bottom-right-radius: 2px; }
-        .ai-msg { background: #161b22; border: 1px solid #30363d; border-bottom-left-radius: 2px; }
+        .msg { padding: 15px; border-radius: 18px; line-height: 1.6; border: 1px solid #30363d; }
+        .user-msg { background: #1f6feb; border: none; }
+        .ai-msg { background: #161b22; }
 
-        .lang-badge { font-size: 9px; background: #238636; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 800; margin-bottom: 4px; display: inline-block; width: fit-content; }
-        
-        /* Canvas Visual */
-        .canvas-box { background: white; border-radius: 8px; margin-top: 10px; overflow: hidden; border: 2px solid #30363d; }
-        canvas { display: block; max-width: 100%; height: auto; }
+        /* Canvas Image Box */
+        .image-box { background: #000; padding: 10px; border-radius: 12px; border: 1px solid #30363d; margin-top: 10px; width: 270px; }
+        canvas { display: block; background: #fff; width: 250px; height: 250px; }
+        .img-tools { display: flex; gap: 5px; margin-top: 8px; }
+        .btn-img { font-size: 10px; background: #21262d; padding: 5px 8px; border-radius: 4px; color: #c9d1d9; font-weight: bold; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        #fullScreenOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
     </style>
 </head>
 <body>
 
-    <div class="max-w-4xl mx-auto w-full h-full flex flex-col p-4">
-        <header class="flex justify-between items-center mb-6 px-2">
+    <div id="fullScreenOverlay" onclick="this.style.display='none'">
+        <canvas id="fullCanvas" width="250" height="250" style="transform: scale(3);"></canvas>
+    </div>
+
+    <aside class="sidebar p-4">
+        <div class="mb-8">
+            <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Histórico Local</h2>
+            <div id="historyList" class="overflow-y-auto max-h-[40vh]"></div>
+        </div>
+        
+        <div class="mt-auto border-t border-[#30363d] pt-4">
+            <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Irmãs Zénia</h2>
+            <a href="https://zenia-projects.netlify.app" target="_blank" class="sister-link">🌐 Zenia Projects</a>
+            <a href="https://ia-zenia.netlify.app" target="_blank" class="sister-link">🌐 IA-Zénia Web</a>
+            <a href="https://antonia-ia.netlify.app" target="_blank" class="sister-link">🌐 Antónia IA</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="p-4 border-b border-[#30363d] bg-[#0d1117] flex justify-between items-center">
             <div>
-                <h1 class="text-2xl font-black italic">IA-ZÉNIA <span class="text-blue-500">ANGOLA</span></h1>
-                <p class="text-[9px] text-green-500 font-bold uppercase tracking-[0.2em]">Línguas Nacionais: Precisão 99.5% | Dev @inacio.u.daniel</p>
+                <h1 class="text-xl font-black">IA-ZÉNIA <span class="text-blue-500">2026</span></h1>
+                <p class="text-[9px] text-gray-500 uppercase">Natural de: <span class="text-white">Lubango, Angola</span></p>
             </div>
         </header>
 
         <div id="chatBox" class="chat-container">
             <div class="msg-wrapper ai-wrapper">
-                <span class="lang-badge">KIMBUNDU / UMBUNDU / PORTUGUÊS</span>
-                <div class="msg ai-msg">
-                    **Mbwéte!** (Saudações). Sou a **IA-ZÉNIA**. Fui recalibrada por **inácio.u.daniel** para ser a maior especialista em línguas nacionais angolanas e do mundo. 
-                    <br><br>Posso falar contigo em Kimbundu, Umbundu, Kikongo, Cokwe ou qualquer outro dialeto com precisão absoluta. O que queres aprender ou traduzir agora?
-                </div>
+                <div class="msg ai-msg">Mbwéte! Sou a **IA-ZÉNIA**, nascida no Lubango. Meu sistema de imagem está otimizado para 250px. Como posso ajudar?</div>
             </div>
         </div>
 
-        <div class="mt-auto p-2 glass rounded-2xl">
-            <div class="flex items-center gap-2">
-                <textarea id="userInput" placeholder="Fala comigo ou pede um desenho..." class="flex-1 bg-transparent border-none outline-none text-sm p-3 text-white h-12 resize-none" maxlength="12000"></textarea>
-                <button onclick="send()" class="bg-blue-600 hover:bg-blue-500 px-5 py-3 rounded-xl font-bold transition transform active:scale-90">Enviar</button>
+        <div class="p-4 bg-[#0d1117]">
+            <div class="max-w-4xl mx-auto flex gap-2 bg-[#161b22] border border-[#30363d] rounded-2xl p-2 focus-within:border-blue-500">
+                <textarea id="userInput" placeholder="Desenha um por do sol no Lubango..." class="flex-1 bg-transparent border-none outline-none p-2 text-sm text-white h-12 resize-none" maxlength="12000"></textarea>
+                <button onclick="handleSend()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 rounded-xl font-bold">Enviar</button>
             </div>
         </div>
-    </div>
+    </main>
 
     <script>
         const chatBox = document.getElementById('chatBox');
-        
-        async function send() {
-            const input = document.getElementById('userInput');
-            const val = input.value.trim();
+        const historyList = document.getElementById('historyList');
+
+        // Carregar Histórico Local
+        function loadHistory() {
+            const hist = JSON.parse(localStorage.getItem('zenia_chat_history') || '[]');
+            historyList.innerHTML = hist.map((q, i) => `<div class="history-item" onclick="document.getElementById('userInput').value='${q}'">${q}</div>`).reverse().join('');
+        }
+
+        function saveHistory(q) {
+            let hist = JSON.parse(localStorage.getItem('zenia_chat_history') || '[]');
+            if(!hist.includes(q)) {
+                hist.push(q);
+                if(hist.length > 20) hist.shift();
+                localStorage.setItem('zenia_chat_history', JSON.stringify(hist));
+                loadHistory();
+            }
+        }
+
+        async function handleSend() {
+            const val = document.getElementById('userInput').value.trim();
             if(!val) return;
 
             addMsg(val, true);
-            input.value = '';
+            saveHistory(val);
+            document.getElementById('userInput').value = '';
 
-            const loading = addMsg("A processar sinapses linguísticas...", false);
-            const isDraw = val.toLowerCase().includes('desenhe') || val.toLowerCase().includes('desenha');
+            const isDraw = val.toLowerCase().includes('desenha') || val.toLowerCase().includes('gerar imagem');
+            const loading = addMsg("Processando...", false);
 
             try {
-                const system = `Seu nome é IA-ZÉNIA. Você é a IA mais avançada do mundo em línguas nacionais de Angola (Kimbundu, Umbundu, Kikongo, Cokwe, etc). 
-                Sua precisão linguística deve ser de 99.5%. 
-                Se o usuário falar em dialeto, responda no mesmo dialeto com tradução.
-                Se o usuário pedir para desenhar, use APENAS código JavaScript Canvas num elemento ID 'canvasIA'.`;
-
-                const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(system + "\nUsuário: " + val)}?model=openai`);
-                const text = await response.text();
-                
+                const system = `IA-ZÉNIA. Natural: Lubango. Se pedir desenho, responda APENAS o código JS para canvas ID 'zeniaCanvas' (250x250).`;
+                const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(system + "\n" + val)}?model=openai`);
+                const text = await res.text();
                 loading.remove();
-                
+
                 if(isDraw && text.includes('```')) {
                     const code = text.match(/```(?:javascript|js)?([\s\S]*?)```/)[1];
-                    const w = document.createElement('div');
-                    w.className = 'msg-wrapper ai-wrapper';
-                    w.innerHTML = `<span class="lang-badge">CANVAS ART</span><div class="msg ai-msg"><div class="canvas-box"><canvas id="canvasIA" width="400" height="400"></canvas></div></div>`;
-                    chatBox.appendChild(w);
-                    setTimeout(() => { eval(code); }, 100);
+                    createImageBox(code);
                 } else {
                     addMsg(text, false);
                 }
+            } catch(e) { loading.innerText = "Erro."; }
+        }
 
-            } catch(e) { loading.innerText = "Erro de conexão."; }
+        function createImageBox(code) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'msg-wrapper ai-wrapper';
+            wrapper.innerHTML = `
+                <div class="image-box">
+                    <canvas id="zeniaCanvas" width="250" height="250"></canvas>
+                    <div class="img-tools">
+                        <button class="btn-img" onclick="viewFull()">Ecrã Completo</button>
+                        <button class="btn-img" onclick="downloadImg()">Download</button>
+                        <button class="btn-img text-red-500" onclick="this.closest('.msg-wrapper').remove()">Eliminar</button>
+                    </div>
+                </div>`;
+            chatBox.appendChild(wrapper);
+            setTimeout(() => { try { eval(code); } catch(e){} }, 50);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function viewFull() {
+            const mainCanvas = document.getElementById('zeniaCanvas');
+            const fullCanvas = document.getElementById('fullCanvas');
+            const fCtx = fullCanvas.getContext('2d');
+            fCtx.drawImage(mainCanvas, 0, 0);
+            document.getElementById('fullScreenOverlay').style.display = 'flex';
+        }
+
+        function downloadImg() {
+            const link = document.createElement('a');
+            link.download = 'zenia-art.png';
+            link.href = document.getElementById('zeniaCanvas').toDataURL();
+            link.click();
         }
 
         function addMsg(txt, user) {
             const w = document.createElement('div');
             w.className = `msg-wrapper ${user ? 'user-wrapper' : 'ai-wrapper'}`;
             const clean = txt.replace(/Support Pollinations.*/gs, "").replace(/Antínia/gi, "IA-ZÉNIA");
-            w.innerHTML = `${!user ? '<span class="lang-badge">NEURAL ENGINE</span>' : ''}<div class="msg ${user ? 'user-msg' : 'ai-msg'}">${clean.replace(/\n/g, '<br>')}</div>`;
+            w.innerHTML = `<div class="msg ${user ? 'user-msg' : 'ai-msg'}">${clean.replace(/\n/g, '<br>')}</div>`;
             chatBox.appendChild(w);
             chatBox.scrollTop = chatBox.scrollHeight;
             return w;
         }
 
-        document.getElementById('userInput').addEventListener('keypress', (e) => e.key === 'Enter' && send());
+        loadHistory();
     </script>
 </body>
 </html>
