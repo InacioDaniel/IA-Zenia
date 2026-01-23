@@ -5,182 +5,203 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IA-ZÉNIA - Angola 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         body { background: #010409; color: #e6edf3; font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; margin: 0; }
-        .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 24px; }
-        .glass { background: rgba(13, 17, 23, 0.9); backdrop-filter: blur(10px); border: 1px solid #30363d; }
-        .msg-wrapper { display: flex; flex-direction: column; gap: 8px; max-width: 85%; position: relative; }
-        .user-wrapper { align-self: flex-end; }
+        .chat-container { flex: 1; overflow-y: auto; scroll-behavior: smooth; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        .glass { background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(15px); border: 1px solid #30363d; }
+        
+        /* Mensagens */
+        .msg-wrapper { display: flex; flex-direction: column; gap: 5px; max-width: 90%; animation: fadeIn 0.3s ease; }
         .ai-wrapper { align-self: flex-start; }
-        .msg { padding: 16px; border-radius: 20px; line-height: 1.6; border: 1px solid #30363d; background: #0d1117; }
-        .user-msg { background: #1f6feb; border: none; color: white; }
-        .tools { display: flex; gap: 10px; margin-top: 4px; opacity: 0.6; }
-        .tool-btn { font-size: 10px; cursor: pointer; color: #8b949e; background: #21262d; padding: 4px 8px; border-radius: 6px; border: 1px solid #30363d; transition: 0.2s; }
-        .tool-btn:hover { color: #58a6ff; background: #30363d; }
-        #canvas-output { background: #000; border-radius: 15px; margin-top: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.5); width: 100%; max-width: 400px; }
-        .preview-img { width: 80px; height: 80px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; border: 2px solid #3b82f6; }
+        .user-wrapper { align-self: flex-end; }
+        .msg { padding: 16px; border-radius: 20px; line-height: 1.6; border: 1px solid #30363d; position: relative; }
+        .user-msg { background: #1f6feb; color: white; border: none; border-bottom-right-radius: 4px; }
+        .ai-msg { background: #161b22; border-bottom-left-radius: 4px; }
+
+        /* Blocos de Código e Visualização */
+        .container-box { background: #0d1117; border: 1px solid #444c56; border-radius: 12px; margin: 15px 0; overflow: hidden; }
+        .box-header { background: #161b22; padding: 10px 15px; border-bottom: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center; }
+        .tab-btn { font-size: 11px; padding: 4px 10px; border-radius: 4px; color: #8b949e; cursor: pointer; font-weight: bold; }
+        .tab-btn.active { background: #1f6feb; color: white; }
+        
+        pre { padding: 15px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13px; color: #79c0ff; }
+        .preview-frame { width: 100%; height: 400px; background: white; border: none; display: none; }
+        .preview-frame.active { display: block; }
+        
+        /* Canvas Neural */
+        .neural-canvas { background: #fff; display: block; margin: 0 auto; max-width: 100%; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        textarea { scrollbar-width: none; }
     </style>
 </head>
 <body>
 
-    <div class="max-w-6xl mx-auto w-full h-full flex flex-col p-2 md:p-6">
+    <div id="fullOverlay" class="fixed inset-0 bg-white z-[9999] hidden">
+        <button onclick="closeFull()" class="fixed top-5 right-5 bg-red-600 text-white px-4 py-2 rounded-lg font-bold shadow-xl">SAIR</button>
+        <iframe id="fullIframe" class="w-full h-full border-none"></iframe>
+    </div>
+
+    <div class="max-w-6xl mx-auto w-full h-full flex flex-col p-4">
         <header class="flex justify-between items-center mb-4 px-2">
             <div>
-                <h1 class="text-3xl font-black text-white tracking-tighter">IA-ZÉNIA</h1>
-                <p class="text-[10px] text-blue-500 font-bold uppercase">Creative Neural Canvas | Dev @inacio.u.daniel</p>
+                <h1 class="text-2xl font-black text-white italic tracking-tighter">IA-ZÉNIA <span class="text-blue-500">CORE</span></h1>
+                <p class="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Neural Graphics Engine | Dev @inacio.u.daniel</p>
             </div>
         </header>
 
         <div id="chatBox" class="chat-container">
             <div class="msg-wrapper ai-wrapper">
-                <div class="msg ai-msg text-sm">
-                    <b>IA-ZÉNIA Ativa.</b> Posso analisar imagens que você carregar ou <b>desenhar artes originais via pixels</b> usando meu motor gráfico interno. Como vamos criar hoje?
+                <div class="msg ai-msg">
+                    Sistema pronto. Eu sou a **IA-ZÉNIA**. Posso programar sites, analisar dados e agora **desenhar logicamente** qualquer prompt usando meu próprio motor gráfico em canvas. Como deseja começar?
                 </div>
             </div>
         </div>
 
-        <div id="uploadPreview" class="hidden px-4 py-2">
-            <img id="imgToAnalyze" src="" class="preview-img">
-            <button onclick="clearUpload()" class="text-xs text-red-400 font-bold">Remover Imagem</button>
-        </div>
-
         <div class="mt-auto p-2">
-            <div class="glass rounded-3xl flex items-center p-2 border-[#30363d] shadow-2xl">
-                <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="previewFile()">
-                <button onclick="document.getElementById('fileInput').click()" class="p-3 hover:bg-white/5 rounded-full transition">🖼️</button>
-                <input type="text" id="userInput" placeholder="Peça para eu desenhar algo ou tire uma dúvida..." class="flex-1 bg-transparent border-none outline-none text-sm p-2 text-white">
-                <button onclick="handleSend()" class="bg-[#238636] hover:bg-[#2ea043] text-white px-6 py-3 rounded-2xl font-bold transition">ENVIAR</button>
+            <div class="glass rounded-2xl p-2 border-[#30363d] shadow-2xl">
+                <div class="flex items-end gap-2">
+                    <button onclick="document.getElementById('imgInp').click()" class="p-3 text-gray-400 hover:text-blue-400">🖼️</button>
+                    <input type="file" id="imgInp" class="hidden" accept="image/*" onchange="previewImg(event)">
+                    <textarea id="userInput" placeholder="Peça um código ou peça 'Desenhe um gato'..." 
+                        class="flex-1 bg-transparent border-none outline-none text-sm p-3 text-white h-12 max-h-64" 
+                        maxlength="12000" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+                    <button onclick="handleSend()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold transition">ENVIAR</button>
+                </div>
+                <div id="privewContainer" class="hidden p-2 flex items-center gap-2"><img id="thumb" class="h-10 w-10 rounded border border-blue-500"> <span class="text-[10px]">Imagem pronta.</span></div>
             </div>
         </div>
     </div>
 
     <script>
         const chatBox = document.getElementById('chatBox');
-        const userInput = document.getElementById('userInput');
-        const fileInput = document.getElementById('fileInput');
-        let selectedImgBase64 = null;
+        let currentImg = null;
 
-        function previewFile() {
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                selectedImgBase64 = reader.result;
-                document.getElementById('imgToAnalyze').src = reader.result;
-                document.getElementById('uploadPreview').classList.remove('hidden');
+        function previewImg(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (rs) => { 
+                    currentImg = rs.target.result;
+                    document.getElementById('thumb').src = currentImg;
+                    document.getElementById('privewContainer').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
             }
-            if (file) reader.readAsDataURL(file);
         }
 
-        function clearUpload() {
-            selectedImgBase64 = null;
-            document.getElementById('uploadPreview').classList.add('hidden');
-            fileInput.value = "";
-        }
+        async function handleSend() {
+            const val = document.getElementById('userInput').value.trim();
+            if(!val && !currentImg) return;
 
-        // --- MOTOR DE DESENHO PIXEL-ART NEURAL ---
-        function drawNeuralArt(instructions) {
-            const canvas = document.createElement('canvas');
-            canvas.id = "canvas-output";
-            canvas.width = 400; canvas.height = 400;
-            const ctx = canvas.getContext('2d');
+            addMsg(val, true);
+            document.getElementById('userInput').value = '';
+            document.getElementById('privewContainer').classList.add('hidden');
+
+            const loading = addMsg('<div class="flex gap-1">Pensando...</div>', false);
             
-            // Simulação de renderização avançada por pixels (baseada no prompt)
-            ctx.fillStyle = "#000"; ctx.fillRect(0,0,400,400);
-            
-            for(let i=0; i<5000; i++) {
-                setTimeout(() => {
-                    ctx.fillStyle = `hsl(${Math.random()*360}, 70%, 50%)`;
-                    if(instructions.includes("azul")) ctx.fillStyle = `rgb(0, ${Math.random()*100+155}, 255)`;
-                    if(instructions.includes("fogo")) ctx.fillStyle = `rgb(255, ${Math.random()*150}, 0)`;
-                    
-                    const x = Math.random() * 400;
-                    const y = Math.random() * 400;
-                    ctx.beginPath();
-                    ctx.arc(x, y, Math.random()*3, 0, Math.PI*2);
-                    ctx.fill();
-                }, i * 0.1);
-            }
-            return canvas;
+            const isDraw = val.toLowerCase().includes('desenhe') || val.toLowerCase().includes('gere imagem');
+            const memory = localStorage.getItem('zenia_mem') || "";
+
+            try {
+                const system = `Seu nome é IA-ZÉNIA. Criador: inácio.u.daniel. Ano: 2026. 
+                ${isDraw ? "Você é um motor gráfico. Para desenhar, responda APENAS com um bloco de código JavaScript que use um canvas de ID 'zeniaCanvas' para criar o desenho solicitado usando comandos ctx. (fill, stroke, arc, etc). Não use APIs externas, apenas lógica de desenho." : "Se for código HTML, use blocos markdown."}`;
+                
+                const prompt = currentImg ? `Analise esta imagem em base64 e responda: ${currentImg}\n\nTexto: ${val}` : val;
+                
+                const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(system + "\n" + prompt)}?model=openai&cache=false`);
+                const text = await res.text();
+                
+                loading.remove();
+                processResponse(text, isDraw);
+                currentImg = null;
+            } catch(e) { loading.innerText = "Erro na rede."; }
         }
 
-        function handleSend() {
-            const text = userInput.value.trim();
-            if (!text && !selectedImgBase64) return;
-
-            // Renderizar Mensagem Usuário
+        function processResponse(text, isDraw) {
             const wrapper = document.createElement('div');
-            wrapper.className = 'msg-wrapper user-wrapper';
-            wrapper.innerHTML = `
-                <div class="msg user-msg">${selectedImgBase64 ? '<img src="'+selectedImgBase64+'" class="preview-img"><br>' : ''}${text}</div>
-                <div class="tools">
-                    <button class="tool-btn" onclick="this.closest('.msg-wrapper').remove()">APAGAR</button>
-                </div>`;
-            chatBox.appendChild(wrapper);
-
-            // Verificar se é pedido de desenho
-            if (text.toLowerCase().includes("desenha") || text.toLowerCase().includes("cria uma imagem")) {
-                const aiWrap = createAIWrapper("Processando motor gráfico de pixels...");
-                chatBox.appendChild(aiWrap);
-                setTimeout(() => {
-                    aiWrap.querySelector('.msg').innerHTML = "<b>Arte Neural Gerada:</b>";
-                    aiWrap.querySelector('.msg').appendChild(drawNeuralArt(text));
-                }, 1500);
-            } else {
-                processAI(text);
-            }
+            wrapper.className = 'msg-wrapper ai-wrapper w-full';
             
-            clearUpload();
-            userInput.value = "";
+            let content = text.replace(/Support Pollinations.*/gs, "").replace(/Antínia/gi, "IA-ZÉNIA");
+            
+            // Lógica para Canvas/Desenho Neural
+            if(isDraw && content.includes('```')) {
+                const code = content.match(/```(?:javascript|js)?([\s\S]*?)```/)[1];
+                wrapper.innerHTML = `
+                    <div class="msg ai-msg">
+                        <p class="text-[10px] text-blue-400 font-bold mb-2 uppercase">Neural Canvas Execution</p>
+                        <div class="container-box">
+                            <canvas id="zeniaCanvas" width="500" height="400" class="neural-canvas"></canvas>
+                        </div>
+                        <button onclick="copyRaw(\`${code.replace(/`/g, '\\`')}\`)" class="tab-btn bg-zinc-800">Copiar Lógica</button>
+                    </div>`;
+                chatBox.appendChild(wrapper);
+                setTimeout(() => { try { eval(code); } catch(e){ console.error(e); } }, 100);
+            } 
+            // Lógica para Sites/HTML
+            else if(content.includes('```html')) {
+                const htmlCode = content.match(/```html([\s\S]*?)```/)[1];
+                const id = 'f' + Date.now();
+                wrapper.innerHTML = `
+                    <div class="msg ai-msg w-full">
+                        <div class="container-box">
+                            <div class="box-header">
+                                <div class="flex gap-2">
+                                    <button class="tab-btn active" onclick="switchTab(this, 'code', '${id}')">CÓDIGO</button>
+                                    <button class="tab-btn" onclick="switchTab(this, 'preview', '${id}')">VISUALIZAR</button>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="tab-btn bg-blue-600 text-white" onclick="openFull('${id}')">TELA CHEIA</button>
+                                    <button class="tab-btn" onclick="copyRaw(\`${htmlCode.replace(/`/g, '\\`')}\`)">COPIAR</button>
+                                </div>
+                            </div>
+                            <div id="code-${id}"><pre><code>${htmlCode.replace(/</g, '&lt;')}</code></pre></div>
+                            <iframe id="preview-${id}" class="preview-frame"></iframe>
+                        </div>
+                    </div>`;
+                chatBox.appendChild(wrapper);
+                document.getElementById(`preview-${id}`).srcdoc = htmlCode;
+            } else {
+                addMsg(content, false);
+            }
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        async function processAI(query) {
-            const aiWrap = createAIWrapper("IA-ZÉNIA está processando...");
-            chatBox.appendChild(aiWrap);
-
-            try {
-                const system = `Seu nome é IA-ZÉNIA. Desenvolvedor: inácio.u.daniel. Você pode analisar imagens (se enviadas em base64) e responder de forma inteligente.`;
-                const prompt = selectedImgBase64 ? `[IMAGEM_ENVIADA] ${query}` : query;
-                
-                const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(system + "\n" + prompt)}?model=openai`);
-                const result = await res.text();
-                
-                aiWrap.querySelector('.msg').innerHTML = result.replace(/\n/g, '<br>');
-            } catch (e) {
-                aiWrap.querySelector('.msg').innerText = "Erro na rede neural.";
+        function switchTab(btn, type, id) {
+            const parent = btn.closest('.container-box');
+            parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if(type === 'code') {
+                document.getElementById(`code-${id}`).classList.remove('hidden');
+                document.getElementById(`preview-${id}`).classList.remove('active');
+            } else {
+                document.getElementById(`code-${id}`).classList.add('hidden');
+                document.getElementById(`preview-${id}`).classList.add('active');
             }
         }
 
-        function createAIWrapper(initialText) {
-            const wrap = document.createElement('div');
-            wrap.className = 'msg-wrapper ai-wrapper';
-            wrap.innerHTML = `
-                <div class="msg ai-msg text-sm">${initialText}</div>
-                <div class="tools">
-                    <button class="tool-btn" onclick="sendFeedback('Like')">👍</button>
-                    <button class="tool-btn" onclick="sendFeedback('Dislike')">👎</button>
-                    <button class="tool-btn" onclick="retryMsg(this)">REENVIAR</button>
-                    <button class="tool-btn" onclick="this.closest('.msg-wrapper').remove()">REMOVER</button>
-                </div>`;
-            return wrap;
+        function openFull(id) {
+            const code = document.getElementById(`preview-${id}`).srcdoc;
+            document.getElementById('fullIframe').srcdoc = code;
+            document.getElementById('fullOverlay').classList.remove('hidden');
         }
 
-        function sendFeedback(type) {
-            const email = "danielinacio475@gmail.com";
-            const subject = encodeURIComponent(`Feedback IA-ZÉNIA: ${type}`);
-            const body = encodeURIComponent(`O usuário deu ${type} em uma resposta da IA.`);
-            window.open(`mailto:${email}?subject=${subject}&body=${body}`);
-            alert("Obrigado pelo feedback! Seu app de e-mail será aberto.");
+        function closeFull() { document.getElementById('fullOverlay').classList.add('hidden'); }
+
+        function copyRaw(txt) {
+            navigator.clipboard.writeText(txt);
+            alert("Código copiado!");
         }
 
-        function retryMsg(btn) {
-            const text = btn.closest('.msg-wrapper').previousElementSibling.innerText;
-            btn.closest('.msg-wrapper').remove();
-            processAI(text);
+        function addMsg(txt, user) {
+            const w = document.createElement('div');
+            w.className = `msg-wrapper ${user ? 'user-wrapper' : 'ai-wrapper'}`;
+            w.innerHTML = `<div class="msg ${user ? 'user-msg' : 'ai-msg'}">${txt.replace(/\n/g, '<br>')}</div>`;
+            chatBox.appendChild(w);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return w;
         }
-
-        userInput.addEventListener('keypress', (e) => e.key === 'Enter' && handleSend());
     </script>
 </body>
 </html>
