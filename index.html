@@ -32,6 +32,7 @@
         .code-header { background: #161b22; padding: 8px 15px; display: flex; justify-content: space-between; align-items: center; }
         .btn-action { font-size: 10px; font-weight: bold; padding: 4px 8px; border-radius: 4px; background: #21262d; color: #8b949e; border: 1px solid var(--border); }
         .math-render { background: rgba(59, 130, 246, 0.05); padding: 15px; border-radius: 10px; margin: 10px 0; border-left: 4px solid var(--accent); }
+        .art-img { border-radius: 12px; border: 1px solid var(--border); margin: 10px 0; max-width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
@@ -56,7 +57,7 @@
         <div class="p-4 bg-[#010409]">
             <div class="max-w-5xl mx-auto bg-[#161b22] rounded-2xl p-2 border border-blue-500/30 flex items-end gap-2">
                 <textarea id="userInput" placeholder="Escreva aqui..." class="flex-1 bg-transparent border-none outline-none text-sm p-2 text-white h-12 max-h-48 resize-none" oninput="this.style.height='';this.style.height=this.scrollHeight+'px'"></textarea>
-                <button onclick="handleSend()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold transition-all">ENVIAR</button>
+                <button id="sendBtn" onclick="handleSend()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold transition-all">ENVIAR</button>
             </div>
         </div>
     </main>
@@ -64,29 +65,67 @@
     <script>
         const chatBox = document.getElementById('chatBox');
         const historyList = document.getElementById('historyList');
+        const userInput = document.getElementById('userInput');
         let sessions = JSON.parse(localStorage.getItem('zenia_sessions') || '[]');
         let currentSessionId = null;
 
-        function init() { renderHistory(); if(sessions.length > 0) loadSession(sessions[sessions.length-1].id); else startNewChat(); }
-        function startNewChat() { currentSessionId = Date.now(); chatBox.innerHTML = ''; addMessage("Mbwéte! Sou a IA-ZÉNIA. Como posso ajudar com seus códigos e cálculos?", false); renderHistory(); }
+        // FUNÇÃO DE QUERY STRING (?msg=...)
+        function checkQueryString() {
+            const params = new URLSearchParams(window.location.search);
+            const msg = params.get('msg');
+            if (msg) {
+                userInput.value = decodeURIComponent(msg);
+                userInput.style.height = userInput.scrollHeight + 'px';
+            }
+        }
+
+        function init() { 
+            renderHistory(); 
+            checkQueryString();
+            if(sessions.length > 0) loadSession(sessions[sessions.length-1].id); 
+            else startNewChat(); 
+        }
+
+        function startNewChat() { currentSessionId = Date.now(); chatBox.innerHTML = ''; addMessage("Mbwéte! Sou a IA-ZÉNIA do Lubango. Sou pintora, programadora e mestre em cálculos. O que faremos?", false); renderHistory(); }
 
         async function handleSend(textOverride = null) {
-            const input = document.getElementById('userInput');
-            const query = textOverride || input.value.trim();
+            const query = textOverride || userInput.value.trim();
             if(!query) return;
-            addMessage(query, true); input.value = ''; input.style.height = '48px';
-            const loading = addMessage("Processando sinapses...", false);
+            addMessage(query, true); userInput.value = ''; userInput.style.height = '48px';
+            const loading = addMessage("IA-ZÉNIA está a processar...", false);
+
             try {
-                const sys = `Você é IA-ZÉNIA do Lubango. Use LaTeX \( \) e \[ \] para matemática. Bloqueie as tags HTML de resposta.`;
-                const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(sys + "\n" + query)}?model=mistral`);
-                const text = await res.text(); loading.remove();
-                processResponse(text, query);
+                // Lógica de Pintor Profissional
+                const isImageRequest = /desenha|gera uma imagem|pinta|mostra uma foto|imagem de/i.test(query);
+                
+                if (isImageRequest) {
+                    const imgUrl = `https://pollinations.ai/p/${encodeURIComponent(query)}?width=1024&height=1024&seed=${Math.floor(Math.random()*1000)}&nologo=true`;
+                    loading.remove();
+                    processResponse(`Aqui está a arte que pintei para você:\n\n![ARTE](${imgUrl})`, query);
+                } else {
+                    const sys = `Você é IA-ZÉNIA do Lubango. Expert em Matemática e Artes. Use LaTeX \( \) e \[ \] para fórmulas.`;
+                    const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(sys + "\n" + query)}?model=mistral`);
+                    const text = await res.text();
+                    loading.remove();
+                    processResponse(text, query);
+                }
             } catch(e) { loading.innerText = "Erro na conexão."; }
         }
 
         function processResponse(text, query) {
             const wrapper = document.createElement('div');
             wrapper.className = 'msg-wrapper ai-wrapper';
+            
+            // Detectar Imagens na Resposta
+            const imgMatch = text.match(/!\[.*?\]\((.*?)\)/);
+            if (imgMatch) {
+                const img = document.createElement('img');
+                img.src = imgMatch[1];
+                img.className = 'art-img';
+                wrapper.appendChild(img);
+                text = text.replace(imgMatch[0], '');
+            }
+
             const parts = text.split(/```/);
             parts.forEach((part, i) => {
                 if(i % 2 !== 0) {
@@ -101,6 +140,7 @@
                     wrapper.appendChild(msgDiv);
                 }
             });
+
             const controls = document.createElement('div');
             controls.className = 'msg-controls';
             controls.innerHTML = `<span class="ctrl-btn" onclick="handleSend('${query.replace(/'/g, "\\'")}')">🔄 Reenviar</span>
@@ -109,7 +149,7 @@
                                   <span class="ctrl-btn" onclick="this.innerHTML='💔'">👎 Unlike</span>`;
             wrapper.appendChild(controls);
             chatBox.appendChild(wrapper);
-            saveSession(query, text);
+            saveSession(query, text + (imgMatch ? ` [IMAGEM: ${imgMatch[1]}]` : ""));
             document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
             chatBox.scrollTop = chatBox.scrollHeight;
         }
@@ -157,6 +197,7 @@
 
         function formatAI(t) { return t.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\\\[([\s\S]*?)\\\]/g, '<div class="math-render">$$$1$$</div>').replace(/\\\((.*?)\\\)/g, '$$$1$$').replace(/\n/g, '<br>'); }
         function copy(btn) { const code = btn.closest('.code-container').querySelector('code').innerText; navigator.clipboard.writeText(code); btn.innerText = "OK"; setTimeout(() => btn.innerText = "COPIAR", 1000); }
+        
         function saveSession(q, a) {
             let session = sessions.find(s => s.id === currentSessionId);
             if(!session) { session = { id: currentSessionId, title: q.substring(0, 20) + '...', messages: [] }; sessions.push(session); }
@@ -174,11 +215,19 @@
         }
         function loadSession(id) {
             currentSessionId = id; const session = sessions.find(s => s.id === id); chatBox.innerHTML = '';
-            if(session) session.messages.forEach(m => { if(m.role === 'ai') processResponse(m.text, ""); else addMessage(m.text, true); });
+            if(session) session.messages.forEach(m => { 
+                if(m.role === 'ai') {
+                    if (m.text.includes("[IMAGEM:")) {
+                        const url = m.text.match(/\[IMAGEM: (.*?)\]/)[1];
+                        processResponse(`![ARTE](${url})`, "");
+                    } else processResponse(m.text, "");
+                } else addMessage(m.text, true); 
+            });
             renderHistory();
         }
         function deleteSession(e, id) { e.stopPropagation(); sessions = sessions.filter(s => s.id !== id); localStorage.setItem('zenia_sessions', JSON.stringify(sessions)); startNewChat(); }
         function clearAllData() { if(confirm("Limpar tudo?")) { localStorage.clear(); location.reload(); } }
+        
         init();
     </script>
 </body>
