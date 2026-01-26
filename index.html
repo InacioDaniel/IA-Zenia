@@ -98,6 +98,16 @@ button.send-btn:hover { background: #1d4ed8; }
         document.getElementById('sidebar').classList.toggle('active');
     }
 
+    function escapeHTML(html) {
+    return html
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+
     const chatBox = document.getElementById('chatBox');
     const historyList = document.getElementById('historyList');
     const userInput = document.getElementById('userInput');
@@ -186,18 +196,17 @@ button.send-btn:hover { background: #1d4ed8; }
         const parts = text.split(/```/);
         parts.forEach((part, i) => {
             if(i % 2 !== 0) {
-                const lines = part.split('\n');
-                const lang = lines[0].trim() || 'js';
-                const code = lines.slice(1).join('\n').trim();
-                wrapper.appendChild(createCodeBlock(code, lang));
-            } else if(part.trim()) {
-                const msgDiv = document.createElement('div');
-                msgDiv.className = 'msg ai-msg';
-                msgDiv.innerHTML = formatAI(part);
-                wrapper.appendChild(msgDiv);
+                    const lines = part.split('\n');
+                    const lang = lines[0].trim() || 'js';
+                    const code = lines.slice(1).join('\n').trim();
+                    wrapper.appendChild(createCodeBlock(code, lang));
+             } else if(part.trim()) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'msg ai-msg';
+            msgDiv.innerHTML = formatAI(escapeHTML(part));
+            wrapper.appendChild(msgDiv);
             }
-        });
-
+            });
         const controls = document.createElement('div');
         controls.className = 'msg-controls';
         controls.innerHTML = `<span class="ctrl-btn" onclick="handleSend('${query.replace(/'/g, "\\'")}')">🔄 Reenviar</span>
