@@ -231,7 +231,24 @@ button.send-btn:hover { background: #1d4ed8; }
   </div>
 </main>
 
-    <script>
+<script>
+  // Auto crescer textarea
+  function autoGrow(element) {
+        element.style.height = 'auto';
+        element.style.height = (element.scrollHeight) + 'px';
+        scrollToBottom();
+  }
+
+  // Scroll automático
+  function scrollToBottom() {
+        const chat = document.getElementById('chatBox');
+        chat.scrollTop = chat.scrollHeight;
+  }
+
+  // Sidebar toggle mobile
+  function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
+  }
         const chatBox = document.getElementById('chatBox');
         const historyList = document.getElementById('historyList');
         const userInput = document.getElementById('userInput');
