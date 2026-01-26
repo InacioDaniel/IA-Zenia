@@ -89,13 +89,11 @@ button.send-btn:hover { background: #1d4ed8; }
         scrollToBottom();
     }
 
-    // Scroll automático
     function scrollToBottom() {
         const chat = document.getElementById('chatBox');
         chat.scrollTop = chat.scrollHeight;
     }
 
-    // Sidebar toggle mobile
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('active');
     }
@@ -142,15 +140,20 @@ button.send-btn:hover { background: #1d4ed8; }
             const isImageRequest = /desenha|gera uma imagem|pinta|mostra uma foto|imagem de/i.test(query);
 
             if (isImageRequest) {
+                // Mostrar a imagem imediatamente sem aguardar download completo
                 const imgUrl = `https://pollinations.ai/p/${encodeURIComponent(query)}?width=1024&height=1024&seed=${Math.floor(Math.random()*1000)}&nologo=true`;
                 loading.remove();
                 processResponse(`![ARTE](${imgUrl})`, query);
             } else {
+                // Envio assíncrono sem await direto, evita travar o front
                 const sys = "Você é IA-ZÉNIA do Lubango. Use LaTeX \\( \\) e \\[ \\].";
-                const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(sys + "\n" + query)}?model=mistral`);
-                const text = await res.text();
-                loading.remove();
-                processResponse(text, query);
+                fetch(`https://text.pollinations.ai/${encodeURIComponent(sys + "\n" + query)}?model=mistral`)
+                    .then(res => res.text())
+                    .then(text => {
+                        loading.remove();
+                        processResponse(text, query);
+                    })
+                    .catch(() => { loading.innerText = "Erro na conexão."; });
             }
         } catch(e) {
             loading.innerText = "Erro na conexão.";
