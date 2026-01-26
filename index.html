@@ -249,11 +249,29 @@ button.send-btn:hover { background: #1d4ed8; }
     }
 
     function formatAI(t) {
-        return t.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-                .replace(/\\\[([\s\S]*?)\\\]/g, '<div class="math-render">$$$1$$</div>')
-                .replace(/\\\((.*?)\\\)/g, '$$$1$$')
-                .replace(/\n/g, '<br>');
-    }
+    // Formatação básica de negrito
+    t = t.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+
+    // Render LaTeX inline: \( ... \)
+    t = t.replace(/\\\((.*?)\\\)/g, (_, expr) => {
+        try {
+            return katex.renderToString(expr, { throwOnError: false });
+        } catch { return expr; }
+    });
+
+    // Render LaTeX display: \[ ... \]
+    t = t.replace(/\\\[([\s\S]*?)\\\]/g, (_, expr) => {
+        try {
+            return `<div class="katex-display">` + katex.renderToString(expr, { displayMode: true, throwOnError: false }) + `</div>`;
+        } catch { return expr; }
+    });
+
+    // Quebra de linhas
+    t = t.replace(/\n/g, '<br>');
+
+    return t;
+}
+
 
     function copy(btn) {
         navigator.clipboard.writeText(btn.closest('.code-container').querySelector('code').innerText);
