@@ -392,7 +392,7 @@ function init() {
 function startNewChat() {
     currentSessionId = Date.now();
     chatBox.innerHTML = '';
-    addMessage("Mbwéte! Sou a IA-ZÉNIA do Lubango. O que vamos criar hoje?", false);
+    addMessage("Onawa ! Sou a IA-ZÉNIA. O que vamos criar hoje?", false);
     renderHistory();
 }
 
@@ -494,7 +494,7 @@ function processResponse(text, query) {
     controls.className = 'msg-controls';
     controls.innerHTML = `
         <span class="ctrl-btn" onclick="handleSend('${query.replace(/'/g, "\\'")}')">🔄 Reenviar</span>
-        <span class="ctrl-btn" onclick="this.closest('.msg-wrapper').remove()">❌ Apagar</span>
+        <span class="ctrl-btn" onclick="this.closest('.msg-wrapper').remove()">🗑 Apagar</span>
         <span class="ctrl-btn" onclick="this.innerHTML='❤️'">👍</span>
     `;
     wrapper.appendChild(controls);
@@ -541,7 +541,7 @@ function addMessage(t, isUser) {
     if (isUser) {
         const editCtrl = document.createElement('div');
         editCtrl.className = 'msg-controls self-end';
-        editCtrl.innerHTML = `<span class="ctrl-btn" onclick="editMessage(this)">✏️ Editar</span>`;
+        editCtrl.innerHTML = `<span class="ctrl-btn" onclick="editMessage(this)">🖊 Editar</span>`;
         w.appendChild(editCtrl);
     }
     chatBox.appendChild(w);
