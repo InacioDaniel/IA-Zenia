@@ -635,6 +635,101 @@ function clearAllData() {
 }
 
 init();
+
+/* ============================
+   1. SISTEMA DE TEMAS
+============================ */
+function applyTheme(theme) {
+    document.body.classList.remove("theme-light","theme-dark","theme-normal","theme-ultra");
+    document.body.classList.add(`theme-${theme}`);
+    localStorage.setItem("zenia_theme", theme);
+}
+
+// Carregar tema salvo
+(function() {
+    const saved = localStorage.getItem("zenia_theme") || "normal";
+    applyTheme(saved);
+})();
+
+/* Botões automáticos (aparecem no header) */
+document.addEventListener("DOMContentLoaded", function() {
+    const header = document.querySelector("header");
+
+    const themeBox = document.createElement("div");
+    themeBox.className = "flex gap-2";
+
+    themeBox.innerHTML = `
+        <button class="text-[10px] text-cyan-300 font-bold hover:underline" onclick="applyTheme('light')">LIGHT</button>
+        <button class="text-[10px] text-yellow-300 font-bold hover:underline" onclick="applyTheme('normal')">NORMAL</button>
+        <button class="text-[10px] text-purple-300 font-bold hover:underline" onclick="applyTheme('dark')">DARK</button>
+        <button class="text-[10px] text-red-400 font-bold hover:underline" onclick="applyTheme('ultra')">ULTRA</button>
+    `;
+
+    header.appendChild(themeBox);
+});
+
+/* ============================
+   2. CONTADOR DE ACESSOS GLOBAL
+============================ */
+async function loadVisitors() {
+    const key = "zenia-project-counter-v1";
+
+    const res = await fetch(`https://api.countapi.xyz/hit/${key}/visits`);
+    const data = await res.json();
+
+    const total = data.value;
+
+    let counterEl = document.getElementById("visitorCounter");
+    if (!counterEl) {
+        const header = document.querySelector("header");
+        counterEl = document.createElement("div");
+        counterEl.id = "visitorCounter";
+        counterEl.className = "text-[10px] text-green-400 font-bold";
+        header.appendChild(counterEl);
+    }
+
+    counterEl.textContent = `👀 Visitantes totais: ${total}`;
+}
+
+loadVisitors();
+
+/* ============================
+   3. ESTILOS DOS TEMAS
+============================ */
+const style = document.createElement("style");
+style.innerHTML = `
+/* LIGHT MODE */
+.theme-light {
+    --bg: #ffffff;
+    --panel: #f0f0f0;
+    --text-light: #000;
+    --accent: #007bff;
+    --accent-alt: #ff00d4;
+}
+
+/* NORMAL MODE (seu padrão atual) */
+.theme-normal {
+    /* Usa tudo que você já tem */
+}
+
+/* DARK MODE (escuro reforçado) */
+.theme-dark {
+    --bg: #000000;
+    --panel: #0c0c0c;
+    --text-light: #d9e0ff;
+    --accent: #00ccff;
+    --accent-alt: #ff00ff;
+}
+
+/* ULTRA REALISTA (efeito vidro + neon forte) */
+.theme-ultra {
+    --bg: #050505;
+    --panel: rgba(255,255,255,0.08);
+    --text-light: #eaffff;
+    backdrop-filter: blur(20px) saturate(180%);
+}
+`;
+document.head.appendChild(style);                
 </script>
 
 </main>
