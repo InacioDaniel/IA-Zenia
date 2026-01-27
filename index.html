@@ -295,15 +295,6 @@ button.send-btn:hover {
 <aside class="sidebar p-4" id="sidebar">
 
     <div class="btn-new" onclick="startNewChat()">+ NOVA CONVERSA</div>
-    <h2 class="text-[10px] font-bold text-gray-400 uppercase mb-2">TEMAS DO SISTEMA</h2>
-    <select id="themeSelector" class="w-full p-2 rounded bg-black text-white border border-gray-700 mb-4"
-        onchange="changeTheme(this.value)">
-        <option value="ultra">Ultra Futurista</option>
-        <option value="dark">Modo Dark</option>
-        <option value="normal">Modo Normal</option>
-        <option value="light">Modo Claro</option>
-    </select>
-
     <h2 class="text-[10px] font-bold text-gray-500 uppercase mb-4 tracking-widest">Histórico Local</h2>
     <div id="historyList" class="flex-1 overflow-y-auto pr-1"></div>
 
@@ -339,7 +330,7 @@ button.send-btn:hover {
 <div id="viewCounter"
      style="
         position: fixed;
-        bottom: 15px;
+        top: 15px;
         right: 15px;
         padding: 10px 18px;
         background: #000000aa;
@@ -374,73 +365,6 @@ function loadVisitCounter() {
     document.getElementById("viewsNumber").textContent = views;
 }
 loadVisitCounter();
-
-/* =====================================================
-   🔥 SISTEMA DE TEMAS
-===================================================== */
-
-function changeTheme(theme) {
-    const styleTag = document.getElementById("theme-styles");
-
-    if (theme === "ultra") {
-        location.reload(); // usado para restaurar o tema padrão ultra
-        return;
-    }
-
-    if (theme === "dark") {
-        styleTag.innerHTML = `
-            :root {
-                --accent: #4b8bff;
-                --bg: #0a0a0a;
-                --panel: #111;
-                --text-light: #e0e0e0;
-                --text-dark: #111;
-                --border: #333;
-            }
-            body { background: #0a0a0a; color: #e0e0e0; }
-            .sidebar { background: #111; border-color: #333; box-shadow:none; }
-            .chat-container { background:#0d0d0d; }
-            .msg { background:#111; border-color:#333; }
-            .user-msg { background:#4b8bff; color:black; }
-        `;
-    }
-
-    if (theme === "normal") {
-        styleTag.innerHTML = `
-            :root {
-                --accent:#2563eb;
-                --bg:#ffffff;
-                --text-light:#222;
-                --panel:#f7f7f7;
-                --border:#ddd;
-            }
-            body { background:#fafafa; color:#222; }
-            .sidebar { background:#f7f7f7; border-color:#ddd; box-shadow:none; color:black; }
-            .chat-container { background:white; }
-            .msg { background:#f0f0f0; color:black; }
-            .user-msg { background:#2563eb; color:white; }
-            .btn-new { background:#2563eb !important; color:white !important; }
-        `;
-    }
-
-    if (theme === "light") {
-        styleTag.innerHTML = `
-            :root {
-                --bg:white;
-                --text-light:black;
-                --panel:#f7f7f7;
-                --border:#ccc;
-                --accent:#ff0077;
-            }
-            body { background:white; color:black; }
-            .sidebar { background:#fdfdfd; border-color:#ccc; box-shadow:none; color:black; }
-            .chat-container { background:white; }
-            .msg { background:#f4f4f4; color:black; }
-            .user-msg { background:#ff0077; color:white; }
-            .btn-new { background:#ff0077 !important; color:white !important; }
-        `;
-    }
-}
 
 /* =====================================================
    🔥 FUNÇÕES DO SISTEMA 
