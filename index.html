@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-AO">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -10,7 +10,12 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
-<style>
+
+<style id="theme-styles">
+
+/* ===========================
+   🔥 TEMA ULTRA FUTURISTA (PADRÃO)
+   =========================== */
 :root {
     --accent: #00ffe7;
     --accent-alt: #ff00f7;
@@ -281,15 +286,27 @@ button.send-btn:hover {
     .footer-input-inner { flex-direction: column; gap: 6px; }
     button.send-btn { width: 100%; }
 }
-</style>
 
+</style>
 
 </head>
 <body>
+
 <aside class="sidebar p-4" id="sidebar">
+
     <div class="btn-new" onclick="startNewChat()">+ NOVA CONVERSA</div>
+    <h2 class="text-[10px] font-bold text-gray-400 uppercase mb-2">TEMAS DO SISTEMA</h2>
+    <select id="themeSelector" class="w-full p-2 rounded bg-black text-white border border-gray-700 mb-4"
+        onchange="changeTheme(this.value)">
+        <option value="ultra">Ultra Futurista</option>
+        <option value="dark">Modo Dark</option>
+        <option value="normal">Modo Normal</option>
+        <option value="light">Modo Claro</option>
+    </select>
+
     <h2 class="text-[10px] font-bold text-gray-500 uppercase mb-4 tracking-widest">Histórico Local</h2>
     <div id="historyList" class="flex-1 overflow-y-auto pr-1"></div>
+
     <div class="mt-auto pt-4 border-t border-zinc-800 space-y-2">
         <h2 class="text-[9px] font-bold text-gray-600 uppercase mb-2">Minhas Irmãs</h2>
         <a href="https://zenia-projects.netlify.app" target="_blank" class="block text-xs text-blue-400 hover:underline">🌐 Zenia Projects</a>
@@ -297,7 +314,9 @@ button.send-btn:hover {
         <a href="https://antonia-ia.netlify.app" target="_blank" class="block text-xs text-blue-400 hover:underline">🌐 Antónia IA</a>
     </div>
 </aside>
+
 <main class="main-content">
+
 <header class="p-4 border-b border-zinc-800 flex justify-between items-center bg-black/30">
     <div class="flex items-center gap-4">
         <button onclick="toggleSidebar()" class="md:hidden text-white font-bold">☰</button>
@@ -305,14 +324,167 @@ button.send-btn:hover {
     </div>
     <button onclick="clearAllData()" class="text-[10px] text-red-500 font-bold hover:underline">APAGAR TUDO</button>
 </header>
+
 <div id="chatBox" class="chat-container"></div>
+
 <div class="footer-input">
     <div class="footer-input-inner">
         <textarea id="userInput" placeholder="Escreva aqui..." oninput="autoGrow(this)"></textarea>
         <button class="send-btn" onclick="handleSend()">ENVIAR 🚀</button>
     </div>
 </div>
+
+</main>
+
+<div id="viewCounter"
+     style="
+        position: fixed;
+        bottom: 15px;
+        right: 15px;
+        padding: 10px 18px;
+        background: #000000aa;
+        color: #00ffe7;
+        border: 1px solid #00ffe7;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: bold;
+        backdrop-filter: blur(6px);
+        box-shadow: 0 0 20px #00ffe799;
+        z-index: 9999;
+     ">
+🔵 Visitantes no Zenia: <span id="viewsNumber">0</span>
+</div>
+
+
 <script>
+/* =====================================================
+   🔥 CONTADOR GLOBAL DE VISITANTES (LOCALSTORAGE)
+===================================================== */
+function loadVisitCounter() {
+    let views = localStorage.getItem("zenia_global_views");
+
+    if (!views) {
+        views = 1;
+        localStorage.setItem("zenia_global_views", views);
+    } else {
+        views = parseInt(views) + 1;
+        localStorage.setItem("zenia_global_views", views);
+    }
+
+    document.getElementById("viewsNumber").textContent = views;
+}
+loadVisitCounter();
+
+/* =====================================================
+   🔥 SISTEMA DE TEMAS
+===================================================== */
+
+function changeTheme(theme) {
+    const styleTag = document.getElementById("theme-styles");
+
+    if (theme === "ultra") {
+        location.reload(); // usado para restaurar o tema padrão ultra
+        return;
+    }
+
+    if (theme === "dark") {
+        styleTag.innerHTML = `
+            :root {
+                --accent: #4b8bff;
+                --bg: #0a0a0a;
+                --panel: #111;
+                --text-light: #e0e0e0;
+                --text-dark: #111;
+                --border: #333;
+            }
+            body { background: #0a0a0a; color: #e0e0e0; }
+            .sidebar { background: #111; border-color: #333; box-shadow:none; }
+            .chat-container { background:#0d0d0d; }
+            .msg { background:#111; border-color:#333; }
+            .user-msg { background:#4b8bff; color:black; }
+        `;
+    }
+
+    if (theme === "normal") {
+        styleTag.innerHTML = `
+            :root {
+                --accent:#2563eb;
+                --bg:#ffffff;
+                --text-light:#222;
+                --panel:#f7f7f7;
+                --border:#ddd;
+            }
+            body { background:#fafafa; color:#222; }
+            .sidebar { background:#f7f7f7; border-color:#ddd; box-shadow:none; color:black; }
+            .chat-container { background:white; }
+            .msg { background:#f0f0f0; color:black; }
+            .user-msg { background:#2563eb; color:white; }
+            .btn-new { background:#2563eb !important; color:white !important; }
+        `;
+    }
+
+    if (theme === "light") {
+        styleTag.innerHTML = `
+            :root {
+                --bg:white;
+                --text-light:black;
+                --panel:#f7f7f7;
+                --border:#ccc;
+                --accent:#ff0077;
+            }
+            body { background:white; color:black; }
+            .sidebar { background:#fdfdfd; border-color:#ccc; box-shadow:none; color:black; }
+            .chat-container { background:white; }
+            .msg { background:#f4f4f4; color:black; }
+            .user-msg { background:#ff0077; color:white; }
+            .btn-new { background:#ff0077 !important; color:white !important; }
+        `;
+    }
+}
+
+/* =====================================================
+   🔥 FUNÇÕES DO SISTEMA 
+===================================================== */
+
+function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("active");
+}
+
+function autoGrow(el) {
+    el.style.height = "auto";
+    el.style.height = el.scrollHeight + "px";
+}
+
+function handleSend() {
+    const input = document.getElementById("userInput");
+    if (!input.value.trim()) return;
+
+    addMessage(input.value, "user");
+    input.value = "";
+}
+
+function addMessage(text, type) {
+    const box = document.getElementById("chatBox");
+    const wrap = document.createElement("div");
+    wrap.className = "msg-wrapper";
+    const msg = document.createElement("div");
+
+    msg.className = "msg " + (type === "user" ? "user-msg" : "ai-msg");
+    msg.textContent = text;
+
+    wrap.appendChild(msg);
+    box.appendChild(wrap);
+    box.scrollTop = box.scrollHeight;
+}
+
+function startNewChat() {
+    document.getElementById("chatBox").innerHTML = "";
+}
+
+function clearAllData() {
+    localStorage.clear();
+    location.reload();
+}
 // Auto crescer textarea
 function autoGrow(element) {
     element.style.height = 'auto';
@@ -635,101 +807,7 @@ function clearAllData() {
 }
 
 init();
-
-/* ============================
-   1. SISTEMA DE TEMAS
-============================ */
-function applyTheme(theme) {
-    document.body.classList.remove("theme-light","theme-dark","theme-normal","theme-ultra");
-    document.body.classList.add(`theme-${theme}`);
-    localStorage.setItem("zenia_theme", theme);
-}
-
-// Carregar tema salvo
-(function() {
-    const saved = localStorage.getItem("zenia_theme") || "normal";
-    applyTheme(saved);
-})();
-
-/* Botões automáticos (aparecem no header) */
-document.addEventListener("DOMContentLoaded", function() {
-    const header = document.querySelector("header");
-
-    const themeBox = document.createElement("div");
-    themeBox.className = "flex gap-2";
-
-    themeBox.innerHTML = `
-        <button class="text-[10px] text-cyan-300 font-bold hover:underline" onclick="applyTheme('light')">LIGHT</button>
-        <button class="text-[10px] text-yellow-300 font-bold hover:underline" onclick="applyTheme('normal')">NORMAL</button>
-        <button class="text-[10px] text-purple-300 font-bold hover:underline" onclick="applyTheme('dark')">DARK</button>
-        <button class="text-[10px] text-red-400 font-bold hover:underline" onclick="applyTheme('ultra')">ULTRA</button>
-    `;
-
-    header.appendChild(themeBox);
-});
-
-/* ============================
-   2. CONTADOR DE ACESSOS GLOBAL
-============================ */
-async function loadVisitors() {
-    const key = "zenia-project-counter-v1";
-
-    const res = await fetch(`https://api.countapi.xyz/hit/${key}/visits`);
-    const data = await res.json();
-
-    const total = data.value;
-
-    let counterEl = document.getElementById("visitorCounter");
-    if (!counterEl) {
-        const header = document.querySelector("header");
-        counterEl = document.createElement("div");
-        counterEl.id = "visitorCounter";
-        counterEl.className = "text-[10px] text-green-400 font-bold";
-        header.appendChild(counterEl);
-    }
-
-    counterEl.textContent = `👀 Visitantes totais: ${total}`;
-}
-
-loadVisitors();
-
-/* ============================
-   3. ESTILOS DOS TEMAS
-============================ */
-const style = document.createElement("style");
-style.innerHTML = `
-/* LIGHT MODE */
-.theme-light {
-    --bg: #ffffff;
-    --panel: #f0f0f0;
-    --text-light: #000;
-    --accent: #007bff;
-    --accent-alt: #ff00d4;
-}
-
-/* NORMAL MODE (seu padrão atual) */
-.theme-normal {
-    /* Usa tudo que você já tem */
-}
-
-/* DARK MODE (escuro reforçado) */
-.theme-dark {
-    --bg: #000000;
-    --panel: #0c0c0c;
-    --text-light: #d9e0ff;
-    --accent: #00ccff;
-    --accent-alt: #ff00ff;
-}
-
-/* ULTRA REALISTA (efeito vidro + neon forte) */
-.theme-ultra {
-    --bg: #050505;
-    --panel: rgba(255,255,255,0.08);
-    --text-light: #eaffff;
-    backdrop-filter: blur(20px) saturate(180%);
-}
-`;
-document.head.appendChild(style);                
+              
 </script>
 
 </main>
