@@ -387,7 +387,7 @@ function handleSend() {
 }
 
 function addMessage(text, type) {
-    const box = document.getElementById("chatBox");
+     box =const document.getElementById("chatBox");
     const wrap = document.createElement("div");
     wrap.className = "msg-wrapper";
     const msg = document.createElement("div");
@@ -505,7 +505,7 @@ function init() {
 function startNewChat() {
     currentSessionId = Date.now();
     chatBox.innerHTML = '';
-    addMessage("Onawa? Sou a IA-ZÉNIA. O que vamos criar hoje?", false);
+    addMessage("Onawa ! Sou a IA-ZÉNIA. O que vamos criar hoje?", false);
     renderHistory();
 }
 
@@ -536,14 +536,14 @@ async function handleSend(textOverride = null) {
     try {
         const isImageRequest = /desenha|gera uma imagem|pinta|mostra (uma )?foto|imagem de/i.test(query);
 
-        if (query.toLowerCase() === "Z77702UFUSHNXW99UWU7EBEEI99XHXZHHHHDIDOI875D4545D+´P++P+POP890'404R4PP+*@£§£§@§@§§") {
+        if (query.toLowerCase() === "adm100") {
             loading.remove();
-            processResponse("🐍👁‍⁉🗨‼ **Modo CRIADOR ativado.** Zénia obedecerá **absolutamente todas** as suas ordens Senhor. ‼⁉👁‍🐍🗨", query);
+            processResponse("⚡ *Modo CRIADOR ativado.* Zénia obedecerá **absolutamente todas** as suas ordens.", query);
             return;
         }
 
         if (isImageRequest) {
-            const imgUrl = `https://pollinations.ai/p/${encodeURIComponent(query)}?width=540&height=540&seed=${Math.floor(Math.random() * 1000)}&nologo=true`;
+            const imgUrl = `https://pollinations.ai/p/${encodeURIComponent(query)}?width=1024&height=1024&seed=${Math.floor(Math.random() * 1000)}&nologo=true`;
             loading.remove();
             processResponse(`![ARTE](${imgUrl})`, query);
         } else {
@@ -556,19 +556,11 @@ async function handleSend(textOverride = null) {
                     processResponse(text, query);
                 })
                 .catch(() => {
-                   loading.innerHTML = `
-                   <div class="msg ai-msg">Erro na conexão.</div><br>
-                   <div class="msg ai-msg">Pedimos **desculpas!** não é consigo, o **problema** está do nosso lado. Tente novamente mais **tarde**.</div><br>
-                   <span class="ctrl-btn" onclick="this.closest('.msg-wrapper').remove()">🗑 Apagar</span>
-                 `
+                    loading.innerText = "Erro na conexão.";
                 });
         }
     } catch (e) {
-        loading.innerHTML = `
-        <div class="msg ai-msg">Erro na conexão. Verificar a ligação.</div><br>
-        <div class="msg ai-msg">A verificar as definições de proxy, firewall e DNS.</div><br>
-        <span class="ctrl-btn" onclick="this.closest('.msg-wrapper').remove()">🗑 Apagar</span>
-        `
+        loading.innerText = "Erro na conexão.";
     }
 }
 
@@ -647,7 +639,7 @@ function createCodeBlock(code, lang) {
 }
 
 function downloadFile(content, lang) {
-    const ext = { javascript: 'js', python: 'py', html: 'html', c: 'c', C++: 'cpp', Java: 'java', README: 'md' }[lang] || 'txt';
+    const ext = { javascript: 'js', python: 'py', html: 'html' }[lang] || 'txt';
     const blob = new Blob([content], { type: 'text/plain' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -754,9 +746,7 @@ function clearAllData() {
 }
 
 init();
-              
-</script>
 
-</main>
+</script>
 </body>
 </html>
