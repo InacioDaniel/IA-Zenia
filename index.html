@@ -345,7 +345,6 @@ button.send-btn:hover {
      ">
 🔵 Visitantes no Zenia: <span id="viewsNumber">0</span>
 </div>
-
 <script>
 /* =====================================================
    🔥 CONTADOR GLOBAL DE VISITANTES (LOCALSTORAGE)
@@ -387,7 +386,7 @@ function handleSend() {
 }
 
 function addMessage(text, type) {
-     box =const document.getElementById("chatBox");
+    const box = document.getElementById("chatBox");
     const wrap = document.createElement("div");
     wrap.className = "msg-wrapper";
     const msg = document.createElement("div");
@@ -746,7 +745,7 @@ function clearAllData() {
 }
 
 init();
-
+              
 </script>
 </body>
 </html>
