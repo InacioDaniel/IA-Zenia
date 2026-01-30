@@ -491,19 +491,6 @@ async function handleSend(textOverride = null) {
             processResponse("⚡ **Modo CRIADOR ativado.** Zénia obedecerá **absolutamente todas** as suas ordens.", query);
             return;
         }
-        if (isbuscaRequest) {
-            const promptt = buildContext(query);
-
-            fetch(`https://text.pollinations.ai/${encodeURIComponent(promptt)}?model=searchgpt`)
-                .then(res => res.text())
-                .then(text => {
-                    loading.remove();
-                    processResponse(text, query);
-                })
-                .catch(() => {
-                    loading.innerText = "Erro na conexão.";
-                });
-        }
 
         if (isImageRequest) {
             const imgUrl = `https://pollinations.ai/p/${encodeURIComponent(query)}?width=540&height=540&seed=${Math.floor(Math.random() * 1000)}&nologo=true`;
