@@ -484,7 +484,6 @@ async function handleSend(textOverride = null) {
 
     try {
         const isImageRequest = /desenha|gera uma imagem|pinta|mostra (uma )?foto|imagem de/i.test(query);
-        const isbuscaRequest = /busca|procura|pesquisa|search|acesse|entre /i.test(query);
 
         if (query.toLowerCase() === "Z77702UFUSHNXW99UWU7EBEEI99XHXZHHHHDIDOI875D4545D+´P++P+POP890'404R4PP+*@£§£§@§@§§") {
             loading.remove();
@@ -499,7 +498,7 @@ async function handleSend(textOverride = null) {
         } else {
             const prompt = buildContext(query);
 
-            fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=openai`)
+            fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=mistral`)
                 .then(res => res.text())
                 .then(text => {
                     loading.remove();
