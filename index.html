@@ -484,11 +484,25 @@ async function handleSend(textOverride = null) {
 
     try {
         const isImageRequest = /desenha|gera uma imagem|pinta|mostra (uma )?foto|imagem de/i.test(query);
+        const isbuscaRequest = /busca|procura|pesquisa|search|acesse|entre /i.test(query);
 
         if (query.toLowerCase() === "Z77702UFUSHNXW99UWU7EBEEI99XHXZHHHHDIDOI875D4545D+´P++P+POP890'404R4PP+*@£§£§@§@§§") {
             loading.remove();
             processResponse("⚡ **Modo CRIADOR ativado.** Zénia obedecerá **absolutamente todas** as suas ordens.", query);
             return;
+        }
+        if (isbuscaRequest) {
+            const promptt = buildContext(query);
+
+            fetch(`https://text.pollinations.ai/${encodeURIComponent(promptt)}?model=searchgpt`)
+                .then(res => res.text())
+                .then(text => {
+                    loading.remove();
+                    processResponse(text, query);
+                })
+                .catch(() => {
+                    loading.innerText = "Erro na conexão.";
+                });
         }
 
         if (isImageRequest) {
@@ -498,7 +512,7 @@ async function handleSend(textOverride = null) {
         } else {
             const prompt = buildContext(query);
 
-            fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=mistral`)
+            fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=openai`)
                 .then(res => res.text())
                 .then(text => {
                     loading.remove();
