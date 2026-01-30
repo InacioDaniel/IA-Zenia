@@ -229,6 +229,135 @@ textarea {
         transition: none !important;
     }
 }
+/* ==========================================================
+   ⚡ 1. OTIMIZAÇÃO PARA DISPOSITIVOS FRACOS
+   ========================================================== */
+
+@media (max-width: 600px) {
+    * {
+        animation-duration: 0.4s !important;
+        transition-duration: 0.2s !important;
+    }
+    .msg, .sidebar {
+        box-shadow: none !important;
+    }
+}
+
+/* Redução automática caso o device marque “reduzir movimentos” */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* ==========================================================
+    2. TEMAS LIGHT, GLASS E DYNAMIC
+   ========================================================== */
+
+/* LIGHT */
+body.light {
+    background: #f5f7fa;
+    color: #111;
+}
+body.light .msg {
+    background: #ffffff;
+    color: #111;
+    border: 1px solid #d2d2d2;
+}
+body.light .sidebar {
+    background: #fafafa;
+    border-right: 1px solid #d4d4d4;
+}
+
+/* GLASS */
+body.glass {
+    backdrop-filter: blur(20px);
+    background: rgba(255,255,255,0.12);
+}
+body.glass .msg {
+    background: rgba(255,255,255,0.25);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* ==========================================================
+    3. FUNDO NEON PULSANTE
+   ========================================================== */
+
+@keyframes neonPulse {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.neon-bg {
+    background: linear-gradient(135deg,
+        #001011,
+        #001e25,
+        #00363b,
+        #001e25,
+        #001011
+    );
+    background-size: 400% 400%;
+    animation: neonPulse 18s ease infinite;
+}
+
+/* ==========================================================
+    4. CABEÇALHO + CONTADOR DE VISITAS
+   ========================================================== */
+
+.header-upgraded {
+    width: 100%;
+    padding: 12px 18px;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #222;
+}
+
+/* ==========================================================
+    5. BOTÕES ("MINHAS IRMÃS") FIXOS EM BAIXO NO MOBILE
+   ========================================================== */
+
+@media (max-width: 768px) {
+    .sisters-buttons {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: #0b0b0b;
+        padding: 10px;
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        border-top: 1px solid #222;
+        z-index: 998;
+    }
+}
+
+/* ==========================================================
+    6. SIDEBAR OCULTÁVEL NO MOBILE
+   ========================================================== */
+
+.mobile-toggle-btn {
+    display: none;
+    cursor: pointer;
+    font-size: 24px;
+    padding: 8px 12px;
+}
+
+@media (max-width: 768px) {
+    .mobile-toggle-btn {
+        display: block;
+    }
+}
+
+.sidebar.hidden-mobile {
+    left: -100% !important;
+}
 </style>
 
 </head>
@@ -287,8 +416,9 @@ textarea {
      ">
 🔵 Visitantes no Zenia: <span id="viewsNumber">0</span>
 </div>
-/* ==========================================================
-    TEMA LIGHT - GLASS - DYNAMIC
+<script>
+/*==========================================================
+    TEMA LIGHT / GLASS / DYNAMIC
    ========================================================== */
 
 function setTheme(mode) {
@@ -298,7 +428,7 @@ function setTheme(mode) {
     localStorage.setItem("theme-mode", mode);
 }
 
-// Tema Dinâmico: Dia - Light - Noite e Dark padrão
+// Tema Dinâmico: Dia → Light | Noite → Dark padrão
 (function dynamicTheme() {
     const hour = new Date().getHours();
     if (hour >= 6 && hour <= 18) setTheme("light");
@@ -309,7 +439,7 @@ const saved = localStorage.getItem("theme-mode");
 if (saved) setTheme(saved);
 
 /* ==========================================================
-   CONTADOR DE VISITAS
+    CONTADOR DE VISITAS
    ========================================================== */
 
 let visits = localStorage.getItem("zenia-visits") || 0;
@@ -320,13 +450,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (el) el.textContent = "Visitas: " + visits;
 });
 
+/* ==========================================================
+    BOTÕES IRMÃS NO FUNDO – MOBILE
+   ========================================================== */
+
 document.addEventListener("DOMContentLoaded", () => {
     const sisters = document.querySelector(".sisters-buttons");
     if (sisters) sisters.classList.add("mobile-active");
 });
 
 /* ==========================================================
-   SIDEBAR OCULTÁVEL
+    SIDEBAR OCULTÁVEL
    ========================================================== */
 
 const sidebar = document.querySelector(".sidebar");
@@ -339,6 +473,9 @@ toggleBtn.onclick = () => {
     sidebar.classList.toggle("active");
     sidebar.classList.toggle("hidden-mobile");
 };
+
+// Inserir no cabeçalho
+document.querySelector(".header-upgraded")?.appendChild(toggleBtn);
 
 function addMessage(text, type) {
     const box = document.getElementById("chatBox");
