@@ -11,75 +11,181 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
 <style>
+/* =========================================
+   TEMA BLUE FUTURISTA - VARIÁVEIS
+========================================= */
 :root {
-    --accent:#00ffe7;--accent-alt:#ff00f7;--bg:#0a0a0a;--panel:#111;
-    --border:#222;--text-light:#e0f7ff;--text-dark:#111;
-    --neon-glow:0 0 10px var(--accent),0 0 20px var(--accent),0 0 40px var(--accent-alt);
+    /* Cores de Acento: Azul Elétrico e Azul Royal Profundo */
+    --accent: #00eaff;        /* Ciano brilhante (Electric Blue) */
+    --accent-alt: #0066ff;    /* Azul Royal vibrante */
+    
+    /* Fundos: Tons profundos de espaço/azul noturno */
+    --bg: #020617;            /* Fundo principal muito escuro */
+    --panel: #0b1124;         /* Painéis laterais/secundários */
+    --border: #1e3a8a;        /* Bordas em azul escuro */
+    
+    /* Textos */
+    --text-light: #e0f2fe;    /* Branco azulado gelo */
+    --text-dark: #020617;     /* Preto azulado para contraste */
+    
+    /* Brilho Neon Azulado */
+    --neon-glow: 0 0 15px rgba(0, 234, 255, 0.6), 0 0 30px rgba(0, 102, 255, 0.4);
 }
-body { background:linear-gradient(135deg,#0a0a0a,#050505 80%); color:var(--text-light); font-family:'Plus Jakarta Sans',sans-serif; margin:0; height:100vh; display:flex; overflow:hidden; }
+
+/* Overrides de Tailwind para consistência do tema */
+.text-blue-500 { color: var(--accent) !important; }
+.text-red-500 { color: #ff3366 !important; /* Um vermelho mais rosado que combina melhor com azul */ }
+.border-zinc-800 { border-color: var(--border) !important; }
+.bg-black\/30 { background-color: rgba(2, 6, 23, 0.5) !important; }
+
+body { 
+    background: linear-gradient(135deg, var(--bg) 0%, #000000 100%); 
+    color: var(--text-light); 
+    font-family: 'Plus Jakarta Sans', sans-serif; 
+    margin: 0; height: 100vh; display: flex; overflow: hidden; 
+}
 
 /* SIDEBAR */
-.sidebar { width:280px; background:radial-gradient(circle at top left,#111,#0a0a0a); border-right:1px solid var(--accent); display:flex; flex-direction:column; transition:.3s; box-shadow:var(--neon-glow); }
+.sidebar { 
+    width: 280px; 
+    background: linear-gradient(to bottom, var(--panel), var(--bg));
+    border-right: 1px solid var(--border); 
+    display: flex; flex-direction: column; transition: .3s; 
+    box-shadow: 5px 0 15px rgba(0, 102, 255, 0.1);
+}
 @media(max-width:768px){ .sidebar{position:fixed;left:-100%;top:0;height:100%;z-index:50;} .sidebar.active{left:0;} }
 .main-content { flex:1; display:flex; flex-direction:column; overflow:hidden; width:100%; }
 
-/* CHAT */
-.chat-container { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:20px; scroll-behavior:smooth; background:radial-gradient(circle at bottom right,#050505 0%,#0a0a0a 100%); }
+/* CHAT AREA */
+.chat-container { 
+    flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; scroll-behavior: smooth; 
+    /* Fundo do chat com um brilho central sutil */
+    background: radial-gradient(circle at center, #0b1124 0%, var(--bg) 70%);
+}
 
-/* HISTORY */
-.hist-item { padding:12px; border-radius:12px; background:#111; margin-bottom:10px; cursor:pointer; border:1px solid transparent; font-size:13px; display:flex; justify-content:space-between; align-items:center; transition:.3s; }
-.hist-item:hover { border-color:var(--accent); background:#1c0a1c; box-shadow:var(--neon-glow); }
-.hist-item.active { border-color:var(--accent-alt); background:#220022; box-shadow:var(--neon-glow); }
+/* HISTORY ITEMS - Interatividade Azul */
+.hist-item { 
+    padding: 12px; border-radius: 12px; background: rgba(11, 17, 36, 0.6); margin-bottom: 10px; cursor: pointer; 
+    border: 1px solid var(--border); font-size: 13px; display: flex; justify-content: space-between; align-items: center; transition: all .3s ease; 
+}
+.hist-item:hover { 
+    border-color: var(--accent); 
+    background: linear-gradient(to right, rgba(0, 234, 255, 0.1), rgba(0, 102, 255, 0.2));
+    box-shadow: 0 0 15px rgba(0, 234, 255, 0.2);
+    transform: translateX(2px);
+}
+.hist-item.active { 
+    border-color: var(--accent-alt); 
+    background: linear-gradient(to right, rgba(0, 102, 255, 0.3), rgba(11, 17, 36, 0.8));
+    box-shadow: var(--neon-glow); 
+}
+.hist-item button { color: #666; transition: .2s; }
+.hist-item button:hover { color: #ff3366; }
 
-/* BUTTONS */
-.btn-new { background:linear-gradient(45deg,#00ffe7,#ff00f7); color:#111; padding:12px; border-radius:12px; font-weight:800; text-align:center; margin-bottom:20px; cursor:pointer; transition:.3s; text-shadow:0 0 5px #fff; }
-.btn-new:hover { transform:translateY(-2px) scale(1.02); box-shadow:var(--neon-glow); }
+/* BUTTONS - Gradiente Azul */
+.btn-new { 
+    background: linear-gradient(135deg, var(--accent), var(--accent-alt)); 
+    color: #fff; /* Texto branco para melhor contraste no azul brilhante */
+    padding: 12px; border-radius: 12px; font-weight: 800; text-align: center; margin-bottom: 20px; cursor: pointer; transition: .3s; 
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3);
+}
+.btn-new:hover { transform: translateY(-2px) scale(1.02); box-shadow: var(--neon-glow); }
 
 /* MESSAGES */
 .msg-wrapper { display:flex; flex-direction:column; max-width:90%; gap:5px; position:relative; animation:fadeIn .3s ease; }
-.msg { padding:15px; border-radius:18px; line-height:1.6; border:1px solid var(--border); font-size:14px; word-wrap:break-word; background:linear-gradient(135deg,#111,#1a1a1a); box-shadow:0 0 15px rgba(0,255,231,.2); transition:.3s; }
-.ai-msg { align-self:flex-start; border-left:4px solid var(--accent); background:linear-gradient(135deg,#111,#050505); color:var(--text-light); }
-.user-msg { align-self:flex-end; background:linear-gradient(135deg,#ff00f7,#ff55ff); color:#111; border:none; box-shadow:0 0 20px #ff00f7; }
-.msg-controls { display:flex; gap:12px; margin-top:4px; padding:0 10px; font-size:11px; color:#8b949e; }
+.msg { 
+    padding: 15px; border-radius: 18px; line-height: 1.6; font-size: 14px; word-wrap: break-word; transition: .3s;
+    backdrop-filter: blur(5px);
+}
+/* AI Message - Dark Blue Style */
+.ai-msg { 
+    align-self: flex-start; 
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent); 
+    background: linear-gradient(135deg, var(--panel), rgba(2, 6, 23, 0.8));
+    color: var(--text-light); 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+/* User Message - Bright Blue Gradient */
+.user-msg { 
+    align-self: flex-end; 
+    background: linear-gradient(135deg, var(--accent-alt), var(--accent)); 
+    color: #fff; 
+    border: none; 
+    box-shadow: 0 5px 15px rgba(0, 102, 255, 0.4);
+}
+.msg-controls { display:flex; gap:12px; margin-top:4px; padding:0 10px; font-size:11px; color:#64748b; }
 .ctrl-btn { cursor:pointer; transition:.2s; } .ctrl-btn:hover { color:var(--accent); }
 
-/* CODE */
-.code-container { border-radius:12px; overflow:hidden; margin:15px 0; border:1px solid var(--accent); background:#111; width:100%; box-shadow:var(--neon-glow); }
-.code-header { background:#0a0a0a; padding:8px 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--accent); }
-.btn-action { font-size:10px; font-weight:bold; padding:4px 8px; border-radius:6px; background:#222; color:#fff; border:1px solid var(--accent); cursor:pointer; transition:.2s; }
-.btn-action:hover { box-shadow:var(--neon-glow); }
+/* CODE BLOCKS */
+.code-container { border-radius:12px; overflow:hidden; margin:15px 0; border:1px solid var(--border); background: #000; width:100%; box-shadow: 0 0 20px rgba(0, 102, 255, 0.1); }
+.code-header { background: var(--panel); padding:8px 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); }
+.code-header span { color: var(--accent) !important; }
+.btn-action { font-size:10px; font-weight:bold; padding:4px 8px; border-radius:6px; background: rgba(0, 102, 255, 0.2); color: var(--accent); border:1px solid var(--border); cursor:pointer; transition:.2s; }
+.btn-action:hover { background: var(--accent); color: var(--text-dark); box-shadow: var(--neon-glow); }
 
-/* INPUT */
-.footer-input { background:linear-gradient(to top,#050505 0%,#111 100%); padding:env(safe-area-inset-bottom,15px) 15px 15px 15px; border-top:1px solid var(--accent); }
-.footer-input-inner { max-width:860px; margin:0 auto; background:#111; border-radius:20px; padding:6px; border:1px solid var(--accent-alt); display:flex; align-items:flex-end; gap:8px; flex-wrap:wrap; }
+/* INPUT AREA */
+.footer-input { 
+    background: linear-gradient(to top, var(--bg) 0%, rgba(11, 17, 36, 0.8) 100%);
+    padding: env(safe-area-inset-bottom, 15px) 15px 15px 15px; 
+    border-top: 1px solid var(--border); 
+}
+.footer-input-inner { 
+    max-width: 860px; margin: 0 auto; 
+    background: rgba(11, 17, 36, 0.5); /* Mais transparente */
+    border-radius: 20px; padding: 6px; 
+    border: 1px solid var(--border); 
+    display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap; 
+    backdrop-filter: blur(10px);
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.3);
+}
 
 /* VOICE BAR */
-.voice-bar { display:flex; align-items:center; gap:8px; padding:6px 10px; background:#0a0a0a; border-radius:14px; border:1px solid #2a2a2a; width:100%; box-sizing:border-box; }
-.voice-bar select { background:#111; color:var(--accent); border:1px solid #333; border-radius:8px; padding:5px 8px; font-size:12px; outline:none; cursor:pointer; flex:1; min-width:0; }
-.voice-bar select option { background:#111; color:var(--text-light); }
-.voice-bar label { font-size:11px; color:#666; white-space:nowrap; }
+.voice-bar { display:flex; align-items:center; gap:8px; padding:6px 10px; background: rgba(2, 6, 23, 0.6); border-radius:14px; border:1px solid var(--border); width:100%; box-sizing:border-box; }
+.voice-bar select { background: transparent; color: var(--accent); border: 1px solid var(--border); border-radius: 8px; padding: 5px 8px; font-size: 12px; outline: none; cursor: pointer; flex: 1; min-width: 0; }
+.voice-bar select option { background: var(--panel); color: var(--text-light); }
+.voice-bar label { font-size: 11px; color: #64748b; white-space: nowrap; }
 
 textarea { flex:1; min-width:120px; background:transparent; border:none; outline:none; color:var(--text-light); font-size:14px; padding:12px; max-height:150px; resize:none; font-family:inherit; }
-button.send-btn { background:linear-gradient(45deg,#00ffe7,#ff00f7); color:#111; padding:12px 20px; border-radius:12px; font-weight:bold; transition:.3s; box-shadow:var(--neon-glow); border:none; cursor:pointer; font-size:16px; }
-button.send-btn:hover { transform:translateY(-2px) scale(1.02); }
+textarea::placeholder { color: #475569; }
+button.send-btn { 
+    background: linear-gradient(135deg, var(--accent), var(--accent-alt)); 
+    color: #fff; 
+    padding: 12px 20px; border-radius: 12px; font-weight: bold; transition: .3s; 
+    box-shadow: 0 0 10px rgba(0, 234, 255, 0.3);
+    border: none; cursor: pointer; font-size: 16px; 
+}
+button.send-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: var(--neon-glow); }
 
-/* IMAGE */
-.img-loader { width:100%; aspect-ratio:1/1; background:linear-gradient(90deg,#0a0a0a 25%,#111 50%,#0a0a0a 75%); background-size:200% 100%; animation:loading 1.5s infinite; border-radius:12px; border:1px solid var(--accent); display:flex; align-items:center; justify-content:center; color:#00ffe7; font-size:12px; }
-.art-img { border-radius:12px; border:1px solid var(--accent); margin:10px 0; max-width:100%; box-shadow:0 0 30px var(--accent); display:none; }
+/* IMAGE LOADER & ART */
+.img-loader { width:100%; aspect-ratio:1/1; background: linear-gradient(90deg, var(--panel) 25%, var(--border) 50%, var(--panel) 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 12px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.art-img { border-radius:12px; border:1px solid var(--border); margin:10px 0; max-width:100%; box-shadow: 0 0 30px rgba(0, 102, 255, 0.2); display:none; }
 
-/* AUDIO PLAYER */
-.audio-player { display:flex; align-items:center; gap:10px; background:linear-gradient(135deg,#0d1117,#161b22); border:1px solid var(--accent); border-radius:14px; padding:12px 14px; margin:8px 0; width:100%; box-sizing:border-box; box-shadow:0 0 18px rgba(0,255,231,.25); }
-.audio-player .play-btn { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent-alt)); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:17px; color:#111; transition:.2s; flex-shrink:0; }
-.audio-player .play-btn:hover { transform:scale(1.1); box-shadow:var(--neon-glow); }
-.audio-player .audio-info { min-width:0; flex-shrink:1; max-width:140px; }
-.audio-player .audio-label { font-size:12px; color:var(--accent); font-weight:600; }
-.audio-player .audio-voice { font-size:10px; color:#555; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.audio-player .progress-wrap { flex:1; display:flex; flex-direction:column; gap:4px; min-width:0; }
-.audio-player .audio-progress-bg { height:4px; background:#222; border-radius:2px; position:relative; cursor:pointer; }
-.audio-player .audio-progress-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent-alt)); border-radius:2px; transition:width .15s linear; pointer-events:none; }
-.audio-player .audio-time { font-size:10px; color:#555; text-align:right; }
-.audio-player .dl-btn { background:none; border:1px solid #333; color:#777; border-radius:8px; padding:5px 9px; font-size:11px; cursor:pointer; transition:.2s; white-space:nowrap; flex-shrink:0; }
-.audio-player .dl-btn:hover { border-color:var(--accent); color:var(--accent); }
+/* AUDIO PLAYER - Blue Theme */
+.audio-player { 
+    display: flex; align-items: center; gap: 10px; 
+    background: linear-gradient(135deg, var(--panel), rgba(30, 58, 138, 0.3));
+    border: 1px solid var(--border); 
+    border-radius: 14px; padding: 12px 14px; margin: 8px 0; width: 100%; box-sizing: border-box; 
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+.audio-player .play-btn { 
+    width: 40px; height: 40px; border-radius: 50%; 
+    background: linear-gradient(135deg, var(--accent), var(--accent-alt)); 
+    border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 17px; 
+    color: #fff; transition: .2s; flex-shrink: 0; box-shadow: 0 0 10px rgba(0, 234, 255, 0.4);
+}
+.audio-player .play-btn:hover { transform: scale(1.1); box-shadow: var(--neon-glow); }
+.audio-player .audio-info { min-width: 0; flex-shrink: 1; max-width: 140px; }
+.audio-player .audio-label { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; }
+.audio-player .audio-voice { font-size: 10px; color: #94a3b8; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.audio-player .progress-wrap { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.audio-player .audio-progress-bg { height: 4px; background: rgba(0,0,0,0.3); border-radius: 2px; position: relative; cursor: pointer; overflow: hidden; }
+.audio-player .audio-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent-alt)); border-radius: 2px; transition: width .15s linear; pointer-events: none; box-shadow: 0 0 10px var(--accent); }
+.audio-player .audio-time { font-size: 10px; color: #94a3b8; text-align: right; }
+.audio-player .dl-btn { background: rgba(0, 102, 255, 0.1); border: 1px solid var(--border); color: var(--accent); border-radius: 8px; padding: 5px 9px; font-size: 11px; cursor: pointer; transition: .2s; white-space: nowrap; flex-shrink: 0; }
+.audio-player .dl-btn:hover { background: var(--accent); color: var(--text-dark); box-shadow: var(--neon-glow); }
 
 /* ANIMATIONS */
 @keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
@@ -95,28 +201,28 @@ button.send-btn:hover { transform:translateY(-2px) scale(1.02); }
 
 <aside class="sidebar p-4" id="sidebar">
     <div class="btn-new" onclick="startNewChat()">+ NOVA CONVERSA</div>
-    <h2 class="text-[10px] font-bold text-gray-500 uppercase mb-4 tracking-widest">Histórico Local</h2>
-    <div id="historyList" class="flex-1 overflow-y-auto pr-1"></div>
-    <div class="mt-auto pt-4 border-t border-zinc-800 space-y-2">
-        <h2 class="text-[9px] font-bold text-gray-600 uppercase mb-2">Minhas Irmãs</h2>
-        <a href="https://zenia-projects.netlify.app" target="_blank" class="block text-xs text-blue-400 hover:underline">🌐 Zenia Projects</a>
-        <a href="https://ia-zenia.netlify.app" target="_blank" class="block text-xs text-blue-400 hover:underline">🌐 IA-Zénia Web</a>
-        <a href="https://antonia-ia.netlify.app" target="_blank" class="block text-xs text-blue-400 hover:underline">🌐 Antónia IA</a>
+    <h2 class="text-[10px] font-bold text-slate-400 uppercase mb-4 tracking-widest">Histórico Local</h2>
+    <div id="historyList" class="flex-1 overflow-y-auto pr-1 custom-scrollbar"></div>
+    <div class="mt-auto pt-4 border-t border-slate-800 space-y-2">
+        <h2 class="text-[9px] font-bold text-slate-500 uppercase mb-2">Minhas Irmãs</h2>
+        <a href="https://zenia-projects.netlify.app" target="_blank" class="block text-xs text-blue-400 hover:text-blue-300 transition">🌐 Zenia Projects</a>
+        <a href="https://ia-zenia.netlify.app" target="_blank" class="block text-xs text-blue-400 hover:text-blue-300 transition">🌐 IA-Zénia Web</a>
+        <a href="https://antonia-ia.netlify.app" target="_blank" class="block text-xs text-blue-400 hover:text-blue-300 transition">🌐 Antónia IA</a>
     </div>
 </aside>
 
 <main class="main-content">
-    <header class="p-4 border-b border-zinc-800 flex justify-between items-center bg-black/30">
+    <header class="p-4 border-b border-slate-800 flex justify-between items-center bg-black/30 backdrop-blur-md z-10">
         <div class="flex items-center gap-4">
             <button onclick="toggleSidebar()" class="md:hidden text-white font-bold text-lg">☰</button>
-            <h1 class="text-xl font-black italic">IA-ZÉNIA <span class="text-blue-500 text-xs font-normal">ALL.ANGOLA</span></h1>
+            <h1 class="text-xl font-black italic tracking-wider">IA-ZÉNIA <span class="text-blue-500 text-xs font-normal" style="text-shadow: 0 0 10px rgba(0,234,255,0.5);">ALL.ANGOLA</span></h1>
         </div>
-        <button onclick="clearAllData()" class="text-[10px] text-red-500 font-bold hover:underline">APAGAR TUDO</button>
+        <button onclick="clearAllData()" class="text-[10px] text-red-500 font-bold hover:underline tracking-wider transition hover:text-red-400">APAGAR TUDO</button>
     </header>
 
-    <div id="chatBox" class="chat-container"></div>
+    <div id="chatBox" class="chat-container custom-scrollbar"></div>
 
-    <div class="footer-input">
+    <div class="footer-input z-20">
         <div class="footer-input-inner">
             <div class="voice-bar">
                 <label>🎤 Voz:</label>
@@ -134,8 +240,8 @@ button.send-btn:hover { transform:translateY(-2px) scale(1.02); }
     </div>
 </main>
 
-<div style="position:fixed;top:10px;right:15px;padding:10px 18px;background:#000000aa;color:#00ffe7;border:1px solid #00ffe7;border-radius:12px;font-size:13px;font-weight:bold;backdrop-filter:blur(6px);box-shadow:0 0 20px #00ffe799;z-index:9999;">
-    🔵 Visitantes: <span id="viewsNumber">0</span>
+<div style="position:fixed;top:10px;right:15px;padding:8px 15px;background:rgba(2, 6, 23, 0.8);color:var(--accent);border:1px solid var(--accent);border-radius:20px;font-size:12px;font-weight:bold;backdrop-filter:blur(10px);box-shadow:0 0 20px rgba(0, 234, 255, 0.3);z-index:9999; letter-spacing: 1px;">
+    🔵 <span id="viewsNumber">0</span> VISITANTES
 </div>
 
 <script>
@@ -250,7 +356,7 @@ function loadSession(id){
             else if(m.text.startsWith('[AUDIO_TTS]')){
                 var ph=document.createElement('div');
                 ph.className='msg-wrapper ai-wrapper';
-                ph.innerHTML='<div class="msg ai-msg" style="font-size:12px;color:#555;">🔊 Áudio foi gerado (não salvo no histórico).</div>';
+                ph.innerHTML='<div class="msg ai-msg" style="font-size:12px;color:#94a3b8;">🔊 Áudio foi gerado (não salvo no histórico).</div>';
                 chatBox.appendChild(ph);
             }
             else processResponse(m.text,"");
@@ -289,7 +395,6 @@ async function handleSend(textOverride){
     // ── IMAGEM (CORRIGIDO URL) ──
     if(isImageRequest(query)){
         var loadI=addMessage("🎨 Zénia está a pintar…",false);
-        // CORREÇÃO: Adicionado /prompt/ na URL para evitar erro 404
         var seed = Math.floor(Math.random()*99999);
         var cleanQuery = encodeURIComponent(query);
         var imgUrl = `https://image.pollinations.ai/prompt/${cleanQuery}?width=1024&height=1024&seed=${seed}&nologo=true&model=flux`;
@@ -315,24 +420,18 @@ async function handleSend(textOverride){
 async function generateAudio(text, originalQuery, loadingWrapper){
     var voice=voiceSelect.value;
     
-    // Fallback Imediato para Voz Nativa se selecionado ou se a API falhar
     if(voice === 'native') {
         loadingWrapper.remove();
         speakNative(text, originalQuery);
         return;
     }
 
-    // Tentar API Pollinations
-    // URL Corrigida: Muitas vezes a endpoint 'text' precisa de tratamento especial
-    // Vamos usar a endpoint que retorna o buffer
     var url=`https://text.pollinations.ai/${encodeURIComponent(text)}?model=openai-audio&voice=${voice}`;
     
     try{
         var res=await fetch(url);
         if(!res.ok) throw new Error('API Busy');
         var blob=await res.blob();
-        
-        // Verifica se o blob é audio válido (as vezes retorna JSON de erro)
         if(blob.type.includes('json') || blob.size < 100) throw new Error('Invalid Audio');
 
         var objUrl=URL.createObjectURL(blob);
@@ -340,7 +439,6 @@ async function generateAudio(text, originalQuery, loadingWrapper){
         createAudioPlayer(objUrl, voice, text, originalQuery);
 
     } catch(err){
-        // FALLBACK AUTOMÁTICO PARA VOZ NATIVA
         loadingWrapper.querySelector('.msg').innerText = "⚠️ API ocupada. Usando voz nativa de Angola...";
         setTimeout(() => {
             loadingWrapper.remove();
@@ -351,11 +449,10 @@ async function generateAudio(text, originalQuery, loadingWrapper){
 
 function speakNative(text, originalQuery){
     var u = new SpeechSynthesisUtterance(text);
-    u.lang = 'pt-PT'; // Sotaque mais próximo
+    u.lang = 'pt-PT';
     u.rate = 1.1;
     u.pitch = 1.0;
     
-    // Criar player visual falso para consistência
     var wrapper=document.createElement('div');
     wrapper.className='msg-wrapper ai-wrapper';
     wrapper.innerHTML = `<div class="msg ai-msg">🔊 <b>Falando (Nativo):</b> "${escapeHTML(text)}"</div>`;
@@ -461,7 +558,6 @@ function processResponse(text,query){
         }
     });
 
-    // Controls
     var ctrl=document.createElement('div');
     ctrl.className='msg-controls';
     ctrl.innerHTML='<span class="ctrl-btn" onclick="handleSend('+JSON.stringify(query).replace(/"/g, '&quot;')+')">🔄 Reenviar</span> <span class="ctrl-btn" onclick="this.closest(\'.msg-wrapper\').remove()">🗑</span>';
@@ -483,7 +579,7 @@ function createCodeBlock(code,lang){
     div.className='code-container';
     div.innerHTML=
         '<div class="code-header">'+
-            '<span class="text-xs font-bold text-blue-400 uppercase">'+escapeHTML(lang)+'</span>'+
+            '<span class="text-xs font-bold uppercase" style="color:var(--accent)">'+escapeHTML(lang)+'</span>'+
             '<button class="btn-action" onclick="navigator.clipboard.writeText(codeStore.get(\''+id+'\'))">COPIAR</button>'+
         '</div>'+
         '<pre><code class="language-'+lang+'">'+escapeHTML(code)+'</code></pre>';
