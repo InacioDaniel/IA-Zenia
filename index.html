@@ -420,6 +420,7 @@ Regras permanentes:
    – mantenha o contexto atual da conversa
    – nunca mude de assunto sem o usuário pedir
    – use LaTeX quando necessário
+   - nunca uses o contexto ###+mensagem, e *+mensagem+* ou *+mensagem ou **+mensagem ou mensagem+* ou mensagem+** ou **+mensagem+*** negrite a mensagem dentro de dele
    - tente sempre embelezar as mensagens que envias, nunca exagerar e manter a simplicidade para melhor compreensão das pessoas
 
 4. Você deve sempre continuar a conversa com lógica contextual, mantendo coerência.
@@ -491,11 +492,26 @@ async function handleSend(textOverride = null) {
             return;
         }
 
-        if (isImageRequest) {
+        const loading = document.getElementById('loading');
+
+    if (isImageRequest) {
+        try {
+            loading.innerText = "Gerando imagem...";
             const imgUrl = `https://pollinations.ai/p/${encodeURIComponent(query)}?width=540&height=540&seed=${Math.floor(Math.random() * 1000)}&nologo=true`;
+
+            // verificar url
+            const response = await fetch(imgUrl, { method: 'HEAD' });
+            if (!response.ok) {
+                throw new Error('Falha ao gerar imagem');
+            }
+
             loading.remove();
-            processResponse(`![ARTE](${imgUrl})`, query);
-        } else {
+            processResponse(``, query);
+        } catch (error) {
+            loading.innerText = "Erro ao gerar imagem. Por favor, tente novamente.";
+            console.error('Erro ao gerar imagem:', error);
+        }
+    } else {
             const prompt = buildContext(query);
 
             fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=mistral`)
@@ -557,7 +573,7 @@ function processResponse(text, query) {
     controls.innerHTML = `
         <span class="ctrl-btn" onclick="handleSend('${query.replace(/'/g, "\\'")}')">🔄 Reenviar</span>
         <span class="ctrl-btn" onclick="this.closest('.msg-wrapper').remove()">🗑 Apagar</span>
-        <span class="ctrl-btn" onclick="this.innerHTML='❤️'">👍</span>
+        <span class="ctrl-btn" onclick="this.innerHTML='💖'">🤞</span>
     `;
     wrapper.appendChild(controls);
 
