@@ -492,26 +492,11 @@ async function handleSend(textOverride = null) {
             return;
         }
 
-        const loading = document.getElementById('loading');
-
-    if (isImageRequest) {
-        try {
-            loading.innerText = "Gerando imagem...";
+        if (isImageRequest) {
             const imgUrl = `https://pollinations.ai/p/${encodeURIComponent(query)}?width=540&height=540&seed=${Math.floor(Math.random() * 1000)}&nologo=true`;
-
-            // verificar url
-            const response = await fetch(imgUrl, { method: 'HEAD' });
-            if (!response.ok) {
-                throw new Error('Falha ao gerar imagem');
-            }
-
             loading.remove();
-            processResponse(``, query);
-        } catch (error) {
-            loading.innerText = "Erro ao gerar imagem. Por favor, tente novamente.";
-            console.error('Erro ao gerar imagem:', error);
-        }
-    } else {
+            processResponse(`![ARTE](${imgUrl})`, query);
+        } else {
             const prompt = buildContext(query);
 
             fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=mistral`)
@@ -528,7 +513,6 @@ async function handleSend(textOverride = null) {
         loading.innerText = "Erro na conexão.";
     }
 }
-
 // Renderizar respostas da IA
 function processResponse(text, query) {
     const wrapper = document.createElement('div');
