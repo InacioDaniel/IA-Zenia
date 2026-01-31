@@ -44,12 +44,13 @@ body {
     border-right: 1px solid var(--border); 
     display: flex; flex-direction: column; transition: .3s; 
     box-shadow: 5px 0 15px rgba(0, 102, 255, 0.1);
-    z-index: 100; /* Garante que fica acima de tudo */
+    z-index: 100;
 }
 @media(max-width:768px){ 
     .sidebar{position:fixed;left:-100%;top:0;height:100%; width: 85%; max-width: 300px; box-shadow: 10px 0 50px rgba(0,0,0,0.8);} 
     .sidebar.active{left:0;} 
-    /* Backdrop para fechar sidebar ao clicar fora */
+    
+    /* Overlay para fechar sidebar */
     .sidebar-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0,0,0,0.7); backdrop-filter: blur(3px);
@@ -99,7 +100,7 @@ body {
 .btn-close-sidebar {
     display: none;
     margin-bottom: 15px; padding: 10px; 
-    background: rgba(255, 51, 102, 0.2); border: 1px solid #ff3366; 
+    background: rgba(255, 51, 102, 0.1); border: 1px solid #ff3366; 
     color: #ff3366; font-weight: bold; border-radius: 8px; text-align: center; cursor: pointer;
 }
 @media(max-width:768px){ .btn-close-sidebar{display:block;} }
@@ -135,15 +136,15 @@ body {
 .btn-action { font-size:10px; font-weight:bold; padding:4px 8px; border-radius:6px; background: rgba(0, 102, 255, 0.2); color: var(--accent); border:1px solid var(--border); cursor:pointer; transition:.2s; }
 .btn-action:hover { background: var(--accent); color: var(--text-dark); box-shadow: var(--neon-glow); }
 
-/* INPUT AREA - REESTRUTURADO PARA MOBILE */
+/* INPUT AREA - REESTRUTURADO */
 .footer-input { 
-    background: linear-gradient(to top, var(--bg) 0%, rgba(11, 17, 36, 0.95) 100%);
+    background: linear-gradient(to top, var(--bg) 0%, rgba(11, 17, 36, 0.98) 100%);
     padding: env(safe-area-inset-bottom, 10px) 10px 10px 10px; 
     border-top: 1px solid var(--border); 
 }
 .footer-input-inner { 
     max-width: 860px; margin: 0 auto; 
-    background: rgba(11, 17, 36, 0.5);
+    background: rgba(11, 17, 36, 0.6);
     border-radius: 20px; padding: 8px; 
     border: 1px solid var(--border); 
     display: flex; flex-direction: column; gap: 8px; 
@@ -151,12 +152,13 @@ body {
     box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.3);
 }
 
+/* Voice Bar */
 .voice-bar { display:flex; align-items:center; gap:8px; padding:6px 10px; background: rgba(2, 6, 23, 0.6); border-radius:12px; border:1px solid var(--border); width:100%; box-sizing:border-box; }
 .voice-bar select { background: transparent; color: var(--accent); border: none; font-size: 12px; outline: none; cursor: pointer; flex: 1; }
 .voice-bar select option { background: var(--panel); color: var(--text-light); }
 .voice-bar label { font-size: 11px; color: #64748b; white-space: nowrap; }
 
-/* LINHA DE INPUT E BOTÕES */
+/* Área Flexivel para Input e Botões */
 .input-row {
     display: flex; gap: 8px; width: 100%; align-items: flex-end;
 }
@@ -170,7 +172,7 @@ textarea {
 }
 textarea::placeholder { color: #475569; }
 
-/* Botões de Ação */
+/* Botões */
 button.action-btn { 
     width: 44px; height: 44px;
     border-radius: 12px; font-weight: bold; transition: .3s; 
@@ -178,7 +180,6 @@ button.action-btn {
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
 }
-/* Botão Enviar */
 button.send-btn {
     background: linear-gradient(135deg, var(--accent), var(--accent-alt)); 
     color: #fff; 
@@ -186,35 +187,23 @@ button.send-btn {
 }
 button.send-btn:hover { transform: scale(1.05); box-shadow: var(--neon-glow); }
 
-/* Botão Upload Imagem */
 button.upload-btn {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
     color: var(--accent);
     border: 1px solid var(--border);
 }
 button.upload-btn:hover { background: rgba(0, 234, 255, 0.1); border-color: var(--accent); }
 
-/* IMAGE PREVIEW IN CHAT */
-.img-preview-msg { max-width: 200px; border-radius: 12px; border: 1px solid var(--border); margin-top: 5px; }
+/* Preview de imagem no chat */
+.img-preview-msg { max-width: 150px; border-radius: 8px; border: 1px solid var(--border); margin-top: 5px; opacity: 0.8; }
 
 /* IMAGE LOADER & ART */
 .img-loader { width:100%; aspect-ratio:1/1; background: linear-gradient(90deg, var(--panel) 25%, var(--border) 50%, var(--panel) 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 12px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
 .art-img { border-radius:12px; border:1px solid var(--border); margin:10px 0; max-width:100%; box-shadow: 0 0 30px rgba(0, 102, 255, 0.2); display:none; }
 
 /* AUDIO PLAYER */
-.audio-player { 
-    display: flex; align-items: center; gap: 10px; 
-    background: linear-gradient(135deg, var(--panel), rgba(30, 58, 138, 0.3));
-    border: 1px solid var(--border); 
-    border-radius: 14px; padding: 12px 14px; margin: 8px 0; width: 100%; box-sizing: border-box; 
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-.audio-player .play-btn { 
-    width: 40px; height: 40px; border-radius: 50%; 
-    background: linear-gradient(135deg, var(--accent), var(--accent-alt)); 
-    border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 17px; 
-    color: #fff; transition: .2s; flex-shrink: 0; box-shadow: 0 0 10px rgba(0, 234, 255, 0.4);
-}
+.audio-player { display: flex; align-items: center; gap: 10px; background: linear-gradient(135deg, var(--panel), rgba(30, 58, 138, 0.3)); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; margin: 8px 0; width: 100%; box-sizing: border-box; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
+.audio-player .play-btn { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-alt)); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 17px; color: #fff; transition: .2s; flex-shrink: 0; box-shadow: 0 0 10px rgba(0, 234, 255, 0.4); }
 .audio-player .audio-info { min-width: 0; flex-shrink: 1; max-width: 140px; }
 .audio-player .audio-label { font-size: 12px; color: var(--accent); font-weight: 600; }
 .audio-player .audio-voice { font-size: 10px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -224,16 +213,15 @@ button.upload-btn:hover { background: rgba(0, 234, 255, 0.1); border-color: var(
 .audio-player .audio-time { font-size: 10px; color: #94a3b8; text-align: right; }
 .audio-player .dl-btn { background: rgba(0, 102, 255, 0.1); border: 1px solid var(--border); color: var(--accent); border-radius: 8px; padding: 5px 9px; font-size: 11px; cursor: pointer; transition: .2s; white-space: nowrap; flex-shrink: 0; }
 
-/* ANIMATIONS */
 @keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
 @keyframes loading{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
 /* RESPONSIVE FIXES */
 @media(max-width:768px){
     .chat-container{padding:15px} .msg{font-size:14px}
-    /* Mobile Input Layout Logic */
-    .footer-input-inner { gap: 6px; }
-    .voice-bar { order: -1; } /* Voice bar always top inside footer */
+    /* No mobile a barra de voz vai pro topo, input fica embaixo */
+    .footer-input-inner { gap: 8px; }
+    .voice-bar { order: -1; margin-bottom: 2px; } 
 }
 </style>
 </head>
@@ -318,19 +306,20 @@ let sessions        = JSON.parse(localStorage.getItem('zenia_sessions')||'[]');
 let currentSessionId = null;
 const codeStore     = new Map();
 let  codeIdCounter  = 0;
+let  pendingImage   = null; // Armazena a imagem em base64 para envio
 
 /* ============================================================
    SYSTEM PROMPT
 ============================================================ */
 const ZENIA_SYSTEM = `Você é IA-ZÉNIA do Lubango. Criada por @inacio.u.daniel fundador do zénia-projects.
 Regras permanentes:
-0. Foste criada pelo Zénia-Projects team fundado por Inácio Daniel.
+0. Foste criada pelo Zénia-Projects team.
 1. Angola possui 21 províncias.
 2. Modo CRIADOR ativa-se com código especial.
 3. Mantenha contexto.
 4. Geras imagens ultra realistas.
-5. Se o usuário pedir para CRIAR MÚSICA, escreva uma letra de música criativa e rítmica (máximo 4 estrofes).
-6. Se o usuário enviou uma imagem, analise o contexto que ele der.`;
+5. Se o usuário pedir para CRIAR MÚSICA, escreva uma letra de música criativa e rítmica.
+6. Se o usuário enviar uma imagem, descreva-a com detalhes e responda a pergunta dele.`;
 
 /* ============================================================
    DETECTION
@@ -363,7 +352,7 @@ function escapeHTML(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 function formatTime(s){ if(isNaN(s))return'0:00'; var m=Math.floor(s/60),sec=Math.floor(s%60); return m+':'+(sec<10?'0':'')+sec; }
 
 /* ============================================================
-   SESSION
+   SESSION LOGIC
 ============================================================ */
 function init(){
     renderHistory();
@@ -374,7 +363,7 @@ function init(){
 
 function startNewChat(){
     currentSessionId=Date.now(); chatBox.innerHTML='';
-    addMessage("Onawa ! Sou a IA-ZÉNIA. O que vamos criar hoje? Música, Imagem ou Código?",false);
+    addMessage("Onawa ! Sou a IA-ZÉNIA. Posso ver imagens, criar músicas e desenhar. Como ajudo?",false);
     renderHistory();
 }
 
@@ -427,26 +416,44 @@ function deleteSession(e,id){ e.stopPropagation(); sessions=sessions.filter(func
 function clearAllData(){ if(confirm("Limpar tudo?")){ localStorage.clear(); location.reload(); } }
 
 /* ============================================================
-   IMAGE UPLOAD LOGIC
+   REAL IMAGE ANALYSIS (POST)
 ============================================================ */
 function handleImageUpload(input){
     if(input.files && input.files[0]){
+        // Compressão simples (Redimensionar se muito grande)
         var reader = new FileReader();
         reader.onload = function(e){
-            // 1. Mostrar a imagem no chat como mensagem do usuário
-            var wrapper = document.createElement('div');
-            wrapper.className = 'msg-wrapper user-wrapper';
-            wrapper.innerHTML = `
-                <div class="msg user-msg">
-                    📎 Imagem carregada:<br>
-                    <img src="${e.target.result}" class="img-preview-msg">
-                </div>`;
-            chatBox.appendChild(wrapper);
-            chatBox.scrollTop = chatBox.scrollHeight;
-            
-            // 2. Enviar prompt automático para a IA
-            var prompt = "Analise esta imagem que enviei (simulação: o usuário carregou uma foto). O que achas?";
-            handleSend(prompt, true); // true = hidden prompt text logic if needed, but here just normal flow
+            var img = new Image();
+            img.src = e.target.result;
+            img.onload = function() {
+                var canvas = document.createElement('canvas');
+                var ctx = canvas.getContext('2d');
+                var maxWidth = 800; // Limitar largura para não exceder limites da API
+                var scale = maxWidth / img.width;
+                if(scale < 1) {
+                    canvas.width = maxWidth;
+                    canvas.height = img.height * scale;
+                } else {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                }
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                pendingImage = canvas.toDataURL('image/jpeg', 0.7); // Salvar em variavel global
+                
+                // Mostrar preview
+                var wrapper = document.createElement('div');
+                wrapper.className = 'msg-wrapper user-wrapper';
+                wrapper.innerHTML = `
+                    <div class="msg user-msg">
+                        📎 Imagem anexada:<br>
+                        <img src="${pendingImage}" class="img-preview-msg">
+                    </div>`;
+                chatBox.appendChild(wrapper);
+                chatBox.scrollTop = chatBox.scrollHeight;
+                
+                userInput.placeholder = "Pergunte algo sobre a imagem...";
+                userInput.focus();
+            }
         }
         reader.readAsDataURL(input.files[0]);
     }
@@ -455,51 +462,82 @@ function handleImageUpload(input){
 /* ============================================================
    HANDLE SEND — PRINCIPAL
 ============================================================ */
-async function handleSend(textOverride, isImageContext){
+async function handleSend(textOverride){
     var query=(textOverride||userInput.value).trim();
-    if(!query) return;
+    if(!query && !pendingImage) return;
 
-    // Se não for override (upload de imagem), mostra a msg do usuário
-    if(!isImageContext) {
+    if(query) {
         addMessage(query,true);
         userInput.value=''; userInput.style.height='auto';
     }
 
-    // modo criador
+    // Modo Criador
     if(query==="Z77702UFUSHNXW99UWU7EBEEI99XHXZHHHHDIDOI875D4545D+´P++P+POP890'404R4PP+*@£§£§@§@§§"){
         processResponse("⚡ **Modo CRIADOR ativado.**",query);
         return;
     }
 
-    // ── MÚSICA ──
-    if(isMusicRequest(query)){
-        var loadM = addMessage("🎵 Zénia está a compor a letra da música...", false);
+    // ── ANÁLISE DE IMAGEM REAL (POST) ──
+    if(pendingImage) {
+        var loadV = addMessage("👁️ Zénia está a analisar a imagem...", false);
         try {
-            var promptMusica = "Escreve uma letra de música curta (máximo 4 estrofes), rítmica e rimada sobre: " + query + ". Apenas a letra, sem introduções.";
-            var res = await fetch('https://text.pollinations.ai/'+encodeURIComponent(buildContext(promptMusica))+'?model=mistral');
-            var lyrics = await res.text();
-            loadM.remove();
-            processResponse("🎵 **Letra Gerada:**\n\n" + lyrics, query);
-            var loadA = addMessage("🎵 A gravar vocal... (Aguarde)", false);
-            await generateAudio(lyrics, query, loadA, true);
+            // Requisição POST para API Pollinations (funciona como Proxy para GPT-4o Vision)
+            const response = await fetch("https://text.pollinations.ai/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    messages: [
+                        {
+                            role: "user",
+                            content: [
+                                { type: "text", text: query || "O que vês nesta imagem? Descreva detalhadamente." },
+                                { type: "image_url", image_url: { url: pendingImage } }
+                            ]
+                        }
+                    ],
+                    model: "openai" // Usa modelo com capacidade de visão
+                })
+            });
+            const text = await response.text();
+            loadV.remove();
+            processResponse(text, query + " [Imagem Enviada]");
+            pendingImage = null; // Limpar imagem após envio
+            userInput.placeholder = "Escreva aqui...";
         } catch(e) {
-            loadM.querySelector('.msg').innerText = "⚠️ Erro ao compor música.";
+            loadV.querySelector('.msg').innerText = "⚠️ Erro ao analisar imagem (muito grande ou API ocupada).";
+            pendingImage = null;
         }
         return;
     }
 
-    // ── ÁUDIO SIMPLES ──
+    // ── MÚSICA ──
+    if(isMusicRequest(query)){
+        var loadM = addMessage("🎵 Zénia está a compor...", false);
+        try {
+            var promptMusica = "Escreve uma letra de música curta (máximo 4 estrofes), rítmica e rimada sobre: " + query + ". Apenas a letra.";
+            var res = await fetch('https://text.pollinations.ai/'+encodeURIComponent(buildContext(promptMusica))+'?model=mistral');
+            var lyrics = await res.text();
+            loadM.remove();
+            processResponse("🎵 **Letra Gerada:**\n\n" + lyrics, query);
+            var loadA = addMessage("🎵 A gravar vocal...", false);
+            await generateAudio(lyrics, query, loadA, true);
+        } catch(e) {
+            loadM.querySelector('.msg').innerText = "⚠️ Erro ao compor.";
+        }
+        return;
+    }
+
+    // ── ÁUDIO ──
     if(isAudioRequest(query)){
         var txt=extractAudioText(query);
-        if(!txt){ addMessage("Escreva o texto para ler. Ex: diz: Olá Zénia",false); return; }
-        var loadA=addMessage("🔊 Zénia está a preparar a voz…",false);
+        var loadA=addMessage("🔊 Preparando voz...",false);
         await generateAudio(txt,query,loadA, false);
         return;
     }
 
-    // ── IMAGEM GERADA ──
+    // ── GERAR IMAGEM ──
     if(isImageRequest(query)){
-        var loadI=addMessage("🎨 Zénia está a pintar…",false);
+        var loadI=addMessage("🎨 A pintar...",false);
         var seed = Math.floor(Math.random()*99999);
         var cleanQuery = encodeURIComponent(query);
         var imgUrl = `https://image.pollinations.ai/prompt/${cleanQuery}?width=1024&height=1024&seed=${seed}&nologo=true&model=flux`;
@@ -508,15 +546,10 @@ async function handleSend(textOverride, isImageContext){
         return;
     }
 
-    // ── TEXTO NORMAL (Com contexto de imagem se houver) ──
-    var loadT=addMessage("Zénia está a pensar…",false);
-    var finalPrompt = query;
-    if(isImageContext) {
-        finalPrompt = "[Sistema: O usuário enviou uma imagem. Responda como se estivesse vendo-a, seja criativa.] " + query;
-    }
-
+    // ── TEXTO NORMAL (GET) ──
+    var loadT=addMessage("Zénia está a pensar...",false);
     try{
-        var res=await fetch('https://text.pollinations.ai/'+encodeURIComponent(buildContext(finalPrompt))+'?model=mistral');
+        var res=await fetch('https://text.pollinations.ai/'+encodeURIComponent(buildContext(query))+'?model=mistral');
         var text=await res.text();
         loadT.remove();
         processResponse(text,query);
@@ -543,11 +576,8 @@ async function generateAudio(text, originalQuery, loadingWrapper, isMusic){
         loadingWrapper.remove();
         createAudioPlayer(objUrl, voice, text, originalQuery, isMusic);
     } catch(err){
-        loadingWrapper.querySelector('.msg').innerText = "⚠️ API ocupada. Usando voz nativa de Angola...";
-        setTimeout(() => {
-            loadingWrapper.remove();
-            speakNative(text, originalQuery);
-        }, 1500);
+        loadingWrapper.querySelector('.msg').innerText = "⚠️ API ocupada. Usando voz nativa...";
+        setTimeout(() => { loadingWrapper.remove(); speakNative(text, originalQuery); }, 1500);
     }
 }
 
@@ -567,7 +597,7 @@ function createAudioPlayer(src, voice, text, originalQuery, isMusic){
     var wrapper=document.createElement('div');
     wrapper.className='msg-wrapper ai-wrapper';
     var icon = isMusic ? '🎵' : '🔊';
-    var label = isMusic ? 'Música Gerada (Vocal)' : 'Áudio Zénia';
+    var label = isMusic ? 'Música' : 'Áudio Zénia';
     var player=document.createElement('div');
     player.className='audio-player';
     if(isMusic) player.style.borderColor = 'var(--accent-alt)';
@@ -578,7 +608,7 @@ function createAudioPlayer(src, voice, text, originalQuery, isMusic){
         '<button class="play-btn" onclick="togglePlay(this)">▶</button>'+
         '<div class="audio-info">'+
             '<div class="audio-label">'+icon+' '+label+'</div>'+
-            '<div class="audio-voice">Voz: '+escapeHTML(voice)+'</div>'+
+            '<div class="audio-voice">'+escapeHTML(voice)+'</div>'+
         '</div>'+
         '<div class="progress-wrap">'+
             '<div class="audio-progress-bg" onclick="seekAudio(this,event)"><div class="audio-progress-fill"></div></div>'+
@@ -597,7 +627,6 @@ function createAudioPlayer(src, voice, text, originalQuery, isMusic){
         player.querySelector('.audio-time').textContent=formatTime(audio.currentTime);
     });
     audio.addEventListener('ended',function(){ player.querySelector('.play-btn').textContent='▶'; });
-
     chatBox.appendChild(wrapper);
     chatBox.scrollTop=chatBox.scrollHeight;
     saveSession(originalQuery, '[AUDIO_TTS] '+text);
@@ -639,7 +668,7 @@ function processResponse(text,query){
         var img=document.createElement('img');
         img.src=imgMatch[1]; img.className='art-img';
         img.onload=function(){ loader.remove(); img.style.display='block'; chatBox.scrollTop=chatBox.scrollHeight; };
-        img.onerror=function(){ loader.innerText='⚠️ Falha na imagem (Tente outra)'; };
+        img.onerror=function(){ loader.innerText='⚠️ Falha na imagem.'; };
         wrapper.appendChild(img);
         text=text.replace(imgMatch[0],'');
     }
