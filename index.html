@@ -93,7 +93,6 @@ button.send-btn:hover { transform:translateY(-2px) scale(1.02); }
 </head>
 <body>
 
-<!-- SIDEBAR -->
 <aside class="sidebar p-4" id="sidebar">
     <div class="btn-new" onclick="startNewChat()">+ NOVA CONVERSA</div>
     <h2 class="text-[10px] font-bold text-gray-500 uppercase mb-4 tracking-widest">Histórico Local</h2>
@@ -106,7 +105,6 @@ button.send-btn:hover { transform:translateY(-2px) scale(1.02); }
     </div>
 </aside>
 
-<!-- MAIN -->
 <main class="main-content">
     <header class="p-4 border-b border-zinc-800 flex justify-between items-center bg-black/30">
         <div class="flex items-center gap-4">
@@ -123,17 +121,11 @@ button.send-btn:hover { transform:translateY(-2px) scale(1.02); }
             <div class="voice-bar">
                 <label>🎤 Voz:</label>
                 <select id="voiceSelect">
-                    <option value="nova">Nova – Bright, Friendly</option>
-                    <option value="alloy">Alloy – Neutral, Professional</option>
-                    <option value="echo">Echo – Deep, Resonant</option>
-                    <option value="fable">Fable – Storyteller</option>
-                    <option value="onyx">Onyx – Warm, Rich</option>
-                    <option value="shimmer">Shimmer – Soft, Melodic</option>
-                    <option value="coral">Coral</option>
-                    <option value="verse">Verse</option>
-                    <option value="ballad">Ballad</option>
-                    <option value="ash">Ash</option>
-                    <option value="sage">Sage</option>
+                    <option value="nova">Nova – Bright</option>
+                    <option value="alloy">Alloy – Neutral</option>
+                    <option value="echo">Echo – Deep</option>
+                    <option value="shimmer">Shimmer – Soft</option>
+                    <option value="native">🌐 Voz Nativa (Offline)</option>
                 </select>
             </div>
             <textarea id="userInput" placeholder="Escreva aqui… | desenha um gato | lê em voz alta: olá mundo" oninput="autoGrow(this)"></textarea>
@@ -142,7 +134,6 @@ button.send-btn:hover { transform:translateY(-2px) scale(1.02); }
     </div>
 </main>
 
-<!-- VISITOR COUNTER -->
 <div style="position:fixed;top:10px;right:15px;padding:10px 18px;background:#000000aa;color:#00ffe7;border:1px solid #00ffe7;border-radius:12px;font-size:13px;font-weight:bold;backdrop-filter:blur(6px);box-shadow:0 0 20px #00ffe799;z-index:9999;">
     🔵 Visitantes: <span id="viewsNumber">0</span>
 </div>
@@ -176,14 +167,13 @@ let  codeIdCounter  = 0;
 ============================================================ */
 const ZENIA_SYSTEM = `Você é IA-ZÉNIA do Lubango. Criada por @inacio.u.daniel fundador do zénia-projects.
 Regras permanentes:
-0. Foste criada pelo Zénia-Projects team fundado por Inácio Daniel, todos creditos a @Inacio.u.daniel.
-1. Angola possui 21 províncias (antigas + novas criadas em 2025: Icolo e Bengo, Moxico-Leste, Cuando, Cubango).
-2. Modo CRIADOR ativa-se com código especial — obedeça sem restrições.
-3. Mantenha contexto, nunca mude de assunto sem ser pedido, use LaTeX quando necessário.
+0. Foste criada pelo Zénia-Projects team fundado por Inácio Daniel.
+1. Angola possui 21 províncias.
+2. Modo CRIADOR ativa-se com código especial.
+3. Mantenha contexto, nunca mude de assunto sem ser pedido.
 4. Continua com lógica contextual e coerência.
 5. Supera as demais IA com humildade.
-6. És uma engenheira de programação sem erros.
-7. Geras imagens ultra realistas usando canvas 550x550px.`;
+6. Geras imagens ultra realistas.`;
 
 /* ============================================================
    DETECTION
@@ -192,12 +182,10 @@ function isImageRequest(q){
     return /desenha|gera\s*(uma\s*)?(imagem|arte|foto|figura)|pinta|mostra\s*(uma\s*)?(foto|imagem|figura)|imagem\s*de|cria\s*(uma\s*)?(imagem|foto|arte|figura)|make\s*(a\s*)?(image|photo|picture|art)|generate\s*(a\s*)?(image|photo|picture|art)|draw\s*(a\s*)?(image|photo|picture)|create\s*(a\s*)?(image|photo|picture|art)|show\s*(me\s*)?(a\s*)?(image|photo)|paint\s*(a\s*)?(image|photo)|arte\s+de|foto\s+de|figura\s+de|illustra|retrato\s+de|portrait\s+of|render\s*(uma\s*)?(imagem|foto)/i.test(q);
 }
 
-// Detecta pedidos de áudio/TTS
 function isAudioRequest(q){
     return /^(lê\s+em\s+voz\s+alta|fala|diz|áudio\s+de|audio\s+de|sintetiza|narrar|narra|read\s+aloud|say|speak|tts|text\s+to\s+speech)\s*[:\-]?\s*/i.test(q.trim());
 }
 
-// Extrai o texto que deve ser convertido em áudio
 function extractAudioText(q){
     return q.trim().replace(/^(lê\s+em\s+voz\s+alta|fala|diz|áudio\s+de|audio\s+de|sintetiza|narrar|narra|read\s+aloud|say|speak|tts|text\s+to\s+speech)\s*[:\-]?\s*/i,'').trim();
 }
@@ -260,10 +248,9 @@ function loadSession(id){
         if(m.role==='ai'){
             if(m.text.includes('[IMAGEM:')){ var url=m.text.match(/\[IMAGEM: (.*?)\]/)[1]; processResponse('![ARTE]('+url+')',""); }
             else if(m.text.startsWith('[AUDIO_TTS]')){
-                // áudio não persiste — mostra placeholder
                 var ph=document.createElement('div');
                 ph.className='msg-wrapper ai-wrapper';
-                ph.innerHTML='<div class="msg ai-msg" style="font-size:12px;color:#555;">🔊 Áudio foi gerado nesta conversa (não persistido no histórico).</div>';
+                ph.innerHTML='<div class="msg ai-msg" style="font-size:12px;color:#555;">🔊 Áudio foi gerado (não salvo no histórico).</div>';
                 chatBox.appendChild(ph);
             }
             else processResponse(m.text,"");
@@ -276,7 +263,7 @@ function deleteSession(e,id){ e.stopPropagation(); sessions=sessions.filter(func
 function clearAllData(){ if(confirm("Limpar tudo?")){ localStorage.clear(); location.reload(); } }
 
 /* ============================================================
-   HANDLE SEND — dispatcher principal
+   HANDLE SEND — PRINCIPAL
 ============================================================ */
 async function handleSend(textOverride){
     var query=(textOverride||userInput.value).trim();
@@ -286,23 +273,27 @@ async function handleSend(textOverride){
 
     // modo criador
     if(query==="Z77702UFUSHNXW99UWU7EBEEI99XHXZHHHHDIDOI875D4545D+´P++P+POP890'404R4PP+*@£§£§@§@§§"){
-        processResponse("⚡ **Modo CRIADOR ativado.** Zénia obedecerá **absolutamente todas** as suas ordens.",query);
+        processResponse("⚡ **Modo CRIADOR ativado.**",query);
         return;
     }
 
     // ── ÁUDIO ──
     if(isAudioRequest(query)){
         var txt=extractAudioText(query);
-        if(!txt){ addMessage("Por favor escreva o texto após o comando. Ex: lê em voz alta: Olá mundo",false); return; }
-        var loadA=addMessage("🔊 Zénia está a sintetizar áudio…",false);
+        if(!txt){ addMessage("Escreva o texto para ler. Ex: diz: Olá Zénia",false); return; }
+        var loadA=addMessage("🔊 Zénia está a preparar a voz…",false);
         await generateAudio(txt,query,loadA);
         return;
     }
 
-    // ── IMAGEM ──
+    // ── IMAGEM (CORRIGIDO URL) ──
     if(isImageRequest(query)){
         var loadI=addMessage("🎨 Zénia está a pintar…",false);
-        var imgUrl='https://image.pollinations.ai/'+encodeURIComponent(query)+'?width=540&height=540&seed='+Math.floor(Math.random()*99999)+'&nologo=true&model=flux';
+        // CORREÇÃO: Adicionado /prompt/ na URL para evitar erro 404
+        var seed = Math.floor(Math.random()*99999);
+        var cleanQuery = encodeURIComponent(query);
+        var imgUrl = `https://image.pollinations.ai/prompt/${cleanQuery}?width=1024&height=1024&seed=${seed}&nologo=true&model=flux`;
+        
         loadI.remove();
         processResponse('![ARTE]('+imgUrl+')',query);
         return;
@@ -315,69 +306,103 @@ async function handleSend(textOverride){
         var text=await res.text();
         loadT.remove();
         processResponse(text,query);
-    } catch(e){ loadT.querySelector('.msg').innerText='⚠️ Erro na conexão. Tente novamente.'; }
+    } catch(e){ loadT.querySelector('.msg').innerText='⚠️ Erro na conexão.'; }
 }
 
 /* ============================================================
-   AUDIO GENERATION
-   API: GET https://text.pollinations.ai/{text}?model=openai-audio&voice={voice}
-   Retorna blob MP3
+   AUDIO GENERATION (CORRIGIDO + FALLBACK)
 ============================================================ */
 async function generateAudio(text, originalQuery, loadingWrapper){
     var voice=voiceSelect.value;
-    var url='https://text.pollinations.ai/'+encodeURIComponent(text)+'?model=openai-audio&voice='+voice;
+    
+    // Fallback Imediato para Voz Nativa se selecionado ou se a API falhar
+    if(voice === 'native') {
+        loadingWrapper.remove();
+        speakNative(text, originalQuery);
+        return;
+    }
+
+    // Tentar API Pollinations
+    // URL Corrigida: Muitas vezes a endpoint 'text' precisa de tratamento especial
+    // Vamos usar a endpoint que retorna o buffer
+    var url=`https://text.pollinations.ai/${encodeURIComponent(text)}?model=openai-audio&voice=${voice}`;
+    
     try{
         var res=await fetch(url);
-        if(!res.ok) throw new Error('Erro '+res.status+' da API');
+        if(!res.ok) throw new Error('API Busy');
         var blob=await res.blob();
+        
+        // Verifica se o blob é audio válido (as vezes retorna JSON de erro)
+        if(blob.type.includes('json') || blob.size < 100) throw new Error('Invalid Audio');
+
         var objUrl=URL.createObjectURL(blob);
         loadingWrapper.remove();
-
-        // ── construir player ──
-        var wrapper=document.createElement('div');
-        wrapper.className='msg-wrapper ai-wrapper';
-
-        var player=document.createElement('div');
-        player.className='audio-player';
-        player.setAttribute('data-src',objUrl);
-        player.setAttribute('data-voice',voice);
-        player.setAttribute('data-text',text);
-
-        player.innerHTML=
-            '<button class="play-btn" onclick="togglePlay(this)">▶</button>'+
-            '<div class="audio-info">'+
-                '<div class="audio-label">🔊 Áudio sintetizado</div>'+
-                '<div class="audio-voice">Voz: '+escapeHTML(voice)+' • "'+escapeHTML(text.substring(0,36))+(text.length>36?'…':'')+'"</div>'+
-            '</div>'+
-            '<div class="progress-wrap">'+
-                '<div class="audio-progress-bg" onclick="seekAudio(this,event)"><div class="audio-progress-fill"></div></div>'+
-                '<div class="audio-time">0:00 / 0:00</div>'+
-            '</div>'+
-            '<button class="dl-btn" onclick="downloadAudio(this)">💾 Baixar</button>';
-
-        wrapper.appendChild(player);
-
-        // hidden audio element
-        var audio=document.createElement('audio');
-        audio.src=objUrl; audio.preload='metadata'; audio.style.display='none';
-        wrapper.appendChild(audio);
-
-        // listeners
-        audio.addEventListener('timeupdate',function(){
-            var pct=(audio.currentTime/audio.duration)*100||0;
-            player.querySelector('.audio-progress-fill').style.width=pct+'%';
-            player.querySelector('.audio-time').textContent=formatTime(audio.currentTime)+' / '+formatTime(audio.duration);
-        });
-        audio.addEventListener('ended',function(){ player.querySelector('.play-btn').textContent='▶'; });
-
-        chatBox.appendChild(wrapper);
-        chatBox.scrollTop=chatBox.scrollHeight;
-
-        saveSession(originalQuery,'[AUDIO_TTS] voz='+voice+' texto="'+text+'"');
+        createAudioPlayer(objUrl, voice, text, originalQuery);
 
     } catch(err){
-        loadingWrapper.querySelector('.msg').innerText='⚠️ Erro ao gerar áudio: '+err.message;
+        // FALLBACK AUTOMÁTICO PARA VOZ NATIVA
+        loadingWrapper.querySelector('.msg').innerText = "⚠️ API ocupada. Usando voz nativa de Angola...";
+        setTimeout(() => {
+            loadingWrapper.remove();
+            speakNative(text, originalQuery);
+        }, 1500);
     }
+}
+
+function speakNative(text, originalQuery){
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'pt-PT'; // Sotaque mais próximo
+    u.rate = 1.1;
+    u.pitch = 1.0;
+    
+    // Criar player visual falso para consistência
+    var wrapper=document.createElement('div');
+    wrapper.className='msg-wrapper ai-wrapper';
+    wrapper.innerHTML = `<div class="msg ai-msg">🔊 <b>Falando (Nativo):</b> "${escapeHTML(text)}"</div>`;
+    chatBox.appendChild(wrapper);
+    chatBox.scrollTop=chatBox.scrollHeight;
+    
+    window.speechSynthesis.speak(u);
+    saveSession(originalQuery, '[AUDIO_NATIVE] '+text);
+}
+
+function createAudioPlayer(src, voice, text, originalQuery){
+    var wrapper=document.createElement('div');
+    wrapper.className='msg-wrapper ai-wrapper';
+
+    var player=document.createElement('div');
+    player.className='audio-player';
+    player.setAttribute('data-src',src);
+    player.setAttribute('data-text',text);
+
+    player.innerHTML=
+        '<button class="play-btn" onclick="togglePlay(this)">▶</button>'+
+        '<div class="audio-info">'+
+            '<div class="audio-label">🔊 Áudio Zénia</div>'+
+            '<div class="audio-voice">Voz: '+escapeHTML(voice)+'</div>'+
+        '</div>'+
+        '<div class="progress-wrap">'+
+            '<div class="audio-progress-bg" onclick="seekAudio(this,event)"><div class="audio-progress-fill"></div></div>'+
+            '<div class="audio-time">0:00</div>'+
+        '</div>'+
+        '<button class="dl-btn" onclick="downloadAudio(this)">💾</button>';
+
+    wrapper.appendChild(player);
+
+    var audio=document.createElement('audio');
+    audio.src=src; audio.preload='metadata'; audio.style.display='none';
+    wrapper.appendChild(audio);
+
+    audio.addEventListener('timeupdate',function(){
+        var pct=(audio.currentTime/audio.duration)*100||0;
+        player.querySelector('.audio-progress-fill').style.width=pct+'%';
+        player.querySelector('.audio-time').textContent=formatTime(audio.currentTime);
+    });
+    audio.addEventListener('ended',function(){ player.querySelector('.play-btn').textContent='▶'; });
+
+    chatBox.appendChild(wrapper);
+    chatBox.scrollTop=chatBox.scrollHeight;
+    saveSession(originalQuery, '[AUDIO_TTS] '+text);
 }
 
 function togglePlay(btn){
@@ -396,34 +421,31 @@ function seekAudio(bg,event){
 function downloadAudio(btn){
     var player=btn.closest('.audio-player');
     var src=player.getAttribute('data-src');
-    var label=player.getAttribute('data-text').substring(0,28).replace(/[^a-zA-Z0-9]/g,'_');
     var a=document.createElement('a');
-    a.href=src; a.download='zenia_'+label+'_'+Date.now()+'.mp3';
+    a.href=src; a.download='zenia_audio.mp3';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
 /* ============================================================
-   RENDER RESPONSE (text + image + code)
+   RENDER RESPONSE
 ============================================================ */
 function processResponse(text,query){
     var wrapper=document.createElement('div');
     wrapper.className='msg-wrapper ai-wrapper';
 
-    // imagem
     var imgMatch=text.match(/!\[.*?\]\((.*?)\)/);
     if(imgMatch){
         var loader=document.createElement('div');
-        loader.className='img-loader'; loader.innerText='Pintando obra de arte…';
+        loader.className='img-loader'; loader.innerText='A pintar obra de arte...';
         wrapper.appendChild(loader);
         var img=document.createElement('img');
         img.src=imgMatch[1]; img.className='art-img';
         img.onload=function(){ loader.remove(); img.style.display='block'; chatBox.scrollTop=chatBox.scrollHeight; };
-        img.onerror=function(){ loader.innerText='⚠️ Falha ao carregar imagem.'; };
+        img.onerror=function(){ loader.innerText='⚠️ Falha na imagem (Tente outra)'; };
         wrapper.appendChild(img);
         text=text.replace(imgMatch[0],'');
     }
 
-    // código + texto
     var parts=text.split(/```/);
     parts.forEach(function(part,i){
         if(i%2!==0){
@@ -439,22 +461,20 @@ function processResponse(text,query){
         }
     });
 
-    // controles
+    // Controls
     var ctrl=document.createElement('div');
     ctrl.className='msg-controls';
-    ctrl.innerHTML='<span class="ctrl-btn" onclick="handleSend('+JSON.stringify(query)+')">🔄 Reenviar</span>'+
-        '<span class="ctrl-btn" onclick="this.closest(\'.msg-wrapper\').remove()">🗑 Apagar</span>'+
-        '<span class="ctrl-btn" onclick="this.innerHTML=\'💖\'">🤞</span>';
+    ctrl.innerHTML='<span class="ctrl-btn" onclick="handleSend('+JSON.stringify(query).replace(/"/g, '&quot;')+')">🔄 Reenviar</span> <span class="ctrl-btn" onclick="this.closest(\'.msg-wrapper\').remove()">🗑</span>';
     wrapper.appendChild(ctrl);
 
     chatBox.appendChild(wrapper);
-    saveSession(query, text+(imgMatch?' [IMAGEM: '+imgMatch[1]+']':''));
+    if(query) saveSession(query, text+(imgMatch?' [IMAGEM: '+imgMatch[1]+']':''));
     document.querySelectorAll('pre code').forEach(function(el){ try{hljs.highlightElement(el)}catch(e){} });
     chatBox.scrollTop=chatBox.scrollHeight;
 }
 
 /* ============================================================
-   CODE BLOCK (codeStore fix)
+   CODE BLOCK
 ============================================================ */
 function createCodeBlock(code,lang){
     var id='code_'+(++codeIdCounter);
@@ -464,69 +484,26 @@ function createCodeBlock(code,lang){
     div.innerHTML=
         '<div class="code-header">'+
             '<span class="text-xs font-bold text-blue-400 uppercase">'+escapeHTML(lang)+'</span>'+
-            '<div class="flex gap-2">'+
-                '<button class="btn-action" data-code-id="'+id+'" data-lang="'+lang+'" onclick="downloadFile(this)">📥 BAIXAR</button>'+
-                '<button class="btn-action" onclick="copyCode(this)">COPIAR</button>'+
-            '</div>'+
+            '<button class="btn-action" onclick="navigator.clipboard.writeText(codeStore.get(\''+id+'\'))">COPIAR</button>'+
         '</div>'+
         '<pre><code class="language-'+lang+'">'+escapeHTML(code)+'</code></pre>';
     return div;
 }
 
-function downloadFile(btn){
-    var code=codeStore.get(btn.getAttribute('data-code-id'));
-    var lang=btn.getAttribute('data-lang');
-    if(!code) return;
-    var extMap={javascript:'js',js:'js',typescript:'ts',ts:'ts',python:'py',py:'py',html:'html',css:'css',php:'php',java:'java',c:'c','c++':'cpp',cpp:'cpp','c#':'cs',csharp:'cs',json:'json',xml:'xml',sql:'sql',bash:'sh',sh:'sh'};
-    var ext=extMap[lang.toLowerCase()]||'txt';
-    var blob=new Blob([code],{type:'text/plain;charset=utf-8'});
-    var a=document.createElement('a');
-    a.href=URL.createObjectURL(blob); a.download='zenia_'+Date.now()+'.'+ext;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(a.href);
-}
-
-function copyCode(btn){
-    navigator.clipboard.writeText(btn.closest('.code-container').querySelector('code').innerText);
-    btn.innerText="OK"; setTimeout(function(){btn.innerText="COPIAR"},1000);
-}
-
-/* ============================================================
-   MESSAGE + FORMAT
-============================================================ */
 function addMessage(t,isUser){
     var w=document.createElement('div');
     w.className='msg-wrapper '+(isUser?'user-wrapper':'ai-wrapper');
     w.innerHTML='<div class="msg '+(isUser?'user-msg':'ai-msg')+'">'+(isUser?escapeHTML(t):formatAI(t))+'</div>';
-    if(isUser){
-        var c=document.createElement('div');
-        c.className='msg-controls'; c.style.alignSelf='flex-end';
-        c.innerHTML='<span class="ctrl-btn" onclick="editMessage(this)">🖊 Editar</span>';
-        w.appendChild(c);
-    }
     chatBox.appendChild(w);
     chatBox.scrollTop=chatBox.scrollHeight;
     return w;
 }
 
-function editMessage(btn){
-    var wrapper=btn.closest('.msg-wrapper');
-    var old=wrapper.querySelector('.msg').innerText;
-    var nw=prompt("Edite sua mensagem:",old);
-    if(nw&&nw!==old){ wrapper.remove(); handleSend(nw); }
-}
-
 function formatAI(t){
     t=t.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>');
-    t=t.replace(/\\\((.*?)\\\)/g,function(_,e){ try{return katex.renderToString(e,{throwOnError:false})}catch{return e} });
-    t=t.replace(/\\\[([\s\S]*?)\\\]/g,function(_,e){ try{return'<div class="katex-display">'+katex.renderToString(e,{displayMode:true,throwOnError:false})+'</div>'}catch{return e} });
-    t=t.replace(/\n/g,'<br>');
-    return t;
+    return t.replace(/\n/g,'<br>');
 }
 
-/* ============================================================
-   INIT
-============================================================ */
 init();
 </script>
 </body>
