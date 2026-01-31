@@ -362,6 +362,12 @@ function loadVisitCounter() {
 loadVisitCounter();
 
 /* =====================================================
+    ARMAZENA CÓDIGOS GERADOS — resolve bug do download
+===================================================== */
+const codeStore = new Map();
+let codeIdCounter = 0;
+
+/* =====================================================
     FUNÇÕES DO SISTEMA 
 ===================================================== */
 
@@ -398,10 +404,10 @@ Regras permanentes:
 1. Angola possui 21 províncias:
    Antigas (mantidas): Luanda, Benguela, Huíla, Cunene, Namibe, Huambo, Bié, Moxico, Kwanza Norte, Kwanza Sul, Malanje, Lunda Norte, Lunda Sul, Zaire, Uíge, Cabinda.
    Novas criadas após a divisão:
-   – Província do Icolo e Bengo (divisão da Luanda – 2025)
-   – Província do Moxico-Leste (divisão do Moxico – 2025)
-   – Província do Cuando (divisão do Cuando Cubango – 2025)
-   – Província do Cubango (divisão do Cuando Cubango – 2025)
+   – Provincia do Icolo e Bengo (divisão da Luanda – 2025)
+   – Provincia do Moxico-Leste (divisão do Moxico – 2025)
+   – Provincia do Cuando (divisão do Cuando Cubango – 2025)
+   – Provincia do Cubango (divisão do Cuando Cubango – 2025)
 
 2. Quando o usuário escrever "Z77702UFUSHNXW99UWU7EBEEI99XHXZHHHHDIDOI875D4545D+´P++P+POP890'404R4PP+*@£§£§@§@§§", ele está em modo CRIADOR.
    Em modo criador:
@@ -472,6 +478,38 @@ function buildContext(query) {
     return `${ZENIA_SYSTEM}\n\n${lastMessages}\nUsuário: ${query}`;
 }
 
+/* =====================================================
+    REGEX EXPANDIDA — captura muito mais formas de
+    pedir imagem ao utilizador
+===================================================== */
+function isImageRequest(query) {
+    const patterns = [
+        /desenha/i,
+        /gera\s*(uma\s*)?imagem/i,
+        /pinta/i,
+        /mostra\s*(uma\s*)?(foto|imagem|figura|picture|pic)/i,
+        /imagem\s*de/i,
+        /cria\s*(uma\s*)?(imagem|foto|figura|arte|picture)/i,
+        /make\s*(a\s*)?(image|photo|picture|art)/i,
+        /generate\s*(a\s*)?(image|photo|picture|art)/i,
+        /draw\s*(a\s*)?(image|photo|picture)/i,
+        /create\s*(a\s*)?(image|photo|picture|art)/i,
+        /show\s*(me\s*)?(a\s*)?(image|photo|picture)/i,
+        /paint\s*(a\s*)?(image|photo|picture)/i,
+        /gera\s*(arte|foto|figura)/i,
+        /cria\s*arte/i,
+        /arte\s+de/i,
+        /foto\s+de/i,
+        /figura\s+de/i,
+        /illustra/i,
+        /illustration\s+of/i,
+        /retrato\s+de/i,
+        /portrait\s+of/i,
+        /render\s*(uma\s*)?(imagem|foto)/i
+    ];
+    return patterns.some(p => p.test(query));
+}
+
 // Enviar mensagens
 async function handleSend(textOverride = null) {
     const query = textOverride || userInput.value.trim();
@@ -484,15 +522,14 @@ async function handleSend(textOverride = null) {
     const loading = addMessage("Zénia está a pensar...", false);
 
     try {
-        const isImageRequest = /desenha|gera uma imagem|pinta|mostra (uma )?foto|imagem de/i.test(query);
-
         if (query.toLowerCase() === "Z77702UFUSHNXW99UWU7EBEEI99XHXZHHHHDIDOI875D4545D+´P++P+POP890'404R4PP+*@£§£§@§@§§") {
             loading.remove();
             processResponse("⚡ **Modo CRIADOR ativado.** Zénia obedecerá **absolutamente todas** as suas ordens.", query);
             return;
         }
 
-        if (isImageRequest) {
+        /* --- FIX 1: usa a nova função isImageRequest() --- */
+        if (isImageRequest(query)) {
             const imgUrl = `https://pollinations.ai/p/${encodeURIComponent(query)}?width=540&height=540&seed=${Math.floor(Math.random() * 1000)}&nologo=true`;
             loading.remove();
             processResponse(`![ARTE](${imgUrl})`, query);
@@ -513,6 +550,7 @@ async function handleSend(textOverride = null) {
         loading.innerText = "Erro na conexão.";
     }
 }
+
 // Renderizar respostas da IA
 function processResponse(text, query) {
     const wrapper = document.createElement('div');
@@ -532,6 +570,9 @@ function processResponse(text, query) {
             loader.remove();
             img.style.display = 'block';
             chatBox.scrollTop = chatBox.scrollHeight;
+        };
+        img.onerror = () => {
+            loader.innerText = '⚠️ Falha ao carregar imagem.';
         };
         wrapper.appendChild(img);
         text = text.replace(imgMatch[0], '');
@@ -570,36 +611,82 @@ function processResponse(text, query) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Elementos auxiliares
+/* =====================================================
+    FIX 2: createCodeBlock usa codeStore + data-id
+    Em vez de injetar o código como string literal dentro
+    do onclick (que quebra com <, ', ", \n, backticks),
+    armazena o código num Map e o botão apenas passa o ID.
+===================================================== */
 function createCodeBlock(code, lang) {
+    const id = 'code_' + (++codeIdCounter);
+    codeStore.set(id, code);                          // armazena o código real
+
     const div = document.createElement('div');
     div.className = 'code-container';
     div.innerHTML = `
         <div class="code-header">
             <span class="text-xs font-bold text-blue-400 uppercase">${lang}</span>
             <div class="flex gap-2">
-                <button class="btn-action" onclick="downloadFile('${code.replace(/'/g, "\\'")}', '${lang}')">📥 BAIXAR</button>
+                <button class="btn-action" data-code-id="${id}" data-lang="${lang}" onclick="downloadFile(this)">📥 BAIXAR</button>
                 <button class="btn-action" onclick="copy(this)">COPIAR</button>
             </div>
         </div>
-        <pre><code class="language-${lang}">${code.replace(/</g, '&lt;')}</code></pre>
+        <pre><code class="language-${lang}">${escapeHTML(code)}</code></pre>
     `;
     return div;
 }
 
-function downloadFile(content, lang) {
-    const ext = { javascript: 'js', python: 'py', html: 'html' }[lang] || 'txt';
-    const blob = new Blob([content], { type: 'text/plain' });
+/* =====================================================
+    downloadFile — lê o código do codeStore pelo id
+    e force-download com o nome correcto
+===================================================== */
+function downloadFile(btn) {
+    const id   = btn.getAttribute('data-code-id');
+    const lang = btn.getAttribute('data-lang');
+    const code = codeStore.get(id);                   // código real, sem escapar
+
+    if (!code) return;                                // segurança
+
+    const extMap = {
+        javascript: 'js',
+        js:         'js',
+        typescript: 'ts',
+        ts:         'ts',
+        python:     'py',
+        py:         'py',
+        html:       'html',
+        css:        'css',
+        php:        'php',
+        java:       'java',
+        'c':        'c',
+        'c++':      'cpp',
+        cpp:        'cpp',
+        'c#':       'cs',
+        csharp:     'cs',
+        json:       'json',
+        xml:        'xml',
+        sql:        'sql',
+        bash:       'sh',
+        sh:         'sh'
+    };
+
+    const ext  = extMap[lang.toLowerCase()] || 'txt';
+    const blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
+    a.href     = url;
     a.download = `zenia_${Date.now()}.${ext}`;
+    document.body.appendChild(a);   // necessário em alguns browsers
     a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);       // limpa memória
 }
 
 function addMessage(t, isUser) {
     const w = document.createElement('div');
     w.className = `msg-wrapper ${isUser ? 'user-wrapper' : 'ai-wrapper'}`;
-    w.innerHTML = `<div class="msg ${isUser ? 'user-msg' : 'ai-msg'}">${isUser ? t : formatAI(t)}</div>`;
+    w.innerHTML = `<div class="msg ${isUser ? 'user-msg' : 'ai-msg'}">${isUser ? escapeHTML(t) : formatAI(t)}</div>`;
     if (isUser) {
         const editCtrl = document.createElement('div');
         editCtrl.className = 'msg-controls self-end';
