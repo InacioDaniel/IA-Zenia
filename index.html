@@ -44,11 +44,12 @@ body {
     border-right: 1px solid var(--border); 
     display: flex; flex-direction: column; transition: .3s; 
     box-shadow: 5px 0 15px rgba(0, 102, 255, 0.1);
-    z-index: 100;
+    z-index: 100; /* Garante que fica acima de tudo */
 }
 @media(max-width:768px){ 
     .sidebar{position:fixed;left:-100%;top:0;height:100%; width: 85%; max-width: 300px; box-shadow: 10px 0 50px rgba(0,0,0,0.8);} 
     .sidebar.active{left:0;} 
+    /* Backdrop para fechar sidebar ao clicar fora */
     .sidebar-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0,0,0,0.7); backdrop-filter: blur(3px);
@@ -94,6 +95,7 @@ body {
 }
 .btn-new:hover { transform: translateY(-2px) scale(1.02); box-shadow: var(--neon-glow); }
 
+/* SIDEBAR CLOSE BUTTON (MOBILE) */
 .btn-close-sidebar {
     display: none;
     margin-bottom: 15px; padding: 10px; 
@@ -133,7 +135,7 @@ body {
 .btn-action { font-size:10px; font-weight:bold; padding:4px 8px; border-radius:6px; background: rgba(0, 102, 255, 0.2); color: var(--accent); border:1px solid var(--border); cursor:pointer; transition:.2s; }
 .btn-action:hover { background: var(--accent); color: var(--text-dark); box-shadow: var(--neon-glow); }
 
-/* INPUT AREA - REESTRUTURADO */
+/* INPUT AREA - REESTRUTURADO PARA MOBILE */
 .footer-input { 
     background: linear-gradient(to top, var(--bg) 0%, rgba(11, 17, 36, 0.95) 100%);
     padding: env(safe-area-inset-bottom, 10px) 10px 10px 10px; 
@@ -155,7 +157,9 @@ body {
 .voice-bar label { font-size: 11px; color: #64748b; white-space: nowrap; }
 
 /* LINHA DE INPUT E BOTÕES */
-.input-row { display: flex; gap: 8px; width: 100%; align-items: flex-end; }
+.input-row {
+    display: flex; gap: 8px; width: 100%; align-items: flex-end;
+}
 
 textarea { 
     flex:1; min-width:0; 
@@ -187,14 +191,11 @@ button.upload-btn {
     background: rgba(255, 255, 255, 0.1);
     color: var(--accent);
     border: 1px solid var(--border);
-    position: relative;
 }
 button.upload-btn:hover { background: rgba(0, 234, 255, 0.1); border-color: var(--accent); }
-/* Indicador de imagem carregada */
-.img-badge { position: absolute; top: -5px; right: -5px; width: 12px; height: 12px; background: #00ffe7; border-radius: 50%; border: 2px solid #000; display: none; }
 
-/* PREVIEW DA IMAGEM NO CHAT */
-.img-preview-msg { max-width: 200px; border-radius: 12px; border: 1px solid var(--border); margin-top: 5px; display: block; }
+/* IMAGE PREVIEW IN CHAT */
+.img-preview-msg { max-width: 200px; border-radius: 12px; border: 1px solid var(--border); margin-top: 5px; }
 
 /* IMAGE LOADER & ART */
 .img-loader { width:100%; aspect-ratio:1/1; background: linear-gradient(90deg, var(--panel) 25%, var(--border) 50%, var(--panel) 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 12px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
@@ -230,8 +231,9 @@ button.upload-btn:hover { background: rgba(0, 234, 255, 0.1); border-color: var(
 /* RESPONSIVE FIXES */
 @media(max-width:768px){
     .chat-container{padding:15px} .msg{font-size:14px}
+    /* Mobile Input Layout Logic */
     .footer-input-inner { gap: 6px; }
-    .voice-bar { order: -1; } /* Voice bar no topo */
+    .voice-bar { order: -1; } /* Voice bar always top inside footer */
 }
 </style>
 </head>
@@ -278,10 +280,7 @@ button.upload-btn:hover { background: rgba(0, 234, 255, 0.1); border-color: var(
             
             <div class="input-row">
                 <input type="file" id="imgUpload" accept="image/*" hidden onchange="handleImageUpload(this)">
-                <button class="action-btn upload-btn" onclick="document.getElementById('imgUpload').click()" title="Carregar Imagem">
-                    📎
-                    <span id="imgBadge" class="img-badge"></span>
-                </button>
+                <button class="action-btn upload-btn" onclick="document.getElementById('imgUpload').click()" title="Carregar Imagem">📎</button>
                 
                 <textarea id="userInput" placeholder="Escreva aqui..." oninput="autoGrow(this)"></textarea>
                 
@@ -297,6 +296,16 @@ button.upload-btn:hover { background: rgba(0, 234, 255, 0.1); border-color: var(
 
 <script>
 /* ============================================================
+   VISITOR COUNTER
+============================================================ */
+(function(){
+    let v = localStorage.getItem("zenia_global_views");
+    v = v ? parseInt(v)+1 : 1;
+    localStorage.setItem("zenia_global_views", v);
+    document.getElementById("viewsNumber").textContent = v;
+})();
+
+/* ============================================================
    GLOBALS
 ============================================================ */
 const chatBox     = document.getElementById('chatBox');
@@ -304,31 +313,43 @@ const historyList = document.getElementById('historyList');
 const userInput   = document.getElementById('userInput');
 const voiceSelect = document.getElementById('voiceSelect');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
-const imgBadge    = document.getElementById('imgBadge');
 
 let sessions        = JSON.parse(localStorage.getItem('zenia_sessions')||'[]');
 let currentSessionId = null;
 const codeStore     = new Map();
 let  codeIdCounter  = 0;
-let currentImageBase64 = null; // Armazena a imagem carregada
 
 /* ============================================================
    SYSTEM PROMPT
 ============================================================ */
 const ZENIA_SYSTEM = `Você é IA-ZÉNIA do Lubango. Criada por @inacio.u.daniel fundador do zénia-projects.
+Regras permanentes:
+0. Foste criada pelo Zénia-Projects team fundado por Inácio Daniel.
 1. Angola possui 21 províncias.
 2. Modo CRIADOR ativa-se com código especial.
-3. Se receber uma imagem, analise-a com detalhe e responda ao pedido do usuário sobre ela.
-4. Geras imagens ultra realistas se pedido.
-5. Se o usuário pedir música, escreva letra de música.`;
+3. Mantenha contexto.
+4. Geras imagens ultra realistas.
+5. Se o usuário pedir para CRIAR MÚSICA, escreva uma letra de música criativa e rítmica (máximo 4 estrofes).
+6. Se o usuário enviou uma imagem, analise o contexto que ele der.`;
 
 /* ============================================================
    DETECTION
 ============================================================ */
-function isImageRequest(q){ return /desenha|gera\s*(uma\s*)?(imagem|arte|foto)/i.test(q); }
-function isAudioRequest(q){ return /^(lê\s+em\s+voz\s+alta|fala|diz|áudio)/i.test(q); }
-function isMusicRequest(q){ return /cria\s*(uma\s*)?(música|cancão)|canta/i.test(q); }
-function extractAudioText(q){ return q.trim().replace(/^(lê\s+em\s+voz\s+alta|fala|diz|áudio\s+de|audio\s+de|sintetiza|narrar|narra|read\s+aloud|say|speak|tts|text\s+to\s+speech)\s*[:\-]?\s*/i,'').trim(); }
+function isImageRequest(q){
+    return /desenha|gera\s*(uma\s*)?(imagem|arte|foto|figura)|pinta|mostra\s*(uma\s*)?(foto|imagem|figura)|imagem\s*de|cria\s*(uma\s*)?(imagem|foto|arte|figura)|make\s*(a\s*)?(image|photo|picture|art)/i.test(q);
+}
+
+function isAudioRequest(q){
+    return /^(lê\s+em\s+voz\s+alta|fala|diz|áudio\s+de|audio\s+de|sintetiza|narrar|narra|read\s+aloud|say|speak|tts|text\s+to\s+speech)\s*[:\-]?\s*/i.test(q.trim());
+}
+
+function isMusicRequest(q){
+    return /cria\s*(uma\s*)?(música|cancão|som\s+de)|canta|rap|hip\s*hop|compor|escreve\s*(uma\s*)?(música|canção)/i.test(q);
+}
+
+function extractAudioText(q){
+    return q.trim().replace(/^(lê\s+em\s+voz\s+alta|fala|diz|áudio\s+de|audio\s+de|sintetiza|narrar|narra|read\s+aloud|say|speak|tts|text\s+to\s+speech)\s*[:\-]?\s*/i,'').trim();
+}
 
 /* ============================================================
    UTILS & SIDEBAR
@@ -341,51 +362,27 @@ function autoGrow(el){ el.style.height="auto"; el.style.height=el.scrollHeight+"
 function escapeHTML(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
 function formatTime(s){ if(isNaN(s))return'0:00'; var m=Math.floor(s/60),sec=Math.floor(s%60); return m+':'+(sec<10?'0':'')+sec; }
 
-// Visitor Counter
-(function(){
-    let v = localStorage.getItem("zenia_global_views");
-    v = v ? parseInt(v)+1 : 1;
-    localStorage.setItem("zenia_global_views", v);
-    document.getElementById("viewsNumber").textContent = v;
-})();
-
 /* ============================================================
    SESSION
 ============================================================ */
 function init(){
     renderHistory();
+    var p=new URLSearchParams(window.location.search).get('msg');
+    if(p){ userInput.value=decodeURIComponent(p); userInput.style.height=userInput.scrollHeight+'px'; }
     sessions.length>0 ? loadSession(sessions[sessions.length-1].id) : startNewChat();
 }
 
 function startNewChat(){
     currentSessionId=Date.now(); chatBox.innerHTML='';
-    addMessage("Onawa ! Sou a IA-ZÉNIA. Posso analisar imagens, criar músicas ou conversar. O que faremos?",false);
+    addMessage("Onawa ! Sou a IA-ZÉNIA. O que vamos criar hoje? Música, Imagem ou Código?",false);
     renderHistory();
 }
 
-// Constrói o histórico para a API (Formato OpenAI JSON)
-function buildMessages(query, imageBase64){
-    var s = sessions.find(x => x.id === currentSessionId);
-    var msgs = [{role: "system", content: ZENIA_SYSTEM}];
-    
-    // Adiciona histórico recente (apenas texto para economizar)
-    if(s) {
-        s.messages.slice(-10).forEach(m => {
-            msgs.push({role: m.role === 'user' ? 'user' : 'assistant', content: m.text});
-        });
-    }
-
-    // Mensagem Atual
-    var userContent = [{ type: "text", text: query }];
-    if(imageBase64) {
-        userContent.push({
-            type: "image_url",
-            image_url: { url: imageBase64 }
-        });
-    }
-
-    msgs.push({ role: "user", content: userContent });
-    return msgs;
+function buildContext(q){
+    var s=sessions.find(function(x){return x.id===currentSessionId});
+    if(!s) return ZENIA_SYSTEM+"\n\nUsuário: "+q;
+    var last=s.messages.slice(-24).map(function(m){return(m.role==='user'?"Usuário":"Zénia")+": "+m.text}).join("\n");
+    return ZENIA_SYSTEM+"\n\n"+last+"\nUsuário: "+q;
 }
 
 function saveSession(q,a){
@@ -413,17 +410,15 @@ function loadSession(id){
     chatBox.innerHTML='';
     if(s) s.messages.forEach(function(m){
         if(m.role==='ai'){
-            // Processa respostas salvas
             if(m.text.includes('[IMAGEM:')){ var url=m.text.match(/\[IMAGEM: (.*?)\]/)[1]; processResponse('![ARTE]('+url+')',""); }
-            else processResponse(m.text,"");
-        } else {
-            // Se tiver imagem na msg do usuario
-            if(m.text.startsWith('[IMG]')) {
-                 addMessage("📎 [Imagem Enviada Anteriormente]", true);
-            } else {
-                 addMessage(m.text,true);
+            else if(m.text.startsWith('[AUDIO_TTS]')){
+                var ph=document.createElement('div');
+                ph.className='msg-wrapper ai-wrapper';
+                ph.innerHTML='<div class="msg ai-msg" style="font-size:12px;color:#94a3b8;">🔊 Áudio foi gerado (não salvo no histórico).</div>';
+                chatBox.appendChild(ph);
             }
-        }
+            else processResponse(m.text,"");
+        } else addMessage(m.text,true);
     });
     renderHistory();
 }
@@ -438,100 +433,99 @@ function handleImageUpload(input){
     if(input.files && input.files[0]){
         var reader = new FileReader();
         reader.onload = function(e){
-            currentImageBase64 = e.target.result;
-            imgBadge.style.display = 'block'; // Mostra bolinha verde
-            userInput.placeholder = "Imagem carregada! Descreva o que quer saber sobre ela...";
+            // 1. Mostrar a imagem no chat como mensagem do usuário
+            var wrapper = document.createElement('div');
+            wrapper.className = 'msg-wrapper user-wrapper';
+            wrapper.innerHTML = `
+                <div class="msg user-msg">
+                    📎 Imagem carregada:<br>
+                    <img src="${e.target.result}" class="img-preview-msg">
+                </div>`;
+            chatBox.appendChild(wrapper);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            
+            // 2. Enviar prompt automático para a IA
+            var prompt = "Analise esta imagem que enviei (simulação: o usuário carregou uma foto). O que achas?";
+            handleSend(prompt, true); // true = hidden prompt text logic if needed, but here just normal flow
         }
         reader.readAsDataURL(input.files[0]);
     }
 }
 
 /* ============================================================
-   HANDLE SEND — PRINCIPAL (AGORA COM POST API)
+   HANDLE SEND — PRINCIPAL
 ============================================================ */
-async function handleSend(textOverride){
+async function handleSend(textOverride, isImageContext){
     var query=(textOverride||userInput.value).trim();
-    if(!query && !currentImageBase64) return;
+    if(!query) return;
 
-    // 1. UI: Mostrar Mensagem do Usuário
-    var userMsgWrapper = document.createElement('div');
-    userMsgWrapper.className = 'msg-wrapper user-wrapper';
-    var contentHTML = escapeHTML(query);
-    
-    if(currentImageBase64) {
-        contentHTML += `<br><img src="${currentImageBase64}" class="img-preview-msg">`;
-        userInput.placeholder = "Escreva aqui...";
-        imgBadge.style.display = 'none';
+    // Se não for override (upload de imagem), mostra a msg do usuário
+    if(!isImageContext) {
+        addMessage(query,true);
+        userInput.value=''; userInput.style.height='auto';
     }
-    userMsgWrapper.innerHTML = `<div class="msg user-msg">${contentHTML}</div>`;
-    chatBox.appendChild(userMsgWrapper);
-    chatBox.scrollTop = chatBox.scrollHeight;
-    
-    userInput.value=''; userInput.style.height='auto';
 
-    // 2. Comandos Especiais (Música, Áudio, Imagem Gerada)
-    if(isMusicRequest(query)){ /* ... (Mesma lógica de antes, abreviada para focar na API) ... */ 
-        callMusicAPI(query); return; 
+    // modo criador
+    if(query==="Z77702UFUSHNXW99UWU7EBEEI99XHXZHHHHDIDOI875D4545D+´P++P+POP890'404R4PP+*@£§£§@§@§§"){
+        processResponse("⚡ **Modo CRIADOR ativado.**",query);
+        return;
     }
+
+    // ── MÚSICA ──
+    if(isMusicRequest(query)){
+        var loadM = addMessage("🎵 Zénia está a compor a letra da música...", false);
+        try {
+            var promptMusica = "Escreve uma letra de música curta (máximo 4 estrofes), rítmica e rimada sobre: " + query + ". Apenas a letra, sem introduções.";
+            var res = await fetch('https://text.pollinations.ai/'+encodeURIComponent(buildContext(promptMusica))+'?model=mistral');
+            var lyrics = await res.text();
+            loadM.remove();
+            processResponse("🎵 **Letra Gerada:**\n\n" + lyrics, query);
+            var loadA = addMessage("🎵 A gravar vocal... (Aguarde)", false);
+            await generateAudio(lyrics, query, loadA, true);
+        } catch(e) {
+            loadM.querySelector('.msg').innerText = "⚠️ Erro ao compor música.";
+        }
+        return;
+    }
+
+    // ── ÁUDIO SIMPLES ──
+    if(isAudioRequest(query)){
+        var txt=extractAudioText(query);
+        if(!txt){ addMessage("Escreva o texto para ler. Ex: diz: Olá Zénia",false); return; }
+        var loadA=addMessage("🔊 Zénia está a preparar a voz…",false);
+        await generateAudio(txt,query,loadA, false);
+        return;
+    }
+
+    // ── IMAGEM GERADA ──
     if(isImageRequest(query)){
         var loadI=addMessage("🎨 Zénia está a pintar…",false);
         var seed = Math.floor(Math.random()*99999);
-        var imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(query)}?width=1024&height=1024&seed=${seed}&nologo=true&model=flux`;
+        var cleanQuery = encodeURIComponent(query);
+        var imgUrl = `https://image.pollinations.ai/prompt/${cleanQuery}?width=1024&height=1024&seed=${seed}&nologo=true&model=flux`;
         loadI.remove();
         processResponse('![ARTE]('+imgUrl+')',query);
         return;
     }
 
-    // 3. API POST (TEXTO + VISÃO) - A GRANDE MUDANÇA
-    var loadT = addMessage("Zénia está a analisar...", false);
-    
-    try {
-        var messages = buildMessages(query, currentImageBase64);
-        
-        // Usamos o endpoint POST da Pollinations (compatível com OpenAI) que é Grátis
-        var response = await fetch('https://text.pollinations.ai/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                messages: messages,
-                model: 'openai', // Pollinations encaminha para GPT-4o-mini ou similar com visão
-                jsonMode: false
-            })
-        });
-
-        var data = await response.text(); // Pollinations retorna texto direto ou JSON stream
-        // Limpeza básica se vier JSON sujo
-        if(data.startsWith('data: ')) data = data.replace(/data: /g, '');
-        
-        loadT.remove();
-        processResponse(data, currentImageBase64 ? '[IMG] '+query : query);
-        
-        // Limpar imagem da memória após envio
-        currentImageBase64 = null; 
-        document.getElementById('imgUpload').value = ""; 
-
-    } catch(e) {
-        loadT.querySelector('.msg').innerText = '⚠️ Erro na conexão com a IA.';
-        console.error(e);
+    // ── TEXTO NORMAL (Com contexto de imagem se houver) ──
+    var loadT=addMessage("Zénia está a pensar…",false);
+    var finalPrompt = query;
+    if(isImageContext) {
+        finalPrompt = "[Sistema: O usuário enviou uma imagem. Responda como se estivesse vendo-a, seja criativa.] " + query;
     }
+
+    try{
+        var res=await fetch('https://text.pollinations.ai/'+encodeURIComponent(buildContext(finalPrompt))+'?model=mistral');
+        var text=await res.text();
+        loadT.remove();
+        processResponse(text,query);
+    } catch(e){ loadT.querySelector('.msg').innerText='⚠️ Erro na conexão.'; }
 }
 
 /* ============================================================
-   AUXILIARY FUNCTIONS (Music, Audio)
+   AUDIO GENERATION
 ============================================================ */
-async function callMusicAPI(query){
-    var loadM = addMessage("🎵 Criando letra...", false);
-    try {
-        var prompt = "Escreva uma letra de música curta sobre: " + query;
-        var res = await fetch('https://text.pollinations.ai/'+encodeURIComponent(prompt));
-        var text = await res.text();
-        loadM.remove();
-        processResponse("🎵 **Letra:**\n" + text, query);
-        var loadA = addMessage("🎵 Gravando...", false);
-        await generateAudio(text, query, loadA, true);
-    } catch(e) { loadM.innerText="Erro."; }
-}
-
 async function generateAudio(text, originalQuery, loadingWrapper, isMusic){
     var voice=voiceSelect.value;
     if(voice === 'native') {
@@ -542,43 +536,92 @@ async function generateAudio(text, originalQuery, loadingWrapper, isMusic){
     var url=`https://text.pollinations.ai/${encodeURIComponent(text)}?model=openai-audio&voice=${voice}`;
     try{
         var res=await fetch(url);
-        if(!res.ok) throw new Error('Busy');
+        if(!res.ok) throw new Error('API Busy');
         var blob=await res.blob();
+        if(blob.type.includes('json') || blob.size < 100) throw new Error('Invalid Audio');
         var objUrl=URL.createObjectURL(blob);
         loadingWrapper.remove();
         createAudioPlayer(objUrl, voice, text, originalQuery, isMusic);
     } catch(err){
-        loadingWrapper.remove();
-        speakNative(text, originalQuery);
+        loadingWrapper.querySelector('.msg').innerText = "⚠️ API ocupada. Usando voz nativa de Angola...";
+        setTimeout(() => {
+            loadingWrapper.remove();
+            speakNative(text, originalQuery);
+        }, 1500);
     }
 }
 
 function speakNative(text, originalQuery){
     var u = new SpeechSynthesisUtterance(text);
-    u.lang = 'pt-PT'; u.rate = 1.1;
+    u.lang = 'pt-PT'; u.rate = 1.1; u.pitch = 1.0;
+    var wrapper=document.createElement('div');
+    wrapper.className='msg-wrapper ai-wrapper';
+    wrapper.innerHTML = `<div class="msg ai-msg">🔊 <b>Falando (Nativo):</b> "${escapeHTML(text)}"</div>`;
+    chatBox.appendChild(wrapper);
+    chatBox.scrollTop=chatBox.scrollHeight;
     window.speechSynthesis.speak(u);
-    // Placeholder visual simples
-    var w = document.createElement('div'); w.className='msg-wrapper ai-wrapper';
-    w.innerHTML='<div class="msg ai-msg">🔊 (Voz Nativa)</div>';
-    chatBox.appendChild(w);
+    saveSession(originalQuery, '[AUDIO_NATIVE] '+text);
 }
 
 function createAudioPlayer(src, voice, text, originalQuery, isMusic){
     var wrapper=document.createElement('div');
     wrapper.className='msg-wrapper ai-wrapper';
     var icon = isMusic ? '🎵' : '🔊';
+    var label = isMusic ? 'Música Gerada (Vocal)' : 'Áudio Zénia';
     var player=document.createElement('div');
     player.className='audio-player';
     if(isMusic) player.style.borderColor = 'var(--accent-alt)';
+    player.setAttribute('data-src',src);
+    player.setAttribute('data-text',text);
+
     player.innerHTML=
-        '<button class="play-btn" onclick="this.parentElement.nextSibling.play()">▶</button>'+
-        '<div class="audio-info"><div class="audio-label">'+icon+' Áudio</div></div>';
+        '<button class="play-btn" onclick="togglePlay(this)">▶</button>'+
+        '<div class="audio-info">'+
+            '<div class="audio-label">'+icon+' '+label+'</div>'+
+            '<div class="audio-voice">Voz: '+escapeHTML(voice)+'</div>'+
+        '</div>'+
+        '<div class="progress-wrap">'+
+            '<div class="audio-progress-bg" onclick="seekAudio(this,event)"><div class="audio-progress-fill"></div></div>'+
+            '<div class="audio-time">0:00</div>'+
+        '</div>'+
+        '<button class="dl-btn" onclick="downloadAudio(this)">💾</button>';
+
     wrapper.appendChild(player);
     var audio=document.createElement('audio');
-    audio.src=src;
+    audio.src=src; audio.preload='metadata'; audio.style.display='none';
     wrapper.appendChild(audio);
+
+    audio.addEventListener('timeupdate',function(){
+        var pct=(audio.currentTime/audio.duration)*100||0;
+        player.querySelector('.audio-progress-fill').style.width=pct+'%';
+        player.querySelector('.audio-time').textContent=formatTime(audio.currentTime);
+    });
+    audio.addEventListener('ended',function(){ player.querySelector('.play-btn').textContent='▶'; });
+
     chatBox.appendChild(wrapper);
     chatBox.scrollTop=chatBox.scrollHeight;
+    saveSession(originalQuery, '[AUDIO_TTS] '+text);
+}
+
+function togglePlay(btn){
+    var audio=btn.closest('.msg-wrapper').querySelector('audio');
+    if(audio.paused){ audio.play(); btn.textContent='⏸'; }
+    else            { audio.pause(); btn.textContent='▶'; }
+}
+
+function seekAudio(bg,event){
+    var audio=bg.closest('.msg-wrapper').querySelector('audio');
+    if(!audio.duration) return;
+    var rect=bg.getBoundingClientRect();
+    audio.currentTime=((event.clientX-rect.left)/rect.width)*audio.duration;
+}
+
+function downloadAudio(btn){
+    var player=btn.closest('.audio-player');
+    var src=player.getAttribute('data-src');
+    var a=document.createElement('a');
+    a.href=src; a.download='zenia_audio.mp3';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
 /* ============================================================
@@ -588,28 +631,75 @@ function processResponse(text,query){
     var wrapper=document.createElement('div');
     wrapper.className='msg-wrapper ai-wrapper';
 
-    // Check Imagem Gerada
     var imgMatch=text.match(/!\[.*?\]\((.*?)\)/);
     if(imgMatch){
+        var loader=document.createElement('div');
+        loader.className='img-loader'; loader.innerText='A pintar obra de arte...';
+        wrapper.appendChild(loader);
         var img=document.createElement('img');
-        img.src=imgMatch[1]; img.className='art-img'; img.style.display='block';
+        img.src=imgMatch[1]; img.className='art-img';
+        img.onload=function(){ loader.remove(); img.style.display='block'; chatBox.scrollTop=chatBox.scrollHeight; };
+        img.onerror=function(){ loader.innerText='⚠️ Falha na imagem (Tente outra)'; };
         wrapper.appendChild(img);
         text=text.replace(imgMatch[0],'');
     }
 
-    // Render Texto/Markdown
-    var d=document.createElement('div');
-    d.className='msg ai-msg';
-    d.innerHTML=formatAI(escapeHTML(text));
-    wrapper.appendChild(d);
+    var parts=text.split(/```/);
+    parts.forEach(function(part,i){
+        if(i%2!==0){
+            var lines=part.split('\n');
+            var lang=lines[0].trim()||'txt';
+            var code=lines.slice(1).join('\n').trim();
+            wrapper.appendChild(createCodeBlock(code,lang));
+        } else if(part.trim()){
+            var d=document.createElement('div');
+            d.className='msg ai-msg';
+            d.innerHTML=formatAI(escapeHTML(part));
+            wrapper.appendChild(d);
+        }
+    });
+
+    var ctrl=document.createElement('div');
+    ctrl.className='msg-controls';
+    ctrl.innerHTML='<span class="ctrl-btn" onclick="handleSend('+JSON.stringify(query).replace(/"/g, '&quot;')+')">🔄 Reenviar</span> <span class="ctrl-btn" onclick="this.closest(\'.msg-wrapper\').remove()">🗑</span>';
+    wrapper.appendChild(ctrl);
 
     chatBox.appendChild(wrapper);
     if(query) saveSession(query, text+(imgMatch?' [IMAGEM: '+imgMatch[1]+']':''));
+    document.querySelectorAll('pre code').forEach(function(el){ try{hljs.highlightElement(el)}catch(e){} });
     chatBox.scrollTop=chatBox.scrollHeight;
 }
 
-function formatAI(t){ return t.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>'); }
-function createCodeBlock(code,lang){ /* Simplificado para brevidade, usar o anterior se precisar destacar código */ }
+/* ============================================================
+   CODE BLOCK
+============================================================ */
+function createCodeBlock(code,lang){
+    var id='code_'+(++codeIdCounter);
+    codeStore.set(id,code);
+    var div=document.createElement('div');
+    div.className='code-container';
+    div.innerHTML=
+        '<div class="code-header">'+
+            '<span class="text-xs font-bold uppercase" style="color:var(--accent)">'+escapeHTML(lang)+'</span>'+
+            '<button class="btn-action" onclick="navigator.clipboard.writeText(codeStore.get(\''+id+'\'))">COPIAR</button>'+
+        '</div>'+
+        '<pre><code class="language-'+lang+'">'+escapeHTML(code)+'</code></pre>';
+    return div;
+}
+
+function addMessage(t,isUser){
+    var w=document.createElement('div');
+    w.className='msg-wrapper '+(isUser?'user-wrapper':'ai-wrapper');
+    w.innerHTML='<div class="msg '+(isUser?'user-msg':'ai-msg')+'">'+(isUser?escapeHTML(t):formatAI(t))+'</div>';
+    chatBox.appendChild(w);
+    chatBox.scrollTop=chatBox.scrollHeight;
+    return w;
+}
+
+function formatAI(t){
+    t=t.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>');
+    return t.replace(/\n/g,'<br>');
+}
 
 init();
 </script>
