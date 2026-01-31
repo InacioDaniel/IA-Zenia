@@ -44,9 +44,21 @@ body {
     border-right: 1px solid var(--border); 
     display: flex; flex-direction: column; transition: .3s; 
     box-shadow: 5px 0 15px rgba(0, 102, 255, 0.1);
+    z-index: 100; /* Garante que fica acima de tudo */
 }
-@media(max-width:768px){ .sidebar{position:fixed;left:-100%;top:0;height:100%;z-index:50;} .sidebar.active{left:0;} }
-.main-content { flex:1; display:flex; flex-direction:column; overflow:hidden; width:100%; }
+@media(max-width:768px){ 
+    .sidebar{position:fixed;left:-100%;top:0;height:100%; width: 85%; max-width: 300px; box-shadow: 10px 0 50px rgba(0,0,0,0.8);} 
+    .sidebar.active{left:0;} 
+    /* Backdrop para fechar sidebar ao clicar fora */
+    .sidebar-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.7); backdrop-filter: blur(3px);
+        z-index: 90; display: none; opacity: 0; transition: opacity .3s;
+    }
+    .sidebar-overlay.active { display: block; opacity: 1; }
+}
+
+.main-content { flex:1; display:flex; flex-direction:column; overflow:hidden; width:100%; position: relative; }
 
 /* CHAT AREA */
 .chat-container { 
@@ -83,6 +95,15 @@ body {
 }
 .btn-new:hover { transform: translateY(-2px) scale(1.02); box-shadow: var(--neon-glow); }
 
+/* SIDEBAR CLOSE BUTTON (MOBILE) */
+.btn-close-sidebar {
+    display: none;
+    margin-bottom: 15px; padding: 10px; 
+    background: rgba(255, 51, 102, 0.2); border: 1px solid #ff3366; 
+    color: #ff3366; font-weight: bold; border-radius: 8px; text-align: center; cursor: pointer;
+}
+@media(max-width:768px){ .btn-close-sidebar{display:block;} }
+
 /* MESSAGES */
 .msg-wrapper { display:flex; flex-direction:column; max-width:90%; gap:5px; position:relative; animation:fadeIn .3s ease; }
 .msg { 
@@ -114,44 +135,73 @@ body {
 .btn-action { font-size:10px; font-weight:bold; padding:4px 8px; border-radius:6px; background: rgba(0, 102, 255, 0.2); color: var(--accent); border:1px solid var(--border); cursor:pointer; transition:.2s; }
 .btn-action:hover { background: var(--accent); color: var(--text-dark); box-shadow: var(--neon-glow); }
 
-/* INPUT AREA */
+/* INPUT AREA - REESTRUTURADO PARA MOBILE */
 .footer-input { 
-    background: linear-gradient(to top, var(--bg) 0%, rgba(11, 17, 36, 0.8) 100%);
-    padding: env(safe-area-inset-bottom, 15px) 15px 15px 15px; 
+    background: linear-gradient(to top, var(--bg) 0%, rgba(11, 17, 36, 0.95) 100%);
+    padding: env(safe-area-inset-bottom, 10px) 10px 10px 10px; 
     border-top: 1px solid var(--border); 
 }
 .footer-input-inner { 
     max-width: 860px; margin: 0 auto; 
     background: rgba(11, 17, 36, 0.5);
-    border-radius: 20px; padding: 6px; 
+    border-radius: 20px; padding: 8px; 
     border: 1px solid var(--border); 
-    display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap; 
+    display: flex; flex-direction: column; gap: 8px; 
     backdrop-filter: blur(10px);
     box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.3);
 }
 
-/* VOICE BAR */
-.voice-bar { display:flex; align-items:center; gap:8px; padding:6px 10px; background: rgba(2, 6, 23, 0.6); border-radius:14px; border:1px solid var(--border); width:100%; box-sizing:border-box; }
-.voice-bar select { background: transparent; color: var(--accent); border: 1px solid var(--border); border-radius: 8px; padding: 5px 8px; font-size: 12px; outline: none; cursor: pointer; flex: 1; min-width: 0; }
+.voice-bar { display:flex; align-items:center; gap:8px; padding:6px 10px; background: rgba(2, 6, 23, 0.6); border-radius:12px; border:1px solid var(--border); width:100%; box-sizing:border-box; }
+.voice-bar select { background: transparent; color: var(--accent); border: none; font-size: 12px; outline: none; cursor: pointer; flex: 1; }
 .voice-bar select option { background: var(--panel); color: var(--text-light); }
 .voice-bar label { font-size: 11px; color: #64748b; white-space: nowrap; }
 
-textarea { flex:1; min-width:120px; background:transparent; border:none; outline:none; color:var(--text-light); font-size:14px; padding:12px; max-height:150px; resize:none; font-family:inherit; }
+/* LINHA DE INPUT E BOTÕES */
+.input-row {
+    display: flex; gap: 8px; width: 100%; align-items: flex-end;
+}
+
+textarea { 
+    flex:1; min-width:0; 
+    background:transparent; border:none; outline:none; 
+    color:var(--text-light); font-size:15px; 
+    padding:10px; max-height:120px; resize:none; 
+    font-family:inherit; 
+}
 textarea::placeholder { color: #475569; }
-button.send-btn { 
+
+/* Botões de Ação */
+button.action-btn { 
+    width: 44px; height: 44px;
+    border-radius: 12px; font-weight: bold; transition: .3s; 
+    border: none; cursor: pointer; font-size: 18px; 
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+/* Botão Enviar */
+button.send-btn {
     background: linear-gradient(135deg, var(--accent), var(--accent-alt)); 
     color: #fff; 
-    padding: 12px 20px; border-radius: 12px; font-weight: bold; transition: .3s; 
     box-shadow: 0 0 10px rgba(0, 234, 255, 0.3);
-    border: none; cursor: pointer; font-size: 16px; 
 }
-button.send-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: var(--neon-glow); }
+button.send-btn:hover { transform: scale(1.05); box-shadow: var(--neon-glow); }
+
+/* Botão Upload Imagem */
+button.upload-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--accent);
+    border: 1px solid var(--border);
+}
+button.upload-btn:hover { background: rgba(0, 234, 255, 0.1); border-color: var(--accent); }
+
+/* IMAGE PREVIEW IN CHAT */
+.img-preview-msg { max-width: 200px; border-radius: 12px; border: 1px solid var(--border); margin-top: 5px; }
 
 /* IMAGE LOADER & ART */
 .img-loader { width:100%; aspect-ratio:1/1; background: linear-gradient(90deg, var(--panel) 25%, var(--border) 50%, var(--panel) 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 12px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
 .art-img { border-radius:12px; border:1px solid var(--border); margin:10px 0; max-width:100%; box-shadow: 0 0 30px rgba(0, 102, 255, 0.2); display:none; }
 
-/* AUDIO PLAYER - Blue Theme */
+/* AUDIO PLAYER */
 .audio-player { 
     display: flex; align-items: center; gap: 10px; 
     background: linear-gradient(135deg, var(--panel), rgba(30, 58, 138, 0.3));
@@ -165,30 +215,35 @@ button.send-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: var
     border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 17px; 
     color: #fff; transition: .2s; flex-shrink: 0; box-shadow: 0 0 10px rgba(0, 234, 255, 0.4);
 }
-.audio-player .play-btn:hover { transform: scale(1.1); box-shadow: var(--neon-glow); }
 .audio-player .audio-info { min-width: 0; flex-shrink: 1; max-width: 140px; }
-.audio-player .audio-label { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; }
-.audio-player .audio-voice { font-size: 10px; color: #94a3b8; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.audio-player .audio-label { font-size: 12px; color: var(--accent); font-weight: 600; }
+.audio-player .audio-voice { font-size: 10px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .audio-player .progress-wrap { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .audio-player .audio-progress-bg { height: 4px; background: rgba(0,0,0,0.3); border-radius: 2px; position: relative; cursor: pointer; overflow: hidden; }
-.audio-player .audio-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent-alt)); border-radius: 2px; transition: width .15s linear; pointer-events: none; box-shadow: 0 0 10px var(--accent); }
+.audio-player .audio-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent-alt)); border-radius: 2px; }
 .audio-player .audio-time { font-size: 10px; color: #94a3b8; text-align: right; }
 .audio-player .dl-btn { background: rgba(0, 102, 255, 0.1); border: 1px solid var(--border); color: var(--accent); border-radius: 8px; padding: 5px 9px; font-size: 11px; cursor: pointer; transition: .2s; white-space: nowrap; flex-shrink: 0; }
-.audio-player .dl-btn:hover { background: var(--accent); color: var(--text-dark); box-shadow: var(--neon-glow); }
 
 /* ANIMATIONS */
 @keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
 @keyframes loading{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-/* RESPONSIVE */
-@media(max-width:768px){.chat-container{padding:15px}.msg{font-size:13px}}
-@media(min-width:1200px){.chat-container{padding:25px}.msg{font-size:15px}}
-@media(max-width:480px){.footer-input-inner{flex-direction:column;gap:6px}button.send-btn{width:100%}.audio-player{flex-wrap:wrap}}
+/* RESPONSIVE FIXES */
+@media(max-width:768px){
+    .chat-container{padding:15px} .msg{font-size:14px}
+    /* Mobile Input Layout Logic */
+    .footer-input-inner { gap: 6px; }
+    .voice-bar { order: -1; } /* Voice bar always top inside footer */
+}
 </style>
 </head>
 <body>
 
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
 <aside class="sidebar p-4" id="sidebar">
+    <button class="btn-close-sidebar" onclick="toggleSidebar()">✕ FECHAR MENU</button>
+
     <div class="btn-new" onclick="startNewChat()">+ NOVA CONVERSA</div>
     <h2 class="text-[10px] font-bold text-slate-400 uppercase mb-4 tracking-widest">Histórico Local</h2>
     <div id="historyList" class="flex-1 overflow-y-auto pr-1 custom-scrollbar"></div>
@@ -196,7 +251,6 @@ button.send-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: var
         <h2 class="text-[9px] font-bold text-slate-500 uppercase mb-2">Minhas Irmãs</h2>
         <a href="https://zenia-projects.netlify.app" target="_blank" class="block text-xs text-blue-400 hover:text-blue-300 transition">🌐 Zenia Projects</a>
         <a href="https://ia-zenia.netlify.app" target="_blank" class="block text-xs text-blue-400 hover:text-blue-300 transition">🌐 IA-Zénia Web</a>
-        <a href="https://antonia-ia.netlify.app" target="_blank" class="block text-xs text-blue-400 hover:text-blue-300 transition">🌐 Antónia IA</a>
     </div>
 </aside>
 
@@ -223,8 +277,15 @@ button.send-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: var
                     <option value="native">🌐 Voz Nativa (Offline)</option>
                 </select>
             </div>
-            <textarea id="userInput" placeholder="Escreva aqui… | cria uma música sobre Angola | desenha um gato" oninput="autoGrow(this)"></textarea>
-            <button class="send-btn" onclick="handleSend()">🚀</button>
+            
+            <div class="input-row">
+                <input type="file" id="imgUpload" accept="image/*" hidden onchange="handleImageUpload(this)">
+                <button class="action-btn upload-btn" onclick="document.getElementById('imgUpload').click()" title="Carregar Imagem">📎</button>
+                
+                <textarea id="userInput" placeholder="Escreva aqui..." oninput="autoGrow(this)"></textarea>
+                
+                <button class="action-btn send-btn" onclick="handleSend()">🚀</button>
+            </div>
         </div>
     </div>
 </main>
@@ -251,6 +312,7 @@ const chatBox     = document.getElementById('chatBox');
 const historyList = document.getElementById('historyList');
 const userInput   = document.getElementById('userInput');
 const voiceSelect = document.getElementById('voiceSelect');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
 
 let sessions        = JSON.parse(localStorage.getItem('zenia_sessions')||'[]');
 let currentSessionId = null;
@@ -267,7 +329,8 @@ Regras permanentes:
 2. Modo CRIADOR ativa-se com código especial.
 3. Mantenha contexto.
 4. Geras imagens ultra realistas.
-5. Se o usuário pedir para CRIAR MÚSICA, escreva uma letra de música criativa e rítmica (máximo 4 estrofes).`;
+5. Se o usuário pedir para CRIAR MÚSICA, escreva uma letra de música criativa e rítmica (máximo 4 estrofes).
+6. Se o usuário enviou uma imagem, analise o contexto que ele der.`;
 
 /* ============================================================
    DETECTION
@@ -280,7 +343,6 @@ function isAudioRequest(q){
     return /^(lê\s+em\s+voz\s+alta|fala|diz|áudio\s+de|audio\s+de|sintetiza|narrar|narra|read\s+aloud|say|speak|tts|text\s+to\s+speech)\s*[:\-]?\s*/i.test(q.trim());
 }
 
-// NOVA DETECÇÃO DE MÚSICA
 function isMusicRequest(q){
     return /cria\s*(uma\s*)?(música|cancão|som\s+de)|canta|rap|hip\s*hop|compor|escreve\s*(uma\s*)?(música|canção)/i.test(q);
 }
@@ -290,9 +352,12 @@ function extractAudioText(q){
 }
 
 /* ============================================================
-   UTILS
+   UTILS & SIDEBAR
 ============================================================ */
-function toggleSidebar(){ document.getElementById("sidebar").classList.toggle("active"); }
+function toggleSidebar(){ 
+    document.getElementById("sidebar").classList.toggle("active"); 
+    sidebarOverlay.classList.toggle("active");
+}
 function autoGrow(el){ el.style.height="auto"; el.style.height=el.scrollHeight+"px"; }
 function escapeHTML(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
 function formatTime(s){ if(isNaN(s))return'0:00'; var m=Math.floor(s/60),sec=Math.floor(s%60); return m+':'+(sec<10?'0':'')+sec; }
@@ -362,13 +427,43 @@ function deleteSession(e,id){ e.stopPropagation(); sessions=sessions.filter(func
 function clearAllData(){ if(confirm("Limpar tudo?")){ localStorage.clear(); location.reload(); } }
 
 /* ============================================================
+   IMAGE UPLOAD LOGIC
+============================================================ */
+function handleImageUpload(input){
+    if(input.files && input.files[0]){
+        var reader = new FileReader();
+        reader.onload = function(e){
+            // 1. Mostrar a imagem no chat como mensagem do usuário
+            var wrapper = document.createElement('div');
+            wrapper.className = 'msg-wrapper user-wrapper';
+            wrapper.innerHTML = `
+                <div class="msg user-msg">
+                    📎 Imagem carregada:<br>
+                    <img src="${e.target.result}" class="img-preview-msg">
+                </div>`;
+            chatBox.appendChild(wrapper);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            
+            // 2. Enviar prompt automático para a IA
+            var prompt = "Analise esta imagem que enviei (simulação: o usuário carregou uma foto). O que achas?";
+            handleSend(prompt, true); // true = hidden prompt text logic if needed, but here just normal flow
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+/* ============================================================
    HANDLE SEND — PRINCIPAL
 ============================================================ */
-async function handleSend(textOverride){
+async function handleSend(textOverride, isImageContext){
     var query=(textOverride||userInput.value).trim();
     if(!query) return;
-    addMessage(query,true);
-    userInput.value=''; userInput.style.height='48px';
+
+    // Se não for override (upload de imagem), mostra a msg do usuário
+    if(!isImageContext) {
+        addMessage(query,true);
+        userInput.value=''; userInput.style.height='auto';
+    }
 
     // modo criador
     if(query==="Z77702UFUSHNXW99UWU7EBEEI99XHXZHHHHDIDOI875D4545D+´P++P+POP890'404R4PP+*@£§£§@§@§§"){
@@ -376,23 +471,17 @@ async function handleSend(textOverride){
         return;
     }
 
-    // ── MÚSICA (NOVO) ──
+    // ── MÚSICA ──
     if(isMusicRequest(query)){
         var loadM = addMessage("🎵 Zénia está a compor a letra da música...", false);
         try {
-            // 1. Gerar a letra (Texto)
             var promptMusica = "Escreve uma letra de música curta (máximo 4 estrofes), rítmica e rimada sobre: " + query + ". Apenas a letra, sem introduções.";
             var res = await fetch('https://text.pollinations.ai/'+encodeURIComponent(buildContext(promptMusica))+'?model=mistral');
             var lyrics = await res.text();
             loadM.remove();
-            
-            // 2. Mostrar a letra
             processResponse("🎵 **Letra Gerada:**\n\n" + lyrics, query);
-            
-            // 3. Gerar o áudio automaticamente (Voz)
             var loadA = addMessage("🎵 A gravar vocal... (Aguarde)", false);
-            await generateAudio(lyrics, query, loadA, true); // true indica Modo Música
-            
+            await generateAudio(lyrics, query, loadA, true);
         } catch(e) {
             loadM.querySelector('.msg').innerText = "⚠️ Erro ao compor música.";
         }
@@ -408,22 +497,26 @@ async function handleSend(textOverride){
         return;
     }
 
-    // ── IMAGEM ──
+    // ── IMAGEM GERADA ──
     if(isImageRequest(query)){
         var loadI=addMessage("🎨 Zénia está a pintar…",false);
         var seed = Math.floor(Math.random()*99999);
         var cleanQuery = encodeURIComponent(query);
         var imgUrl = `https://image.pollinations.ai/prompt/${cleanQuery}?width=1024&height=1024&seed=${seed}&nologo=true&model=flux`;
-        
         loadI.remove();
         processResponse('![ARTE]('+imgUrl+')',query);
         return;
     }
 
-    // ── TEXTO NORMAL ──
+    // ── TEXTO NORMAL (Com contexto de imagem se houver) ──
     var loadT=addMessage("Zénia está a pensar…",false);
+    var finalPrompt = query;
+    if(isImageContext) {
+        finalPrompt = "[Sistema: O usuário enviou uma imagem. Responda como se estivesse vendo-a, seja criativa.] " + query;
+    }
+
     try{
-        var res=await fetch('https://text.pollinations.ai/'+encodeURIComponent(buildContext(query))+'?model=mistral');
+        var res=await fetch('https://text.pollinations.ai/'+encodeURIComponent(buildContext(finalPrompt))+'?model=mistral');
         var text=await res.text();
         loadT.remove();
         processResponse(text,query);
@@ -431,29 +524,24 @@ async function handleSend(textOverride){
 }
 
 /* ============================================================
-   AUDIO GENERATION (COM MODO MÚSICA)
+   AUDIO GENERATION
 ============================================================ */
 async function generateAudio(text, originalQuery, loadingWrapper, isMusic){
     var voice=voiceSelect.value;
-    
     if(voice === 'native') {
         loadingWrapper.remove();
         speakNative(text, originalQuery);
         return;
     }
-
     var url=`https://text.pollinations.ai/${encodeURIComponent(text)}?model=openai-audio&voice=${voice}`;
-    
     try{
         var res=await fetch(url);
         if(!res.ok) throw new Error('API Busy');
         var blob=await res.blob();
         if(blob.type.includes('json') || blob.size < 100) throw new Error('Invalid Audio');
-
         var objUrl=URL.createObjectURL(blob);
         loadingWrapper.remove();
         createAudioPlayer(objUrl, voice, text, originalQuery, isMusic);
-
     } catch(err){
         loadingWrapper.querySelector('.msg').innerText = "⚠️ API ocupada. Usando voz nativa de Angola...";
         setTimeout(() => {
@@ -465,16 +553,12 @@ async function generateAudio(text, originalQuery, loadingWrapper, isMusic){
 
 function speakNative(text, originalQuery){
     var u = new SpeechSynthesisUtterance(text);
-    u.lang = 'pt-PT';
-    u.rate = 1.1;
-    u.pitch = 1.0;
-    
+    u.lang = 'pt-PT'; u.rate = 1.1; u.pitch = 1.0;
     var wrapper=document.createElement('div');
     wrapper.className='msg-wrapper ai-wrapper';
     wrapper.innerHTML = `<div class="msg ai-msg">🔊 <b>Falando (Nativo):</b> "${escapeHTML(text)}"</div>`;
     chatBox.appendChild(wrapper);
     chatBox.scrollTop=chatBox.scrollHeight;
-    
     window.speechSynthesis.speak(u);
     saveSession(originalQuery, '[AUDIO_NATIVE] '+text);
 }
@@ -482,14 +566,11 @@ function speakNative(text, originalQuery){
 function createAudioPlayer(src, voice, text, originalQuery, isMusic){
     var wrapper=document.createElement('div');
     wrapper.className='msg-wrapper ai-wrapper';
-
-    // Ícone e Rótulo mudam se for Música
     var icon = isMusic ? '🎵' : '🔊';
     var label = isMusic ? 'Música Gerada (Vocal)' : 'Áudio Zénia';
-
     var player=document.createElement('div');
     player.className='audio-player';
-    if(isMusic) player.style.borderColor = 'var(--accent-alt)'; // Borda diferente para música
+    if(isMusic) player.style.borderColor = 'var(--accent-alt)';
     player.setAttribute('data-src',src);
     player.setAttribute('data-text',text);
 
@@ -506,7 +587,6 @@ function createAudioPlayer(src, voice, text, originalQuery, isMusic){
         '<button class="dl-btn" onclick="downloadAudio(this)">💾</button>';
 
     wrapper.appendChild(player);
-
     var audio=document.createElement('audio');
     audio.src=src; audio.preload='metadata'; audio.style.display='none';
     wrapper.appendChild(audio);
