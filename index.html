@@ -173,23 +173,38 @@
         renderHistory();
     };
 
-    async function fetchAIResponse(prompt) {
-        // Tenta a Pollinations primeiro, se falhar, vai para a Hercai (Pública)
+    /* ============================================================
+   SISTEMA DE IA DE ALTA DISPONIBILIDADE (SEM POLLINATIONS)
+============================================================ */
+async function fetchAIResponse(prompt) {
+    // 1ª TENTATIVA: HERCAI (Atualmente o mais estável para uso público)
+    try {
+        const res = await fetch(`https://hercai.onrender.com/v3/hercai?question=${encodeURIComponent(prompt)}`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        return data.reply;
+    } catch (e) {
+        console.log("Hercai falhou, tentando Rota de Emergência...");
+
+        // 2ª TENTATIVA: FLOWERY (Interface de IA generativa aberta)
         try {
-            const res = await fetch(API_ENDPOINTS[0](prompt));
-            if (!res.ok) throw new Error();
-            return await res.text();
-        } catch (e) {
-            console.log("Servidor principal instável, tentando backup...");
-            try {
-                const res = await fetch(API_ENDPOINTS[2](`Responda como IA-ZÉNIA do Lubango: ${prompt}`));
-                const data = await res.json();
-                return data.reply || data.content;
-            } catch (e2) {
-                return "Kapiango! Todos os meus servidores estão ocupados agora. Tenta de novo em 1 minuto?";
-            }
+            const res = await fetch(`https://api.flowery.pw/v1/chat/completions`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: "gpt-3.5-turbo",
+                    messages: [{ role: "user", content: prompt }]
+                })
+            });
+            const data = await res.json();
+            return data.choices[0].message.content;
+        } catch (e2) {
+            // SE TUDO FALHAR: MENSAGEM AMIGÁVEL DO LUBANGO
+            return "Pôxa! Os meus servidores centrais estão em manutenção agora. O sinal aqui no Lubango está mesmo " + 
+                   "com problemas. Podes tentar de novo em alguns segundos? Onawa!";
         }
     }
+}
 
     window.handleSend = async (textOverride = null, isSystem = false) => {
         const input = document.getElementById('userInput');
