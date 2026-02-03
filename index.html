@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>EM ATUALIZAÇÃO - TENTE MAIS TARDE</title>
+<title>IA-Zénia - EM ATUALIZAÇÃO - TENTE MAIS TARDE</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -71,6 +71,7 @@ textarea { background: transparent; border: none; outline: none; color: white; r
         <div class="flex items-center gap-3">
             <select id="modelEngine" class="model-select">
                 <option value="zenia-flow">MODELO: ZÉNIA-FLOW (TENSORFLOW)</option>
+                <option value="kimi">MODELO: KIMI K2.5 (POLLINATIONS)</option>
                 <option value="mistral">MODELO: ZÉNIA (MISTRAL)</option>
                 <option value="pollinations">MODELO: ZÉNIA-NEURAL (OPENAI)</option>
                 <option value="saurav">MODELO: SAURAV-Z (GPT-3.5)</option>
@@ -183,6 +184,12 @@ async function fetchPollinations(prompt, modelName) {
     return await res.text();
 }
 
+async function fetchKimiK2(prompt) {
+    const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=kimi-k2-5&seed=${Math.random()}`);
+    if (!res.ok) throw new Error();
+    return await res.text();
+}
+
 window.handleSend = async (textOverride) => {
     const text = (textOverride || userInput.value).trim();
     if(!text) return;
@@ -202,6 +209,8 @@ window.handleSend = async (textOverride) => {
 
         if (selected === 'zenia-flow') {
             responseText = await fetchZeniaFlow(systemContext);
+        } else if (selected === 'kimi') {
+            responseText = await fetchKimiK2(systemContext);
         } else if (selected === 'saurav') {
             responseText = await fetchSaurav(systemContext);
         } else if (selected === 'mistral') {
@@ -215,6 +224,7 @@ window.handleSend = async (textOverride) => {
     } catch (err) {
         loader.remove();
         const modelName = modelEngine.options[modelEngine.selectedIndex].text;
+        const selected = modelEngine.value;
         
         // Se Zénia-Flow falhar, sugerir fallback
         if (selected === 'zenia-flow') {
