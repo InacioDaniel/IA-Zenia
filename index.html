@@ -206,32 +206,37 @@ window.handleSend = async (textOverride) => {
     try {
         let responseText;
         const selected = modelEngine.value;
+        let modelUsed = modelEngine.options[modelEngine.selectedIndex].text;
 
-        if (selected === 'zenia-flow') {
-            responseText = await fetchZeniaFlow(systemContext);
-        } else if (selected === 'kimi') {
-            responseText = await fetchKimiK2(systemContext);
-        } else if (selected === 'saurav') {
-            responseText = await fetchSaurav(systemContext);
-        } else if (selected === 'mistral') {
-            responseText = await fetchPollinations(systemContext, 'mistral');
-        } else {
-            responseText = await fetchPollinations(systemContext, 'openai');
+        try {
+            if (selected === 'zenia-flow') {
+                responseText = await fetchZeniaFlow(systemContext);
+            } else if (selected === 'kimi') {
+                responseText = await fetchKimiK2(systemContext);
+            } else if (selected === 'saurav') {
+                responseText = await fetchSaurav(systemContext);
+            } else if (selected === 'mistral') {
+                responseText = await fetchPollinations(systemContext, 'mistral');
+            } else {
+                responseText = await fetchPollinations(systemContext, 'openai');
+            }
+        } catch (primaryErr) {
+            // Se modelo selecionado falhar, tenta fallback automático
+            console.log(`${modelUsed} falhou, tentando Zénia-Flow...`);
+            
+            try {
+                responseText = await fetchZeniaFlow(systemContext);
+                modelUsed = "ZÉNIA-FLOW (fallback automático)";
+            } catch (fallbackErr) {
+                throw new Error('Todos os modelos estão indisponíveis');
+            }
         }
 
         loader.remove();
         addMessage(responseText, false);
     } catch (err) {
         loader.remove();
-        const modelName = modelEngine.options[modelEngine.selectedIndex].text;
-        const selected = modelEngine.value;
-        
-        // Se Zénia-Flow falhar, sugerir fallback
-        if (selected === 'zenia-flow') {
-            addMessage("⚠️ Zénia-Flow está a carregar o modelo pela primeira vez (pode demorar 30-60s). Tenta novamente em alguns segundos!", false);
-        } else {
-            addMessage("⚠️ O modelo '" + modelName + "' está com problemas de conexão. Tenta trocar o modelo no topo!", false);
-        }
+        addMessage("⚠️ Desculpa! Todos os modelos estão temporariamente indisponíveis. A Pollinations está em manutenção. Tenta novamente em alguns minutos ou seleciona ZÉNIA-FLOW que funciona sem internet!", false);
     }
 };
 
