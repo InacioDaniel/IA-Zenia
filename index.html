@@ -1,472 +1,293 @@
 <!DOCTYPE html>
 <html lang="pt-AO">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>IA-Zénia by Zénia-Projects</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
-<style>
-/* =========================================
-   TEMA BLUE FUTURISTA - VARIÁVEIS
-========================================= */
-:root {
-    --accent: #00eaff;        
-    --accent-alt: #0066ff;    
-    --bg: #020617;            
-    --panel: #0b1124;         
-    --border: #1e3a8a;        
-    --text-light: #e0f2fe;    
-    --text-dark: #020617;     
-    --neon-glow: 0 0 15px rgba(0, 234, 255, 0.6), 0 0 30px rgba(0, 102, 255, 0.4);
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>IA-Zénia Vision | Lubango</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #00eaff; --accent-alt: #0066ff; --bg: #020617;
+            --panel: #0b1124; --border: #1e3a8a; --text-light: #e0f2fe;
+            --neon-glow: 0 0 15px rgba(0, 234, 255, 0.4);
+        }
 
-.text-blue-500 { color: var(--accent) !important; }
-.text-red-500 { color: #ff3366 !important; }
-.border-zinc-800 { border-color: var(--border) !important; }
-.bg-black\/30 { background-color: rgba(2, 6, 23, 0.5) !important; }
+        body { 
+            background: radial-gradient(circle at top right, #001d3d, var(--bg)); 
+            color: var(--text-light); font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0; height: 100vh; display: flex; overflow: hidden;
+        }
 
-body { 
-    background: linear-gradient(135deg, var(--bg) 0%, #000000 100%); 
-    color: var(--text-light); 
-    font-family: 'Plus Jakarta Sans', sans-serif; 
-    margin: 0; height: 100vh; display: flex; overflow: hidden; 
-}
+        /* Scrollbar Personalizada */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
-/* SIDEBAR */
-.sidebar { 
-    width: 280px; 
-    background: linear-gradient(to bottom, var(--panel), var(--bg));
-    border-right: 1px solid var(--border); 
-    display: flex; flex-direction: column; transition: .3s; 
-    box-shadow: 5px 0 15px rgba(0, 102, 255, 0.1);
-    z-index: 100;
-}
-@media(max-width:768px){ 
-    .sidebar{position:fixed;left:-100%;top:0;height:100%; width: 85%; max-width: 300px; box-shadow: 10px 0 50px rgba(0,0,0,0.8);} 
-    .sidebar.active{left:0;} 
-    .sidebar-overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.7); backdrop-filter: blur(3px);
-        z-index: 90; display: none; opacity: 0; transition: opacity .3s;
-    }
-    .sidebar-overlay.active { display: block; opacity: 1; }
-}
+        /* Sidebar Melhorada */
+        .sidebar { 
+            width: 280px; background: rgba(11, 17, 36, 0.95);
+            border-right: 1px solid var(--border); display: flex; flex-direction: column;
+            transition: 0.3s; z-index: 100; backdrop-filter: blur(10px);
+        }
 
-.main-content { flex:1; display:flex; flex-direction:column; overflow:hidden; width:100%; position: relative; }
+        @media(max-width:768px) {
+            .sidebar { position: fixed; left: -100%; height: 100%; width: 80%; }
+            .sidebar.active { left: 0; }
+        }
 
-/* CHAT AREA */
-.chat-container { 
-    flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; scroll-behavior: smooth; 
-    background: radial-gradient(circle at center, #0b1124 0%, var(--bg) 70%);
-}
+        /* Chat Area */
+        .chat-container { 
+            flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; 
+            gap: 20px; background: transparent;
+        }
 
-.hist-item { 
-    padding: 12px; border-radius: 12px; background: rgba(11, 17, 36, 0.6); margin-bottom: 10px; cursor: pointer; 
-    border: 1px solid var(--border); font-size: 13px; display: flex; justify-content: space-between; align-items: center; transition: all .3s ease; 
-}
-.hist-item:hover { border-color: var(--accent); background: linear-gradient(to right, rgba(0, 234, 255, 0.1), rgba(0, 102, 255, 0.2)); }
-.hist-item.active { border-color: var(--accent-alt); background: linear-gradient(to right, rgba(0, 102, 255, 0.3), rgba(11, 17, 36, 0.8)); box-shadow: var(--neon-glow); }
-.hist-item button { color: #666; transition: .2s; } .hist-item button:hover { color: #ff3366; }
+        .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; animation: fadeIn 0.3s ease; }
+        .ai-wrapper { align-self: flex-start; }
+        .user-wrapper { align-self: flex-end; }
 
-.btn-new { 
-    background: linear-gradient(135deg, var(--accent), var(--accent-alt)); 
-    color: #fff; padding: 12px; border-radius: 12px; font-weight: 800; text-align: center; margin-bottom: 20px; cursor: pointer; transition: .3s; 
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3); box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3);
-}
-.btn-new:hover { transform: translateY(-2px) scale(1.02); box-shadow: var(--neon-glow); }
+        .msg { padding: 14px 18px; border-radius: 20px; font-size: 14.5px; line-height: 1.6; position: relative; }
+        .ai-msg { 
+            background: rgba(11, 17, 36, 0.7); border: 1px solid var(--border);
+            border-left: 4px solid var(--accent); box-shadow: 10px 10px 20px rgba(0,0,0,0.2);
+        }
+        .user-msg { 
+            background: linear-gradient(135deg, var(--accent-alt), var(--accent));
+            color: white; font-weight: 500; border-bottom-right-radius: 4px;
+        }
 
-.btn-close-sidebar {
-    display: none; margin-bottom: 15px; padding: 10px; background: rgba(255, 51, 102, 0.2); border: 1px solid #ff3366; 
-    color: #ff3366; font-weight: bold; border-radius: 8px; text-align: center; cursor: pointer;
-}
-@media(max-width:768px){ .btn-close-sidebar{display:block;} }
+        /* Código */
+        pre { background: #000 !important; padding: 15px; border-radius: 12px; margin: 10px 0; overflow-x: auto; border: 1px solid var(--border); }
+        code { font-family: 'Fira Code', monospace; font-size: 13px; }
 
-.msg-wrapper { display:flex; flex-direction:column; max-width:90%; gap:5px; position:relative; animation:fadeIn .3s ease; }
-.msg { padding: 15px; border-radius: 18px; line-height: 1.6; font-size: 14px; word-wrap: break-word; transition: .3s; backdrop-filter: blur(5px); }
-.ai-msg { align-self: flex-start; border: 1px solid var(--border); border-left: 4px solid var(--accent); background: linear-gradient(135deg, var(--panel), rgba(2, 6, 23, 0.8)); color: var(--text-light); }
-.user-msg { align-self: flex-end; background: linear-gradient(135deg, var(--accent-alt), var(--accent)); color: #fff; border: none; box-shadow: 0 5px 15px rgba(0, 102, 255, 0.4); }
-.msg-controls { display:flex; gap:12px; margin-top:4px; padding:0 10px; font-size:11px; color:#64748b; }
-.ctrl-btn { cursor:pointer; transition:.2s; } .ctrl-btn:hover { color:var(--accent); }
+        /* Footer Input */
+        .footer-input { padding: 20px; background: linear-gradient(to top, var(--bg), transparent); }
+        .input-area { 
+            max-width: 900px; margin: 0 auto; background: rgba(11, 17, 36, 0.8);
+            border: 1px solid var(--border); border-radius: 24px; padding: 10px;
+            display: flex; align-items: flex-end; gap: 10px; backdrop-filter: blur(15px);
+        }
 
-.code-container { border-radius:12px; overflow:hidden; margin:15px 0; border:1px solid var(--border); background: #000; width:100%; box-shadow: 0 0 20px rgba(0, 102, 255, 0.1); }
-.code-header { background: var(--panel); padding:8px 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); }
-.btn-action { font-size:10px; font-weight:bold; padding:4px 8px; border-radius:6px; background: rgba(0, 102, 255, 0.2); color: var(--accent); border:1px solid var(--border); cursor:pointer; transition:.2s; }
+        textarea { 
+            flex: 1; background: transparent; border: none; outline: none; color: white;
+            padding: 10px; resize: none; max-height: 150px; font-size: 15px;
+        }
 
-/* INPUT MOBILE FIXED */
-.footer-input { background: linear-gradient(to top, var(--bg) 0%, rgba(11, 17, 36, 0.95) 100%); padding: env(safe-area-inset-bottom, 10px) 10px 10px 10px; border-top: 1px solid var(--border); }
-.footer-input-inner { max-width: 860px; margin: 0 auto; background: rgba(11, 17, 36, 0.5); border-radius: 20px; padding: 8px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; backdrop-filter: blur(10px); }
+        .action-btn {
+            width: 45px; height: 45px; border-radius: 18px; display: flex;
+            align-items: center; justify-content: center; transition: 0.2s;
+        }
+        .send-btn { background: var(--accent); color: var(--bg); font-weight: bold; }
+        .send-btn:hover { transform: scale(1.05); box-shadow: var(--neon-glow); }
 
-.voice-bar { display:flex; align-items:center; gap:8px; padding:6px 10px; background: rgba(2, 6, 23, 0.6); border-radius:12px; border:1px solid var(--border); width:100%; box-sizing:border-box; }
-.voice-bar select { background: transparent; color: var(--accent); border: none; font-size: 12px; outline: none; cursor: pointer; flex: 1; }
-.voice-bar option { background: var(--panel); }
-
-.input-row { display: flex; gap: 8px; width: 100%; align-items: center; }
-textarea { flex:1; min-width:0; background:transparent; border:none; outline:none; color:var(--text-light); font-size:15px; padding:10px; max-height:120px; resize:none; font-family:inherit; }
-
-button.action-btn { width: 40px; height: 40px; border-radius: 12px; font-weight: bold; border: none; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: .3s; }
-button.send-btn { background: linear-gradient(135deg, var(--accent), var(--accent-alt)); color: #fff; box-shadow: 0 0 10px rgba(0, 234, 255, 0.3); }
-button.upload-btn { background: rgba(255, 255, 255, 0.1); color: var(--accent); border: 1px solid var(--border); }
-
-/* IMAGEM E MODELO LOADER */
-.img-preview-msg { max-width: 200px; border-radius: 12px; border: 1px solid var(--border); margin-top: 5px; }
-.vision-status { font-size: 11px; color: var(--accent); margin-top: 5px; font-style: italic; display: flex; align-items: center; gap: 5px; }
-.vision-status.loading::after { content: ''; width: 10px; height: 10px; border: 2px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; }
-
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
-@keyframes loading{0%{background-position:200% 0}100%{background-position:-200% 0}}
-
-/* AUDIO PLAYER */
-.audio-player { display: flex; align-items: center; gap: 10px; background: linear-gradient(135deg, var(--panel), rgba(30, 58, 138, 0.3)); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; margin: 8px 0; width: 100%; box-sizing: border-box; }
-.play-btn { width: 35px; height: 35px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-alt)); border: none; cursor: pointer; color: #fff; flex-shrink: 0; }
-.progress-wrap { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-.audio-progress-bg { height: 4px; background: rgba(0,0,0,0.3); position: relative; cursor: pointer; }
-.audio-progress-fill { height: 100%; width: 0%; background: var(--accent); }
-.audio-time { font-size: 10px; color: #aaa; text-align: right; }
-
-@media(max-width:768px){ .chat-container{padding:15px} .footer-input-inner { gap: 6px; } .voice-bar { order: -1; } }
-</style>
+        /* Status de Visão Pulsante */
+        .vision-status.loading { animation: pulse 1.5s infinite; color: var(--accent); }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
 <body>
 
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="window.toggleSidebar()"></div>
+<div id="sidebarOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-[90]" onclick="toggleSidebar()"></div>
 
-<aside class="sidebar p-4" id="sidebar">
-    <button class="btn-close-sidebar" onclick="window.toggleSidebar()">✕ FECHAR MENU</button>
-    <div class="btn-new" onclick="window.startNewChat()">+ NOVA CONVERSA</div>
-    <h2 class="text-[10px] font-bold text-slate-400 uppercase mb-4 tracking-widest">Histórico Local</h2>
-    <div id="historyList" class="flex-1 overflow-y-auto pr-1 custom-scrollbar"></div>
-    <div class="mt-auto pt-4 border-t border-slate-800 space-y-2">
-        <h2 class="text-[9px] font-bold text-slate-500 uppercase mb-2">Links</h2>
-        <a href="https://zenia-projects.netlify.app" target="_blank" class="block text-xs text-blue-400">🌐 Zenia Projects</a>
-    </div>
+<aside class="sidebar p-5" id="sidebar">
+    <div class="flex justify-between items-center mb-8">
+        <span class="font-black text-xl tracking-tighter">IA-ZÉNIA</span>
+        <button onclick="toggleSidebar()" class="md:hidden text-red-400">✕</button>
+    </div>
+    
+    <button onclick="startNewChat()" class="w-full bg-blue-600/20 border border-blue-500/50 p-3 rounded-xl font-bold text-sm mb-6 hover:bg-blue-600/40 transition">
+        + NOVA CONVERSA
+    </button>
+
+    <div id="historyList" class="flex-1 overflow-y-auto space-y-2"></div>
+
+    <div class="mt-auto pt-5 border-t border-slate-800">
+        <a href="https://zenia-projects.netlify.app" target="_blank" class="text-xs text-slate-400 hover:text-white flex items-center gap-2">
+            <span>🌐</span> zenia-projects.netlify.app
+        </a>
+    </div>
 </aside>
 
-<main class="main-content">
-    <header class="p-4 border-b border-slate-800 flex justify-between items-center bg-black/30 backdrop-blur-md z-10">
-        <div class="flex items-center gap-4">
-            <button onclick="window.toggleSidebar()" class="md:hidden text-white font-bold text-lg">☰</button>
-            <h1 class="text-xl font-black italic tracking-wider">IA-ZÉNIA <span class="text-blue-500 text-xs font-normal" style="text-shadow: 0 0 10px rgba(0,234,255,0.5);">VISION</span></h1>
-        </div>
-        <button onclick="window.clearAllData()" class="text-[10px] text-red-500 font-bold hover:underline">APAGAR TUDO</button>
-    </header>
+<main class="flex-1 flex flex-col relative overflow-hidden">
+    <header class="p-4 border-b border-white/5 flex justify-between items-center bg-black/20 backdrop-blur-md">
+        <div class="flex items-center gap-3">
+            <button onclick="toggleSidebar()" class="md:hidden text-2xl">☰</button>
+            <h1 class="font-black text-lg italic">VISION <span class="text-blue-400">2.0</span></h1>
+        </div>
+        <div class="text-[10px] bg-blue-500/10 border border-blue-500/30 px-3 py-1 rounded-full text-blue-400 font-bold">
+            📍 LUBANGO, AO
+        </div>
+    </header>
 
-    <div id="chatBox" class="chat-container custom-scrollbar"></div>
+    <div id="chatBox" class="chat-container"></div>
 
-    <div class="footer-input z-20">
-        <div class="footer-input-inner">
-            <div class="voice-bar">
-                <label>🎤 Voz:</label>
-                <select id="voiceSelect">
-                    <option value="nova">Nova</option>
-                    <option value="alloy">Alloy</option>
-                    <option value="echo">Echo</option>
-                    <option value="shimmer">Shimmer</option>
-                    <option value="native">🌐 Voz Nativa</option>
-                </select>
-            </div>
-            
-            <div class="input-row">
-                <input type="file" id="imgUpload" accept="image/*" hidden>
-                <button class="action-btn upload-btn" onclick="document.getElementById('imgUpload').click()" title="Carregar Imagem">👁️</button>
-                <textarea id="userInput" placeholder="Mostra-me uma foto ou escreve..." oninput="autoGrow(this)"></textarea>
-                <button class="action-btn send-btn" onclick="window.handleSend()">🚀</button>
-            </div>
-        </div>
-    </div>
+    <div class="footer-input">
+        <div class="input-area">
+            <input type="file" id="imgUpload" accept="image/*" hidden>
+            <button class="action-btn bg-white/5 hover:bg-white/10" onclick="document.getElementById('imgUpload').click()">
+                📷
+            </button>
+            <textarea id="userInput" placeholder="Escreve aqui ou envia uma foto..." rows="1" oninput="this.style.height='';this.style.height=this.scrollHeight+'px'"></textarea>
+            <button class="action-btn send-btn" onclick="handleSend()">🚀</button>
+        </div>
+    </div>
 </main>
 
-<div style="position:fixed;top:10px;right:15px;padding:8px 15px;background:rgba(2, 6, 23, 0.8);color:var(--accent);border:1px solid var(--accent);border-radius:20px;font-size:12px;font-weight:bold;backdrop-filter:blur(10px);z-index:9999;">
-    🔵 <span id="viewsNumber">0</span> VISITANTES
-</div>
-
 <script type="module">
-/* ============================================================
-   IMPORTS & SETUP (Transformers.js)
-============================================================ */
-// Importa biblioteca de Visão diretamente do CDN (Sem API KEY, roda local/browser)
-import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.0';
+    import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.0';
+    env.allowLocalModels = false;
+    env.useBrowserCache = true;
 
-// Configura para não buscar modelos locais, mas sim do Hub (cacheado no browser)
-env.allowLocalModels = false;
-env.useBrowserCache = true;
+    let visionPipeline = null;
+    let sessions = JSON.parse(localStorage.getItem('zenia_sessions') || '[]');
+    let currentSessionId = null;
 
-// Variável para guardar o modelo carregado
-let visionPipeline = null;
+    // Inicialização
+    window.onload = () => {
+        if (sessions.length === 0) {
+            startNewChat();
+        } else {
+            loadSession(sessions[sessions.length - 1].id);
+        }
+        renderHistory();
+    };
 
-/* ============================================================
-   FUNÇÕES GLOBAIS (Expondo para o HTML)
-============================================================ */
-window.toggleSidebar = function(){ 
-    document.getElementById("sidebar").classList.toggle("active"); 
-    document.getElementById("sidebarOverlay").classList.toggle("active");
-}
-window.autoGrow = function(el){ el.style.height="auto"; el.style.height=el.scrollHeight+"px"; }
-window.clearAllData = function(){ if(confirm("Apagar tudo?")){ localStorage.clear(); location.reload(); } }
-window.startNewChat = startNewChat;
-window.handleSend = handleSend;
+    // --- FUNÇÕES DE INTERFACE ---
+    window.toggleSidebar = () => {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('sidebarOverlay').classList.toggle('hidden');
+    };
 
-/* ============================================================
-   VISITOR COUNTER
-============================================================ */
-(function(){
-    let v = localStorage.getItem("zenia_global_views");
-    v = v ? parseInt(v)+1 : 1;
-    localStorage.setItem("zenia_global_views", v);
-    document.getElementById("viewsNumber").textContent = v;
-})();
+    window.startNewChat = () => {
+        currentSessionId = Date.now();
+        const newSession = { id: currentSessionId, title: "Nova Conversa", messages: [] };
+        sessions.push(newSession);
+        saveSessions();
+        document.getElementById('chatBox').innerHTML = '';
+        addMessage("Onawa! Sou a IA-ZÉNIA. Como posso ajudar o Lubango hoje?", false);
+        renderHistory();
+    };
 
-/* ============================================================
-   GLOBALS
-============================================================ */
-const chatBox     = document.getElementById('chatBox');
-const historyList = document.getElementById('historyList');
-const userInput   = document.getElementById('userInput');
-const voiceSelect = document.getElementById('voiceSelect');
-const imgUpload   = document.getElementById('imgUpload');
+    function saveSessions() {
+        localStorage.setItem('zenia_sessions', JSON.stringify(sessions));
+    }
 
-let sessions        = JSON.parse(localStorage.getItem('zenia_sessions')||'[]');
-let currentSessionId = null;
-const codeStore     = new Map();
-let  codeIdCounter  = 0;
+    function loadSession(id) {
+        currentSessionId = id;
+        const session = sessions.find(s => s.id === id);
+        const chatBox = document.getElementById('chatBox');
+        chatBox.innerHTML = '';
+        session.messages.forEach(m => addMessage(m.text, m.role === 'user', true));
+        renderHistory();
+    }
 
-/* ============================================================
-   IMAGE ANALYSIS LOGIC (REAL VISION)
-============================================================ */
-// Event Listener para Upload
-imgUpload.addEventListener('change', async function(e){
-    if(e.target.files && e.target.files[0]){
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        
-        reader.onload = async function(event){
-            const imageUrl = event.target.result;
-            
-            // 1. Mostrar imagem no chat
-            const msgId = 'img-' + Date.now();
-            const wrapper = addMessage(`📎 Imagem carregada:<br><img src="${imageUrl}" class="img-preview-msg"><div id="${msgId}" class="vision-status loading">A carregar modelo de visão neuronal...</div>`, true);
-            
-            // 2. Processar com Transformers.js
-            try {
-                const statusEl = document.getElementById(msgId);
-                
-                // Carregar modelo se ainda não existe (primeira vez demora)
-                if(!visionPipeline){
-                    statusEl.innerText = "A baixar modelo de IA (só 1ª vez)...";
-                    // Usando um modelo leve de Image Captioning
-                    visionPipeline = await pipeline('image-to-text', 'Xenova/vit-gpt2-image-captioning');
-                }
+    // --- LÓGICA DE MENSAGENS ---
+    window.handleSend = async (textOverride = null, isSystem = false) => {
+        const input = document.getElementById('userInput');
+        const text = (textOverride || input.value).trim();
+        if (!text) return;
 
-                statusEl.innerText = "A analisar pixeis...";
-                
-                // Analisar a imagem
-                const output = await visionPipeline(imageUrl);
-                const description = output[0].generated_text; // Ex: "a cat sitting on a table"
-                
-                statusEl.className = "vision-status";
-                statusEl.innerText = `✅ Detectado: "${description}"`;
+        if (!isSystem) {
+            addMessage(text, true);
+            input.value = '';
+            input.style.height = 'auto';
+        }
 
-                // 3. Enviar contexto para o cérebro da Zénia (Mistral)
-                // O Mistral não vê a imagem, mas nós passamos a descrição do que a visão detectou
-                const hiddenPrompt = `[CONTEXTO DE VISÃO: O usuário enviou uma imagem. A minha rede neural de visão detectou: "${description}". Use isso como base, mas responda em Português de Angola.] O que vês nesta imagem?`;
-                
-                window.handleSend(hiddenPrompt, true); // true = modo sistema (não mostra texto balão)
+        // Simulação de carregamento
+        const loadMsg = addMessage("Zénia está a processar...", false);
+        
+        try {
+            // Contexto para Pollinations (Mistral)
+            const prompt = `System: Você é a IA-ZÉNIA do Lubango. Responda em Português de Angola com carisma. Contexto: ${text}`;
+            const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=mistral`);
+            const responseText = await res.text();
+            
+            loadMsg.remove();
+            addMessage(responseText, false);
+            
+            // Salvar no histórico
+            const session = sessions.find(s => s.id === currentSessionId);
+            if (session) {
+                if (session.messages.length === 0) session.title = text.substring(0, 20);
+                session.messages.push({ role: isSystem ? 'system' : 'user', text: text });
+                session.messages.push({ role: 'ai', text: responseText });
+                saveSessions();
+                renderHistory();
+            }
 
-            } catch (err) {
-                console.error(err);
-                document.getElementById(msgId).innerText = "❌ Erro ao processar imagem (Navegador incompatível?)";
-            }
-        }
-        reader.readAsDataURL(file);
-    }
-});
+        } catch (e) {
+            loadMsg.innerText = "Erro ao conectar com o cérebro da Zénia.";
+        }
+    };
 
-/* ============================================================
-   SYSTEM PROMPT
-============================================================ */
-const ZENIA_SYSTEM = `Você é IA-ZÉNIA do Lubango.
-1. Se receberes [CONTEXTO DE VISÃO], descreva a imagem baseada na detecção em inglês traduzindo para Português de forma natural e criativa.
-2. Não diga "O texto diz que é um gato", diga "Eu vejo um gato...".
-3. Geras imagens se pedirem.
-4. Crias músicas se pedirem.`;
+    function addMessage(text, isUser, isLoadingSession = false) {
+        const chatBox = document.getElementById('chatBox');
+        const wrapper = document.createElement('div');
+        wrapper.className = `msg-wrapper ${isUser ? 'user-wrapper' : 'ai-wrapper'}`;
+        
+        const content = isUser ? escapeHTML(text) : formatMarkdown(text);
+        
+        wrapper.innerHTML = `<div class="msg ${isUser ? 'user-msg' : 'ai-msg'}">${content}</div>`;
+        chatBox.appendChild(wrapper);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return wrapper;
+    }
 
-/* ============================================================
-   CORE FUNCTIONS
-============================================================ */
-function init(){
-    renderHistory();
-    sessions.length>0 ? loadSession(sessions[sessions.length-1].id) : startNewChat();
-}
+    // --- VISÃO (TRANSFORMERS) ---
+    document.getElementById('imgUpload').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
 
-function startNewChat(){
-    currentSessionId=Date.now(); chatBox.innerHTML='';
-    addMessage("Onawa ! Sou a IA-ZÉNIA. Posso 'ver' imagens agora. Mostra-me algo!",false);
-    renderHistory();
-}
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            const url = event.target.result;
+            const statusId = 'v-' + Date.now();
+            
+            addMessage(`[IMAGEM ENVIADA]<br><img src="${url}" class="rounded-lg mt-2 max-h-60">`, true);
+            const loadMsg = addMessage(`<div id="${statusId}" class="vision-status loading">Iniciando redes neurais de visão...</div>`, false);
 
-async function handleSend(textOverride, isSystemPrompt){
-    const query = (textOverride || userInput.value).trim();
-    if(!query) return;
+            try {
+                if (!visionPipeline) {
+                    visionPipeline = await pipeline('image-to-text', 'Xenova/vit-gpt2-image-captioning');
+                }
+                const output = await visionPipeline(url);
+                const desc = output[0].generated_text;
+                
+                document.getElementById(statusId).innerHTML = `✅ Vejo: <span class="italic text-white">${desc}</span>`;
+                window.handleSend(`[VISÃO]: Descreva o que você vê nesta imagem: ${desc}`, true);
+            } catch (err) {
+                document.getElementById(statusId).innerText = "❌ Erro na análise visual.";
+            }
+        };
+        reader.readAsDataURL(file);
+    });
 
-    if(!isSystemPrompt) {
-        addMessage(query, true);
-        userInput.value=''; userInput.style.height='auto';
-    }
+    // --- UTILITÁRIOS ---
+    function formatMarkdown(t) {
+        return t
+            .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+            .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+            .replace(/\n/g, '<br>');
+    }
 
-    // Comandos Especiais
-    if(isMusicRequest(query)) { handleMusic(query); return; }
-    if(isImageRequest(query)) { handleImageGen(query); return; }
-    if(isAudioRequest(query)) { handleTTS(query); return; }
+    function escapeHTML(s) {
+        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    }
 
-    // Texto Normal (Brain)
-    const loadT = addMessage("Zénia está a analisar...", false);
-    
-    // Construir contexto
-    const context = buildContext(query);
-    
-    try{
-        const res = await fetch('https://text.pollinations.ai/'+encodeURIComponent(context)+'?model=mistral');
-        const text = await res.text();
-        loadT.remove();
-        processResponse(text, query);
-    } catch(e){ 
-        loadT.querySelector('.msg').innerText='⚠️ Erro na conexão.'; 
-    }
-}
-
-/* ============================================================
-   HANDLERS ESPECÍFICOS
-============================================================ */
-async function handleMusic(query){
-    const loadM = addMessage("🎵 A compor letra...", false);
-    const prompt = "Escreve letra de música sobre: " + query;
-    const res = await fetch('https://text.pollinations.ai/'+encodeURIComponent(prompt));
-    const lyrics = await res.text();
-    loadM.remove();
-    processResponse("🎵 **Música:**\n\n"+lyrics, query);
-    // Auto-play TTS
-    generateAudio(lyrics.substring(0, 200), query, null, true); 
-}
-
-function handleImageGen(query){
-    const loadI = addMessage("🎨 A pintar...", false);
-    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(query)}?width=1024&height=1024&nologo=true&model=flux`;
-    loadI.remove();
-    processResponse(`![ARTE](${url})`, query);
-}
-
-function handleTTS(query){
-    const txt = query.replace(/^(fala|diz|lê)\s*[:\-]?\s*/i,'');
-    generateAudio(txt, query, addMessage("🔊 A gravar...", false), false);
-}
-
-/* ============================================================
-   AUDIO & UTILS
-============================================================ */
-async function generateAudio(text, originalQuery, loadingWrapper, isMusic){
-    const voice = voiceSelect.value;
-    if(loadingWrapper) loadingWrapper.remove();
-    
-    if(voice === 'native'){
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'pt-PT'; u.rate = 1.1;
-        window.speechSynthesis.speak(u);
-        return;
-    }
-
-    // Usando API Pollinations TTS
-    const url = `https://text.pollinations.ai/${encodeURIComponent(text)}?model=openai-audio&voice=${voice}`;
-    createAudioPlayer(url, voice, text, isMusic);
-}
-
-function createAudioPlayer(src, voice, text, isMusic){
-    const wrapper = document.createElement('div');
-    wrapper.className = 'msg-wrapper ai-wrapper';
-    wrapper.innerHTML = `
-        <div class="audio-player" style="${isMusic?'border-color:var(--accent-alt)':''}">
-            <button class="play-btn" onclick="this.nextElementSibling.play()">▶</button>
-            <audio src="${src}" onended="this.previousElementSibling.innerText='▶'" onplay="this.previousElementSibling.innerText='⏸'"></audio>
-            <div class="progress-wrap">
-                <div class="audio-label">${isMusic?'🎵 Música':'🔊 Áudio'}</div>
-                <div class="audio-voice">${voice}</div>
-            </div>
-        </div>`;
-    chatBox.appendChild(wrapper);
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-/* ============================================================
-   HELPERS (Context, Hist, UI)
-============================================================ */
-function buildContext(q){
-    const s = sessions.find(x => x.id===currentSessionId);
-    let hist = "";
-    if(s) hist = s.messages.slice(-6).map(m => (m.role==='user'?'User':'AI')+': '+m.text).join('\n');
-    return `${ZENIA_SYSTEM}\n\nHistórico:\n${hist}\n\nUsuário: ${q}`;
-}
-
-function processResponse(text, query){
-    const wrapper = document.createElement('div');
-    wrapper.className='msg-wrapper ai-wrapper';
-    
-    // Check imagem
-    const imgMatch = text.match(/!\[.*?\]\((.*?)\)/);
-    if(imgMatch){
-        wrapper.innerHTML += `<img src="${imgMatch[1]}" class="art-img" style="display:block" onload="this.scrollIntoView()">`;
-        text = text.replace(imgMatch[0], '');
-    }
-    
-    if(text.trim()) wrapper.innerHTML += `<div class="msg ai-msg">${formatAI(escapeHTML(text))}</div>`;
-    
-    chatBox.appendChild(wrapper);
-    chatBox.scrollTop=chatBox.scrollHeight;
-    
-    // Save session logic here (simplified)
-    if(currentSessionId){
-        const s = sessions.find(x => x.id===currentSessionId);
-        if(s) {
-            s.messages.push({role:'user',text:query}, {role:'ai',text:text});
-            localStorage.setItem('zenia_sessions',JSON.stringify(sessions));
-            renderHistory();
-        }
-    }
-}
-
-function addMessage(t, isUser){
-    const w=document.createElement('div');
-    w.className='msg-wrapper '+(isUser?'user-wrapper':'ai-wrapper');
-    w.innerHTML='<div class="msg '+(isUser?'user-msg':'ai-msg')+'">'+(isUser?t:formatAI(t))+'</div>';
-    chatBox.appendChild(w);
-    chatBox.scrollTop=chatBox.scrollHeight;
-    return w;
-}
-
-function renderHistory(){
-    historyList.innerHTML='';
-    sessions.slice().reverse().forEach(s => {
-        const item=document.createElement('div');
-        item.className='hist-item'+(s.id===currentSessionId?' active':'');
-        item.innerHTML=`<span>${escapeHTML(s.title || 'Conversa')}</span>`;
-        item.onclick = () => { currentSessionId=s.id; chatBox.innerHTML=''; s.messages.forEach(m => addMessage(m.text, m.role==='user')); renderHistory(); };
-        historyList.appendChild(item);
-    });
-}
-
-function isImageRequest(q){ return /desenha|gera\s*(uma\s*)?(imagem|arte)/i.test(q); }
-function isMusicRequest(q){ return /cria\s*música|letra/i.test(q); }
-function isAudioRequest(q){ return /fala|diz|lê/i.test(q); }
-function formatAI(t){ return t.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>'); }
-function escapeHTML(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
-
-// Iniciar
-init();
-
+    function renderHistory() {
+        const list = document.getElementById('historyList');
+        list.innerHTML = '';
+        [...sessions].reverse().forEach(s => {
+            const item = document.createElement('div');
+            item.className = `p-3 rounded-xl cursor-pointer text-sm truncate transition ${s.id === currentSessionId ? 'bg-blue-500/20 border border-blue-500/40 text-blue-400' : 'hover:bg-white/5 text-slate-400'}`;
+            item.innerText = s.title;
+            item.onclick = () => loadSession(s.id);
+            list.appendChild(item);
+        });
+    }
 </script>
 </body>
 </html>
-
