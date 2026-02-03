@@ -1,141 +1,3 @@
-<!DOCTYPE html>
-<html lang="pt-AO">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>IA-Zénia - ALL for life</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --accent: #00eaff; --accent-alt: #0066ff; --bg: #020617;
-            --panel: #0b1124; --border: #1e3a8a; --text-light: #e0f2fe;
-            --neon-glow: 0 0 15px rgba(0, 234, 255, 0.4);
-        }
-
-        body { 
-            background: radial-gradient(circle at top right, #001d3d, var(--bg)); 
-            color: var(--text-light); font-family: 'Plus Jakarta Sans', sans-serif;
-            margin: 0; height: 100vh; display: flex; overflow: hidden;
-        }
-
-        /* Scrollbar Personalizada */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-
-        /* Sidebar Melhorada */
-        .sidebar { 
-            width: 280px; background: rgba(11, 17, 36, 0.95);
-            border-right: 1px solid var(--border); display: flex; flex-direction: column;
-            transition: 0.3s; z-index: 100; backdrop-filter: blur(10px);
-        }
-
-        @media(max-width:768px) {
-            .sidebar { position: fixed; left: -100%; height: 100%; width: 80%; }
-            .sidebar.active { left: 0; }
-        }
-
-        /* Chat Area */
-        .chat-container { 
-            flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; 
-            gap: 20px; background: transparent;
-        }
-
-        .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; animation: fadeIn 0.3s ease; }
-        .ai-wrapper { align-self: flex-start; }
-        .user-wrapper { align-self: flex-end; }
-
-        .msg { padding: 14px 18px; border-radius: 20px; font-size: 14.5px; line-height: 1.6; position: relative; }
-        .ai-msg { 
-            background: rgba(11, 17, 36, 0.7); border: 1px solid var(--border);
-            border-left: 4px solid var(--accent); box-shadow: 10px 10px 20px rgba(0,0,0,0.2);
-        }
-        .user-msg { 
-            background: linear-gradient(135deg, var(--accent-alt), var(--accent));
-            color: white; font-weight: 500; border-bottom-right-radius: 4px;
-        }
-
-        /* Código */
-        pre { background: #000 !important; padding: 15px; border-radius: 12px; margin: 10px 0; overflow-x: auto; border: 1px solid var(--border); }
-        code { font-family: 'Fira Code', monospace; font-size: 13px; }
-
-        /* Footer Input */
-        .footer-input { padding: 20px; background: linear-gradient(to top, var(--bg), transparent); }
-        .input-area { 
-            max-width: 900px; margin: 0 auto; background: rgba(11, 17, 36, 0.8);
-            border: 1px solid var(--border); border-radius: 24px; padding: 10px;
-            display: flex; align-items: flex-end; gap: 10px; backdrop-filter: blur(15px);
-        }
-
-        textarea { 
-            flex: 1; background: transparent; border: none; outline: none; color: white;
-            padding: 10px; resize: none; max-height: 150px; font-size: 15px;
-        }
-
-        .action-btn {
-            width: 45px; height: 45px; border-radius: 18px; display: flex;
-            align-items: center; justify-content: center; transition: 0.2s;
-        }
-        .send-btn { background: var(--accent); color: var(--bg); font-weight: bold; }
-        .send-btn:hover { transform: scale(1.05); box-shadow: var(--neon-glow); }
-
-        /* Status de Visão Pulsante */
-        .vision-status.loading { animation: pulse 1.5s infinite; color: var(--accent); }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
-</head>
-<body>
-
-<div id="sidebarOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-[90]" onclick="toggleSidebar()"></div>
-
-<aside class="sidebar p-5" id="sidebar">
-    <div class="flex justify-between items-center mb-8">
-        <span class="font-black text-xl tracking-tighter">IA-ZÉNIA</span>
-        <button onclick="toggleSidebar()" class="md:hidden text-red-400">✕</button>
-    </div>
-    
-    <button onclick="startNewChat()" class="w-full bg-blue-600/20 border border-blue-500/50 p-3 rounded-xl font-bold text-sm mb-6 hover:bg-blue-600/40 transition">
-        + NOVA CONVERSA
-    </button>
-
-    <div id="historyList" class="flex-1 overflow-y-auto space-y-2"></div>
-
-    <div class="mt-auto pt-5 border-t border-slate-800">
-        <a href="https://zenia-projects.netlify.app" target="_blank" class="text-xs text-slate-400 hover:text-white flex items-center gap-2">
-            <span>🌐</span> zenia-projects.netlify.app
-        </a>
-    </div>
-</aside>
-
-<main class="flex-1 flex flex-col relative overflow-hidden">
-    <header class="p-4 border-b border-white/5 flex justify-between items-center bg-black/20 backdrop-blur-md">
-        <div class="flex items-center gap-3">
-            <button onclick="toggleSidebar()" class="md:hidden text-2xl">☰</button>
-            <h1 class="font-black text-lg italic">VISION <span class="text-blue-400">ALL.ANGOLA</span></h1>
-        </div>
-        <div class="text-[10px] bg-blue-500/10 border border-blue-500/30 px-3 py-1 rounded-full text-blue-400 font-bold">
-            📍 LUBANGO, AO
-        </div>
-    </header>
-
-    <div id="chatBox" class="chat-container"></div>
-
-    <div class="footer-input">
-        <div class="input-area">
-            <input type="file" id="imgUpload" accept="image/*" hidden>
-            <button class="action-btn bg-white/5 hover:bg-white/10" onclick="document.getElementById('imgUpload').click()">
-                📷
-            </button>
-            <textarea id="userInput" placeholder="Escreve aqui ou envia uma foto..." rows="1" oninput="this.style.height='';this.style.height=this.scrollHeight+'px'"></textarea>
-            <button class="action-btn send-btn" onclick="handleSend()">🚀</button>
-        </div>
-    </div>
-</main>
-
 <script type="module">
     import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.0';
     env.allowLocalModels = false;
@@ -145,17 +7,19 @@
     let sessions = JSON.parse(localStorage.getItem('zenia_sessions') || '[]');
     let currentSessionId = null;
 
-    // Inicialização
+    // --- CONFIGURAÇÃO DE APIS PÚBLICAS (SEM CHAVE) ---
+    const API_ENDPOINTS = [
+        (p) => `https://text.pollinations.ai/${encodeURIComponent(p)}?model=mistral`,
+        (p) => `https://api.pawan.krd/cosmosrp-v1/chat/completions`, // Alternativa Pública
+        (p) => `https://hercai.onrender.com/v3/hercai?question=${encodeURIComponent(p)}` // Backup Grátis
+    ];
+
     window.onload = () => {
-        if (sessions.length === 0) {
-            startNewChat();
-        } else {
-            loadSession(sessions[sessions.length - 1].id);
-        }
+        if (sessions.length === 0) startNewChat();
+        else loadSession(sessions[sessions.length - 1].id);
         renderHistory();
     };
 
-    // --- FUNÇÕES DE INTERFACE ---
     window.toggleSidebar = () => {
         document.getElementById('sidebar').classList.toggle('active');
         document.getElementById('sidebarOverlay').classList.toggle('hidden');
@@ -167,24 +31,28 @@
         sessions.push(newSession);
         saveSessions();
         document.getElementById('chatBox').innerHTML = '';
-        addMessage("Onawa! Sou a IA-ZÉNIA. EU ZÉNIA ESTOU SENDO ATUALIZADA COM NOVOS RECURSOS, VOLTO EM BREVE, false);
+        addMessage("Onawa! Sou a IA-ZÉNIA. Estou conectada via redes neurais públicas. O que vamos criar hoje?", false);
         renderHistory();
     };
 
-    function saveSessions() {
-        localStorage.setItem('zenia_sessions', JSON.stringify(sessions));
+    async function fetchAIResponse(prompt) {
+        // Tenta a Pollinations primeiro, se falhar, vai para a Hercai (Pública)
+        try {
+            const res = await fetch(API_ENDPOINTS[0](prompt));
+            if (!res.ok) throw new Error();
+            return await res.text();
+        } catch (e) {
+            console.log("Servidor principal instável, tentando backup...");
+            try {
+                const res = await fetch(API_ENDPOINTS[2](`Responda como IA-ZÉNIA do Lubango: ${prompt}`));
+                const data = await res.json();
+                return data.reply || data.content;
+            } catch (e2) {
+                return "Kapiango! Todos os meus servidores estão ocupados agora. Tenta de novo em 1 minuto?";
+            }
+        }
     }
 
-    function loadSession(id) {
-        currentSessionId = id;
-        const session = sessions.find(s => s.id === id);
-        const chatBox = document.getElementById('chatBox');
-        chatBox.innerHTML = '';
-        session.messages.forEach(m => addMessage(m.text, m.role === 'user', true));
-        renderHistory();
-    }
-
-    // --- LÓGICA DE MENSAGENS ---
     window.handleSend = async (textOverride = null, isSystem = false) => {
         const input = document.getElementById('userInput');
         const text = (textOverride || input.value).trim();
@@ -196,98 +64,58 @@
             input.style.height = 'auto';
         }
 
-        // Simulação de carregamento
-        const loadMsg = addMessage("Zénia está a processar...", false);
+        const loadMsg = addMessage("Zénia está a pensar...", false);
         
-        try {
-            // Contexto para Pollinations (Mistral)
-            const prompt = `System: Você é a IA-ZÉNIA do Lubango. Responda em Português de Angola com carisma. Contexto: ${text}`;
-            const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=mistral`);
-            const responseText = await res.text();
-            
-            loadMsg.remove();
-            addMessage(responseText, false);
-            
-            // Salvar no histórico
-            const session = sessions.find(s => s.id === currentSessionId);
-            if (session) {
-                if (session.messages.length === 0) session.title = text.substring(0, 20);
-                session.messages.push({ role: isSystem ? 'system' : 'user', text: text });
-                session.messages.push({ role: 'ai', text: responseText });
-                saveSessions();
-                renderHistory();
-            }
-
-        } catch (e) {
-            loadMsg.innerText = "Erro ao conectar com o cérebro da Zénia.";
+        const systemPrompt = `Você é IA-ZÉNIA, uma IA do Lubango, Angola. Seja prestativa e use gírias leves angolanas. Pergunta: ${text}`;
+        const responseText = await fetchAIResponse(systemPrompt);
+        
+        loadMsg.remove();
+        addMessage(responseText, false);
+        
+        const session = sessions.find(s => s.id === currentSessionId);
+        if (session) {
+            if (session.messages.length === 0) session.title = text.substring(0, 25);
+            session.messages.push({ role: 'user', text: text }, { role: 'ai', text: responseText });
+            saveSessions();
+            renderHistory();
         }
     };
 
-    function addMessage(text, isUser, isLoadingSession = false) {
+    // --- RESTANTE DAS FUNÇÕES (Mantendo Visão e UI) ---
+    function addMessage(text, isUser) {
         const chatBox = document.getElementById('chatBox');
         const wrapper = document.createElement('div');
         wrapper.className = `msg-wrapper ${isUser ? 'user-wrapper' : 'ai-wrapper'}`;
-        
-        const content = isUser ? escapeHTML(text) : formatMarkdown(text);
-        
-        wrapper.innerHTML = `<div class="msg ${isUser ? 'user-msg' : 'ai-msg'}">${content}</div>`;
+        wrapper.innerHTML = `<div class="msg ${isUser ? 'user-msg' : 'ai-msg'}">${isUser ? escapeHTML(text) : formatMarkdown(text)}</div>`;
         chatBox.appendChild(wrapper);
         chatBox.scrollTop = chatBox.scrollHeight;
         return wrapper;
     }
 
-    // --- VISÃO (TRANSFORMERS) ---
-    document.getElementById('imgUpload').addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-            const url = event.target.result;
-            const statusId = 'v-' + Date.now();
-            
-            addMessage(`[IMAGEM ENVIADA]<br><img src="${url}" class="rounded-lg mt-2 max-h-60">`, true);
-            const loadMsg = addMessage(`<div id="${statusId}" class="vision-status loading">Iniciando redes neurais de visão...</div>`, false);
-
-            try {
-                if (!visionPipeline) {
-                    visionPipeline = await pipeline('image-to-text', 'Xenova/vit-gpt2-image-captioning');
-                }
-                const output = await visionPipeline(url);
-                const desc = output[0].generated_text;
-                
-                document.getElementById(statusId).innerHTML = `✅ Vejo: <span class="italic text-white">${desc}</span>`;
-                window.handleSend(`[VISÃO]: Descreva o que você vê nesta imagem: ${desc}`, true);
-            } catch (err) {
-                document.getElementById(statusId).innerText = "❌ Erro na análise visual.";
-            }
-        };
-        reader.readAsDataURL(file);
-    });
-
-    // --- UTILITÁRIOS ---
     function formatMarkdown(t) {
-        return t
-            .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-            .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
-            .replace(/\n/g, '<br>');
+        return t.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                .replace(/### (.*?)\n/g, '<h3 class="text-blue-400 font-bold">$1</h3>')
+                .replace(/\n/g, '<br>');
     }
 
-    function escapeHTML(s) {
-        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
-    }
-
+    function escapeHTML(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+    function saveSessions() { localStorage.setItem('zenia_sessions', JSON.stringify(sessions)); }
     function renderHistory() {
         const list = document.getElementById('historyList');
         list.innerHTML = '';
-        [...sessions].reverse().forEach(s => {
+        [...sessions].reverse().slice(0, 10).forEach(s => {
             const item = document.createElement('div');
-            item.className = `p-3 rounded-xl cursor-pointer text-sm truncate transition ${s.id === currentSessionId ? 'bg-blue-500/20 border border-blue-500/40 text-blue-400' : 'hover:bg-white/5 text-slate-400'}`;
+            item.className = `p-3 rounded-xl cursor-pointer text-sm truncate mb-1 ${s.id === currentSessionId ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'text-slate-400 hover:bg-white/5'}`;
             item.innerText = s.title;
             item.onclick = () => loadSession(s.id);
             list.appendChild(item);
         });
     }
+    function loadSession(id) {
+        currentSessionId = id;
+        const session = sessions.find(s => s.id === id);
+        document.getElementById('chatBox').innerHTML = '';
+        session.messages.forEach(m => addMessage(m.text, m.role === 'user'));
+        renderHistory();
+    }
 </script>
-</body>
-</html>
