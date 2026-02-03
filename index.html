@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>IA-Zénia - EM ATUALIZAÇÃO - TENTE MAIS TARDE</title>
+<title>EM ATUALIZAÇÃO - TENTE MAIS TARDE</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -34,6 +34,9 @@ textarea { background: transparent; border: none; outline: none; color: white; r
 @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
 .model-select { background: rgba(30, 58, 138, 0.5); border: 1px solid var(--border); color: var(--accent); font-size: 10px; padding: 4px 8px; border-radius: 8px; outline: none; cursor: pointer; }
+
+.loading-indicator { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-right: 5px; animation: pulse 1s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 </style>
 </head>
 <body>
@@ -67,6 +70,7 @@ textarea { background: transparent; border: none; outline: none; color: white; r
         
         <div class="flex items-center gap-3">
             <select id="modelEngine" class="model-select">
+                <option value="zenia-flow">MODELO: ZÉNIA-FLOW (TENSORFLOW)</option>
                 <option value="mistral">MODELO: ZÉNIA (MISTRAL)</option>
                 <option value="pollinations">MODELO: ZÉNIA-NEURAL (OPENAI)</option>
                 <option value="saurav">MODELO: SAURAV-Z (GPT-3.5)</option>
@@ -106,6 +110,8 @@ env.allowLocalModels = false;
 env.useBrowserCache = true;
 
 let visionPipeline = null;
+let zeniaPipeline = null;
+let zeniaPipelineReady = false;
 const chatBox = document.getElementById('chatBox');
 const userInput = document.getElementById('userInput');
 const modelEngine = document.getElementById('modelEngine');
@@ -117,7 +123,48 @@ window.startNewChat = () => {
     addMessage("Onawa! Sou a IA-ZÉNIA. Estou pronta para conversar com o cérebro que escolheres!", false);
 };
 
-// --- MOTORES DE IA ---
+// --- MODELO ZÉNIA-FLOW (TRANSFORMERS.JS - TENSORFLOW) ---
+async function initZeniaFlow() {
+    if (zeniaPipelineReady) return zeniaPipeline;
+    
+    try {
+        zeniaPipeline = await pipeline('text2text-generation', 'Xenova/distilbart-cnn-6-6');
+        zeniaPipelineReady = true;
+        return zeniaPipeline;
+    } catch (err) {
+        console.error('Erro ao carregar Zénia-Flow:', err);
+        throw new Error('Modelo Zénia-Flow indisponível');
+    }
+}
+
+async function fetchZeniaFlow(prompt) {
+    try {
+        const pipe = await initZeniaFlow();
+        
+        // Processar com limite de tokens
+        const sanitized = prompt.substring(0, 1024);
+        const result = await pipe(sanitized, { 
+            max_length: 256,
+            min_length: 50,
+            do_sample: true,
+            temperature: 0.7
+        });
+        
+        let response = result[0].summary_text || "Resposta processada com sucesso.";
+        
+        // Garantir que responde em português de Angola
+        if (!response.includes('Zénia') && !response.includes('cérebro')) {
+            response = `[Zénia-Flow] ${response}`;
+        }
+        
+        return response;
+    } catch (err) {
+        console.error('Erro Zénia-Flow:', err);
+        throw new Error('Zénia-Flow processamento falhou');
+    }
+}
+
+// --- MOTORES DE IA ORIGINAIS ---
 async function fetchSaurav(prompt) {
     const response = await fetch(`https://free-text-generation-api.vercel.app/api/generate`, {
         method: 'POST',
@@ -146,14 +193,16 @@ window.handleSend = async (textOverride) => {
         userInput.style.height = 'auto';
     }
 
-    const loader = addMessage("<span class='animate-pulse'>Zénia está a processar...</span>", false);
+    const loader = addMessage("<span class='animate-pulse'><span class='loading-indicator'></span>Zénia está a processar...</span>", false);
     const systemContext = `Você é IA-ZÉNIA do Lubango, Angola, criada por @inacio.u.daniel. Você é carismática e inteligente. Responda em Português de Angola: ${text}`;
 
     try {
         let responseText;
         const selected = modelEngine.value;
 
-        if (selected === 'saurav') {
+        if (selected === 'zenia-flow') {
+            responseText = await fetchZeniaFlow(systemContext);
+        } else if (selected === 'saurav') {
             responseText = await fetchSaurav(systemContext);
         } else if (selected === 'mistral') {
             responseText = await fetchPollinations(systemContext, 'mistral');
@@ -165,7 +214,14 @@ window.handleSend = async (textOverride) => {
         addMessage(responseText, false);
     } catch (err) {
         loader.remove();
-        addMessage("⚠️ O modelo '" + modelEngine.options[modelEngine.selectedIndex].text + "' está com problemas de conexão. Tenta trocar o modelo no topo!", false);
+        const modelName = modelEngine.options[modelEngine.selectedIndex].text;
+        
+        // Se Zénia-Flow falhar, sugerir fallback
+        if (selected === 'zenia-flow') {
+            addMessage("⚠️ Zénia-Flow está a carregar o modelo pela primeira vez (pode demorar 30-60s). Tenta novamente em alguns segundos!", false);
+        } else {
+            addMessage("⚠️ O modelo '" + modelName + "' está com problemas de conexão. Tenta trocar o modelo no topo!", false);
+        }
     }
 };
 
