@@ -124,12 +124,13 @@ window.startNewChat = () => {
     addMessage("Onawa! Sou a IA-ZÉNIA. Estou pronta para conversar com o cérebro que escolheres!", false);
 };
 
-// --- MODELO ZÉNIA-FLOW (TRANSFORMERS.JS - TENSORFLOW) ---
+// --- MODELO ZÉNIA-FLOW (TRANSFORMERS.JS - GPT2 OTIMIZADO) ---
 async function initZeniaFlow() {
     if (zeniaPipelineReady) return zeniaPipeline;
     
     try {
-        zeniaPipeline = await pipeline('text2text-generation', 'Xenova/distilbart-cnn-6-6');
+        // GPT2 é MUITO mais rápido que DistilBART
+        zeniaPipeline = await pipeline('text-generation', 'Xenova/distilgpt2');
         zeniaPipelineReady = true;
         return zeniaPipeline;
     } catch (err) {
@@ -142,20 +143,22 @@ async function fetchZeniaFlow(prompt) {
     try {
         const pipe = await initZeniaFlow();
         
-        // Processar com limite de tokens
-        const sanitized = prompt.substring(0, 1024);
+        // Processar com limite de tokens (GPT2 é muito mais rápido)
+        const sanitized = prompt.substring(0, 512);
         const result = await pipe(sanitized, { 
-            max_length: 256,
-            min_length: 50,
+            max_new_tokens: 150,
             do_sample: true,
-            temperature: 0.7
+            temperature: 0.8,
+            top_p: 0.95
         });
         
-        let response = result[0].summary_text || "Resposta processada com sucesso.";
+        let response = result[0].generated_text || "Resposta processada com sucesso.";
         
-        // Garantir que responde em português de Angola
-        if (!response.includes('Zénia') && !response.includes('cérebro')) {
-            response = `[Zénia-Flow] ${response}`;
+        // Remover a prompt do resultado (GPT2 inclui o input na output)
+        response = response.replace(sanitized, '').trim();
+        
+        if (!response) {
+            response = "Processado com sucesso!";
         }
         
         return response;
