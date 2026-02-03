@@ -3,12 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>IA-Zénia - by zénia projectsn</title>
+<title>IA-Zénia - Zénia Projects</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -28,13 +24,14 @@ body { background: radial-gradient(circle at top right, #0b1124, #020617); color
 .msg-wrapper { display:flex; flex-direction:column; max-width:85%; gap:8px; animation: slideUp 0.4s ease-out; }
 .ai-wrapper { align-self: flex-start; }
 .user-wrapper { align-self: flex-end; }
-.msg { padding: 16px 20px; border-radius: 20px; line-height: 1.6; font-size: 14.5px; }
+.msg { padding: 16px 20px; border-radius: 20px; line-height: 1.6; font-size: 14.5px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 .ai-msg { background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border); border-left: 4px solid var(--accent); }
 .user-msg { background: linear-gradient(135deg, var(--accent-alt), #0044cc); color: white; }
 
-.footer-input-inner { max-width: 900px; margin: 0 auto; background: rgba(15, 23, 42, 0.9); border: 1px solid var(--border); border-radius: 24px; padding: 10px; }
-textarea { background: transparent; border: none; outline: none; color: white; resize: none; width: 100%; padding: 10px; }
-.send-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--accent); color: #000; font-weight: bold; transition: 0.3s; }
+.footer-input-inner { max-width: 900px; margin: 0 auto; background: rgba(15, 23, 42, 0.9); border: 1px solid var(--border); border-radius: 24px; padding: 10px; box-shadow: 0 -5px 20px rgba(0,0,0,0.3); }
+textarea { background: transparent; border: none; outline: none; color: white; resize: none; width: 100%; padding: 10px; font-size: 15px; }
+.send-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--accent); color: #000; font-weight: bold; transition: 0.3s; flex-shrink: 0; }
+.send-btn:hover { transform: scale(1.05); box-shadow: var(--neon-glow); }
 @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
@@ -42,33 +39,36 @@ textarea { background: transparent; border: none; outline: none; color: white; r
 
 <aside class="sidebar p-5" id="sidebar">
     <div class="mb-6">
-        <h1 class="text-2xl font-extrabold text-cyan-400 italic">IA-ZÉNIA</h1>
+        <h1 class="text-2xl font-extrabold text-cyan-400 italic tracking-tighter">IA-ZÉNIA</h1>
         <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">By Zénia Projects</p>
     </div>
     
-    <button class="bg-blue-600 hover:bg-blue-500 p-3 rounded-xl font-bold mb-6 transition-all" onclick="window.startNewChat()">+ NOVA SESSÃO</button>
+    <button class="bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-xl font-bold mb-6 transition-all shadow-lg" onclick="window.startNewChat()">+ NOVA SESSÃO</button>
     
     <div id="historyList" class="flex-1 overflow-y-auto space-y-2 text-xs"></div>
     
     <div class="pt-4 border-t border-slate-800 space-y-3">
-        <div>
-            <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Irmãs Neurais</p>
-            <a href="https://ia-zenia.netlify.app" target="_blank" class="block text-cyan-500 hover:underline mb-1">🔗 IA-Zénia Web</a>
-            <a href="https://antonia-ia.netlify.app" target="_blank" class="block text-cyan-500 hover:underline">🔗 Antónia IA</a>
+        <p class="text-[10px] text-slate-500 font-bold uppercase">Irmãs Neurais</p>
+        <div class="space-y-1">
+            <a href="https://ia-zenia.netlify.app" target="_blank" class="block text-cyan-500 hover:text-white transition text-[11px]">🔗 IA-Zénia Web</a>
+            <a href="https://antonia-ia.netlify.app" target="_blank" class="block text-cyan-500 hover:text-white transition text-[11px]">🔗 Antónia IA</a>
         </div>
         <div class="bg-black/40 p-3 rounded-lg border border-white/5">
             <p class="text-[10px] text-slate-400">Criador: <span class="text-white">@inacio.u.daniel</span></p>
-            <a href="https://zenia-projects.netlify.app" class="text-[10px] text-blue-400 hover:underline">zenia-projects.netlify.app</a>
+            <p class="text-[9px] text-slate-500 italic mt-1">Lubango, Angola</p>
         </div>
     </div>
 </aside>
 
 <main class="main-content">
     <header class="p-4 border-b border-white/5 flex justify-between items-center bg-black/20 backdrop-blur-md">
-        <button onclick="window.toggleSidebar()" class="p-2 hover:bg-white/10 rounded-lg">☰</button>
+        <button onclick="window.toggleSidebar()" class="p-2 hover:bg-white/10 rounded-lg text-white">☰</button>
         <div class="text-right">
-            <p class="text-[10px] font-bold text-cyan-400">STATUS: ONLINE</p>
-            <p class="text-[8px] text-slate-500">LUBANGO, ANGOLA</p>
+            <div class="flex items-center gap-2 justify-end">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <p class="text-[10px] font-bold text-cyan-400">SISTEMA ACTIVO</p>
+            </div>
+            <p class="text-[8px] text-slate-500 uppercase tracking-widest">Lubango Edition</p>
         </div>
     </header>
 
@@ -77,15 +77,15 @@ textarea { background: transparent; border: none; outline: none; color: white; r
     <div class="p-4 bg-gradient-to-t from-bg to-transparent">
         <div class="footer-input-inner">
             <div class="flex items-center gap-4 border-b border-white/5 mb-2 pb-2 px-2 text-[11px]">
-                <select id="voiceSelect" class="bg-transparent text-cyan-400 outline-none">
-                    <option value="nova">Voz Nova</option>
-                    <option value="native">Nativa (PT-AO)</option>
+                <select id="voiceSelect" class="bg-transparent text-cyan-400 outline-none cursor-pointer">
+                    <option value="nova">Voz: Zénia Nova</option>
+                    <option value="native">Voz: Nativa PT-AO</option>
                 </select>
                 <input type="file" id="imgUpload" hidden>
-                <button onclick="document.getElementById('imgUpload').click()" class="text-slate-400 hover:text-white">📎 IMAGEM</button>
+                <button onclick="document.getElementById('imgUpload').click()" class="text-slate-400 hover:text-cyan-400 transition">📎 ANEXAR FOTO</button>
             </div>
             <div class="flex items-end gap-2">
-                <textarea id="userInput" placeholder="Escreve para a Zénia..." rows="1" oninput="this.style.height='';this.style.height=this.scrollHeight+'px'"></textarea>
+                <textarea id="userInput" placeholder="Escreve aqui..." rows="1" oninput="this.style.height='';this.style.height=this.scrollHeight+'px'"></textarea>
                 <button class="send-btn" onclick="window.handleSend()">🚀</button>
             </div>
         </div>
@@ -101,13 +101,37 @@ let visionPipeline = null;
 const chatBox = document.getElementById('chatBox');
 const userInput = document.getElementById('userInput');
 
-// --- EXPOSIÇÃO PARA O WINDOW (RESOLVE O ERRO) ---
 window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('active');
 
 window.startNewChat = () => {
     chatBox.innerHTML = '';
     addMessage("Onawa! Sou a IA-ZÉNIA de Lubango. Como posso ajudar hoje?", false);
 };
+
+// --- FUNÇÃO DE CHAMADA ROBUSTA ---
+async function askAI(prompt) {
+    const systemPrompt = `Você é IA-ZÉNIA, uma IA angolana do Lubango. Criador: @inacio.u.daniel. Responda sempre em Português de Angola com carisma. Pergunta: ${prompt}`;
+    
+    // Tenta primeiro a API do Saurav (mesmo instável)
+    try {
+        const response = await fetch(`https://free-text-generation-api.vercel.app/api/generate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: systemPrompt, model: "gpt-3.5-turbo" })
+        });
+        
+        if (!response.ok) throw new Error('API Down');
+        const data = await response.json();
+        // Se a resposta contiver erro de gateway ou estiver vazia
+        if (!data.result || data.result.includes("502")) throw new Error('Bad Gateway');
+        return data.result;
+    } catch (err) {
+        console.warn("API Principal falhou, usando backup...");
+        // BACKUP ESTÁVEL (Pollinations)
+        const res = await fetch('https://text.pollinations.ai/'+encodeURIComponent(systemPrompt)+'?model=mistral&seed=' + Math.random());
+        return await res.text();
+    }
+}
 
 window.handleSend = async (textOverride) => {
     const text = (textOverride || userInput.value).trim();
@@ -121,26 +145,9 @@ window.handleSend = async (textOverride) => {
 
     const loader = addMessage("<span class='animate-pulse'>Zénia está a pensar...</span>", false);
 
-    try {
-        const response = await fetch(`https://free-text-generation-api.vercel.app/api/generate`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                prompt: `Você é IA-ZÉNIA do Lubango, Angola. Criada por @inacio.u.daniel. Responda de forma criativa: ${text}`,
-                model: "gpt-3.5-turbo"
-            })
-        });
-        const data = await response.json();
-        const responseText = data.result || data.text || "Erro ao conectar com Saurav-Z.";
-        loader.remove();
-        addMessage(responseText, false);
-    } catch (err) {
-        // Fallback Pollinations
-        const res = await fetch('https://text.pollinations.ai/'+encodeURIComponent(text)+'?model=mistral');
-        const fallbackText = await res.text();
-        loader.remove();
-        addMessage(fallbackText, false);
-    }
+    const responseText = await askAI(text);
+    loader.remove();
+    addMessage(responseText, false);
 };
 
 function addMessage(content, isUser) {
@@ -153,21 +160,23 @@ function addMessage(content, isUser) {
     return wrapper;
 }
 
-// Visão
+// Visão Local (Transformers.js)
 document.getElementById('imgUpload').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if(!file) return;
     const reader = new FileReader();
     reader.onload = async (event) => {
-        addMessage(`📎 Analisando imagem...<br><img src="${event.target.result}" style="border-radius:10px; margin-top:10px; max-width:100%">`, true);
-        if(!visionPipeline) visionPipeline = await pipeline('image-to-text', 'Xenova/vit-gpt2-image-captioning');
+        addMessage(`📎 Analisando imagem...<br><img src="${event.target.result}" style="border-radius:12px; margin-top:10px; border: 1px solid var(--accent)">`, true);
+        if(!visionPipeline) {
+            addMessage("<i>A carregar visão neural (só na primeira vez)...</i>", false);
+            visionPipeline = await pipeline('image-to-text', 'Xenova/vit-gpt2-image-captioning');
+        }
         const output = await visionPipeline(event.target.result);
-        window.handleSend(`[VISÃO]: Eu vejo ${output[0].generated_text}. O que achas disso? (responda em português)`);
+        window.handleSend(`[VISÃO]: Detectei: ${output[0].generated_text}. Comenta isso como Zénia.`);
     };
     reader.readAsDataURL(file);
 });
 
-// Inicializar
 window.startNewChat();
 </script>
 </body>
