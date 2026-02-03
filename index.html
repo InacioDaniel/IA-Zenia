@@ -936,9 +936,9 @@ async function handleSend(textOverride, isSystemPrompt){
     
     try {
         const context = buildContext(query);
-        const encodedContext = encodeURIComponent(context);
-        const res = await fetch('https://text.pollinations.ai/' + encodedContext + '?model=mistral');
-        
+      const encodedContext = encodeURIComponent(context);
+      const res = await fetch(`https://text.pollinations.ai/?model=mistral&prompt=${encodedContext}`);
+
         if(!res.ok) {
             throw new Error(`API Error: ${res.status}`);
         }
