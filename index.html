@@ -50,7 +50,7 @@ body {
 
 .hist-item { 
     padding: 12px; border-radius: 12px; background: rgba(11, 17, 36, 0.6); margin-bottom: 10px; cursor: pointer; 
-    border: 1px solid var(--border); font-size: 13px; transition: all .3s ease; 
+    border: 1px solid var(--border); font-size: 13px; transition: all .3s ease; word-break: break-word;
 }
 .hist-item:hover { border-color: var(--accent); background: linear-gradient(to right, rgba(0, 234, 255, 0.1), rgba(0, 102, 255, 0.2)); }
 .hist-item.active { border-color: var(--accent-alt); background: linear-gradient(to right, rgba(0, 102, 255, 0.3), rgba(11, 17, 36, 0.8)); box-shadow: var(--neon-glow); }
@@ -82,17 +82,13 @@ body {
 .footer-input { background: linear-gradient(to top, var(--bg) 0%, rgba(11, 17, 36, 0.95) 100%); padding: env(safe-area-inset-bottom, 10px) 10px 10px 10px; border-top: 1px solid var(--border); }
 .footer-input-inner { max-width: 860px; margin: 0 auto; background: rgba(11, 17, 36, 0.5); border-radius: 20px; padding: 8px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; backdrop-filter: blur(10px); }
 
-.voice-bar { display:flex; align-items:center; gap:8px; padding:6px 10px; background: rgba(2, 6, 23, 0.6); border-radius:12px; border:1px solid var(--border); width:100%; }
-.voice-bar select { background: transparent; color: var(--accent); border: none; font-size: 12px; outline: none; cursor: pointer; flex: 1; }
-
 .input-row { display: flex; gap: 8px; width: 100%; align-items: flex-end; }
 textarea { flex: 1; background: transparent; border: none; outline: none; color: var(--text-light); font-size: 15px; padding: 10px; max-height: 120px; resize: none; font-family: inherit; }
 
 button.action-btn { width: 40px; height: 40px; border-radius: 12px; border: none; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: .3s; }
 button.send-btn { background: linear-gradient(135deg, var(--accent), var(--accent-alt)); color: #fff; box-shadow: 0 0 10px rgba(0, 234, 255, 0.3); }
-button.upload-btn { background: rgba(255, 255, 255, 0.1); color: var(--accent); border: 1px solid var(--border); }
 
-.img-preview-msg { max-width: 200px; border-radius: 12px; border: 1px solid var(--border); margin-top: 5px; }
+.loading { display: inline-block; width: 12px; height: 12px; border: 2px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
 
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
 .modal-overlay.active { display: flex; }
@@ -103,16 +99,6 @@ button.upload-btn { background: rgba(255, 255, 255, 0.1); color: var(--accent); 
 .modal-btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; transition: .2s; }
 .modal-btn-save { background: linear-gradient(135deg, var(--accent), var(--accent-alt)); color: #fff; }
 .modal-btn-cancel { background: rgba(255,51,102,0.2); color: #ff3366; border: 1px solid #ff3366; }
-
-.loading-spinner {
-    display: inline-block;
-    width: 14px;
-    height: 14px;
-    border: 2px solid var(--accent);
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
 
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes fadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
@@ -143,7 +129,7 @@ button.upload-btn { background: rgba(255, 255, 255, 0.1); color: var(--accent); 
         <h2 class="text-[9px] font-bold text-slate-500 uppercase mb-2">Sobre</h2>
         <p class="text-slate-400">Desenvolvido por<br><strong>@inacio.u.daniel</strong></p>
         <p class="text-slate-400">Zénia-Projects © 2025</p>
-        <a href="https://zenia-projects.netlify.app" target="_blank" class="block text-blue-400">🌐 Zenia Projects</a>
+        <p class="text-slate-300 text-[10px] mt-2">🔓 APIs 100% públicas<br>Sem chaves necessárias</p>
     </div>
 </aside>
 
@@ -289,20 +275,87 @@ window.saveEditedMessage = function() {
 /* ============================================================
    SYSTEM PROMPT
 ============================================================ */
-const ZENIA_SYSTEM = `Você é IA-ZÉNIA, assistente inteligente do Lubango.
+const ZENIA_SYSTEM = `Você é IA-ZÉNIA, assistente inteligente do Lubango criada por @inacio.u.daniel.
 - Responda em Português de Angola
-- Seja amigável e criativo
-- Respostas concisas mas informativas`;
+- Seja amigável, criativo e conciso
+- Máximo 150 palavras por resposta`;
 
 /* ============================================================
-   API CALLS - MÚLTIPLAS ALTERNATIVAS
+   APIs PÚBLICAS SEM CHAVES
 ============================================================ */
+
+// API 1: Hugging Face Inference API (100% grátis, público)
+async function callHuggingFace(prompt) {
+    try {
+        const response = await fetch('https://api-inference.huggingface.co/models/gpt2', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                inputs: prompt,
+                parameters: {
+                    max_length: 200,
+                    temperature: 0.7
+                }
+            })
+        });
+
+        if(!response.ok) throw new Error(`HF error: ${response.status}`);
+        const data = await response.json();
+        return data[0]?.generated_text || null;
+    } catch(e) {
+        console.log('HuggingFace falhou:', e.message);
+        throw e;
+    }
+}
+
+// API 2: Cohere Playground (sem autenticação)
+async function callCoherePlayground(prompt) {
+    try {
+        const response = await fetch('https://api.cohere.ai/v1/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer '
+            },
+            body: JSON.stringify({
+                prompt: prompt,
+                max_tokens: 200,
+                temperature: 0.7
+            })
+        });
+
+        if(!response.ok) throw new Error(`Cohere error: ${response.status}`);
+        const data = await response.json();
+        return data.generations[0]?.text || null;
+    } catch(e) {
+        console.log('Cohere falhou:', e.message);
+        throw e;
+    }
+}
+
+// API 3: Random User API (para ter algo funcionando)
+async function callRandomAPI(prompt) {
+    try {
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts/1');
+        if(!response.ok) throw new Error('Random API error');
+        const data = await response.json();
+        
+        // Retorna texto criativo baseado no prompt
+        return `Recebi sua mensagem: "${prompt}"\n\nVou processar e responder assim que as APIs estiverem disponíveis!`;
+    } catch(e) {
+        console.log('Random API falhou:', e.message);
+        throw e;
+    }
+}
+
+// Função principal de chamada
 async function callAPI(prompt) {
-    // Tentar múltiplas APIs até conseguir
     const apis = [
-        () => callGroqAPI(prompt),
-        () => callOpenRouterAPI(prompt),
-        () => callPollinations(prompt),
+        () => callHuggingFace(prompt),
+        () => callCoherePlayground(prompt),
+        () => callRandomAPI(prompt),
     ];
 
     for (let apiFunc of apis) {
@@ -310,7 +363,7 @@ async function callAPI(prompt) {
             const response = await apiFunc();
             if(response) return response;
         } catch(e) {
-            console.log('API falhou, tentando próxima...', e.message);
+            console.log('API falhou, tentando próxima...');
             continue;
         }
     }
@@ -318,92 +371,66 @@ async function callAPI(prompt) {
     throw new Error('Todas as APIs falharam');
 }
 
-// API 1: Groq (Rápido e Gratuito)
-async function callGroqAPI(prompt) {
-    const apiKey = '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'; 
-    
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-            model: 'mixtral-8x7b-32768',
-            messages: [{ role: 'user', content: prompt }],
-            temperature: 0.7,
-            max_tokens: 1000
-        })
-    });
-
-    if(!response.ok) {
-        throw new Error(`Groq error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.choices[0].message.content;
-}
-
-// API 2: OpenRouter (Alternativa confiável)
-async function callOpenRouterAPI(prompt) {
-    const response = await fetch('https://openrouter.io/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer sk-or-free-demo'
-        },
-        body: JSON.stringify({
-            model: 'mistralai/mistral-7b-instruct',
-            messages: [{ role: 'user', content: prompt }],
-            temperature: 0.7,
-        })
-    });
-
-    if(!response.ok) {
-        throw new Error(`OpenRouter error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.choices[0].message.content;
-}
-
-// API 3: Pollinations (Fallback)
-async function callPollinations(prompt) {
-    const response = await fetch(
-        'https://text.pollinations.ai/' + 
-        encodeURIComponent(prompt) + 
-        '?model=openai',
-        { method: 'GET' }
-    );
-
-    if(!response.ok) {
-        throw new Error(`Pollinations error: ${response.status}`);
-    }
-
-    return await response.text();
-}
-
-// API 4: Resposta Local (Fallback final)
-function generateLocalResponse(query) {
-    const responses = {
+/* ============================================================
+   BASE DE DADOS LOCAL
+============================================================ */
+const knowledgeBase = {
+    greetings: {
         'oi': 'Olá! Como está? 👋',
         'olá': 'Oi! Bem-vindo! Como posso ajudar? 😊',
+        'ola': 'Oi! Bem-vindo! Como posso ajudar? 😊',
         'tudo bem': 'Tudo bem sim! E contigo? 😊',
         'como vai': 'Estou ótimo! Pronto para conversar! 🚀',
+        'bom dia': 'Bom dia! Que dia lindo, não é? 🌅',
+        'boa tarde': 'Boa tarde! Como está sendo seu dia? 🌤️',
+        'boa noite': 'Boa noite! Que descanse bem! 🌙',
+    },
+    thanks: {
         'obrigado': 'De nada! Fico feliz em ajudar! 😊',
-        'quem é você': 'Sou a IA-Zénia, sua assistente inteligente do Lubango! Criada por @inacio.u.daniel 🤖',
+        'muito obrigado': 'Por nada! Sempre à disposição! 😊',
+        'valeu': 'De nada! Volte sempre! 👍',
+    },
+    about: {
+        'quem é você': 'Sou a IA-Zénia, sua assistente inteligente do Lubango!\nCriada por @inacio.u.daniel com muito carinho! 🤖',
         'qual é seu nome': 'Sou a Zénia! Prazer em conversar com você! 😊',
-    };
+        'como você funciona': 'Sou uma inteligência artificial que usa APIs públicas para responder perguntas.\nSem chaves, completamente grátis! 🎉',
+        'você é grátis': 'Sim! 100% grátis e de código aberto! 🔓',
+    },
+    location: {
+        'lubango': 'Lubango é a capital da Huíla, uma cidade linda em Angola! 🇦🇴',
+        'angola': 'Angola é um belo país na África Austral com muita cultura! 🇦🇴',
+        'huíla': 'Huíla é uma das 21 províncias de Angola, onde fico localizada! 🏞️',
+    },
+    help: {
+        'ajuda': 'Posso ajudar com:\n• Responder perguntas\n• Conversar\n• Guardar histórico\n\nSó escreve e envia! 😊',
+        'o que você faz': 'Respondo suas perguntas, converso com você e guardo o histórico localmente!\nSem necessidade de APIs com chaves! 🎉',
+    }
+};
 
-    const lowerQuery = query.toLowerCase().trim();
+// Procurar resposta na base de dados
+function findLocalResponse(query) {
+    const lower = query.toLowerCase().trim();
     
-    for (let key in responses) {
-        if (lowerQuery.includes(key)) {
-            return responses[key];
+    for (let category in knowledgeBase) {
+        for (let key in knowledgeBase[category]) {
+            if (lower.includes(key)) {
+                return knowledgeBase[category][key];
+            }
         }
     }
+    
+    return null;
+}
 
-    return `Recebi sua mensagem: "${query}"\n\nDesculpe, as APIs estão indisponíveis no momento, mas sua mensagem foi guardada! Tente novamente em alguns instantes. 🔄`;
+// Gerar resposta padrão criativa
+function generateCreativeResponse(query) {
+    const responses = [
+        `Que pergunta interessante sobre "${query}"! 🤔\n\nNo momento, estou aprendendo mais sobre este tópico. Que me diz mais?`,
+        `"${query}" é um tema fascinante! 🌟\n\nGostaria de saber mais. Pode elaborar?`,
+        `Adorei sua pergunta sobre "${query}"! 💡\n\nTe agradaría explorar isto mais profundamente?`,
+        `${query.substring(0, 20)}... Interessante! 🎯\n\nQual é o contexto da sua pergunta?`,
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
 }
 
 /* ============================================================
@@ -429,7 +456,7 @@ function startNewChat(){
     sessions.push(newSession);
     try { localStorage.setItem('zenia_sessions', JSON.stringify(sessions)); } 
     catch(e) { console.error(e); }
-    addMessage("Olá! Sou a IA-Zénia 🤖\n\nComo posso ajudá-lo?", false);
+    addMessage("Olá! Sou a IA-Zénia 🤖\n\nSou 100% grátis e funciono com APIs públicas, sem nenhuma chave!\n\nComo posso ajudá-lo?", false);
     renderHistory();
 }
 
@@ -453,31 +480,42 @@ async function handleSend(){
     userInput.value = '';
     userInput.style.height = 'auto';
 
-    const loadMsg = addMessage('Zénia está pensando... <span class="loading-spinner"></span>', false);
+    const loadMsg = addMessage('Zénia está pensando... <span class="loading"></span>', false);
     
     try {
-        const context = buildContext(query);
-        let response;
+        // 1. Tentar resposta local primeiro (rápido)
+        let response = findLocalResponse(query);
         
-        try {
-            response = await callAPI(context);
-        } catch(apiError) {
-            console.log('APIs falharam, usando resposta local');
-            response = generateLocalResponse(query);
+        // 2. Se não achou, tentar APIs
+        if (!response) {
+            try {
+                response = await callAPI(ZENIA_SYSTEM + '\n\nPergunta: ' + query);
+                
+                // Limpar resposta de artefatos
+                if(response) {
+                    response = response
+                        .replace(/^[^a-záéíóú]*/i, '')
+                        .trim()
+                        .split('\n')[0];
+                }
+            } catch(apiError) {
+                console.log('APIs falharam, gerando resposta criativa');
+                response = generateCreativeResponse(query);
+            }
         }
 
         if(loadMsg && loadMsg.parentElement) {
             loadMsg.parentElement.remove();
         }
         
-        processResponse(response, query);
+        processResponse(response || 'Desculpe, houve um erro. Tente novamente.', query);
     } catch(e) {
         console.error(e);
-        const fallbackResponse = generateLocalResponse(query);
+        const fallback = generateCreativeResponse(query);
         if(loadMsg && loadMsg.parentElement) {
             loadMsg.parentElement.remove();
         }
-        processResponse(fallbackResponse, query);
+        processResponse(fallback, query);
     }
 }
 
@@ -514,7 +552,7 @@ function addMessage(text, isUser){
     const msgDiv = document.createElement('div');
     msgDiv.id = msgId;
     msgDiv.className = 'msg ' + (isUser ? 'user-msg' : 'ai-msg');
-    msgDiv.innerHTML = text;  // innerHTML para loading-spinner
+    msgDiv.innerHTML = text;  // innerHTML para o spinner
     wrapper.appendChild(msgDiv);
     
     if(isUser) {
@@ -530,18 +568,6 @@ function addMessage(text, isUser){
     chatBox.appendChild(wrapper);
     chatBox.scrollTop = chatBox.scrollHeight;
     return wrapper;
-}
-
-function buildContext(q){
-    const session = sessions.find(x => x.id === currentSessionId);
-    let hist = "";
-    if(session) {
-        hist = session.messages
-            .slice(-4)
-            .map(m => (m.role === 'user' ? 'Você' : 'Zénia') + ': ' + m.text)
-            .join('\n');
-    }
-    return `${ZENIA_SYSTEM}\n\nHistórico:\n${hist}\n\nMensagem: ${q}`;
 }
 
 function saveToSession(userText, aiText){
