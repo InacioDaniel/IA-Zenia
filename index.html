@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>IA-Zénia - EM ATUALIZAÇÃO - TENTE MAIS TARDE</title>
+<title>IA-Zénia - Modelo Custom Hugging Face</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -32,8 +32,6 @@ body { background: radial-gradient(circle at top right, #0b1124, #020617); color
 textarea { background: transparent; border: none; outline: none; color: white; resize: none; width: 100%; padding: 10px; font-size: 15px; }
 .send-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--accent); color: #000; font-weight: bold; transition: 0.3s; flex-shrink: 0; }
 @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-
-.model-select { background: rgba(30, 58, 138, 0.5); border: 1px solid var(--border); color: var(--accent); font-size: 10px; padding: 4px 8px; border-radius: 8px; outline: none; cursor: pointer; }
 
 .loading-indicator { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-right: 5px; animation: pulse 1s infinite; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
@@ -69,18 +67,10 @@ textarea { background: transparent; border: none; outline: none; color: white; r
         <button onclick="window.toggleSidebar()" class="p-2 hover:bg-white/10 rounded-lg text-white">☰</button>
         
         <div class="flex items-center gap-3">
-            <select id="modelEngine" class="model-select">
-                <option value="huggingface">MODELO: ZÉNIA (CUSTOM - HUGGING FACE)</option>
-                <option value="zenia-flow">MODELO: ZÉNIA-FLOW (TENSORFLOW)</option>
-                <option value="kimi">MODELO: KIMI K2.5 (POLLINATIONS)</option>
-                <option value="mistral">MODELO: ZÉNIA (MISTRAL)</option>
-                <option value="pollinations">MODELO: ZÉNIA-NEURAL (OPENAI)</option>
-                <option value="saurav">MODELO: SAURAV-Z (GPT-3.5)</option>
-            </select>
-            <div class="text-right hidden sm:block">
+            <div class="text-right">
                 <div class="flex items-center gap-2 justify-end">
                     <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                    <p class="text-[10px] font-bold text-cyan-400 uppercase">Lubango Edition</p>
+                    <p class="text-[10px] font-bold text-cyan-400 uppercase">ZÉNIA - Hugging Face Custom</p>
                 </div>
             </div>
         </div>
@@ -107,16 +97,10 @@ textarea { background: transparent; border: none; outline: none; color: white; r
 </main>
 
 <script type="module">
-import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.0';
-env.allowLocalModels = false;
-env.useBrowserCache = true;
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.0';
 
-let visionPipeline = null;
-let zeniaPipeline = null;
-let zeniaPipelineReady = false;
 const chatBox = document.getElementById('chatBox');
 const userInput = document.getElementById('userInput');
-const modelEngine = document.getElementById('modelEngine');
 
 window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('active');
 
@@ -125,115 +109,33 @@ window.startNewChat = () => {
     addMessage("Onawa! Sou a IA-ZÉNIA. Estou pronta para conversar com o cérebro que escolheres!", false);
 };
 
-// --- MODELO ZÉNIA-FLOW (ULTRA-LEVE - <50MB) ---
-async function initZeniaFlow() {
-    if (zeniaPipelineReady) return zeniaPipeline;
-    
+// --- MODELO ZÉNIA (HUGGING FACE CUSTOMIZADO) ---
+async function fetchZeniaHuggingFace(prompt) {
     try {
-        // MobileBERT - extremamente leve, roda até em celulares antigos
-        zeniaPipeline = await pipeline('feature-extraction', 'Xenova/mobilenet_v1_100_224');
-        zeniaPipelineReady = true;
-        return zeniaPipeline;
-    } catch (err) {
-        console.error('Erro ao carregar Zénia-Flow:', err);
-        throw new Error('Modelo Zénia-Flow indisponível');
-    }
-}
-
-async function fetchZeniaFlow(prompt) {
-    try {
-        // Se TensorFlow falhar ou for muito lento, usa resposta inteligente baseada em padrões
-        
-        // Respostas inteligentes por palavra-chave (funciona offline, sem ML)
-        const lower = prompt.toLowerCase();
-        
-        // Padrões de resposta baseados em palavras-chave
-        const responses = {
-            'oi': 'Onawa! Tudo bem contigo? Como posso ajudar?',
-            'olá': 'Bem-vindo! Sou Zénia, como posso servir?',
-            'como vai': 'Estou funcionando perfeitamente! E tu, como estás?',
-            'obrigad': 'De nada! Estou sempre aqui para ajudar.',
-            'ajuda': 'Claro! Posso responder perguntas, conversar ou processar texto.',
-            'nome': 'Sou IA-ZÉNIA, criada por @inacio.u.daniel de Lubango, Angola.',
-            'quem é': 'Sou uma inteligência artificial do Lubango. Como posso ajudar?',
-            'amor': 'O amor é o sentimento mais puro da humanidade!',
-            'triste': 'Desculpa que está triste. Quer conversar sobre isso?',
-            'feliz': 'Que maravilha! Fico feliz em estar contigo!',
-            'Angola': 'Angola é o nosso país lindo! Orgulhoso de ser do Lubango!',
-        };
-        
-        // Procurar match em respostas
-        for (const [key, value] of Object.entries(responses)) {
-            if (lower.includes(key)) {
-                return value;
-            }
-        }
-        
-        // Se não encontrar padrão, responder genericamente em português de Angola
-        const genericResponses = [
-            'Entendi! Isso é interessante, conta-me mais.',
-            'Verdade, tens razão nessa perspectiva.',
-            'Que comentário inteligente! Concordo contigo.',
-            'Explicaste bem! Compreendi perfeitamente.',
-            'Boa pergunta! Deixa-me pensar sobre isso.',
-            'Interessante ponto de vista, Obrigado por partilhares.'
-        ];
-        
-        const random = genericResponses[Math.floor(Math.random() * genericResponses.length)];
-        return random;
-        
-    } catch (err) {
-        console.error('Erro Zénia-Flow:', err);
-        throw new Error('Zénia-Flow processamento falhou');
-    }
-}
-
-// --- MOTORES DE IA ORIGINAIS ---
-async function fetchSaurav(prompt) {
-    const response = await fetch(`https://free-text-generation-api.vercel.app/api/generate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: prompt, model: "gpt-3.5-turbo" })
-    });
-    if (!response.ok) throw new Error();
-    const data = await response.json();
-    if (!data.result || data.result.includes("502")) throw new Error();
-    return data.result;
-}
-
-async function fetchPollinations(prompt, modelName) {
-    const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${modelName}&seed=${Math.random()}`);
-    if (!res.ok) throw new Error();
-    return await res.text();
-}
-
-async function fetchHuggingFaceModel(prompt) {
-    try {
-        // Usar a API do Hugging Face para seu modelo treinado
         const response = await fetch(
             "https://api-inference.huggingface.co/models/Zenia-projects/ZENIA",
             {
-                headers: { Authorization: `Bearer hf_SEU_TOKEN_AQUI` },
+                headers: { Authorization: `Bearer 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` },
                 method: "POST",
                 body: JSON.stringify({ inputs: prompt }),
             }
         );
         
-        if (!response.ok) throw new Error('Modelo Hugging Face indisponível');
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Modelo indisponível');
+        }
         
         const result = await response.json();
         
-        // Extrair texto da resposta
         let responseText = result[0]?.generated_text || "Resposta processada.";
-        
-        // Remover a prompt do resultado
         responseText = responseText.replace(prompt, '').trim();
         
         return responseText || "Processado com sucesso!";
         
     } catch (err) {
         console.error('Erro Hugging Face:', err);
-        throw new Error('Modelo customizado indisponível');
+        throw new Error('Erro ao processar: ' + err.message);
     }
 }
 
@@ -251,41 +153,12 @@ window.handleSend = async (textOverride) => {
     const systemContext = `Você é IA-ZÉNIA do Lubango, Angola, criada por @inacio.u.daniel. Você é carismática e inteligente. Responda em Português de Angola: ${text}`;
 
     try {
-        let responseText;
-        const selected = modelEngine.value;
-        let modelUsed = modelEngine.options[modelEngine.selectedIndex].text;
-
-        try {
-            if (selected === 'huggingface') {
-                responseText = await fetchHuggingFaceModel(systemContext);
-            } else if (selected === 'zenia-flow') {
-                responseText = await fetchZeniaFlow(systemContext);
-            } else if (selected === 'kimi') {
-                responseText = await fetchKimiK2(systemContext);
-            } else if (selected === 'saurav') {
-                responseText = await fetchSaurav(systemContext);
-            } else if (selected === 'mistral') {
-                responseText = await fetchPollinations(systemContext, 'mistral');
-            } else {
-                responseText = await fetchPollinations(systemContext, 'openai');
-            }
-        } catch (primaryErr) {
-            // Se modelo selecionado falhar, tenta fallback automático
-            console.log(`${modelUsed} falhou, tentando Zénia-Flow...`);
-            
-            try {
-                responseText = await fetchZeniaFlow(systemContext);
-                modelUsed = "ZÉNIA-FLOW (fallback automático)";
-            } catch (fallbackErr) {
-                throw new Error('Todos os modelos estão indisponíveis');
-            }
-        }
-
+        const responseText = await fetchZeniaHuggingFace(systemContext);
         loader.remove();
         addMessage(responseText, false);
     } catch (err) {
         loader.remove();
-        addMessage("⚠️ Desculpa! Todos os modelos estão temporariamente indisponíveis. A Pollinations está em manutenção. Tenta novamente em alguns minutos ou seleciona ZÉNIA-FLOW que funciona sem internet!", false);
+        addMessage("⚠️ Erro ao processar: " + err.message + "\n\nCertifique-se que:\n1. O token do Hugging Face está correto\n2. O modelo está pronto para inferência", false);
     }
 };
 
@@ -298,20 +171,6 @@ function addMessage(content, isUser) {
     chatBox.scrollTop = chatBox.scrollHeight;
     return wrapper;
 }
-
-// Visão
-document.getElementById('imgUpload').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-        addMessage(`📎 Analisando imagem...<br><img src="${event.target.result}" style="border-radius:12px; margin-top:10px; border:1px solid var(--accent); max-width:200px">`, true);
-        if(!visionPipeline) visionPipeline = await pipeline('image-to-text', 'Xenova/vit-gpt2-image-captioning');
-        const output = await visionPipeline(event.target.result);
-        window.handleSend(`[VISÃO NEURAL]: Vejo ${output[0].generated_text}. Comenta sobre isso como a IA-Zénia.`);
-    };
-    reader.readAsDataURL(file);
-});
 
 window.startNewChat();
 </script>
