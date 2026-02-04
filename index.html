@@ -110,6 +110,8 @@ window.startNewChat = () => {
 // --- MODELO ZÉNIA (HUGGING FACE VIA NETLIFY FUNCTION) ---
 async function fetchZeniaHuggingFace(prompt) {
     try {
+        console.log('Enviando prompt para backend...');
+        
         // Fazer requisição ao Netlify Function
         const response = await fetch(
             "/.netlify/functions/zenia",
@@ -120,21 +122,43 @@ async function fetchZeniaHuggingFace(prompt) {
             }
         );
 
+        console.log('Resposta status:', response.status);
+
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Backend indisponível');
+            let errorMsg = 'Backend indisponível';
+            try {
+                const error = await response.json();
+                errorMsg = error.error || error.message || errorMsg;
+            } catch (e) {
+                errorMsg = `HTTP ${response.status}`;
+            }
+            throw new Error(errorMsg);
         }
 
-        const result = await response.json();
+        let result;
+        try {
+            const text = await response.text();
+            console.log('Resposta raw:', text.substring(0, 200));
+            result = JSON.parse(text);
+        } catch (e) {
+            console.error('Erro ao parsear JSON:', e);
+            throw new Error('Resposta inválida do servidor');
+        }
+
+        console.log('Resultado:', result);
 
         if (!result.success) {
-            throw new Error(result.error || 'Erro ao processar');
+            throw new Error(result.error || 'Erro desconhecido');
+        }
+
+        if (!result.response) {
+            throw new Error('Resposta vazia do modelo');
         }
 
         return result.response;
 
     } catch (err) {
-        console.error('Erro:', err);
+        console.error('Erro completo:', err);
         throw new Error('Erro: ' + err.message);
     }
 }
