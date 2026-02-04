@@ -1,0 +1,11 @@
+# Proteger arquivo de configuração com token
+api/config.php
+
+# Outros arquivos sensíveis
+.env
+.env.local
+.env.*.local
+*.log
+node_modules/
+vendor/
+.DS_Store

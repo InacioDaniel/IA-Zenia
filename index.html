@@ -96,9 +96,7 @@ textarea { background: transparent; border: none; outline: none; color: white; r
     </div>
 </main>
 
-<script type="module">
-import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.0';
-
+<script>
 const chatBox = document.getElementById('chatBox');
 const userInput = document.getElementById('userInput');
 
@@ -109,33 +107,34 @@ window.startNewChat = () => {
     addMessage("Onawa! Sou a IA-ZÉNIA. Estou pronta para conversar com o cérebro que escolheres!", false);
 };
 
-// --- MODELO ZÉNIA (HUGGING FACE CUSTOMIZADO) ---
+// --- MODELO ZÉNIA (HUGGING FACE VIA BACKEND PHP) ---
 async function fetchZeniaHuggingFace(prompt) {
     try {
+        // Fazer requisição ao backend PHP (token seguro no servidor)
         const response = await fetch(
-            "https://api-inference.huggingface.co/models/Zenia-projects/ZENIA",
+            "api/zenia.php",
             {
-                headers: { Authorization: `Bearer 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` },
                 method: "POST",
-                body: JSON.stringify({ inputs: prompt }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt: prompt }),
             }
         );
-        
+
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Modelo indisponível');
+            throw new Error('Backend indisponível');
         }
-        
+
         const result = await response.json();
-        
-        let responseText = result[0]?.generated_text || "Resposta processada.";
-        responseText = responseText.replace(prompt, '').trim();
-        
-        return responseText || "Processado com sucesso!";
-        
+
+        if (!result.success) {
+            throw new Error(result.error || 'Erro ao processar');
+        }
+
+        return result.response;
+
     } catch (err) {
-        console.error('Erro Hugging Face:', err);
-        throw new Error('Erro ao processar: ' + err.message);
+        console.error('Erro:', err);
+        throw new Error('Erro: ' + err.message);
     }
 }
 
@@ -158,7 +157,7 @@ window.handleSend = async (textOverride) => {
         addMessage(responseText, false);
     } catch (err) {
         loader.remove();
-        addMessage("⚠️ Erro ao processar: " + err.message + "\n\nCertifique-se que:\n1. O token do Hugging Face está correto\n2. O modelo está pronto para inferência", false);
+        addMessage("⚠️ " + err.message, false);
     }
 };
 
