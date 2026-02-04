@@ -53,7 +53,7 @@ exports.handler = async (event) => {
             {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${HF_TOKEN}`,
+                    'Authorization': `Bearer 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`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ inputs: prompt })
