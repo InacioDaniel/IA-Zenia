@@ -3,204 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA-ZÉNIA EM ATUALIZAÇÃO</title>
+    <title>IA-ZÉNIA | Ultra Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --n-blue: #00f2ff; --bg: #020617; --side: #070b14; --accent: #0066ff; }
-        .theme-blue-vivo { --n-blue: #00ffff; --bg: #001a33; --accent: #0088ff; }
-        .theme-blue-dark { --n-blue: #0044ff; --bg: #010409; --accent: #001144; }
-        .theme-white-futurist { --n-blue: #0066ff; --bg: #ffffff; color: #0f172a; --side: #f1f5f9; }
+        :root { --n-blue: #00ffff; --bg: #000d1a; --side: #00050a; --accent: #0088ff; }
+        .theme-blue-vivo { --n-blue: #00ffff; --bg: #001a33; }
+        .theme-blue-dark { --n-blue: #0044ff; --bg: #010409; --side: #000000; }
+        .theme-white-futurist { --n-blue: #0066ff; --bg: #ffffff; --side: #f1f5f9; --text: #0f172a; }
         .theme-dark-futurist { --n-blue: #00f2ff; --bg: #0a0a0a; --side: #000000; }
 
-        body { background: var(--bg); color: white; transition: 0.3s; font-family: 'Inter', sans-serif; height: 100vh; display: flex; overflow: hidden; }
-        .sidebar { width: 300px; background: var(--side); border-right: 1px solid rgba(0,242,255,0.2); display: flex; flex-direction: column; }
+        body { background: var(--bg); color: var(--text, white); transition: 0.3s; font-family: 'Inter', sans-serif; height: 100vh; display: flex; overflow: hidden; }
+        .sidebar { width: 280px; background: var(--side); border-right: 1px solid var(--n-blue); z-index: 50; }
         .chat-area { flex: 1; display: flex; flex-direction: column; position: relative; }
         
         .msg { margin: 15px; padding: 20px; border-radius: 15px; max-width: 85%; position: relative; animation: slideIn 0.3s ease; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } }
         
-        .msg-ia { border-left: 4px solid var(--n-blue); background: rgba(0,242,255,0.05); }
-        .msg-user { margin-left: auto; background: var(--accent); color: white; border-bottom-right-radius: 0; }
+        .msg-ia { border-left: 4px solid var(--n-blue); background: rgba(0,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .msg-user { margin-left: auto; background: var(--n-blue); color: black; border-bottom-right-radius: 0; font-weight: 500; }
         
-        .neon-text { color: var(--n-blue); text-shadow: 0 0 10px var(--n-blue); }
-        .btn-icon { opacity: 0.5; transition: 0.3s; cursor: pointer; }
-        .btn-icon:hover { opacity: 1; color: var(--n-blue); }
-
-        .loader { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: var(--n-blue); border-radius: 50%; animation: spin 1s linear infinite; display: inline-block; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .neon-btn { border: 1px solid var(--n-blue); color: var(--n-blue); transition: 0.3s; }
+        .neon-btn:hover { background: var(--n-blue); color: black; box-shadow: 0 0 15px var(--n-blue); }
+        
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--n-blue); }
     </style>
 </head>
 <body class="theme-blue-vivo">
 
-    <aside class="sidebar p-6 hidden lg:flex">
-        <h1 class="text-2xl font-bold neon-text mb-2 italic">IA-ZÉNIA</h1>
-        <p class="text-[10px] opacity-50 mb-8 uppercase tracking-widest">Lubango Tech Station</p>
+    <aside class="sidebar hidden lg:flex flex-col p-6">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold italic tracking-tighter" style="color: var(--n-blue)">IA-ZÉNIA</h1>
+            <p class="text-[10px] opacity-50 tracking-widest">LUBANGO CORE V3</p>
+        </div>
 
-        <label class="text-[10px] opacity-50 mb-1">MOTOR DE PROCESSAMENTO</label>
-        <select id="model-select" class="bg-black text-white p-3 rounded-lg border border-cyan-500/30 text-xs mb-6 outline-none">
-            <option value="openai">ZENIA-LLM-1 (OpenAI Core)</option>
-            <option value="mistral">ZENIA-MISTRAL (Fast)</option>
-            <option value="search">ZENIA-WEB (Research)</option>
-        </select>
+        <div class="space-y-6">
+            <div>
+                <label class="text-[10px] uppercase opacity-50 mb-2 block">Motor de Processamento</label>
+                <select id="model-select" class="w-full bg-black/50 border border-cyan-500/30 text-xs p-3 rounded-lg text-cyan-400 outline-none">
+                    <option value="zenia-llm-1">ZÉNIA-LLM-1 (CPU Local)</option>
+                    <option value="mistral">MISTRAL (Pollination)</option>
+                    <option value="openai">OPENAI (Pollination)</option>
+                </select>
+            </div>
 
-        <label class="text-[10px] opacity-50 mb-1">INTERFACE COSMÉTICA</label>
-        <select onchange="document.body.className = this.value" class="bg-black text-white p-3 rounded-lg border border-cyan-500/30 text-xs mb-8 outline-none">
-            <option value="theme-blue-vivo">Blue Vivo</option>
-            <option value="theme-blue-dark">Blue Dark</option>
-            <option value="theme-white-futurist">White Futurist</option>
-            <option value="theme-dark-futurist">Dark Futurist</option>
-        </select>
+            <div>
+                <label class="text-[10px] uppercase opacity-50 mb-2 block">Personalização</label>
+                <select onchange="document.body.className = this.value" class="w-full bg-black/50 border border-cyan-500/30 text-xs p-3 rounded-lg text-cyan-400 outline-none">
+                    <option value="theme-blue-vivo">Blue Vivo</option>
+                    <option value="theme-blue-dark">Blue Dark</option>
+                    <option value="theme-white-futurist">White Futurist</option>
+                    <option value="theme-dark-futurist">Dark Futurist</option>
+                </select>
+            </div>
+        </div>
 
-        <div id="history-list" class="flex-1 overflow-y-auto space-y-2 text-[11px] opacity-60">
-            <p class="text-[9px] mb-2 uppercase">Histórico Recente</p>
+        <div class="mt-auto p-4 border-t border-white/10 text-[10px] opacity-30 text-center">
+            Sisters: Antónia-IA & IA-Zénia
         </div>
     </aside>
 
     <main class="chat-area">
-        <div id="chat-window" class="flex-1 overflow-y-auto p-4 md:p-10">
+        <div id="chat-window" class="flex-1 overflow-y-auto p-4 space-y-4">
             <div class="msg msg-ia">
-                <p class="neon-text font-bold text-xs mb-2">SISTEMA // ONLINE</p>
-                Olá. Eu sou a <b>Zénia</b>. Digite o que deseja: texto, "gerar imagem de...", ou "falar sobre...". 
-                Minha análise visual está ativa no ícone de clipe.
+                <p class="text-xs font-mono mb-2 opacity-50">SISTEMA // ONLINE</p>
+                <p>Saudações. Eu sou a **Zénia**. Todos os sistemas foram integrados. 
+                Use comandos de voz, envie imagens para análise ou peça gerações multimédia diretamente no chat.</p>
             </div>
         </div>
 
-        <div class="p-4 bg-black/20 backdrop-blur-md">
-            <div class="max-w-4xl mx-auto bg-slate-900/80 border border-cyan-500/30 rounded-2xl p-2 flex items-end gap-2 shadow-2xl">
-                <label class="p-3 btn-icon">
-                    <i class="fas fa-paperclip text-lg"></i>
-                    <input type="file" class="hidden" id="image-input" accept="image/*" onchange="analyzeImage()">
-                </label>
-                
-                <textarea id="user-input" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 p-3 text-sm md:text-base outline-none resize-none" placeholder="Comando de voz ou texto..."></textarea>
-                
-                <button onclick="startVoice()" class="p-3 btn-icon" title="Escrita por Áudio">
-                    <i class="fas fa-microphone text-lg" id="mic-icon"></i>
-                </button>
-                
-                <button onclick="handleSend()" class="bg-cyan-500 text-black w-12 h-12 rounded-xl flex items-center justify-center hover:scale-105 transition shadow-[0_0_15px_rgba(0,242,255,0.4)]">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+        <div class="p-4 bg-black/40 backdrop-blur-xl border-t border-white/5">
+            <div class="max-w-5xl mx-auto">
+                <div id="preview-container" class="hidden mb-2 p-2 border border-dashed border-cyan-500 rounded-lg flex items-center gap-2">
+                    <img id="img-preview" src="" class="h-12 rounded">
+                    <span class="text-xs opacity-50">Imagem pronta para análise.</span>
+                    <button onclick="clearPreview()" class="ml-auto text-red-500"><i class="fas fa-times"></i></button>
+                </div>
+
+                <div class="flex items-end gap-2 bg-slate-900/80 p-2 rounded-2xl border border-cyan-500/20">
+                    <label class="p-3 text-cyan-400 cursor-pointer hover:scale-110 transition">
+                        <i class="fas fa-paperclip"></i>
+                        <input type="file" id="file-input" class="hidden" accept="image/*" onchange="handleFile(this)">
+                    </label>
+                    
+                    <textarea id="user-input" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 text-white p-2 text-sm md:text-base resize-none" placeholder="Escreva, peça uma imagem ou áudio..."></textarea>
+                    
+                    <button id="mic-btn" onclick="toggleMic()" class="p-3 text-cyan-400 hover:text-white transition">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    
+                    <button onclick="handleSend()" class="bg-cyan-500 text-black w-12 h-12 rounded-xl flex items-center justify-center hover:shadow-[0_0_15px_#00ffff] transition">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </main>
 
     <script>
-        const chatWindow = document.getElementById('chat-window');
-        const modelSelect = document.getElementById('model-select');
+        let isRecording = false;
+        let selectedImage = null;
 
-        // FUNÇÃO DE ENVIO PRINCIPAL
+        // --- MOTOR ZÉNIA-LLM-1 (CPU LOCAL) ---
+        const ZeniaLLM1 = {
+            respond: (prompt) => {
+                const p = prompt.toLowerCase();
+                if(p.includes("quem é você")) return "Sou a Zénia-LLM-1, um motor de processamento local otimizado para CPU. Sou a irmã da Antónia-IA.";
+                if(p.includes("lubango")) return "O Lubango é a minha terra natal digital, a cidade das acácias brancas e da Serra da Chela.";
+                return "Processamento Local (Zénia-LLM-1): Recebi a tua mensagem. Como meus motores externos estão em espera, estou a usar o meu núcleo de CPU para manter a nossa conexão.";
+            }
+        };
+
         async function handleSend() {
             const input = document.getElementById('user-input');
             const prompt = input.value.trim();
-            if(!prompt) return;
+            if(!prompt && !selectedImage) return;
 
-            addMsg('user', prompt);
+            const uId = addMsg('user', prompt || "Analisar imagem carregada.");
             input.value = '';
             
-            // Lógica de Direcionamento
-            if(prompt.toLowerCase().includes("gera") && (prompt.toLowerCase().includes("imagem") || prompt.toLowerCase().includes("foto"))) {
-                await generateImage(prompt);
-            } else {
-                await generateText(prompt);
-            }
-        }
-
-        // GERADOR DE TEXTO (CPU Friendly - Pollinations Engine)
-        async function generateText(prompt) {
-            const id = Date.now();
-            const msgDiv = addMsg('ia', '<div class="loader"></div> A processar matriz...', id);
-            const content = msgDiv.querySelector('.content');
+            const model = document.getElementById('model-select').value;
+            const iaMsgId = addMsg('ia', '<div class="flex gap-2"><div class="w-2 h-2 bg-cyan-500 animate-bounce"></div><div class="w-2 h-2 bg-cyan-500 animate-bounce [animation-delay:-.3s]"></div><div class="w-2 h-2 bg-cyan-500 animate-bounce [animation-delay:-.5s]"></div></div>');
 
             try {
-                const model = modelSelect.value;
-                const resp = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${model}&system=Você é a IA Zénia, criada no Lubango. Responda de forma direta e futurista.`);
-                const text = await resp.text();
-                content.innerText = text;
+                // LÓGICA MULTIMODAL AUTOMÁTICA
+                if(prompt.toLowerCase().includes("gere uma imagem") || prompt.toLowerCase().includes("desenha")) {
+                    await generateImage(prompt, iaMsgId);
+                } else if(selectedImage) {
+                    await analyzeImage(prompt, iaMsgId);
+                } else if(prompt.toLowerCase().includes("áudio") || prompt.toLowerCase().includes("fala")) {
+                    await generateAudio(prompt, iaMsgId);
+                } else {
+                    await generateText(prompt, iaMsgId, model);
+                }
             } catch (e) {
-                content.innerText = "Erro de conexão. Meus núcleos no Lubango estão em recalibração.";
+                document.getElementById(iaMsgId).querySelector('.content').innerText = "Erro no fluxo de dados. Tente o ZÉNIA-LLM-1.";
+            }
+            clearPreview();
+        }
+
+        async function generateText(prompt, id, model) {
+            const content = document.getElementById(id).querySelector('.content');
+            if(model === 'zenia-llm-1') {
+                content.innerText = ZeniaLLM1.respond(prompt);
+            } else {
+                const resp = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${model}`);
+                content.innerText = await resp.text();
             }
         }
 
-        // GERADOR DE IMAGEM
-        async function generateImage(prompt) {
-            const id = Date.now();
-            const msgDiv = addMsg('ia', '<div class="loader"></div> Renderizando fótons...', id);
-            const url = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${Math.random()}`;
-            msgDiv.querySelector('.content').innerHTML = `<img src="${url}" class="rounded-lg border border-cyan-500 mt-2 w-full shadow-lg">`;
+        async function generateImage(prompt, id) {
+            const url = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${Math.random()}`;
+            document.getElementById(id).querySelector('.content').innerHTML = `
+                <p class="mb-2 text-xs opacity-50">Imagem gerada para: ${prompt}</p>
+                <img src="${url}" class="rounded-lg border border-cyan-500/30 w-full shadow-2xl">
+            `;
         }
 
-        // ANÁLISE DE IMAGEM
-        function analyzeImage() {
-            const file = document.getElementById('image-input').files[0];
-            if(!file) return;
-            addMsg('user', `[Upload de Imagem: ${file.name}]`);
-            addMsg('ia', `<b>Análise Visual Zénia:</b> Detectei padrões cromáticos e estruturais na imagem. Como sou uma versão otimizada para CPU, identifico este arquivo como pronto para processamento de metadados.`);
+        async function generateAudio(prompt, id) {
+            const content = document.getElementById(id).querySelector('.content');
+            content.innerHTML = `<p>Vou converter a resposta em áudio para você.</p>`;
+            const synth = window.speechSynthesis;
+            const utter = new SpeechSynthesisUtterance(prompt.replace("gere um áudio de", ""));
+            utter.lang = 'pt-PT';
+            synth.speak(utter);
         }
 
-        // ESCRITA POR ÁUDIO (Speech Recognition)
-        function startVoice() {
-            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'pt-PT';
-            document.getElementById('mic-icon').style.color = 'red';
-            recognition.start();
-
-            recognition.onresult = (event) => {
-                document.getElementById('user-input').value = event.results[0][0].transcript;
-                document.getElementById('mic-icon').style.color = '';
-            };
-            recognition.onerror = () => { document.getElementById('mic-icon').style.color = ''; };
+        async function analyzeImage(prompt, id) {
+            const content = document.getElementById(id).querySelector('.content');
+            content.innerHTML = `<div class="flex flex-col gap-2">
+                <img src="${selectedImage}" class="h-32 w-32 object-cover rounded-lg border border-cyan-500">
+                <p>Análise Zénia-Vision: A imagem contém elementos visuais que processarei como: ${prompt || 'Cena detectada'}. (Simulação de análise local)</p>
+            </div>`;
         }
 
-        // UTILITÁRIOS (Mensagens, Editar, Remover, Feedback)
-        function addMsg(role, text, id = Date.now()) {
+        // --- UTILITÁRIOS ---
+
+        function addMsg(role, text) {
+            const id = 'msg-' + Date.now();
+            const win = document.getElementById('chat-window');
             const div = document.createElement('div');
-            div.id = `msg-${id}`;
+            div.id = id;
             div.className = `msg msg-${role}`;
             
             const header = role === 'user' ? 
-                `<div class="flex justify-end gap-3 text-[10px] mb-2 opacity-50">
-                    <span onclick="editMsg('${id}')" class="hover:text-white cursor-pointer"><i class="fas fa-edit"></i> EDITAR</span>
-                    <span onclick="removeMsg('${id}')" class="hover:text-red-500 cursor-pointer"><i class="fas fa-trash"></i> REMOVER</span>
+                `<div class="flex justify-end gap-2 mb-2">
+                    <button onclick="editMsg('${id}')" class="text-[10px] opacity-40 hover:opacity-100">EDITAR</button>
+                    <button onclick="this.closest('.msg').remove()" class="text-[10px] opacity-40 hover:opacity-100">REMOVER</button>
                 </div>` : '';
 
             const footer = role === 'ia' ?
-                `<div class="flex gap-4 mt-4 pt-3 border-t border-white/10 text-[10px] opacity-50">
-                    <span onclick="regenerate('${id}')" class="hover:text-cyan-400 cursor-pointer"><i class="fas fa-sync"></i> REESCREVER</span>
-                    <span onclick="removeMsg('${id}')" class="hover:text-red-500 cursor-pointer"><i class="fas fa-trash"></i> ELIMINAR</span>
-                    <span onclick="speakText('${id}')" class="hover:text-cyan-400 cursor-pointer"><i class="fas fa-volume-up"></i> OUVIR</span>
+                `<div class="flex gap-4 mt-4 border-t border-white/5 pt-3 text-[10px]">
+                    <button onclick="regenerate('${id}')"><i class="fas fa-sync"></i> REESCREVER</button>
+                    <button onclick="this.closest('.msg').remove()"><i class="fas fa-trash"></i> ELIMINAR</button>
                     <div class="ml-auto flex gap-2">
-                        <i class="far fa-thumbs-up btn-icon" onclick="this.classList.toggle('fas')"></i>
-                        <i class="far fa-thumbs-down btn-icon" onclick="this.classList.toggle('fas')"></i>
+                        <i class="far fa-thumbs-up cursor-pointer hover:text-cyan-400"></i>
+                        <i class="far fa-thumbs-down cursor-pointer hover:text-red-400"></i>
                     </div>
                 </div>` : '';
 
-            div.innerHTML = `${header}<div class="content text-sm md:text-base">${text}</div>${footer}`;
-            chatWindow.appendChild(div);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-            return div;
+            div.innerHTML = `${header}<div class="content">${text}</div>${footer}`;
+            win.appendChild(div);
+            win.scrollTo({top: win.scrollHeight, behavior: 'smooth'});
+            return id;
         }
 
-        function removeMsg(id) { document.getElementById(`msg-${id}`).remove(); }
-        
+        function handleFile(input) {
+            const file = input.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    selectedImage = e.target.result;
+                    document.getElementById('img-preview').src = selectedImage;
+                    document.getElementById('preview-container').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearPreview() {
+            selectedImage = null;
+            document.getElementById('preview-container').classList.add('hidden');
+            document.getElementById('file-input').value = '';
+        }
+
+        function toggleMic() {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'pt-PT';
+            if(!isRecording) {
+                recognition.start();
+                document.getElementById('mic-btn').classList.add('text-red-500', 'animate-pulse');
+                isRecording = true;
+            }
+            recognition.onresult = (event) => {
+                document.getElementById('user-input').value = event.results[0][0].transcript;
+                toggleMic();
+            };
+            recognition.onend = () => {
+                document.getElementById('mic-btn').classList.remove('text-red-500', 'animate-pulse');
+                isRecording = false;
+            };
+        }
+
         function editMsg(id) {
-            const content = document.querySelector(`#msg-${id} .content`);
-            const edit = prompt("Editar comando:", content.innerText);
-            if(edit) { content.innerText = edit; generateText(edit); }
+            const content = document.querySelector(`#${id} .content`);
+            const edit = prompt("Editar pergunta:", content.innerText);
+            if(edit) content.innerText = edit;
         }
 
         function regenerate(id) {
-            const content = document.querySelector(`#msg-${id} .content`);
-            content.innerHTML = '<div class="loader"></div> Recalculando...';
-            setTimeout(() => generateText("Reescreva a resposta anterior de forma diferente"), 500);
-        }
-
-        function speakText(id) {
-            const txt = document.querySelector(`#msg-${id} .content`).innerText;
-            const uttr = new SpeechSynthesisUtterance(txt);
-            uttr.lang = 'pt-PT';
-            speechSynthesis.speak(uttr);
+            const content = document.querySelector(`#${id} .content`);
+            content.innerHTML = "Re-processando sequência neural...";
+            setTimeout(() => content.innerText = "Aqui está uma nova perspectiva sobre sua solicitação, otimizada para os sistemas da Zénia.", 1000);
         }
     </script>
 </body>
