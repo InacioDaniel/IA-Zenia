@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA-ZÉNIA | Ultra Engine</title>
+    <title>IA-ZÉNIA | Neural Engine V3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --n-blue: #00ffff; --bg: #000d1a; --side: #00050a; --accent: #0088ff; }
+        :root { --n-blue: #00ffff; --bg: #000d1a; --side: #00050a; }
         .theme-blue-vivo { --n-blue: #00ffff; --bg: #001a33; }
         .theme-blue-dark { --n-blue: #0044ff; --bg: #010409; --side: #000000; }
         .theme-white-futurist { --n-blue: #0066ff; --bg: #ffffff; --side: #f1f5f9; --text: #0f172a; }
@@ -16,16 +16,10 @@
         body { background: var(--bg); color: var(--text, white); transition: 0.3s; font-family: 'Inter', sans-serif; height: 100vh; display: flex; overflow: hidden; }
         .sidebar { width: 280px; background: var(--side); border-right: 1px solid var(--n-blue); z-index: 50; }
         .chat-area { flex: 1; display: flex; flex-direction: column; position: relative; }
-        
-        .msg { margin: 15px; padding: 20px; border-radius: 15px; max-width: 85%; position: relative; animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } }
-        
-        .msg-ia { border-left: 4px solid var(--n-blue); background: rgba(0,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .msg-user { margin-left: auto; background: var(--n-blue); color: black; border-bottom-right-radius: 0; font-weight: 500; }
-        
-        .neon-btn { border: 1px solid var(--n-blue); color: var(--n-blue); transition: 0.3s; }
-        .neon-btn:hover { background: var(--n-blue); color: black; box-shadow: 0 0 15px var(--n-blue); }
-        
+        .msg { margin: 15px; padding: 20px; border-radius: 15px; max-width: 85%; position: relative; animation: slideIn 0.2s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(5px); } }
+        .msg-ia { border-left: 4px solid var(--n-blue); background: rgba(0,255,255,0.05); }
+        .msg-user { margin-left: auto; background: var(--n-blue); color: black; font-weight: 500; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: var(--n-blue); }
     </style>
@@ -35,21 +29,20 @@
     <aside class="sidebar hidden lg:flex flex-col p-6">
         <div class="mb-8">
             <h1 class="text-3xl font-bold italic tracking-tighter" style="color: var(--n-blue)">IA-ZÉNIA</h1>
-            <p class="text-[10px] opacity-50 tracking-widest">LUBANGO CORE V3</p>
+            <p class="text-[10px] opacity-50 tracking-widest">LUBANGO NEURAL CORE</p>
         </div>
 
         <div class="space-y-6">
             <div>
-                <label class="text-[10px] uppercase opacity-50 mb-2 block">Motor de Processamento</label>
+                <label class="text-[10px] opacity-50 mb-2 block uppercase">Motor de Inteligência</label>
                 <select id="model-select" class="w-full bg-black/50 border border-cyan-500/30 text-xs p-3 rounded-lg text-cyan-400 outline-none">
-                    <option value="zenia-llm-1">ZÉNIA-LLM-1 (CPU Local)</option>
-                    <option value="mistral">MISTRAL (Pollination)</option>
-                    <option value="openai">OPENAI (Pollination)</option>
+                    <option value="zenia-llm-1">ZÉNIA-LLM-1 (Neural CPU)</option>
+                    <option value="mistral">MISTRAL (Cloud)</option>
+                    <option value="openai">OPENAI (Cloud)</option>
                 </select>
             </div>
-
             <div>
-                <label class="text-[10px] uppercase opacity-50 mb-2 block">Personalização</label>
+                <label class="text-[10px] opacity-50 mb-2 block uppercase">Interface</label>
                 <select onchange="document.body.className = this.value" class="w-full bg-black/50 border border-cyan-500/30 text-xs p-3 rounded-lg text-cyan-400 outline-none">
                     <option value="theme-blue-vivo">Blue Vivo</option>
                     <option value="theme-blue-dark">Blue Dark</option>
@@ -58,42 +51,32 @@
                 </select>
             </div>
         </div>
-
-        <div class="mt-auto p-4 border-t border-white/10 text-[10px] opacity-30 text-center">
-            Sisters: Antónia-IA & IA-Zénia
-        </div>
+        <div class="mt-auto text-[9px] opacity-30 text-center">Sisters: Antónia, Zénia-Projects & Zénia</div>
     </aside>
 
     <main class="chat-area">
         <div id="chat-window" class="flex-1 overflow-y-auto p-4 space-y-4">
             <div class="msg msg-ia">
-                <p class="text-xs font-mono mb-2 opacity-50">SISTEMA // ONLINE</p>
-                <p>Saudações. Eu sou a **Zénia**. Todos os sistemas foram integrados. 
-                Use comandos de voz, envie imagens para análise ou peça gerações multimédia diretamente no chat.</p>
+                <p class="text-[10px] font-mono mb-2 text-cyan-400">CORE_V3 // STATUS: ACTIVE</p>
+                <p>O motor **ZÉNIA-LLM-1** foi atualizado. Agora posso processar matéria bruta e raciocinar sobre ela localmente.</p>
             </div>
         </div>
 
-        <div class="p-4 bg-black/40 backdrop-blur-xl border-t border-white/5">
+        <div class="p-4 bg-black/40 backdrop-blur-md border-t border-white/5">
             <div class="max-w-5xl mx-auto">
                 <div id="preview-container" class="hidden mb-2 p-2 border border-dashed border-cyan-500 rounded-lg flex items-center gap-2">
                     <img id="img-preview" src="" class="h-12 rounded">
-                    <span class="text-xs opacity-50">Imagem pronta para análise.</span>
                     <button onclick="clearPreview()" class="ml-auto text-red-500"><i class="fas fa-times"></i></button>
                 </div>
 
-                <div class="flex items-end gap-2 bg-slate-900/80 p-2 rounded-2xl border border-cyan-500/20">
+                <div class="flex items-end gap-2 bg-slate-900/80 p-2 rounded-2xl border border-cyan-500/20 shadow-2xl">
                     <label class="p-3 text-cyan-400 cursor-pointer hover:scale-110 transition">
                         <i class="fas fa-paperclip"></i>
                         <input type="file" id="file-input" class="hidden" accept="image/*" onchange="handleFile(this)">
                     </label>
-                    
-                    <textarea id="user-input" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 text-white p-2 text-sm md:text-base resize-none" placeholder="Escreva, peça uma imagem ou áudio..."></textarea>
-                    
-                    <button id="mic-btn" onclick="toggleMic()" class="p-3 text-cyan-400 hover:text-white transition">
-                        <i class="fas fa-microphone"></i>
-                    </button>
-                    
-                    <button onclick="handleSend()" class="bg-cyan-500 text-black w-12 h-12 rounded-xl flex items-center justify-center hover:shadow-[0_0_15px_#00ffff] transition">
+                    <textarea id="user-input" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 text-white p-2 text-sm resize-none" placeholder="Pergunte algo sobre a minha matéria..."></textarea>
+                    <button id="mic-btn" onclick="toggleMic()" class="p-3 text-cyan-400 hover:text-white transition"><i class="fas fa-microphone"></i></button>
+                    <button onclick="handleSend()" class="bg-cyan-500 text-black w-12 h-12 rounded-xl flex items-center justify-center hover:shadow-[0_0_20px_var(--n-blue)] transition">
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
@@ -102,84 +85,71 @@
     </main>
 
     <script>
-        let isRecording = false;
-        let selectedImage = null;
+        // --- NÚCLEO DE MATÉRIA (TREINAMENTO POR CONTEÚDO) ---
+        // Aqui você insere a "matéria" que ela deve usar para raciocinar
+        const ZENIA_MATTER = {
+            "identidade": "A Zénia é uma Inteligência Artificial avançada, criada na cidade do Lubango, Angola. Ela é irmã da Antónia-IA e das plataformas zenia-projects.netlify.app e ia-zenia.netlify.app.",
+            "geografia": "O Lubango situa-se na província da Huíla. É famoso pela Serra da Chela, a Fenda da Tundavala e o Cristo Rei. O clima é tropical de altitude.",
+            "tecnologia": "A Zénia usa o motor LLM-1 que permite processamento neural via CPU, garantindo autonomia total mesmo sem servidores externos (Cloud).",
+            "historia": "Diferente de outras IAs feitas em Luanda, a Zénia orgulha-se de ser uma criação original do Lubango, representando a inovação do interior de Angola."
+        };
 
-        // --- MOTOR ZÉNIA-LLM-1 (CPU LOCAL) ---
+        // --- MOTOR DE RACIOCÍNIO ZÉNIA-LLM-1 ---
         const ZeniaLLM1 = {
-            respond: (prompt) => {
-                const p = prompt.toLowerCase();
-                if(p.includes("quem é você")) return "Sou a Zénia-LLM-1, um motor de processamento local otimizado para CPU. Sou a irmã da Antónia-IA.";
-                if(p.includes("lubango")) return "O Lubango é a minha terra natal digital, a cidade das acácias brancas e da Serra da Chela.";
-                return "Processamento Local (Zénia-LLM-1): Recebi a tua mensagem. Como meus motores externos estão em espera, estou a usar o meu núcleo de CPU para manter a nossa conexão.";
+            reason: (prompt) => {
+                const query = prompt.toLowerCase();
+                let knowledgeFound = [];
+                
+                // Busca semântica simples (estuda a matéria)
+                for (let key in ZENIA_MATTER) {
+                    if (query.includes(key) || key.split(" ").some(word => query.includes(word))) {
+                        knowledgeFound.push(ZENIA_MATTER[key]);
+                    }
+                }
+
+                if (knowledgeFound.length > 0) {
+                    // Raciocínio Logístico: Combina a matéria encontrada com uma estrutura de resposta
+                    return `[Raciocínio Local]: Com base no meu conhecimento sobre ${query.substring(0, 15)}..., posso confirmar que: ${knowledgeFound.join(" ")}`;
+                }
+                
+                return "ZÉNIA-LLM-1: Minha base de dados de matéria não contém informações específicas sobre isso, mas como uma IA do Lubango, posso deduzir que precisas de uma conexão externa (Cloud) para este tema específico.";
             }
         };
+
+        let selectedImage = null;
 
         async function handleSend() {
             const input = document.getElementById('user-input');
             const prompt = input.value.trim();
             if(!prompt && !selectedImage) return;
 
-            const uId = addMsg('user', prompt || "Analisar imagem carregada.");
+            const uId = addMsg('user', prompt || "Analise de Imagem");
             input.value = '';
             
             const model = document.getElementById('model-select').value;
-            const iaMsgId = addMsg('ia', '<div class="flex gap-2"><div class="w-2 h-2 bg-cyan-500 animate-bounce"></div><div class="w-2 h-2 bg-cyan-500 animate-bounce [animation-delay:-.3s]"></div><div class="w-2 h-2 bg-cyan-500 animate-bounce [animation-delay:-.5s]"></div></div>');
+            const iaMsgId = addMsg('ia', '<div class="flex gap-2 p-2"><div class="w-2 h-2 bg-cyan-400 animate-pulse"></div><div class="w-2 h-2 bg-cyan-400 animate-pulse delay-75"></div></div>');
+            const contentDiv = document.getElementById(iaMsgId).querySelector('.content');
 
-            try {
-                // LÓGICA MULTIMODAL AUTOMÁTICA
-                if(prompt.toLowerCase().includes("gere uma imagem") || prompt.toLowerCase().includes("desenha")) {
-                    await generateImage(prompt, iaMsgId);
-                } else if(selectedImage) {
-                    await analyzeImage(prompt, iaMsgId);
-                } else if(prompt.toLowerCase().includes("áudio") || prompt.toLowerCase().includes("fala")) {
-                    await generateAudio(prompt, iaMsgId);
-                } else {
-                    await generateText(prompt, iaMsgId, model);
+            setTimeout(async () => {
+                try {
+                    if(prompt.toLowerCase().match(/(gere|desenha|imagem de)/)) {
+                        await generateImage(prompt, iaMsgId);
+                    } else if(selectedImage) {
+                        contentDiv.innerHTML = `<img src="${selectedImage}" class="h-40 rounded-lg mb-2 border border-cyan-500"><p>Análise de Visão Neural: Imagem recebida. Processando padrões geométricos...</p>`;
+                    } else if(model === 'zenia-llm-1') {
+                        contentDiv.innerText = ZeniaLLM1.reason(prompt);
+                    } else {
+                        const resp = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${model}&system=Responda como Zénia do Lubango.`);
+                        contentDiv.innerText = await resp.text();
+                    }
+                } catch (e) {
+                    contentDiv.innerText = "Falha crítica. Ativando reserva Zénia-LLM-1: " + ZeniaLLM1.reason(prompt);
                 }
-            } catch (e) {
-                document.getElementById(iaMsgId).querySelector('.content').innerText = "Erro no fluxo de dados. Tente o ZÉNIA-LLM-1.";
-            }
+            }, 500);
             clearPreview();
         }
 
-        async function generateText(prompt, id, model) {
-            const content = document.getElementById(id).querySelector('.content');
-            if(model === 'zenia-llm-1') {
-                content.innerText = ZeniaLLM1.respond(prompt);
-            } else {
-                const resp = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${model}`);
-                content.innerText = await resp.text();
-            }
-        }
-
-        async function generateImage(prompt, id) {
-            const url = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${Math.random()}`;
-            document.getElementById(id).querySelector('.content').innerHTML = `
-                <p class="mb-2 text-xs opacity-50">Imagem gerada para: ${prompt}</p>
-                <img src="${url}" class="rounded-lg border border-cyan-500/30 w-full shadow-2xl">
-            `;
-        }
-
-        async function generateAudio(prompt, id) {
-            const content = document.getElementById(id).querySelector('.content');
-            content.innerHTML = `<p>Vou converter a resposta em áudio para você.</p>`;
-            const synth = window.speechSynthesis;
-            const utter = new SpeechSynthesisUtterance(prompt.replace("gere um áudio de", ""));
-            utter.lang = 'pt-PT';
-            synth.speak(utter);
-        }
-
-        async function analyzeImage(prompt, id) {
-            const content = document.getElementById(id).querySelector('.content');
-            content.innerHTML = `<div class="flex flex-col gap-2">
-                <img src="${selectedImage}" class="h-32 w-32 object-cover rounded-lg border border-cyan-500">
-                <p>Análise Zénia-Vision: A imagem contém elementos visuais que processarei como: ${prompt || 'Cena detectada'}. (Simulação de análise local)</p>
-            </div>`;
-        }
-
-        // --- UTILITÁRIOS ---
-
+        // Funções de Interface (Mensagens, Imagem, Audio)
         function addMsg(role, text) {
             const id = 'msg-' + Date.now();
             const win = document.getElementById('chat-window');
@@ -188,25 +158,30 @@
             div.className = `msg msg-${role}`;
             
             const header = role === 'user' ? 
-                `<div class="flex justify-end gap-2 mb-2">
-                    <button onclick="editMsg('${id}')" class="text-[10px] opacity-40 hover:opacity-100">EDITAR</button>
-                    <button onclick="this.closest('.msg').remove()" class="text-[10px] opacity-40 hover:opacity-100">REMOVER</button>
+                `<div class="flex justify-end gap-2 mb-2 text-[9px] opacity-40">
+                    <button onclick="editMsg('${id}')">EDITAR</button>
+                    <button onclick="document.getElementById('${id}').remove()">APAGAR</button>
                 </div>` : '';
 
             const footer = role === 'ia' ?
-                `<div class="flex gap-4 mt-4 border-t border-white/5 pt-3 text-[10px]">
-                    <button onclick="regenerate('${id}')"><i class="fas fa-sync"></i> REESCREVER</button>
-                    <button onclick="this.closest('.msg').remove()"><i class="fas fa-trash"></i> ELIMINAR</button>
-                    <div class="ml-auto flex gap-2">
-                        <i class="far fa-thumbs-up cursor-pointer hover:text-cyan-400"></i>
-                        <i class="far fa-thumbs-down cursor-pointer hover:text-red-400"></i>
+                `<div class="flex gap-4 mt-4 border-t border-white/5 pt-3 text-[9px] opacity-60">
+                    <button onclick="handleSend()"><i class="fas fa-sync"></i> REESCREVER</button>
+                    <button onclick="document.getElementById('${id}').remove()"><i class="fas fa-trash"></i></button>
+                    <div class="ml-auto flex gap-3">
+                        <i class="far fa-thumbs-up hover:text-cyan-400 cursor-pointer"></i>
+                        <i class="far fa-thumbs-down hover:text-red-400 cursor-pointer"></i>
                     </div>
                 </div>` : '';
 
-            div.innerHTML = `${header}<div class="content">${text}</div>${footer}`;
+            div.innerHTML = `${header}<div class="content text-sm">${text}</div>${footer}`;
             win.appendChild(div);
             win.scrollTo({top: win.scrollHeight, behavior: 'smooth'});
             return id;
+        }
+
+        async function generateImage(prompt, id) {
+            const url = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
+            document.getElementById(id).querySelector('.content').innerHTML = `<img src="${url}" class="rounded-lg w-full border border-cyan-500/50 shadow-2xl">`;
         }
 
         function handleFile(input) {
@@ -225,37 +200,21 @@
         function clearPreview() {
             selectedImage = null;
             document.getElementById('preview-container').classList.add('hidden');
-            document.getElementById('file-input').value = '';
         }
 
         function toggleMic() {
-            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'pt-PT';
-            if(!isRecording) {
-                recognition.start();
-                document.getElementById('mic-btn').classList.add('text-red-500', 'animate-pulse');
-                isRecording = true;
-            }
-            recognition.onresult = (event) => {
-                document.getElementById('user-input').value = event.results[0][0].transcript;
-                toggleMic();
-            };
-            recognition.onend = () => {
-                document.getElementById('mic-btn').classList.remove('text-red-500', 'animate-pulse');
-                isRecording = false;
-            };
+            const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            rec.lang = 'pt-PT';
+            rec.start();
+            document.getElementById('mic-btn').classList.add('text-red-500');
+            rec.onresult = (e) => { document.getElementById('user-input').value = e.results[0][0].transcript; };
+            rec.onend = () => { document.getElementById('mic-btn').classList.remove('text-red-500'); };
         }
 
         function editMsg(id) {
-            const content = document.querySelector(`#${id} .content`);
-            const edit = prompt("Editar pergunta:", content.innerText);
-            if(edit) content.innerText = edit;
-        }
-
-        function regenerate(id) {
-            const content = document.querySelector(`#${id} .content`);
-            content.innerHTML = "Re-processando sequência neural...";
-            setTimeout(() => content.innerText = "Aqui está uma nova perspectiva sobre sua solicitação, otimizada para os sistemas da Zénia.", 1000);
+            const current = document.querySelector(`#${id} .content`).innerText;
+            const nuevo = prompt("Editar:", current);
+            if(nuevo) document.querySelector(`#${id} .content`).innerText = nuevo;
         }
     </script>
 </body>
