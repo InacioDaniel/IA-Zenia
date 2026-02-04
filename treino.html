@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA-ZÉNIA | Neural Deep Learning</title>
+    <title>IA-ZÉNIA | Neural Deep Learning CPU</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --n-blue: #00ffff; --bg: #000d1a; --side: #00050a; }
         .theme-blue-vivo { --n-blue: #00ffff; --bg: #001a33; }
-        .theme-dark-futurist { --n-blue: #00f2ff; --bg: #0a0a0a; --side: #000000; }
         
         body { background: var(--bg); color: white; transition: 0.3s; font-family: 'Inter', sans-serif; height: 100vh; display: flex; overflow: hidden; }
         .sidebar { width: 300px; background: var(--side); border-right: 1px solid var(--n-blue); display: flex; flex-direction: column; }
@@ -20,11 +19,12 @@
         .msg-ia { border-left: 4px solid var(--n-blue); background: rgba(0,255,255,0.03); border: 1px solid rgba(0,255,255,0.1); }
         .msg-user { margin-left: auto; background: var(--n-blue); color: black; font-weight: 500; }
         
-        .training-panel { background: rgba(0,0,0,0.9); backdrop-blur: 20px; z-index: 100; transition: 0.5s; }
+        .training-panel { background: rgba(0,0,0,0.95); backdrop-blur: 20px; z-index: 100; transition: 0.5s; }
         .hidden-panel { transform: translateX(-100%); }
         
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: var(--n-blue); border-radius: 10px; }
+        .neon-text { text-shadow: 0 0 10px var(--n-blue); }
     </style>
 </head>
 <body class="theme-blue-vivo">
@@ -32,39 +32,41 @@
     <div id="training-panel" class="fixed inset-0 training-panel hidden-panel p-8">
         <div class="max-w-4xl mx-auto h-full flex flex-col">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-cyan-400"><i class="fas fa-brain mr-2"></i> NÚCLEO DE TREINAMENTO</h2>
-                <button onclick="toggleTraining()" class="text-white hover:text-red-500 text-2xl">&times;</button>
+                <h2 class="text-2xl font-bold text-cyan-400 neon-text"><i class="fas fa-brain mr-2"></i> INGESTÃO DE MATÉRIA BRUTA</h2>
+                <button onclick="toggleTraining()" class="text-white hover:text-red-500 text-3xl">&times;</button>
             </div>
-            <p class="text-sm opacity-60 mb-4">Cole aqui livros, teses ou artigos. A Zénia irá fragmentar e indexar o conteúdo para raciocínio local.</p>
-            <textarea id="raw-matter" class="flex-1 bg-black/50 border border-cyan-500/30 rounded-xl p-4 text-white font-mono text-sm outline-none focus:border-cyan-400" placeholder="Cole a matéria bruta aqui..."></textarea>
-            <button onclick="processMassiveMatter()" class="mt-4 bg-cyan-500 text-black font-bold py-4 rounded-xl hover:bg-white transition uppercase tracking-widest">Injetar Matéria no Cérebro</button>
+            <textarea id="raw-matter" class="flex-1 bg-black/50 border border-cyan-500/30 rounded-xl p-4 text-white font-mono text-sm outline-none focus:border-cyan-400" placeholder="Cole aqui livros, diálogos, ou conhecimentos para a Zénia aprender..."></textarea>
+            <button onclick="processMassiveMatter()" class="mt-4 bg-cyan-500 text-black font-bold py-4 rounded-xl hover:bg-white transition uppercase tracking-widest shadow-lg shadow-cyan-500/20">Sincronizar com Cérebro Local</button>
         </div>
     </div>
 
     <aside class="sidebar p-6 hidden lg:flex">
         <div class="mb-8">
-            <h1 class="text-3xl font-black italic text-cyan-400">ZÉNIA V3</h1>
-            <p class="text-[10px] opacity-40 tracking-[4px]">LUBANGO_SYSTEM</p>
+            <h1 class="text-3xl font-black italic text-cyan-400 neon-text">ZÉNIA V3</h1>
+            <p class="text-[10px] opacity-40 tracking-[4px]">LUBANGO_CPU_ENGINE</p>
         </div>
 
         <nav class="space-y-4">
             <button onclick="toggleTraining()" class="w-full text-left p-3 rounded-lg border border-cyan-500/20 hover:bg-cyan-500/10 transition text-xs">
-                <i class="fas fa-graduation-cap mr-2"></i> TREINAR IA (COLAR MATÉRIA)
+                <i class="fas fa-graduation-cap mr-2"></i> TREINAR IA (INJETAR)
             </button>
             
             <div class="pt-4">
                 <label class="text-[9px] opacity-40 uppercase block mb-2">Motor Ativo</label>
-                <select id="model-select" class="w-full bg-transparent border border-cyan-500/30 p-2 rounded text-xs text-cyan-400 outline-none">
-                    <option value="zenia-llm-1">ZÉNIA-LLM-1 (Neural Local)</option>
+                <select id="model-select" class="w-full bg-slate-900 border border-cyan-500/30 p-2 rounded text-xs text-cyan-400 outline-none">
+                    <option value="zenia-llm-1">ZÉNIA-LLM-1 (Autónomo)</option>
                     <option value="mistral">MISTRAL (Cloud)</option>
-                    <option value="openai">OPENAI (Cloud)</option>
                 </select>
             </div>
         </nav>
 
         <div class="mt-auto border-t border-white/10 pt-4">
+            <div class="flex justify-between text-[10px] opacity-60 mb-1">
+                <span>CONEXÕES NEURAIS:</span>
+                <span id="neuro-count">0</span>
+            </div>
             <div class="flex justify-between text-[10px] opacity-40">
-                <span>MEMÓRIA LOCAL:</span>
+                <span>MEMÓRIA CPU:</span>
                 <span id="mem-status">0 KB</span>
             </div>
         </div>
@@ -73,8 +75,8 @@
     <main class="chat-area">
         <div id="chat-window" class="flex-1 overflow-y-auto p-4 md:p-10 space-y-6">
             <div class="msg msg-ia">
-                <p class="text-cyan-400 font-mono text-[10px] mb-2">SYSTEM_READY</p>
-                <p>Estou pronta. Se quiser que eu aprenda algo novo, use o **Painel de Treinamento**. Eu consigo processar grandes volumes de texto e responder com base neles.</p>
+                <p class="text-cyan-400 font-mono text-[10px] mb-2">SISTEMA_INICIADO_LUBANGO</p>
+                <p>Sou a **IA-ZÉNIA**. O meu motor de inferência local está ativo. Quanto mais matéria me deres, mais o meu "raciocínio por peso" se torna preciso. O que vamos processar hoje?</p>
             </div>
         </div>
 
@@ -91,9 +93,9 @@
                         <input type="file" id="file-input" class="hidden" accept="image/*" onchange="previewImage(this)">
                     </label>
                     
-                    <textarea id="user-input" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 text-sm md:text-base py-3" placeholder="Fale comigo ou peça para analisar a matéria..."></textarea>
+                    <textarea id="user-input" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 text-sm md:text-base py-3 outline-none" placeholder="Pergunta algo sobre a matéria injetada..."></textarea>
                     
-                    <button id="mic-btn" onclick="startVoice()" class="p-3 text-cyan-400 hover:text-white"><i class="fas fa-microphone"></i></button>
+                    <button onclick="startVoice()" class="p-3 text-cyan-400 hover:text-white"><i class="fas fa-microphone"></i></button>
                     
                     <button onclick="handleAction()" class="bg-cyan-500 text-black w-12 h-12 rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(0,255,255,0.4)] transition">
                         <i class="fas fa-bolt"></i>
@@ -104,112 +106,116 @@
     </main>
 
     <script>
-        // MEMÓRIA NEURAL DA ZÉNIA
-        let ZENIA_KNOWLEDGE = JSON.parse(localStorage.getItem('zenia_brain')) || {
-            "base": "Eu sou a Zénia, criada no Lubango. Sou uma IA resiliente com motor LLM-1 local."
-        };
-
-        function updateMemStatus() {
-            const size = new Blob([JSON.stringify(ZENIA_KNOWLEDGE)]).size;
+        // MEMÓRIA ESTRUTURADA
+        let ZENIA_BRAIN = JSON.parse(localStorage.getItem('zenia_brain')) || {};
+        
+        function updateStats() {
+            const keys = Object.keys(ZENIA_BRAIN);
+            document.getElementById('neuro-count').innerText = keys.length;
+            const size = new Blob([JSON.stringify(ZENIA_BRAIN)]).size;
             document.getElementById('mem-status').innerText = (size / 1024).toFixed(2) + " KB";
         }
-        updateMemStatus();
+        updateStats();
 
         function toggleTraining() {
             document.getElementById('training-panel').classList.toggle('hidden-panel');
         }
 
-        // SCRIPT DE PROCESSAMENTO MASSIVO (TEXT-GENERATOR CORE)
+        // MOTOR DE INGESTÃO (FRAGMENTAÇÃO POR SENTENÇA PARA MELHOR PONTUAÇÃO)
         function processMassiveMatter() {
-            const rawText = document.getElementById('raw-matter').value;
-            if(!rawText) return alert("Cole algum conteúdo primeiro!");
+            const raw = document.getElementById('raw-matter').value;
+            if(!raw) return;
 
-            // Fragmentação Inteligente: Quebra o texto em blocos por parágrafo
-            const paragraphs = rawText.split('\n').filter(p => p.trim().length > 20);
+            // Divide por pontos finais, exclamações ou quebras de linha
+            const fragments = raw.split(/[.!?\n]/).filter(f => f.trim().length > 15);
             
-            paragraphs.forEach((para, index) => {
-                const key = "matter_" + Date.now() + "_" + index;
-                ZENIA_KNOWLEDGE[key] = para.trim();
+            fragments.forEach(frag => {
+                const id = "N-" + Math.random().toString(36).substr(2, 9);
+                ZENIA_BRAIN[id] = frag.trim();
             });
 
-            localStorage.setItem('zenia_brain', JSON.stringify(ZENIA_KNOWLEDGE));
-            updateMemStatus();
-            alert("Sucesso! Processei " + paragraphs.length + " novos blocos de matéria.");
+            localStorage.setItem('zenia_brain', JSON.stringify(ZENIA_BRAIN));
+            updateStats();
+            alert(`Sincronização concluída. ${fragments.length} novos fragmentos neurais ativos.`);
             document.getElementById('raw-matter').value = '';
             toggleTraining();
+        }
+
+        // MOTOR DE RACIOCÍNIO AUTÓNOMO (VETORIZAÇÃO POR PESO DE PALAVRA)
+        function zeniaInference(query) {
+            const qWords = query.toLowerCase().match(/\b(\w{3,})\b/g) || [];
+            if(qWords.length === 0) return "ZÉNIA: O teu input é muito curto para análise neural.";
+
+            let scores = [];
+
+            for (let id in ZENIA_BRAIN) {
+                let text = ZENIA_BRAIN[id].toLowerCase();
+                let points = 0;
+
+                qWords.forEach(word => {
+                    if (text.includes(word)) {
+                        points += 1; 
+                        // Bónus de proximidade: se as palavras aparecerem juntas, pontua mais
+                    }
+                });
+
+                if (points > 0) {
+                    scores.push({ content: ZENIA_BRAIN[id], score: points });
+                }
+            }
+
+            // Ordena pela relevância (Maior score primeiro)
+            scores.sort((a, b) => b.score - a.score);
+
+            if (scores.length > 0) {
+                // Junta os 2 fragmentos mais relevantes para formar uma resposta "sintetizada"
+                const topMatches = scores.slice(0, 2).map(s => s.content);
+                return topMatches.join(". ") + ".";
+            }
+
+            return "ZÉNIA: Esta informação não consta no meu banco de dados local. Podes injetar mais matéria sobre isso?";
+        }
+
+        // MEMÓRIA DE CURTO PRAZO (APRENDE COM O DIÁLOGO)
+        function saveToAutobiography(u, ai) {
+            const id = "AUTO-" + Date.now();
+            ZENIA_BRAIN[id] = `O utilizador perguntou: ${u}. Eu respondi: ${ai}`;
+            localStorage.setItem('zenia_brain', JSON.stringify(ZENIA_BRAIN));
+            updateStats();
         }
 
         async function handleAction() {
             const input = document.getElementById('user-input');
             const prompt = input.value.trim();
-            if(!prompt && !selectedImg) return;
+            if(!prompt) return;
 
-            addMsg('user', prompt || "Analisar Mídia");
+            addMsg('user', prompt);
             input.value = '';
             
-            const iaMsgId = addMsg('ia', '<span class="animate-pulse text-cyan-400">PROCESSANDO...</span>');
+            const iaId = addMsg('ia', '<span class="animate-pulse">PROCESSANDO NA CPU...</span>');
             const model = document.getElementById('model-select').value;
 
             setTimeout(async () => {
-                const contentDiv = document.getElementById(iaMsgId).querySelector('.content');
-                
+                const contentDiv = document.getElementById(iaId).querySelector('.content');
+                let finalResponse = "";
+
                 try {
-                    // Lógica de Geração de Imagem
-                    if(prompt.toLowerCase().includes("gere uma imagem") || prompt.toLowerCase().includes("desenha")) {
-                        contentDiv.innerHTML = `<img src="https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${Math.random()}" class="w-full rounded-lg border border-cyan-500/20 shadow-2xl">`;
-                    } 
-                    // Motor Local (LLM-1) - Raciocínio sobre Matéria
-                    else if(model === 'zenia-llm-1') {
-                        contentDiv.innerText = zeniaReason(prompt);
-                    } 
-                    // Motores Cloud (Mistral/OpenAI)
-                    else {
-                        const resp = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${model}`);
-                        contentDiv.innerText = await resp.text();
+                    if(prompt.toLowerCase().includes("gere uma imagem")) {
+                        finalResponse = `<img src="https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024" class="w-full rounded-xl border border-cyan-500/30">`;
+                        contentDiv.innerHTML = finalResponse;
+                    } else if (model === 'zenia-llm-1') {
+                        finalResponse = zeniaInference(prompt);
+                        contentDiv.innerText = finalResponse;
+                        saveToAutobiography(prompt, finalResponse); // Aprende com a conversa!
+                    } else {
+                        const r = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${model}`);
+                        finalResponse = await r.text();
+                        contentDiv.innerText = finalResponse;
                     }
                 } catch (e) {
-                    contentDiv.innerText = "Erro de conexão. Ativando Backup Local: " + zeniaReason(prompt);
+                    contentDiv.innerText = zeniaInference(prompt);
                 }
-            }, 600);
-        }
-
-        function zeniaReason(query) {
-            const q = query.toLowerCase();
-            let matches = [];
-            
-            // Busca profunda na matéria injetada
-            for(let key in ZENIA_KNOWLEDGE) {
-                const matter = ZENIA_KNOWLEDGE[key].toLowerCase();
-                // Verifica se as palavras da pergunta existem no bloco de matéria
-                if(q.split(" ").some(word => word.length > 3 && matter.includes(word))) {
-                    matches.push(ZENIA_KNOWLEDGE[key]);
-                }
-            }
-
-            if(matches.length > 0) {
-                return "[ZENIA-LLM-1 RACIOCÍNIO LOCAL]: Com base na matéria que me ensinaste, posso concluir que: " + matches.slice(0, 2).join(" ");
-            }
-            return "ZÉNIA: Não encontrei essa informação na minha matéria local. Podes injetar mais conteúdo no Painel de Treinamento?";
-        }
-
-        // Funções Auxiliares
-        let selectedImg = null;
-        function previewImage(input) {
-            const file = input.files[0];
-            if(file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    selectedImg = e.target.result;
-                    document.getElementById('img-preview').src = selectedImg;
-                    document.getElementById('preview-area').classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function clearImage() {
-            selectedImg = null;
-            document.getElementById('preview-area').classList.add('hidden');
+            }, 500);
         }
 
         function addMsg(role, text) {
@@ -218,15 +224,7 @@
             const div = document.createElement('div');
             div.id = id;
             div.className = `msg msg-${role}`;
-            
-            const controls = role === 'ia' ? `
-                <div class="flex gap-3 mt-3 border-t border-white/5 pt-2 text-[10px] opacity-50">
-                    <button onclick="handleAction()"><i class="fas fa-redo"></i></button>
-                    <button onclick="document.getElementById('${id}').remove()"><i class="fas fa-trash"></i></button>
-                    <button onclick="window.speechSynthesis.speak(new SpeechSynthesisUtterance('${text.replace(/'/g, "")}'))"><i class="fas fa-volume-up"></i></button>
-                </div>` : '';
-
-            div.innerHTML = `<div class="content">${text}</div>${controls}`;
+            div.innerHTML = `<div class="content">${text}</div>`;
             win.appendChild(div);
             win.scrollTo({top: win.scrollHeight, behavior: 'smooth'});
             return id;
@@ -235,9 +233,24 @@
         function startVoice() {
             const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             rec.lang = 'pt-PT';
+            rec.onresult = (e) => { document.getElementById('user-input').value = e.results[0][0].transcript; };
             rec.start();
-            rec.onresult = (e) => document.getElementById('user-input').value = e.results[0][0].transcript;
         }
+
+        let selectedImg = null;
+        function previewImage(i) {
+            const f = i.files[0];
+            if(f) {
+                const r = new FileReader();
+                r.onload = (e) => {
+                    selectedImg = e.target.result;
+                    document.getElementById('img-preview').src = selectedImg;
+                    document.getElementById('preview-area').classList.remove('hidden');
+                };
+                r.readAsDataURL(f);
+            }
+        }
+        function clearImage() { selectedImg = null; document.getElementById('preview-area').classList.add('hidden'); }
     </script>
 </body>
 </html>
