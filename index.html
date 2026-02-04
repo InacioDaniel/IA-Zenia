@@ -70,6 +70,7 @@ textarea { background: transparent; border: none; outline: none; color: white; r
         
         <div class="flex items-center gap-3">
             <select id="modelEngine" class="model-select">
+                <option value="huggingface">MODELO: ZÉNIA (CUSTOM - HUGGING FACE)</option>
                 <option value="zenia-flow">MODELO: ZÉNIA-FLOW (TENSORFLOW)</option>
                 <option value="kimi">MODELO: KIMI K2.5 (POLLINATIONS)</option>
                 <option value="mistral">MODELO: ZÉNIA (MISTRAL)</option>
@@ -206,10 +207,34 @@ async function fetchPollinations(prompt, modelName) {
     return await res.text();
 }
 
-async function fetchKimiK2(prompt) {
-    const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=kimi-k2-5&seed=${Math.random()}`);
-    if (!res.ok) throw new Error();
-    return await res.text();
+async function fetchHuggingFaceModel(prompt) {
+    try {
+        // Usar a API do Hugging Face para seu modelo treinado
+        const response = await fetch(
+            "https://api-inference.huggingface.co/models/Zenia-projects/ZENIA",
+            {
+                headers: { Authorization: `Bearer hf_SEU_TOKEN_AQUI` },
+                method: "POST",
+                body: JSON.stringify({ inputs: prompt }),
+            }
+        );
+        
+        if (!response.ok) throw new Error('Modelo Hugging Face indisponível');
+        
+        const result = await response.json();
+        
+        // Extrair texto da resposta
+        let responseText = result[0]?.generated_text || "Resposta processada.";
+        
+        // Remover a prompt do resultado
+        responseText = responseText.replace(prompt, '').trim();
+        
+        return responseText || "Processado com sucesso!";
+        
+    } catch (err) {
+        console.error('Erro Hugging Face:', err);
+        throw new Error('Modelo customizado indisponível');
+    }
 }
 
 window.handleSend = async (textOverride) => {
@@ -231,7 +256,9 @@ window.handleSend = async (textOverride) => {
         let modelUsed = modelEngine.options[modelEngine.selectedIndex].text;
 
         try {
-            if (selected === 'zenia-flow') {
+            if (selected === 'huggingface') {
+                responseText = await fetchHuggingFaceModel(systemContext);
+            } else if (selected === 'zenia-flow') {
                 responseText = await fetchZeniaFlow(systemContext);
             } else if (selected === 'kimi') {
                 responseText = await fetchKimiK2(systemContext);
