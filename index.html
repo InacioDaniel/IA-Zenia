@@ -6,26 +6,12 @@
     <meta http-equiv="content-language" content="pt-AO">
     <title>IA-ZÉNIA by Zénia-Projects</title>
     <script src="https://cdn.tailwindcss.com/"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --accent: #00ffe7;
-            --accent-alt: #ff00f7;
-            --bg: #0a0a0a;
-            --panel: #111;
-            --border: #222;
-            --text-light: #e0f7ff;
-            --neon-glow: 0 0 15px rgba(0, 255, 231, 0.3);
-        }
-
         body {
             background: #050505;
-            color: var(--text-light);
+            color: #e0f7ff;
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
             height: 100vh;
@@ -33,19 +19,17 @@
             overflow: hidden;
         }
 
-        /* Sidebar Estilizada */
         .sidebar {
             width: 280px;
             background: #0a0a0a;
             border-right: 1px solid #1a1a1a;
             display: flex;
             flex-direction: column;
-            transition: 0.3s;
             z-index: 100;
         }
 
         @media (max-width: 768px) {
-            .sidebar { position: fixed; left: -100%; top: 0; height: 100%; }
+            .sidebar { position: fixed; left: -100%; top: 0; height: 100%; width: 100%; }
             .sidebar.active { left: 0; }
         }
 
@@ -61,6 +45,7 @@
             transition: 0.3s;
             text-transform: uppercase;
             letter-spacing: 1px;
+            border: none;
         }
 
         .btn-new:hover { opacity: 0.9; transform: scale(0.98); }
@@ -71,24 +56,18 @@
             border-radius: 10px;
             background: rgba(255,255,255,0.03);
             cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             font-size: 13px;
             border: 1px solid transparent;
         }
 
-        .hist-item:hover {
-            background: rgba(0,132,255,0.15);
-        }
+        .hist-item:hover { background: rgba(0,132,255,0.15); }
 
-        .hist-item.active {
-            background: linear-gradient(90deg, rgba(0,132,255,0.2), transparent);
-            border-color: #0084ff;
+        .main-content { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
         }
-
-        /* Área de Chat */
-        .main-content { flex: 1; display: flex; flex-direction: column; position: relative; }
 
         .chat-container {
             flex: 1;
@@ -100,16 +79,12 @@
             background: radial-gradient(circle at center, #0f172a 0%, #050505 100%);
         }
 
-        .art-img {
-            max-width: 100%;
-            border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            margin-top: 10px;
-            display: block;
+        .msg-wrapper { 
+            display: flex; 
+            flex-direction: column; 
+            max-width: 85%; 
         }
 
-        .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; }
         .user-wrapper { align-self: flex-end; }
         .ai-wrapper { align-self: flex-start; }
 
@@ -120,24 +95,24 @@
             line-height: 1.5;
         }
 
-        .user-msg { background: #0084ff; color: white; border-bottom-right-radius: 2px; }
-        .ai-msg { background: #1a1a1a; color: #e0f7ff; border-bottom-left-radius: 2px; border: 1px solid #333; }
-
-        .audio-player {
-            margin-top: 10px;
-            padding: 10px;
-            background: rgba(0,132,255,0.1);
-            border-radius: 10px;
-            border: 1px solid #0084ff;
+        .user-msg { 
+            background: #0084ff; 
+            color: white; 
+            border-bottom-right-radius: 2px; 
         }
 
-        audio {
-            width: 100%;
-            max-width: 300px;
+        .ai-msg { 
+            background: #1a1a1a; 
+            color: #e0f7ff; 
+            border-bottom-left-radius: 2px; 
+            border: 1px solid #333; 
         }
 
-        /* Input Inferior */
-        .footer-input { padding: 20px; background: transparent; }
+        .footer-input { 
+            padding: 20px; 
+            background: transparent; 
+        }
+
         .footer-input-inner {
             background: #111;
             border: 1px solid #333;
@@ -157,39 +132,30 @@
             padding: 10px;
             resize: none;
             height: 45px;
+            font-family: inherit;
+        }
+
+        button {
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
         }
 
         .send-btn {
             background: #00ffe7;
             color: #000;
-            padding: 8px 15px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
         }
 
-        .send-btn:hover {
-            opacity: 0.9;
-            transform: scale(0.98);
-        }
+        .send-btn:hover { opacity: 0.9; }
 
         .audio-btn {
             background: #ff6b6b;
             color: white;
-            padding: 8px 12px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-            transition: 0.3s;
         }
 
-        .audio-btn:hover {
-            opacity: 0.9;
-        }
-
-        /* Contador de Visitantes */
         .visitor-badge {
             position: absolute;
             top: 20px;
@@ -199,30 +165,36 @@
             padding: 5px 15px;
             border-radius: 20px;
             font-size: 12px;
-            font-weight: bold;
             color: #0084ff;
-            backdrop-filter: blur(5px);
+        }
+
+        .loading { 
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
 
 <aside class="sidebar" id="sidebar">
-    <div class="btn-new" onclick="startNewChat()">+ NOVA CONVERSA</div>
+    <button class="btn-new" onclick="startNewChat()">+ NOVA CONVERSA</button>
     
     <div class="px-4 mb-2 mt-4">
-        <h2 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Histórico Local</h2>
+        <h2 class="text-[10px] font-bold text-gray-500 uppercase">Histórico Local</h2>
     </div>
     
-    <div id="historyList" class="flex-1 overflow-y-auto">
-    </div>
+    <div id="historyList" class="flex-1 overflow-y-auto px-4"></div>
 
     <div class="p-4 border-t border-zinc-800">
-        <h2 class="text-[9px] font-bold text-gray-600 uppercase mb-3">Minhas Irmãs</h2>
+        <h2 class="text-[9px] font-bold text-gray-600 uppercase mb-3">Links</h2>
         <div class="space-y-2">
-            <a href="https://zenia-projects.netlify.app/" target="_blank" class="block text-xs text-blue-400 hover:text-white transition">🌐 Zenia Projects</a>
-            <a href="https://ia-zenia.netlify.app/" target="_blank" class="block text-xs text-blue-400 hover:text-white transition">🌐 IA-Zénia Web</a>
-            <a href="https://antonia-ia.netlify.app/" target="_blank" class="block text-xs text-blue-400 hover:text-white transition">🌐 Antónia IA</a>
+            <a href="https://zenia-projects.netlify.app/" target="_blank" class="block text-xs text-blue-400 hover:text-white">🌐 Zenia Projects</a>
+            <a href="https://ia-zenia.netlify.app/" target="_blank" class="block text-xs text-blue-400 hover:text-white">🌐 IA-Zénia Web</a>
         </div>
     </div>
 </aside>
@@ -232,38 +204,49 @@
     
     <header class="p-4 flex items-center justify-between border-b border-white/5">
         <div class="flex items-center gap-3">
-            <button onclick="toggleSidebar()" class="md:hidden text-white">☰</button>
-            <h1 class="text-xl font-black italic tracking-tighter">IA-ZÉNIA <span class="text-blue-500 text-xs font-normal not-italic ml-1">ALL.ANGOLA</span></h1>
+            <button onclick="toggleSidebar()" class="md:hidden text-white bg-none border-none cursor-pointer">☰</button>
+            <h1 class="text-xl font-black">IA-ZÉNIA <span class="text-blue-500 text-xs ml-1">ALL.ANGOLA</span></h1>
         </div>
     </header>
 
-    <div id="chatBox" class="chat-container">
-    </div>
+    <div id="chatBox" class="chat-container"></div>
 
     <div class="footer-input">
         <div class="footer-input-inner">
-            <textarea id="userInput" placeholder="Escreva aqui... | desenha um gato | lê em voz alta" oninput="autoGrow(this)"></textarea>
-            <button class="audio-btn" onclick="toggleAudio()" id="audioBtn" title="Sintetizar áudio">🔊</button>
+            <textarea id="userInput" placeholder="Escreva aqui... | desenha um gato | ler em voz alta"></textarea>
+            <button class="audio-btn" onclick="toggleAudio()" id="audioBtn" title="Ativar áudio">🔊</button>
             <button class="send-btn" onclick="handleSend()">ENVIAR 🚀</button>
         </div>
     </div>
 </main>
 
 <script>
-    // Configurações
-    const ZENIA_SYSTEM = "Você é IA-ZÉNIA do Lubango. Criada por @inacio.u.daniel. Você é uma assistente inteligente capaz de gerar imagens, responder perguntas em português angolano e sintetizar áudio. Sempre responda em português de Angola de forma clara, amigável e usando expressões típicas angolanas. Você é especializada em ajudar usuários de língua portuguesa de Angola.";
-    let conversationId = Date.now();
     let shouldSynthesizeAudio = false;
+    const API_KEY = "gsk_8N9dZvZqXxZ8qxZ8qxZ8qxZ8qxZ8qxZ8"; // Groq (pode ser expirado)
 
-    // Carregar histórico ao abrir
     window.addEventListener('load', () => {
         showWelcomeMessage();
         loadHistoryFromStorage();
     });
 
+    function showWelcomeMessage() {
+        const box = document.getElementById("chatBox");
+        box.innerHTML = '';
+        const wrap = document.createElement("div");
+        wrap.className = "msg-wrapper ai-wrapper";
+        wrap.innerHTML = `<div class="msg ai-msg">
+            Onawa! 👋 Sou a <strong>IA-ZÉNIA</strong> do Lubango.<br><br>
+            Como posso ajudar? Você pode:<br>
+            • <strong>Desenhar:</strong> "desenha um gato"<br>
+            • <strong>Perguntar:</strong> "qual é a capital de Angola?"<br>
+            • <strong>Com áudio:</strong> Clique em 🔊 antes de enviar
+        </div>`;
+        box.appendChild(wrap);
+    }
+
     function autoGrow(el) {
         el.style.height = "45px";
-        el.style.height = (el.scrollHeight) + "px";
+        el.style.height = Math.min(el.scrollHeight, 150) + "px";
     }
 
     function toggleSidebar() {
@@ -274,7 +257,6 @@
         shouldSynthesizeAudio = !shouldSynthesizeAudio;
         const btn = document.getElementById("audioBtn");
         btn.style.opacity = shouldSynthesizeAudio ? "1" : "0.5";
-        btn.title = shouldSynthesizeAudio ? "Áudio ativado" : "Áudio desativado";
     }
 
     async function handleSend() {
@@ -291,55 +273,71 @@
         const isImageRequest = /desenha|gera|pinta|imagem|foto/i.test(query);
 
         if (isImageRequest) {
-            const tempMsg = addMessage("Zénia está a pintar...", false);
+            const tempMsg = addMessage("🎨 Zénia está a pintar...", false);
             const imgUrl = `https://pollinations.ai/p/${encodeURIComponent(query)}?width=1024&height=1024&nologo=true`;
             
             setTimeout(() => {
-                tempMsg.innerHTML = `<div class="msg ai-msg">Pronto! Aqui está:</div><img src="${imgUrl}" class="art-img" alt="Imagem gerada">`;
+                tempMsg.innerHTML = `
+                    <div class="msg ai-msg">Pronto! Aqui está:</div>
+                    <img src="${imgUrl}" class="max-w-full rounded-lg border border-gray-700 mt-2" onerror="this.style.display='none'">
+                `;
                 scrollToBottom();
-            }, 2000);
-X2mL9nP4rT6wY3zH0aB1cD2eF4gH7iJ8kL9mN0pQ1rS2tU3vW4xY5zA"
-                    },
-                    body: JSON.stringify({
-                        model: "claude-3-5-sonnet-20241022",
-                        max_tokens: 1024,
-                        messages: [{
-                            role: "user",
-                            content: query
-                        }],
-                        system: ZENIA_SYSTEM
-                    })
-                });
-
-                const data = await response.json();
-                let text = "";
+            }, 1500);
+        } else {
+            const tempMsg = addMessage("⏳ Pensando via Pollinations...", false);
+            try {
+                // Usar Pollinations para gerar resposta (sem autenticação)
+                const textUrl = `https://text.pollinations.ai/${encodeURIComponent(query)}`;
+                const response = await fetch(textUrl);
                 
-                if (data.content && data.content[0] && data.content[0].text) {
-                    text = data.content[0].text;
-                } else if (data.error) {
-                    throw new Error(data.error.message);
-                } else {
-                    text = "Desculpe, não consegui gerar uma resposta. Tente novamente.";
-                }
+                if (!response.ok) throw new Error('Erro ao conectar');
+                
+                const text = await response.text();
+                tempMsg.innerHTML = `<div class="msg ai-msg">${text}</div>`;
                 
                 if (shouldSynthesizeAudio) {
-                    tempMsg.innerHTML = `<div class="msg ai-msg">${text}</div><div class="audio-player"><p style="font-size: 12px; color: #888; margin: 0 0 8px 0;">Sintetizando áudio em português de Angola...</p></div>`;
+                    // Usar Pollinations para sintetizar áudio em português
+                    const audioUrl = `https://audio.pollinations.ai/speech?text=${encodeURIComponent(text.substring(0, 500))}&language=pt-AO`;
                     
-                    // Síntese de áudio via TTS API gratuita
-                    try {
-                        const audioUrl = `https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM?text=${encodeURIComponent(text.substring(0, 500))}`;
-                        const playerHTML = tempMsg.querySelector('.audio-player');
-                        playerHTML.innerHTML = `<audio controls style="width: 100%;"><source src="${audioUrl}" type="audio/mpeg">Seu navegador não suporta áudio.</audio>`;
-                    } catch {
-                        const playerHTML = tempMsg.querySelector('.audio-player');
-                        playerHTML.innerHTML = `<p style="font-size: 12px; color: #ff6b6b;">⚠️ Áudio indisponível no momento</p>`;
-                    }
-                } else {
-                    tempMsg.innerHTML = `<div class="msg ai-msg">${text}</div>`;
+                    // Criar elemento de áudio
+                    const audioHTML = `
+                        <div style="margin-top: 10px; padding: 10px; background: rgba(0,132,255,0.1); border-radius: 8px;">
+                            <audio controls style="width: 100%; max-width: 300px;">
+                                <source src="${audioUrl}" type="audio/mpeg">
+                                Seu navegador não suporta áudio.
+                            </audio>
+                        </div>
+                    `;
+                    tempMsg.innerHTML += audioHTML;
                 }
             } catch (err) {
-                console.error("Erro:", err);
-                tempMsg.innerHTML = `<div class="msg ai-msg">❌ Erro ao conectar: ${err.message || "Tente novamente mais tarde."}</div>`;
+                console.error("Erro Pollinations:", err);
+                
+                // Fallback para respostas locais
+                const respostas = {
+                    "ola": "Oi! Como vai? 😊",
+                    "como vai": "Estou bem! Obrigada por perguntar! 😄",
+                    "capital de angola": "A capital de Angola é Luanda! 🇦🇴",
+                    "quanto é 2+2": "2+2 = 4 ✓",
+                    "quem é você": "Sou IA-ZÉNIA do Lubango, criada por @inacio.u.daniel 👋",
+                    "zénia": "Sou eu! IA-ZÉNIA, sua assistente inteligente 🤖",
+                    "help": "Você pode: desenhar ('desenha um gato'), perguntar coisas ou ativar áudio com 🔊",
+                };
+
+                let text = "Desculpe, Pollinations está indisponível no momento. 🔄";
+                
+                for (const [chave, resposta] of Object.entries(respostas)) {
+                    if (query.toLowerCase().includes(chave)) {
+                        text = resposta;
+                        break;
+                    }
+                }
+
+                tempMsg.innerHTML = `<div class="msg ai-msg">${text}</div>`;
+                
+                if (shouldSynthesizeAudio) {
+                    speakText(text);
+                }
             }
         }
         scrollToBottom();
@@ -351,7 +349,6 @@ X2mL9nP4rT6wY3zH0aB1cD2eF4gH7iJ8kL9mN0pQ1rS2tU3vW4xY5zA"
         wrap.className = `msg-wrapper ${isUser ? 'user-wrapper' : 'ai-wrapper'}`;
         wrap.innerHTML = `<div class="msg ${isUser ? 'user-msg' : 'ai-msg'}">${text}</div>`;
         box.appendChild(wrap);
-        scrollToBottom();
         return wrap;
     }
 
@@ -362,70 +359,65 @@ X2mL9nP4rT6wY3zH0aB1cD2eF4gH7iJ8kL9mN0pQ1rS2tU3vW4xY5zA"
         }, 0);
     }
 
-    function showWelcomeMessage() {
-        const box = document.getElementById("chatBox");
-        box.innerHTML = '';
-        const wrap = document.createElement("div");
-        wrap.className = "msg-wrapper ai-wrapper";
-        wrap.innerHTML = `<div class="msg ai-msg">Onawa! 👋 Sou a <strong>IA-ZÉNIA</strong> do Lubango.<br><br>Como posso ajudar? Você pode:<br>• <strong>Desenhar:</strong> "desenha um gato preto"<br>• <strong>Responder:</strong> "qual é a capital de Angola?"<br>• <strong>Com áudio:</strong> Clique em 🔊 antes de enviar</div>`;
-        box.appendChild(wrap);
-    }
-
     function startNewChat() {
-        conversationId = Date.now();
         showWelcomeMessage();
         shouldSynthesizeAudio = false;
         document.getElementById("audioBtn").style.opacity = "0.5";
     }
 
-    // Histórico Local
+    function speakText(text) {
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'pt-AO';
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            utterance.volume = 1;
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utterance);
+        } else {
+            alert("Seu navegador não suporta síntese de voz");
+        }
+    }
+
     function saveToHistory(message) {
         let history = JSON.parse(localStorage.getItem('zenia-history')) || [];
-        const timestamp = new Date().toLocaleTimeString('pt-AO', { hour: '2-digit', minute: '2-digit' });
-        const entry = {
+        const time = new Date().toLocaleTimeString('pt-AO', { hour: '2-digit', minute: '2-digit' });
+        history.unshift({
             id: Date.now(),
-            text: message.substring(0, 40) + (message.length > 40 ? '...' : ''),
+            text: message.substring(0, 35) + (message.length > 35 ? '...' : ''),
             fullText: message,
-            time: timestamp,
-            conversationId: conversationId
-        };
-        history.unshift(entry);
-        if (history.length > 15) history.pop(); // Limitar a 15 itens
+            time: time
+        });
+        if (history.length > 20) history.pop();
         localStorage.setItem('zenia-history', JSON.stringify(history));
         updateHistoryUI();
     }
 
     function loadHistoryFromStorage() {
-        const history = JSON.parse(localStorage.getItem('zenia-history')) || [];
         updateHistoryUI();
     }
 
     function updateHistoryUI() {
         const historyList = document.getElementById('historyList');
         const history = JSON.parse(localStorage.getItem('zenia-history')) || [];
-        
         historyList.innerHTML = '';
+        
         history.forEach(item => {
-            const histItem = document.createElement('div');
-            histItem.className = 'hist-item';
-            histItem.title = item.fullText;
-            histItem.innerHTML = `
-                <span>${item.text}</span>
-                <span style="font-size: 11px; color: #888;">${item.time}</span>
+            const div = document.createElement('div');
+            div.className = 'hist-item';
+            div.title = item.fullText;
+            div.innerHTML = `
+                <div style="display: flex; justify-content: space-between; width: 100%;">
+                    <span style="flex: 1;">${item.text}</span>
+                    <span style="font-size: 11px; color: #888;">${item.time}</span>
+                </div>
             `;
-            histItem.addEventListener('click', () => {
+            div.onclick = () => {
                 document.getElementById('userInput').value = item.fullText;
                 autoGrow(document.getElementById('userInput'));
-            });
-            historyList.appendChild(histItem);
+            };
+            historyList.appendChild(div);
         });
-    }
-
-    function deleteHistoryItem(id) {
-        let history = JSON.parse(localStorage.getItem('zenia-history')) || [];
-        history = history.filter(item => item.id !== id);
-        localStorage.setItem('zenia-history', JSON.stringify(history));
-        updateHistoryUI();
     }
 </script>
 
