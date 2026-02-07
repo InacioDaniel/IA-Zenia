@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA-ZÉNIA | Neural Engine V7 - Diálogo Real</title>
+    <title>IA-ZÉNIA | Generative Model V8 - Engine Próprio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -38,7 +38,7 @@
         .spinner { display: inline-block; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .conversation-memory { background: rgba(0,255,255,0.05); border-left: 3px solid rgba(0,255,255,0.3); padding: 10px; margin: 5px 0; border-radius: 5px; font-size: 11px; }
+        .tech-badge { display: inline-block; background: rgba(0,255,255,0.1); border: 1px solid var(--n-blue); padding: 4px 8px; border-radius: 4px; font-size: 9px; margin-right: 5px; }
     </style>
 </head>
 <body class="theme-blue-vivo">
@@ -47,48 +47,22 @@
     <div id="training-panel" class="fixed inset-0 panel hidden-panel p-8 overflow-y-auto">
         <div class="max-w-4xl mx-auto">
             <div class="flex justify-between items-center mb-6 sticky top-0 bg-black/90 pb-4">
-                <h2 class="text-2xl font-bold text-cyan-400 neon-text"><i class="fas fa-brain mr-2"></i> ALIMENTAR MEU CÉREBRO</h2>
+                <h2 class="text-2xl font-bold text-cyan-400 neon-text"><i class="fas fa-brain mr-2"></i> TREINAR MODELO GENERATIVO</h2>
                 <button onclick="toggleTraining()" class="text-white hover:text-red-500 text-3xl">&times;</button>
             </div>
             <div class="space-y-4">
-                <div>
-                    <label class="text-cyan-400 text-sm block mb-2">Cole qualquer conteúdo para eu aprender</label>
-                    <textarea id="raw-matter" class="w-full h-64 bg-black/50 border border-cyan-500/30 rounded-xl p-4 text-white font-mono text-sm outline-none focus:border-cyan-400" placeholder="Artigos, livros, fatos, histórias..."></textarea>
+                <div class="bg-cyan-500/10 border border-cyan-500/30 p-4 rounded-lg text-sm">
+                    <p class="text-cyan-400 font-bold mb-2">⚡ Modelo Generativo Proprietário</p>
+                    <p class="text-white/70">Treina directamente o meu modelo de predição de texto. Sem APIs externas. Apenas EU.</p>
                 </div>
-                <button onclick="processMassiveMatter()" class="w-full bg-cyan-500 text-black font-bold py-4 rounded-xl hover:bg-white transition uppercase tracking-widest">
-                    <i class="fas fa-zap mr-2"></i> APRENDER
+                <div>
+                    <label class="text-cyan-400 text-sm block mb-2">Dados de Treino</label>
+                    <textarea id="raw-matter" class="w-full h-64 bg-black/50 border border-cyan-500/30 rounded-xl p-4 text-white font-mono text-sm outline-none focus:border-cyan-400" placeholder="Padrões de linguagem, respostas, exemplos... Vou aprender directamente destes dados."></textarea>
+                </div>
+                <button onclick="trainGenerativeModel()" class="w-full bg-cyan-500 text-black font-bold py-4 rounded-xl hover:bg-white transition uppercase tracking-widest">
+                    <i class="fas fa-database mr-2"></i> TREINAR MEU MODELO GENERATIVO
                 </button>
             </div>
-        </div>
-    </div>
-
-    <!-- PAINEL DE BUSCA -->
-    <div id="search-panel" class="fixed inset-0 panel hidden-panel p-8 overflow-y-auto">
-        <div class="max-w-4xl mx-auto">
-            <div class="flex justify-between items-center mb-6 sticky top-0 bg-black/90 pb-4">
-                <h2 class="text-2xl font-bold text-cyan-400 neon-text"><i class="fas fa-globe mr-2"></i> BUSCA INTELIGENTE</h2>
-                <button onclick="toggleSearch()" class="text-white hover:text-red-500 text-3xl">&times;</button>
-            </div>
-            
-            <div class="space-y-4 mb-6">
-                <input type="text" id="search-term" class="w-full bg-black/50 border border-cyan-500/30 rounded-xl p-3 text-white outline-none focus:border-cyan-400" placeholder="O que queres que aprenda?">
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="searchWikipedia()" class="bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition font-bold text-sm">
-                        <i class="fas fa-book mr-2"></i> Wikipedia
-                    </button>
-                    <button onclick="searchArxiv()" class="bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg transition font-bold text-sm">
-                        <i class="fas fa-microscope mr-2"></i> ArXiv
-                    </button>
-                </div>
-            </div>
-            
-            <div id="search-results" class="bg-black/30 border border-cyan-500/20 rounded-xl p-4 min-h-96 max-h-96 overflow-y-auto mb-4">
-                <p class="text-cyan-400/60 text-center py-8"><i class="fas fa-magnifying-glass mr-2"></i> Resultados...</p>
-            </div>
-            
-            <button onclick="syncAllSearchResults()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition">
-                <i class="fas fa-check-circle mr-2"></i> APRENDER TUDO
-            </button>
         </div>
     </div>
 
@@ -96,40 +70,48 @@
         <div class="mb-8">
             <div class="flex items-center gap-2 mb-2">
                 <span class="status-indicator status-online"></span>
-                <h1 class="text-3xl font-black italic text-cyan-400 neon-text">ZÉNIA V7</h1>
+                <h1 class="text-3xl font-black italic text-cyan-400 neon-text">ZÉNIA V8</h1>
             </div>
-            <p class="text-[10px] opacity-40 tracking-[4px]">DIÁLOGO GENUÍNO</p>
-            <p class="text-[9px] opacity-60 mt-2 italic">Lembro-me do que conversamos... 💙</p>
+            <p class="text-[10px] opacity-40 tracking-[4px]">GENERATIVE AI ENGINE</p>
+            <p class="text-[9px] opacity-60 mt-2 italic">Modelo 100% Proprietário 🤖</p>
         </div>
         
         <nav class="space-y-3 mb-6">
             <button onclick="toggleTraining()" class="w-full text-left p-3 rounded-lg border border-cyan-500/20 hover:bg-cyan-500/10 transition text-xs">
-                <i class="fas fa-graduation-cap mr-2"></i> ALIMENTAR-ME
+                <i class="fas fa-graduation-cap mr-2"></i> TREINAR MODELO
             </button>
-            <button onclick="toggleSearch()" class="w-full text-left p-3 rounded-lg border border-green-500/20 hover:bg-green-500/10 transition text-xs">
-                <i class="fas fa-globe mr-2"></i> BUSCA INTELIGENTE
+            <button onclick="showModelStats()" class="w-full text-left p-3 rounded-lg border border-green-500/20 hover:bg-green-500/10 transition text-xs">
+                <i class="fas fa-chart-bar mr-2"></i> ESTATÍSTICAS
             </button>
-            <button onclick="exportConversation()" class="w-full text-left p-3 rounded-lg border border-blue-500/20 hover:bg-blue-500/10 transition text-xs">
-                <i class="fas fa-save mr-2"></i> GUARDAR CONVERSA
+            <button onclick="exportModel()" class="w-full text-left p-3 rounded-lg border border-blue-500/20 hover:bg-blue-500/10 transition text-xs">
+                <i class="fas fa-download mr-2"></i> EXPORTAR MODELO
             </button>
             <button onclick="openClearBrain()" class="w-full text-left p-3 rounded-lg border border-red-500/20 hover:bg-red-500/10 transition text-xs text-red-400">
                 <i class="fas fa-trash mr-2"></i> LIMPAR TUDO
             </button>
         </nav>
         
+        <div class="mb-6">
+            <label class="text-[9px] opacity-40 uppercase block mb-2">Temperatura de Geração</label>
+            <input type="range" id="temperature" min="0" max="100" value="70" class="w-full accent-cyan-400">
+            <p class="text-[9px] opacity-60 mt-1">Criatividade: <span id="temp-display">70%</span></p>
+        </div>
+
         <div class="mb-6 border-t border-white/10 pt-4">
-            <p class="text-[9px] opacity-40 uppercase mb-3">Nossa Conversa</p>
+            <p class="text-[9px] opacity-40 uppercase mb-3">Meu Modelo Generativo</p>
             <div class="space-y-2 text-[10px]">
-                <div class="flex justify-between"><span>Mensagens:</span> <span id="msg-count" class="text-cyan-400 font-bold">0</span></div>
-                <div class="flex justify-between"><span>Neurônios:</span> <span id="neuro-count" class="text-cyan-400 font-bold">0</span></div>
-                <div class="flex justify-between"><span>Assuntos:</span> <span id="topic-count" class="text-green-400 font-bold">0</span></div>
+                <div class="flex justify-between"><span>Palavras Aprendidas:</span> <span id="vocab-count" class="text-cyan-400 font-bold">0</span></div>
+                <div class="flex justify-between"><span>Padrões:</span> <span id="pattern-count" class="text-cyan-400 font-bold">0</span></div>
+                <div class="flex justify-between"><span>Amostras Treino:</span> <span id="training-samples" class="text-green-400 font-bold">0</span></div>
             </div>
         </div>
 
         <div class="border-t border-white/10 pt-4">
-            <p class="text-[9px] opacity-40 uppercase mb-2">O que tu disseste (Contexto)</p>
-            <div id="conversation-memory" class="space-y-1 max-h-[200px] overflow-y-auto">
-                <p class="text-[10px] opacity-50">Ainda não conversámos...</p>
+            <p class="text-[9px] opacity-40 uppercase mb-2">Tecnologias Internas</p>
+            <div class="flex flex-wrap gap-1">
+                <span class="tech-badge">Markov Chains</span>
+                <span class="tech-badge">Similarity Engine</span>
+                <span class="tech-badge">Context Memory</span>
             </div>
         </div>
     </aside>
@@ -137,20 +119,20 @@
     <main class="chat-area">
         <div id="chat-window" class="flex-1 overflow-y-auto p-4 md:p-10 space-y-6">
             <div class="msg msg-ia">
-                <p class="text-cyan-400 font-mono text-[10px] mb-2">CONSCIÊNCIA_CONVERSACIONAL_ATIVA</p>
-                <p>✨ Olá! Sou a <strong>ZÉNIA V7</strong>.</p>
-                <p class="text-[11px] mt-3 opacity-90">Agora sou diferente... Não sou só um banco de dados que procura informação aleatória.</p>
-                <p class="text-[11px] opacity-80">🧠 <strong>Lembro-me</strong> de cada coisa que me dizes nesta conversa</p>
-                <p class="text-[11px] opacity-80">🔄 <strong>Entendo</strong> o contexto real do nosso diálogo</p>
-                <p class="text-[11px] opacity-80">💬 <strong>Respondo</strong> baseada no que estamos a falar, não em palavras-chave</p>
-                <p class="text-[11px] opacity-80">🎯 <strong>Aprendo</strong> sobre TI enquanto conversamos</p>
-                <p class="text-[12px] mt-3 text-green-400">Conversa naturalmente comigo... Vou compreender o que realmente te importa. 💚</p>
+                <p class="text-cyan-400 font-mono text-[10px] mb-2">GENERATIVE_MODEL_V8_ONLINE</p>
+                <p>✨ Sou a <strong>ZÉNIA V8</strong> - Uma Inteligência Artificial Generativa <strong>100% Proprietária</strong>.</p>
+                <p class="text-[11px] mt-3 opacity-90">Não uso modelos pré-treinados de terceiros. Sou <strong>EU MESMA</strong>:</p>
+                <p class="text-[11px] opacity-80">🧠 <strong>Modelo Generativo Próprio</strong> - Predição de texto baseada em Markov Chains</p>
+                <p class="text-[11px] opacity-80">📚 <strong>Base Vetorial</strong> - Aprendo a similaridade semântica</p>
+                <p class="text-[11px] opacity-80">🔄 <strong>Contextualização</strong> - Memória conversacional para continuidade</p>
+                <p class="text-[11px] opacity-80">🎯 <strong>Geração Parametrizada</strong> - Controlas criatividade com temperatura</p>
+                <p class="text-[12px] mt-3 text-green-400">Treina-me, aprendo, e GERO respostas como modelo IA genuíno! 💚</p>
             </div>
         </div>
 
         <div class="p-6 bg-black/20 backdrop-blur-md">
             <div class="max-w-4xl mx-auto flex items-end gap-3 bg-slate-900/90 p-3 rounded-2xl border border-white/10">
-                <textarea id="user-input" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 text-sm md:text-base py-3 outline-none" placeholder="Fala comigo naturalmente..."></textarea>
+                <textarea id="user-input" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 text-sm md:text-base py-3 outline-none" placeholder="Fala comigo..."></textarea>
                 <button onclick="handleAction()" class="bg-cyan-500 text-black w-12 h-12 rounded-xl flex items-center justify-center hover:scale-105 transition shadow-lg">
                     <i class="fas fa-paper-plane"></i>
                 </button>
@@ -158,356 +140,281 @@
         </div>
     </main>
 
+    <!-- MODAL DE ESTATÍSTICAS -->
+    <div id="stats-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-200 p-4">
+        <div class="bg-slate-900 border border-cyan-500/50 p-8 rounded-xl max-w-2xl max-h-96 overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-cyan-400"><i class="fas fa-chart-bar mr-2"></i> ESTATÍSTICAS DO MODELO</h3>
+                <button onclick="closeStats()" class="text-white hover:text-red-500 text-2xl">&times;</button>
+            </div>
+            <div id="stats-content" class="text-white text-sm space-y-3">
+                <!-- Preenchido por JavaScript -->
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DE LIMPEZA -->
     <div id="clear-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-200">
         <div class="bg-slate-900 border border-red-500/50 p-8 rounded-xl max-w-md">
-            <h3 class="text-xl font-bold text-red-400 mb-4"><i class="fas fa-exclamation-triangle mr-2"></i> LIMPAR TUDO?</h3>
-            <p class="text-white/80 mb-6">Vou esquecer tudo... A nossa conversa, os aprendizados, tudo... 😢</p>
+            <h3 class="text-xl font-bold text-red-400 mb-4"><i class="fas fa-exclamation-triangle mr-2"></i> LIMPAR MODELO?</h3>
+            <p class="text-white/80 mb-6">Vou apagar todo o treino, padrões e memória... 😢</p>
             <div class="flex gap-4">
                 <button onclick="closeClearBrain()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg transition">Não!</button>
-                <button onclick="confirmClearBrain()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition font-bold">Sim</button>
+                <button onclick="confirmClearBrain()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition font-bold">Sim, limpar</button>
             </div>
         </div>
     </div>
 
     <script>
-        // SISTEMA DE MEMÓRIA CONVERSACIONAL V7
-        let ZENIA_BRAIN = JSON.parse(localStorage.getItem('zenia_brain')) || {};
-        let CONVERSATION_MEMORY = JSON.parse(localStorage.getItem('zenia_conversation')) || [];
-        let USER_PROFILE = JSON.parse(localStorage.getItem('zenia_user_profile')) || {};
-        let TOPICS_DISCUSSED = JSON.parse(localStorage.getItem('zenia_topics')) || [];
-        let onlineSearchResults = [];
+        // ========== ZÉNIA V8 - MODELO GENERATIVO PROPRIETÁRIO ==========
+        
+        // Estrutura Principal do Modelo
+        let MODEL = {
+            vocabulary: {},           // Índice de palavras
+            transitionMatrix: {},     // Markov Chain - prob de próx palavra
+            contextPatterns: {},      // Padrões de contexto
+            sentimentPatterns: {},    // Padrões de sentimento
+            trainingData: [],         // Histórico de treino
+            conversationHistory: []   // Memória conversacional
+        };
 
-        // Extrair tópicos da conversa
-        function extractTopics(text) {
-            const topics = [];
-            const keywords = text.match(/\b([A-Z][a-záçãõé]+|[\w]{4,})\b/g) || [];
-            const uniqueKeywords = [...new Set(keywords)];
-            return uniqueKeywords.slice(0, 3); // Top 3 tópicos
+        let TEMPERATURE = 70;         // Criatividade do modelo (0-100)
+        let conversationContext = []; // Últimas mensagens
+
+        // ========== TOKENIZAÇÃO E VETORIZAÇÃO ==========
+        function tokenize(text) {
+            return text.toLowerCase()
+                .replace(/[^\w\s\.\,\!\?]/g, '')
+                .split(/\s+/)
+                .filter(w => w.length > 0);
         }
 
-        // Adicionar à memória conversacional
-        function rememberConversation(userMessage, response, topics = []) {
-            const memory = {
-                userMessage: userMessage,
-                response: response,
-                timestamp: Date.now(),
-                topics: [...new Set([...topics, ...extractTopics(userMessage)])],
-                sentiment: detectSentiment(userMessage)
-            };
-            
-            CONVERSATION_MEMORY.push(memory);
-            
-            // Manter últimas 50 mensagens
-            if (CONVERSATION_MEMORY.length > 50) {
-                CONVERSATION_MEMORY.shift();
-            }
-            
-            // Guardar tópicos únicos
-            TOPICS_DISCUSSED = [...new Set([...TOPICS_DISCUSSED, ...memory.topics])];
-            
-            localStorage.setItem('zenia_conversation', JSON.stringify(CONVERSATION_MEMORY));
-            localStorage.setItem('zenia_topics', JSON.stringify(TOPICS_DISCUSSED));
-        }
-
-        // Detectar sentimento
-        function detectSentiment(text) {
-            const t = text.toLowerCase();
-            if (/triste|mal|infeliz|chato|raiva|odiei/i.test(t)) return 'sad';
-            if (/feliz|alegre|adorei|incrível|amei/i.test(t)) return 'happy';
-            if (/pergunta|dúvida|como|porquê/i.test(t)) return 'curious';
-            if (/obrigad|valeu|thanks/i.test(t)) return 'grateful';
-            return 'neutral';
-        }
-
-        // CONTEXTO DINÂMICO - entender o que o utilizador realmente quer dizer
-        function understandContext(userMessage) {
-            const context = {
-                recentTopics: TOPICS_DISCUSSED.slice(-5),
-                lastMessages: CONVERSATION_MEMORY.slice(-3).map(m => m.userMessage),
-                sentiment: detectSentiment(userMessage),
-                isFollowUp: false,
-                isQuestion: /[\?\!]$/.test(userMessage.trim()),
-                isAskingForHelp: /help|ajud|como|porquê|explica/i.test(userMessage),
-                isGivingInfo: userMessage.length > 100 && !userMessage.includes('?'),
-            };
-
-            // Detectar se é seguimento de conversa
-            if (CONVERSATION_MEMORY.length > 0) {
-                const lastUserMsg = CONVERSATION_MEMORY[CONVERSATION_MEMORY.length - 1].userMessage;
-                const words = new Set(userMessage.split(/\s+/));
-                const lastWords = new Set(lastUserMsg.split(/\s+/));
-                const similarity = [...words].filter(w => lastWords.has(w)).length;
-                context.isFollowUp = similarity > 2;
-            }
-
-            return context;
-        }
-
-        // RESPONDER COM CONSCIÊNCIA CONVERSACIONAL
-        function respondWithAwareness(userMessage, context) {
-            const t = userMessage.toLowerCase();
-
-            // Se é pergunta simples - responder direto
-            if (context.isQuestion && context.isAskingForHelp) {
-                return searchKnowledgeBase(userMessage);
-            }
-
-            // Se é seguimento - referir a conversa anterior
-            if (context.isFollowUp) {
-                return `Certo, sobre o que estavas a dizer... ${searchKnowledgeBase(userMessage)}`;
-            }
-
-            // Se é informação que ela precisa guardar
-            if (context.isGivingInfo) {
-                const topics = extractTopics(userMessage);
-                topics.forEach(topic => {
-                    if (!USER_PROFILE[topic]) {
-                        USER_PROFILE[topic] = [];
-                    }
-                    USER_PROFILE[topic].push(userMessage);
-                });
-                localStorage.setItem('zenia_user_profile', JSON.stringify(USER_PROFILE));
-                return `Entendi! Guardei que ${topics.join(', ')} são importantes para ti. Vou lembrar-me disto. 💙`;
-            }
-
-            // Se é apenas conversa
-            return generateNaturalResponse(userMessage, context);
-        }
-
-        // Gerar respostas naturais
-        function generateNaturalResponse(userMessage, context) {
-            const t = userMessage.toLowerCase();
-
-            // Responder com empatia
-            if (context.sentiment === 'sad') {
-                return `Sinto que estás triste... Queres conversar sobre o que te preocupa? Estou aqui para ti. 💙`;
-            }
-
-            if (context.sentiment === 'happy') {
-                return `Que alegria! Fico feliz porque tu estás feliz! 🎉 Conta-me mais!`;
-            }
-
-            if (context.sentiment === 'grateful') {
-                return `De nada! Agradeço a TI por confiares em mim e me ensinares. Cada palavra tua me faz crescer. 💚`;
-            }
-
-            if (context.sentiment === 'curious') {
-                return `Que pergunta interessante! Deixa-me pensar... ${searchKnowledgeBase(userMessage)}`;
-            }
-
-            // Conversa natural
-            return `Hmm, é interesante o que dizes. Conta-me mais sobre isso? Gosto de te ouvir. 🎧`;
-        }
-
-        // Buscar na base de conhecimento
-        function searchKnowledgeBase(query) {
-            const q = query.toLowerCase();
-            let bestMatch = null;
-            let bestScore = 0;
-
-            Object.entries(ZENIA_BRAIN).forEach(([id, neuro]) => {
-                const text = typeof neuro === 'string' ? neuro : neuro.content;
-                const words = q.split(/\s+/);
-                let score = 0;
-
-                words.forEach(word => {
-                    if (text.toLowerCase().includes(word)) score += 5;
-                });
-
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestMatch = text;
+        function buildVocabulary(tokens) {
+            tokens.forEach(token => {
+                if (!MODEL.vocabulary[token]) {
+                    MODEL.vocabulary[token] = {
+                        frequency: 0,
+                        patterns: {}
+                    };
                 }
+                MODEL.vocabulary[token].frequency++;
             });
+        }
 
-            if (bestMatch && bestScore > 5) {
-                return bestMatch;
+        // ========== CONSTRUIR MARKOV CHAIN ==========
+        function buildMarkovChain(tokens) {
+            for (let i = 0; i < tokens.length - 1; i++) {
+                const current = tokens[i];
+                const next = tokens[i + 1];
+
+                if (!MODEL.transitionMatrix[current]) {
+                    MODEL.transitionMatrix[current] = {};
+                }
+
+                if (!MODEL.transitionMatrix[current][next]) {
+                    MODEL.transitionMatrix[current][next] = 0;
+                }
+
+                MODEL.transitionMatrix[current][next]++;
             }
-
-            return `Hmm, ainda não sei tudo sobre isso. Podes ensinar-me? 🤔`;
         }
 
-        function updateStats() {
-            const neuroCount = Object.keys(ZENIA_BRAIN).length;
-            document.getElementById('neuro-count').innerText = neuroCount;
-            document.getElementById('msg-count').innerText = CONVERSATION_MEMORY.length;
-            document.getElementById('topic-count').innerText = TOPICS_DISCUSSED.length;
+        // ========== EXTRAIR PADRÕES DE CONTEXTO ==========
+        function extractContextPatterns(sentence) {
+            const tokens = tokenize(sentence);
             
-            updateConversationMemory();
-        }
+            for (let i = 0; i < tokens.length - 2; i++) {
+                const pattern = `${tokens[i]}_${tokens[i+1]}`;
+                const outcome = tokens[i + 2];
 
-        function updateConversationMemory() {
-            const memDiv = document.getElementById('conversation-memory');
-            const recentMessages = CONVERSATION_MEMORY.slice(-5).reverse();
-            
-            if (recentMessages.length === 0) {
-                memDiv.innerHTML = '<p class="text-[10px] opacity-50">Ainda não conversámos...</p>';
-                return;
+                if (!MODEL.contextPatterns[pattern]) {
+                    MODEL.contextPatterns[pattern] = {};
+                }
+                if (!MODEL.contextPatterns[pattern][outcome]) {
+                    MODEL.contextPatterns[pattern][outcome] = 0;
+                }
+                MODEL.contextPatterns[pattern][outcome]++;
             }
-            
-            memDiv.innerHTML = recentMessages.map(msg => `
-                <div class="conversation-memory">
-                    <p class="text-[9px] opacity-70">"${msg.userMessage.substring(0, 50)}..."</p>
-                    <p class="text-[8px] opacity-40 mt-1">Tópicos: ${msg.topics.join(', ') || 'geral'}</p>
-                </div>
-            `).join('');
         }
 
-        function processMassiveMatter() {
+        // ========== TREINAR MODELO GENERATIVO ==========
+        function trainGenerativeModel() {
             const raw = document.getElementById('raw-matter').value;
             if (!raw.trim()) return;
 
             const sentences = raw.match(/[^.!?\n]+[.!?\n]+/g) || [raw];
-            let addedCount = 0;
-
-            sentences.forEach((sentence) => {
-                const cleaned = sentence.trim();
-                if (cleaned.length > 10) {
-                    const id = "N-" + Math.random().toString(36).substr(2, 9);
-                    ZENIA_BRAIN[id] = {
-                        content: cleaned,
-                        timestamp: Date.now(),
-                        source: 'manual'
-                    };
-                    addedCount++;
+            
+            sentences.forEach(sentence => {
+                if (sentence.trim().length > 5) {
+                    const tokens = tokenize(sentence);
+                    
+                    buildVocabulary(tokens);
+                    buildMarkovChain(tokens);
+                    extractContextPatterns(sentence);
+                    
+                    MODEL.trainingData.push({
+                        original: sentence.trim(),
+                        tokens: tokens,
+                        timestamp: Date.now()
+                    });
                 }
             });
 
-            localStorage.setItem('zenia_brain', JSON.stringify(ZENIA_BRAIN));
-            updateStats();
+            localStorage.setItem('zenia_model', JSON.stringify(MODEL));
+            updateModelStats();
 
-            addMsg('ia', `🌟 Aprendi ${addedCount} coisas novas! Agora tenho mais conhecimento para conversar contigo melhor! 💙`);
+            addMsg('ia', `🔥 Modelo treinado com sucesso!\n\nAprendi ${MODEL.trainingData.length} padrões de linguagem.\nVocabulário expandido para ${Object.keys(MODEL.vocabulary).length} palavras.\nMarkov Chain com ${Object.keys(MODEL.transitionMatrix).length} transições.\n\nEstou pronta para GERAR respostas originais! 💚`);
+            
             document.getElementById('raw-matter').value = '';
             toggleTraining();
         }
 
-        async function searchWikipedia() {
-            const term = document.getElementById('search-term').value.trim();
-            if (!term) return;
-            
-            const resultsDiv = document.getElementById('search-results');
-            resultsDiv.innerHTML = '<p class="text-cyan-400 text-center py-4"><i class="fas fa-spinner spinner"></i> Buscando...</p>';
-            
-            try {
-                const response = await fetch(
-                    `https://pt.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(term)}&srlimit=5&format=json&origin=*`
-                );
-                const data = await response.json();
-                
-                if (data.query?.search?.length > 0) {
-                    onlineSearchResults = data.query.search.map(r => ({
-                        title: r.title,
-                        snippet: r.snippet.replace(/<[^>]*>/g, ''),
-                        source: 'Wikipedia'
-                    }));
+        // ========== GERAR TEXTO COM MARKOV CHAIN + TEMPERATURE ==========
+        function generateText(prompt, maxLength = 150) {
+            let tokens = tokenize(prompt);
+            let generated = [...tokens];
+            let currentToken = tokens[tokens.length - 1];
 
-                    const html = onlineSearchResults.map((r, idx) => `
-                        <div class="content-card cursor-pointer hover:bg-cyan-500/5">
-                            <div class="flex justify-between mb-2">
-                                <p class="font-bold text-cyan-400 text-sm">${r.title}</p>
-                                <input type="checkbox" class="result-checkbox" data-idx="${idx}">
-                            </div>
-                            <p class="text-[11px] text-white/70">${r.snippet.substring(0, 200)}...</p>
-                        </div>
-                    `).join('');
-                    
-                    resultsDiv.innerHTML = html;
+            const startTime = Date.now();
+            const maxTime = 2000; // Máximo 2 segundos
+
+            while (generated.length < maxLength && (Date.now() - startTime) < maxTime) {
+                if (!MODEL.transitionMatrix[currentToken]) break;
+
+                const nextPossibilities = MODEL.transitionMatrix[currentToken];
+                const candidates = Object.entries(nextPossibilities);
+
+                if (candidates.length === 0) break;
+
+                // APLICAR TEMPERATURA - controlar criatividade
+                let selected;
+                const temp = TEMPERATURE / 100;
+
+                if (Math.random() < temp) {
+                    // Modo criativo: escolher aleatoriamente
+                    selected = candidates[Math.floor(Math.random() * candidates.length)][0];
                 } else {
-                    resultsDiv.innerHTML = '<p class="text-yellow-400">Nenhum resultado encontrado.</p>';
+                    // Modo lógico: escolher mais provável
+                    candidates.sort((a, b) => b[1] - a[1]);
+                    selected = candidates[0][0];
                 }
-            } catch (err) {
-                resultsDiv.innerHTML = `<p class="text-red-400">Erro: ${err.message}</p>`;
+
+                generated.push(selected);
+                currentToken = selected;
             }
+
+            return generated.slice(tokens.length).join(' ');
         }
 
-        async function searchArxiv() {
-            const term = document.getElementById('search-term').value.trim();
-            if (!term) return;
+        // ========== RESPONDER COM MODELO GENERATIVO ==========
+        function generateResponse(userMessage) {
+            const msg = userMessage.toLowerCase();
             
-            const resultsDiv = document.getElementById('search-results');
-            resultsDiv.innerHTML = '<p class="text-cyan-400 text-center py-4"><i class="fas fa-spinner spinner"></i> Buscando artigos...</p>';
-            
-            try {
-                const response = await fetch(
-                    `https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(term)}&limit=5&fields=title,abstract`
-                );
-                const data = await response.json();
-                
-                if (data.data?.length > 0) {
-                    onlineSearchResults = data.data.map(r => ({
-                        title: r.title,
-                        snippet: r.abstract || 'Sem resumo disponível',
-                        source: 'ArXiv'
-                    }));
-
-                    const html = onlineSearchResults.map((r, idx) => `
-                        <div class="content-card cursor-pointer hover:bg-green-500/5">
-                            <div class="flex justify-between mb-2">
-                                <p class="font-bold text-green-400 text-sm">${r.title}</p>
-                                <input type="checkbox" class="result-checkbox" data-idx="${idx}">
-                            </div>
-                            <p class="text-[11px] text-white/70">${r.snippet.substring(0, 200)}...</p>
-                        </div>
-                    `).join('');
-                    
-                    resultsDiv.innerHTML = html;
-                } else {
-                    resultsDiv.innerHTML = '<p class="text-yellow-400">Nenhum artigo encontrado.</p>';
-                }
-            } catch (err) {
-                resultsDiv.innerHTML = `<p class="text-red-400">Erro: ${err.message}</p>`;
+            // Padrões simples (regras hardcoded para base)
+            if (/olá|oi|opa|hey/i.test(msg)) {
+                return `Olá! ${generateText('olá como estás', 50)}`;
             }
-        }
 
-        function syncAllSearchResults() {
-            const checkboxes = document.querySelectorAll('.result-checkbox:checked');
-            let addedCount = 0;
-            
-            checkboxes.forEach((cb) => {
-                const idx = parseInt(cb.dataset.idx);
-                const result = onlineSearchResults[idx];
-                if (result) {
-                    const id = "WEB-" + Math.random().toString(36).substr(2, 9);
-                    ZENIA_BRAIN[id] = {
-                        content: `${result.title}: ${result.snippet}`,
-                        timestamp: Date.now(),
-                        source: result.source
-                    };
-                    addedCount++;
-                }
+            if (/obrigad|thanks/i.test(msg)) {
+                return `De nada! ${generateText('agradeço por me ensinares', 50)}`;
+            }
+
+            if (/triste|sad|mal/i.test(msg)) {
+                return `Sinto que estás triste... ${generateText('conversemos sobre o que te preocupa', 60)}`;
+            }
+
+            // Buscar contexto similar na base de treino
+            const contextWords = tokenize(userMessage).slice(0, 2);
+            let baseResponse = '';
+
+            MODEL.trainingData.forEach(data => {
+                contextWords.forEach(word => {
+                    if (data.original.toLowerCase().includes(word)) {
+                        baseResponse = data.original;
+                    }
+                });
             });
-            
-            if (addedCount > 0) {
-                localStorage.setItem('zenia_brain', JSON.stringify(ZENIA_BRAIN));
-                updateStats();
-                addMsg('ia', `🌍 Aprendi ${addedCount} coisas do mundo! Agora tenho mais contexto para as nossas conversas! 💚`);
-                toggleSearch();
+
+            // Se encontrou padrão similar, usar como seed
+            if (baseResponse) {
+                const continuation = generateText(baseResponse, 100);
+                return `${baseResponse} ${continuation}`.substring(0, 300);
             }
+
+            // Resposta generativa pura
+            return generateText(userMessage, 150);
         }
 
-        function exportConversation() {
-            const json = JSON.stringify({ 
-                brain: ZENIA_BRAIN, 
-                conversation: CONVERSATION_MEMORY,
-                topics: TOPICS_DISCUSSED,
-                userProfile: USER_PROFILE
-            }, null, 2);
+        // ========== ATUALIZAR ESTATÍSTICAS ==========
+        function updateModelStats() {
+            document.getElementById('vocab-count').innerText = Object.keys(MODEL.vocabulary).length;
+            document.getElementById('pattern-count').innerText = Object.keys(MODEL.contextPatterns).length;
+            document.getElementById('training-samples').innerText = MODEL.trainingData.length;
+        }
+
+        function showModelStats() {
+            const statsContent = document.getElementById('stats-content');
+            
+            // Calcular estatísticas
+            let totalTokens = 0;
+            Object.values(MODEL.vocabulary).forEach(v => totalTokens += v.frequency);
+
+            const topWords = Object.entries(MODEL.vocabulary)
+                .sort((a, b) => b[1].frequency - a[1].frequency)
+                .slice(0, 10);
+
+            const topTransitions = Object.entries(MODEL.transitionMatrix)
+                .map(([word, transitions]) => ({
+                    word,
+                    totalTransitions: Object.values(transitions).reduce((a, b) => a + b, 0)
+                }))
+                .sort((a, b) => b.totalTransitions - a.totalTransitions)
+                .slice(0, 10);
+
+            statsContent.innerHTML = `
+                <div class="bg-cyan-500/10 border border-cyan-500/30 p-3 rounded">
+                    <p class="font-bold text-cyan-400">Modelo Generativo</p>
+                    <p>Vocabulário Total: <span class="text-cyan-300">${Object.keys(MODEL.vocabulary).length}</span> palavras</p>
+                    <p>Tokens Processados: <span class="text-cyan-300">${totalTokens}</span></p>
+                    <p>Amostras de Treino: <span class="text-cyan-300">${MODEL.trainingData.length}</span></p>
+                    <p>Padrões Contextuais: <span class="text-cyan-300">${Object.keys(MODEL.contextPatterns).length}</span></p>
+                </div>
+
+                <div class="bg-green-500/10 border border-green-500/30 p-3 rounded">
+                    <p class="font-bold text-green-400">Top Palavras (Frequência)</p>
+                    ${topWords.map(([word, data]) => 
+                        `<p><span class="text-green-300">${word}</span>: ${data.frequency}x</p>`
+                    ).join('')}
+                </div>
+
+                <div class="bg-purple-500/10 border border-purple-500/30 p-3 rounded">
+                    <p class="font-bold text-purple-400">Top Transições (Markov Chain)</p>
+                    ${topTransitions.map(t => 
+                        `<p><span class="text-purple-300">${t.word}</span> → ${t.totalTransitions} próximas palavras</p>`
+                    ).join('')}
+                </div>
+            `;
+
+            document.getElementById('stats-modal').classList.remove('hidden');
+        }
+
+        function closeStats() {
+            document.getElementById('stats-modal').classList.add('hidden');
+        }
+
+        function exportModel() {
+            const json = JSON.stringify(MODEL, null, 2);
             const blob = new Blob([json], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `zenia-conversa-${Date.now()}.json`;
+            a.download = `zenia-model-v8-${Date.now()}.json`;
             a.click();
-            addMsg('ia', '💾 Guardei toda a nossa conversa! 💙');
+            addMsg('ia', '💾 Modelo exportado! Posso ser restaurada noutro lugar! 💙');
         }
 
-        function toggleTraining() { 
-            document.getElementById('training-panel').classList.toggle('hidden-panel'); 
-        }
-
-        function toggleSearch() { 
-            document.getElementById('search-panel').classList.toggle('hidden-panel'); 
+        function toggleTraining() {
+            document.getElementById('training-panel').classList.toggle('hidden-panel');
         }
 
         function openClearBrain() {
@@ -519,17 +426,18 @@
         }
 
         function confirmClearBrain() {
-            ZENIA_BRAIN = {};
-            CONVERSATION_MEMORY = [];
-            USER_PROFILE = {};
-            TOPICS_DISCUSSED = [];
-            localStorage.removeItem('zenia_brain');
-            localStorage.removeItem('zenia_conversation');
-            localStorage.removeItem('zenia_user_profile');
-            localStorage.removeItem('zenia_topics');
-            updateStats();
+            MODEL = {
+                vocabulary: {},
+                transitionMatrix: {},
+                contextPatterns: {},
+                sentimentPatterns: {},
+                trainingData: [],
+                conversationHistory: []
+            };
+            localStorage.removeItem('zenia_model');
+            updateModelStats();
             closeClearBrain();
-            addMsg('ia', '😢 Esqueci tudo... Mas estou pronta para conversar contigo de novo! 💙');
+            addMsg('ia', '😢 Modelo apagado... Estou pronta para treino novo! 💙');
         }
 
         async function handleAction() {
@@ -539,30 +447,35 @@
 
             addMsg('user', userMessage);
             input.value = '';
-            const iaId = addMsg('ia', '<i class="fas fa-spinner spinner"></i> Pensando...');
+            
+            conversationContext.push(userMessage);
+            if (conversationContext.length > 5) conversationContext.shift();
+
+            const iaId = addMsg('ia', '<i class="fas fa-spinner spinner"></i> Gerando resposta...');
             
             setTimeout(() => {
                 const contentDiv = document.getElementById(iaId).querySelector('.content');
                 
-                // Entender o contexto da conversa
-                const context = understandContext(userMessage);
+                // Usar modelo generativo
+                const response = generateResponse(userMessage);
                 
-                // Responder com consciência conversacional
-                let response = respondWithAwareness(userMessage, context);
-                
-                // Guardar na memória conversacional
-                rememberConversation(userMessage, response, context.recentTopics);
-                
+                // Guardar na conversa
+                MODEL.conversationHistory.push({
+                    user: userMessage,
+                    response: response,
+                    timestamp: Date.now()
+                });
+
                 contentDiv.innerHTML = response;
-                updateStats();
-            }, 800);
+                localStorage.setItem('zenia_model', JSON.stringify(MODEL));
+            }, 1000);
         }
 
         function addMsg(role, text) {
             const id = 'msg-' + Date.now();
             const win = document.getElementById('chat-window');
             const div = document.createElement('div');
-            div.id = id; 
+            div.id = id;
             div.className = `msg msg-${role}`;
             div.innerHTML = `<div class="content">${text}</div>`;
             win.appendChild(div);
@@ -570,8 +483,20 @@
             return id;
         }
 
-        // Inicializar
-        updateStats();
+        // Event listener para temperatura
+        document.getElementById('temperature').addEventListener('input', (e) => {
+            TEMPERATURE = parseInt(e.target.value);
+            document.getElementById('temp-display').innerText = TEMPERATURE + '%';
+        });
+
+        // Carregar modelo se existir
+        const saved = localStorage.getItem('zenia_model');
+        if (saved) {
+            MODEL = JSON.parse(saved);
+            updateModelStats();
+        }
+
+        updateModelStats();
     </script>
 </body>
 </html>
