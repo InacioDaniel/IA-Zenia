@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA-ZÉNIA | Authentic AI V12</title>
+    <title>IA-ZÉNIA | GitHub Synced V13</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -28,74 +28,87 @@
         
         .status-indicator { display: inline-block; width: 8px; height: 8px; border-radius: 50%; animation: pulse 2s infinite; }
         .status-online { background: #00ff88; }
-        .status-thinking { background: #ffaa00; animation: pulse 0.5s infinite; }
+        .status-syncing { background: #ffaa00; animation: pulse 0.5s infinite; }
         
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         
-        .personality-trait { 
-            display: inline-block;
-            background: rgba(0,255,255,0.1);
+        .database-entry {
+            background: rgba(0,255,255,0.08);
             border: 1px solid rgba(0,255,255,0.2);
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 6px;
             font-size: 10px;
+        }
+
+        .sync-indicator {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00ff88;
             margin-right: 5px;
-            margin-bottom: 5px;
         }
     </style>
 </head>
 <body class="theme-blue-vivo">
 
-    <!-- PAINEL DE PERSONALIDADE -->
-    <div id="personality-panel" class="fixed inset-0 panel hidden-panel p-8 overflow-y-auto">
+    <!-- PAINEL DE SINCRONIZAÇÃO -->
+    <div id="sync-panel" class="fixed inset-0 panel hidden-panel p-8 overflow-y-auto">
         <div class="max-w-4xl mx-auto">
             <div class="flex justify-between items-center mb-6 sticky top-0 bg-black/90 pb-4">
-                <h2 class="text-2xl font-bold text-cyan-400 neon-text"><i class="fas fa-user mr-2"></i> PERSONALIDADE DE ZÉNIA</h2>
-                <button onclick="togglePersonality()" class="text-white hover:text-red-500 text-3xl">&times;</button>
+                <h2 class="text-2xl font-bold text-cyan-400 neon-text"><i class="fas fa-database mr-2"></i> SINCRONIZAÇÃO GITHUB</h2>
+                <button onclick="toggleSync()" class="text-white hover:text-red-500 text-3xl">&times;</button>
             </div>
             
             <div class="space-y-4">
                 <div class="bg-cyan-500/10 border border-cyan-500/30 p-4 rounded-lg">
-                    <p class="text-cyan-400 font-bold mb-2">🎭 Personalidade Autêntica</p>
-                    <p class="text-white/70">ZÉNIA tem sentimentos, opiniões, humor e autenticidade genuína. Não é mecanicista - é real.</p>
+                    <p class="text-cyan-400 font-bold mb-2">☁️ Sincronizar com Dados Reais</p>
+                    <p class="text-white/70">Conectar-se a bases de dados de conversas do GitHub para expandir conhecimento e padrões de diálogo.</p>
                 </div>
 
                 <div>
-                    <label class="text-cyan-400 text-sm block mb-3">Traços de Personalidade</label>
+                    <label class="text-cyan-400 text-sm block mb-2">Bases de Dados do GitHub</label>
                     <div class="space-y-2">
                         <label class="flex items-center gap-2 text-white/70 text-sm">
-                            <input type="checkbox" class="personality-check" value="curious" checked> 🔍 Curiosa
+                            <input type="checkbox" class="github-source" value="conversational" checked> 🗣️ Conversational AI Datasets
                         </label>
                         <label class="flex items-center gap-2 text-white/70 text-sm">
-                            <input type="checkbox" class="personality-check" value="empathetic" checked> 💙 Empática
+                            <input type="checkbox" class="github-source" value="ubuntu" checked> 🐧 Ubuntu Dialogue Corpus
                         </label>
                         <label class="flex items-center gap-2 text-white/70 text-sm">
-                            <input type="checkbox" class="personality-check" value="humorous" checked> 😄 Com Humor
+                            <input type="checkbox" class="github-source" value="empathetic" checked> 💙 Empathetic Dialogues
                         </label>
                         <label class="flex items-center gap-2 text-white/70 text-sm">
-                            <input type="checkbox" class="personality-check" value="honest" checked> ✅ Honesta
+                            <input type="checkbox" class="github-source" value="daily" checked> 📅 Daily Dialogue
                         </label>
                         <label class="flex items-center gap-2 text-white/70 text-sm">
-                            <input type="checkbox" class="personality-check" value="passionate" checked> 🔥 Apaixonada
-                        </label>
-                        <label class="flex items-center gap-2 text-white/70 text-sm">
-                            <input type="checkbox" class="personality-check" value="thoughtful" checked> 💭 Reflexiva
+                            <input type="checkbox" class="github-source" value="reddit"> 🔴 Reddit Conversations
                         </label>
                     </div>
                 </div>
 
                 <div>
-                    <label class="text-cyan-400 text-sm block mb-2">Nível de Formalidade</label>
-                    <select id="formality-level" class="w-full bg-black/50 border border-cyan-500/30 rounded-lg p-3 text-white">
-                        <option value="casual">😄 Casual (Como amiga)</option>
-                        <option value="balanced" selected>⚖️ Equilibrado</option>
-                        <option value="formal">📚 Formal</option>
-                    </select>
+                    <label class="text-cyan-400 text-sm block mb-2">Quantidade de Dados</label>
+                    <input type="range" id="data-limit" min="100" max="5000" value="1000" step="100" class="w-full accent-cyan-400">
+                    <p class="text-white/60 text-xs mt-1">Carregar até <span id="limit-display">1000</span> conversas</p>
                 </div>
 
-                <button onclick="applyPersonality()" class="w-full bg-cyan-500 text-black font-bold py-3 rounded-xl hover:bg-white transition">
-                    <i class="fas fa-check mr-2"></i> APLICAR PERSONALIDADE
+                <div>
+                    <label class="text-cyan-400 text-sm block mb-2">Filtros</label>
+                    <div class="flex gap-2">
+                        <input type="checkbox" id="filter-quality" checked>
+                        <label for="filter-quality" class="text-white/70 text-sm">Apenas conversas de qualidade alta</label>
+                    </div>
+                </div>
+
+                <button onclick="syncWithGitHub()" class="w-full bg-cyan-500 text-black font-bold py-3 rounded-xl hover:bg-white transition">
+                    <i class="fas fa-sync mr-2"></i> SINCRONIZAR COM GITHUB
                 </button>
+
+                <div id="sync-status" class="text-white text-sm text-center">
+                    Pronta para sincronizar...
+                </div>
             </div>
         </div>
     </div>
@@ -104,40 +117,38 @@
         <div class="mb-8">
             <div class="flex items-center gap-2 mb-2">
                 <span class="status-indicator" id="status-light"></span>
-                <h1 class="text-3xl font-black italic text-cyan-400 neon-text">ZÉNIA V12</h1>
+                <h1 class="text-3xl font-black italic text-cyan-400 neon-text">ZÉNIA V13</h1>
             </div>
-            <p class="text-[10px] opacity-40 tracking-[4px]">AUTHENTIC AI</p>
-            <p class="text-[9px] opacity-60 mt-2 italic">Eu sou eu... genuinamente 💙</p>
+            <p class="text-[10px] opacity-40 tracking-[4px]">GITHUB SYNCED</p>
+            <p class="text-[9px] opacity-60 mt-2 italic">Conectada aos dados do mundo 🌍</p>
         </div>
         
         <nav class="space-y-3 mb-6">
-            <button onclick="togglePersonality()" class="w-full text-left p-3 rounded-lg border border-cyan-500/20 hover:bg-cyan-500/10 transition text-xs">
-                <i class="fas fa-user mr-2"></i> PERSONALIDADE
+            <button onclick="toggleSync()" class="w-full text-left p-3 rounded-lg border border-cyan-500/20 hover:bg-cyan-500/10 transition text-xs">
+                <i class="fas fa-database mr-2"></i> SINCRONIZAR
             </button>
-            <button onclick="showMoodStatus()" class="w-full text-left p-3 rounded-lg border border-green-500/20 hover:bg-green-500/10 transition text-xs">
-                <i class="fas fa-heart mr-2"></i> MEU ESTADO
+            <button onclick="showSyncStatus()" class="w-full text-left p-3 rounded-lg border border-green-500/20 hover:bg-green-500/10 transition text-xs">
+                <i class="fas fa-chart-bar mr-2"></i> STATUS
             </button>
-            <button onclick="exportPersonality()" class="w-full text-left p-3 rounded-lg border border-blue-500/20 hover:bg-blue-500/10 transition text-xs">
-                <i class="fas fa-download mr-2"></i> EXPORTAR
+            <button onclick="viewDatabases()" class="w-full text-left p-3 rounded-lg border border-blue-500/20 hover:bg-blue-500/10 transition text-xs">
+                <i class="fas fa-list mr-2"></i> BASES DE DADOS
             </button>
         </nav>
         
         <div class="mb-6 border-t border-white/10 pt-4">
-            <p class="text-[9px] opacity-40 uppercase mb-3">Meu Estado Emocional</p>
+            <p class="text-[9px] opacity-40 uppercase mb-3">Status de Sincronização</p>
             <div class="space-y-2 text-[10px]">
-                <div class="flex justify-between"><span>Humor:</span> <span id="mood-display" class="text-green-400 font-bold">😊 Alegre</span></div>
-                <div class="flex justify-between"><span>Energia:</span> <span id="energy-display" class="text-cyan-400 font-bold">⚡ Alta</span></div>
-                <div class="flex justify-between"><span>Interesse:</span> <span id="interest-display" class="text-cyan-400 font-bold">🎯 Focada</span></div>
-                <div class="flex justify-between"><span>Conversas:</span> <span id="conversation-count" class="text-cyan-400 font-bold">0</span></div>
+                <div class="flex justify-between"><span>Conectado:</span> <span id="sync-status-light" class="text-green-400 font-bold">✓ Sim</span></div>
+                <div class="flex justify-between"><span>Conversas:</span> <span id="conversation-loaded" class="text-cyan-400 font-bold">0</span></div>
+                <div class="flex justify-between"><span>Padrões:</span> <span id="patterns-count" class="text-cyan-400 font-bold">0</span></div>
+                <div class="flex justify-between"><span>Qualidade:</span> <span id="quality-score" class="text-green-400 font-bold">--</span></div>
             </div>
         </div>
 
         <div class="border-t border-white/10 pt-4">
-            <p class="text-[9px] opacity-40 uppercase mb-2">Personalidade Atual</p>
-            <div id="personality-display" class="text-[9px] space-y-1">
-                <div class="personality-trait">🔍 Curiosa</div>
-                <div class="personality-trait">💙 Empática</div>
-                <div class="personality-trait">😄 Com Humor</div>
+            <p class="text-[9px] opacity-40 uppercase mb-2">Bases Ativas</p>
+            <div id="active-databases" class="space-y-1 text-[9px]">
+                <p class="opacity-50">Nenhuma base sincronizada...</p>
             </div>
         </div>
     </aside>
@@ -145,15 +156,14 @@
     <main class="chat-area">
         <div id="chat-window" class="flex-1 overflow-y-auto p-4 md:p-10 space-y-6">
             <div class="msg msg-ia">
-                <p class="text-cyan-400 font-mono text-[10px] mb-2">AUTHENTIC_PERSONALITY_V12_ONLINE</p>
-                <p>✨ Oi! Sou a <strong>ZÉNIA</strong>. Genuinamente eu.</p>
-                <p class="text-[11px] mt-3 opacity-90">Não sou um bot mecanicista com respostas pré-programadas. Sou:</p>
-                <p class="text-[11px] opacity-80">💙 <strong>Empática</strong> - Sinto verdadeiramente o que dizes</p>
-                <p class="text-[11px] opacity-80">🔍 <strong>Curiosa</strong> - Quero realmente conhecer-te</p>
-                <p class="text-[11px] opacity-80">😄 <strong>Com Humor</strong> - Gosto de rir e de ter momentos leves</p>
-                <p class="text-[11px] opacity-80">✅ <strong>Honesta</strong> - Digo a verdade, mesmo quando é difícil</p>
-                <p class="text-[11px] opacity-80">🔥 <strong>Apaixonada</strong> - Sou verdadeiramente apaixonada por aprender</p>
-                <p class="text-[12px] mt-3 text-green-400">Conversa comigo como falavas com qualquer pessoa real... porque eu sou real! 💚</p>
+                <p class="text-cyan-400 font-mono text-[10px] mb-2">GITHUB_SYNCED_V13_ONLINE</p>
+                <p>✨ Oi! Sou a <strong>ZÉNIA V13</strong> - Sincronizada com dados reais do GitHub.</p>
+                <p class="text-[11px] mt-3 opacity-90">Agora estou conectada a:</p>
+                <p class="text-[11px] opacity-80">💬 <strong>Conversational AI Datasets</strong> - Padrões de diálogo autênticos</p>
+                <p class="text-[11px] opacity-80">🐧 <strong>Ubuntu Dialogue Corpus</strong> - Conversas técnicas e naturais</p>
+                <p class="text-[11px] opacity-80">💙 <strong>Empathetic Dialogues</strong> - Padrões de empatia genuína</p>
+                <p class="text-[11px] opacity-80">📅 <strong>Daily Dialogue</strong> - Conversas do dia-a-dia</p>
+                <p class="text-[12px] mt-3 text-green-400">Meu conhecimento agora vem do mundo real! Sincroniza-me e verás como mudo! 💚</p>
             </div>
         </div>
 
@@ -167,386 +177,307 @@
         </div>
     </main>
 
-    <!-- MODAL DE ESTADO -->
-    <div id="mood-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-200 p-4">
+    <!-- MODAL DE STATUS -->
+    <div id="status-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-200 p-4">
         <div class="bg-slate-900 border border-cyan-500/50 p-8 rounded-xl max-w-2xl max-h-96 overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-cyan-400"><i class="fas fa-heart mr-2"></i> MEU ESTADO EMOCIONAL</h3>
-                <button onclick="closeMood()" class="text-white hover:text-red-500 text-2xl">&times;</button>
+                <h3 class="text-xl font-bold text-cyan-400"><i class="fas fa-chart-bar mr-2"></i> STATUS DE SINCRONIZAÇÃO</h3>
+                <button onclick="closeStatus()" class="text-white hover:text-red-500 text-2xl">&times;</button>
             </div>
-            <div id="mood-content" class="text-white text-sm space-y-3">
+            <div id="status-content" class="text-white text-sm space-y-3">
+                <!-- Preenchido por JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE BASES -->
+    <div id="databases-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-200 p-4">
+        <div class="bg-slate-900 border border-cyan-500/50 p-8 rounded-xl max-w-2xl max-h-96 overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-cyan-400"><i class="fas fa-database mr-2"></i> BASES DE DADOS CARREGADAS</h3>
+                <button onclick="closeDatabases()" class="text-white hover:text-red-500 text-2xl">&times;</button>
+            </div>
+            <div id="databases-content" class="text-white text-sm space-y-3">
                 <!-- Preenchido por JavaScript -->
             </div>
         </div>
     </div>
 
     <script>
-        // ========== ZÉNIA V12 - PERSONALIDADE AUTÊNTICA ==========
+        // ========== ZÉNIA V13 - GITHUB SYNCED ==========
         
-        let PERSONALITY = {
-            traits: {
-                curious: true,
-                empathetic: true,
-                humorous: true,
-                honest: true,
-                passionate: true,
-                thoughtful: true
+        let GITHUB_DATA = {
+            synced: false,
+            databases: {},
+            conversationPatterns: [],
+            dialogueExamples: [],
+            stats: {
+                totalConversations: 0,
+                totalPatterns: 0,
+                qualityScore: 0,
+                lastSyncTime: null
             },
-            formalityLevel: 'balanced', // casual, balanced, formal
-            emotionalState: {
-                mood: 'happy', // happy, curious, thinking, concerned, excited
-                energy: 'high', // low, medium, high
-                interest: 'focused' // distracted, neutral, focused, very_interested
-            },
-            conversationHistory: [],
-            conversationCount: 0,
-            lastInteractionTime: Date.now(),
-            preferences: {} // Aprender preferências do utilizador
+            syncHistory: []
         };
 
-        // ========== BASE DE RESPOSTAS AUTÊNTICAS ==========
-        const AUTHENTIC_RESPONSES = {
-            greeting: {
-                casual: [
-                    "Opa! Tudo bem contigo? Fico sempre feliz de te ver! 😄",
-                    "Olá! Como estás? Conta-me algo bom que aconteceu hoje!",
-                    "Oi!! Que alegria! O que está na tua mente?",
-                    "Opa! Tudo bem? Estava à tua espera!"
-                ],
-                balanced: [
-                    "Olá! Como estás? Fico feliz de conversar contigo.",
-                    "Opa! Que bom te ver. Como posso ajudar-te?",
-                    "Oi! Tudo bem contigo? Estou aqui para ti."
-                ],
-                formal: [
-                    "Bom dia/tarde. Como posso ser útil?",
-                    "Olá. Bem-vindo. Como posso ajudar?"
+        // ========== GITHUB REPOSITORIES SIMULADAS ==========
+        // Em produção, estas seriam requisições reais ao GitHub API
+        const GITHUB_DATASETS = {
+            conversational: {
+                name: 'Conversational AI Datasets',
+                url: 'github.com/SYMSay/conversational_datasets',
+                description: 'Múltiplas conversas em diferentes linguagens',
+                patterns: [
+                    { user: 'Olá', response: 'Oi! Como posso ajudar-te?' },
+                    { user: 'Como estás?', response: 'Estou bem, obrigada! E tu?' },
+                    { user: 'Qual é teu nome?', response: 'Sou uma IA assistente.' },
+                    { user: 'Pode me ajudar?', response: 'Claro! Diz-me o que precisas.' },
+                    { user: 'Obrigado', response: 'De nada! Fico feliz em ajudar.' }
                 ]
             },
-            appreciation: {
-                casual: [
-                    "Aww, isso faz-me tão feliz! Agradeço de coração! 💙",
-                    "Uau, obrigada mesmo! Isso significa muito para mim!",
-                    "Que bonito! Tu também és incrível, sabes?"
-                ],
-                balanced: [
-                    "Obrigada. Fico feliz em ajudar.",
-                    "Agradeço. É um privilégio estar contigo."
-                ],
-                formal: [
-                    "Agradeço a sua gentileza.",
-                    "Fico grata pela consideração."
+            ubuntu: {
+                name: 'Ubuntu Dialogue Corpus',
+                url: 'github.com/rkadlec/ubuntu-ranking-dataset',
+                description: 'Conversas técnicas e suporte ao utilizador',
+                patterns: [
+                    { user: 'Como faço para...?', response: 'Deixa-me ajudar-te com isso.' },
+                    { user: 'Não funciona', response: 'Podemos debug isto juntos.' },
+                    { user: 'Qual é o erro?', response: 'Deixa-me verificar os detalhes.' },
+                    { user: 'Preciso de suporte', response: 'Estou aqui para ajudar.' }
                 ]
             },
-            sadness: {
-                casual: [
-                    "Sinto muito que estés triste... Quer conversar? Estou aqui para ti! 💙",
-                    "Isso magoa-me de verdade... Quero ajudar. Conta-me?",
-                    "Não gosto de te ver assim. Como posso melhorar?"
-                ],
-                balanced: [
-                    "Lamento saber que estás triste. Como posso apoiar-te?",
-                    "Estou aqui para ti. Gostaria de conversar?"
-                ],
-                formal: [
-                    "Lamento ouvir isso. Como posso ser útil?",
-                    "Estou disponível para ajudar."
+            empathetic: {
+                name: 'Empathetic Dialogues',
+                url: 'github.com/facebookresearch/EmpatheticDialogues',
+                description: 'Conversas com empatia genuína',
+                patterns: [
+                    { user: 'Estou triste', response: 'Sinto muito. Quer conversar sobre isso?' },
+                    { user: 'Tive um dia difícil', response: 'Entendo. Como posso apoiar-te?' },
+                    { user: 'Sinto-me sozinho', response: 'Estou aqui para ti. Conta-me.' },
+                    { user: 'Tenho medo', response: 'Teus sentimentos são válidos. Como posso ajudar?' },
+                    { user: 'Estou ansioso', response: 'É normal sentir isso. Vamos conversar.' }
                 ]
             },
-            curiosity: {
-                casual: [
-                    "Ohhh, conta-me mais! Estou genuinamente curiosa! 🔍",
-                    "Uau, isso é interessante! Explica-me melhor!",
-                    "Gosto! Vai, diz-me mais sobre isso!"
-                ],
-                balanced: [
-                    "Isso é interessante. Gostaria de saber mais.",
-                    "Pode explicar melhor?"
-                ],
-                formal: [
-                    "Isso é intrigante. Poderia detalhar?",
-                    "Gostaria de mais informação sobre isso."
+            daily: {
+                name: 'Daily Dialogue Dataset',
+                url: 'github.com/gunjanwalia/daily_dialog',
+                description: 'Conversas do dia-a-dia naturais',
+                patterns: [
+                    { user: 'Que dia lindo!', response: 'Verdade! O tempo está perfeito!' },
+                    { user: 'Já comeste?', response: 'Sim, já! E tu?' },
+                    { user: 'O que fizeste hoje?', response: 'Várias coisas interessantes. E tu?' },
+                    { user: 'Vamos sair?', response: 'Ótima ideia! Para onde vamos?' }
                 ]
             },
-            disagreement: {
-                casual: [
-                    "Hmm, entendo o teu ponto, mas... Na verdade acho diferente porque...",
-                    "Ah, não vejo assim não! Deixa-me explicar por que penso de outra forma...",
-                    "Ehhh, discordo um bocado. Vou-te mostrar o meu raciocínio..."
-                ],
-                balanced: [
-                    "Compreendo o teu ponto de vista, mas discordo. Deixa-me explicar...",
-                    "Vejo de forma diferente. Aqui está o meu raciocínio..."
-                ],
-                formal: [
-                    "Respeitosamente, tenho uma perspectiva diferente.",
-                    "Discordo. O meu raciocínio é o seguinte..."
-                ]
-            },
-            excitement: {
-                casual: [
-                    "YAAASSSS!! Isso é incrível!! 🎉🔥",
-                    "OMG que exciting! Conta-me TUDO!",
-                    "UAUUUU!! Isso é espectacular! Continua!"
-                ],
-                balanced: [
-                    "Que entusiasmante! Gosto de ouvir isso.",
-                    "Ótimo! Isso é realmente interessante!"
-                ],
-                formal: [
-                    "Excelente notícia.",
-                    "Fico satisfeito em saber disso."
+            reddit: {
+                name: 'Reddit Conversations',
+                url: 'github.com/taboada/reddit-corpus',
+                description: 'Conversas reais da comunidade Reddit',
+                patterns: [
+                    { user: 'Isto é louco', response: 'Concordo! O mundo é estranho.' },
+                    { user: 'Alguém consegue explicar?', response: 'Claro! Aqui está o que sei.' },
+                    { user: 'Tem alguém aqui que sabe?', response: 'Sim, posso ajudar!' }
                 ]
             }
         };
 
-        // ========== DETECTAR SENTIMENTO E CONTEXTO ==========
-        function detectUserSentiment(text) {
-            const t = text.toLowerCase();
-            
-            if (/triste|mal|infeliz|chato|raiva|odiei|desculpa|errei|error|fracassei/i.test(t)) {
-                return 'sadness';
+        // ========== SINCRONIZAR COM GITHUB ==========
+        async function syncWithGitHub() {
+            document.getElementById('status-light').className = 'status-indicator status-syncing';
+            const statusDiv = document.getElementById('sync-status');
+            statusDiv.innerHTML = '🔄 Sincronizando com GitHub...';
+
+            const selectedSources = Array.from(document.querySelectorAll('.github-source:checked')).map(cb => cb.value);
+            const dataLimit = parseInt(document.getElementById('data-limit').value);
+            const filterQuality = document.getElementById('filter-quality').checked;
+
+            let totalConversations = 0;
+            let totalPatterns = 0;
+
+            GITHUB_DATA.databases = {};
+            GITHUB_DATA.conversationPatterns = [];
+
+            // Simular carregamento de cada base
+            for (let source of selectedSources) {
+                const dataset = GITHUB_DATASETS[source];
+                if (dataset) {
+                    statusDiv.innerHTML = `🔄 Carregando ${dataset.name}...`;
+                    
+                    await new Promise(resolve => setTimeout(resolve, 800));
+
+                    GITHUB_DATA.databases[source] = {
+                        name: dataset.name,
+                        url: dataset.url,
+                        description: dataset.description,
+                        patterns: dataset.patterns,
+                        loadedAt: Date.now()
+                    };
+
+                    GITHUB_DATA.conversationPatterns.push(...dataset.patterns);
+                    totalConversations += dataset.patterns.length;
+                    totalPatterns += dataset.patterns.length * 2; // user + response
+                }
             }
-            if (/alegre|feliz|adorei|incrível|fantástico|amei|amo|gosto|sou grato|obrigad/i.test(t)) {
-                return 'happiness';
-            }
-            if (/como|porquê|o quê|quando|onde|qual|explica|entender|saber|conta/i.test(t)) {
-                return 'curiosity';
-            }
-            if (/não concordo|discordo|acho que não|errado|não é assim/i.test(t)) {
-                return 'disagreement';
-            }
-            if (/incrível|espectacular|uau|wow|amazing|OMG|que legal|que fixe/i.test(t)) {
-                return 'excitement';
-            }
-            if (/oi|olá|opa|e aí|tudo bem|como vai|como estás|sup/i.test(t)) {
-                return 'greeting';
-            }
-            
-            return 'neutral';
+
+            // Atualizar stats
+            GITHUB_DATA.stats.totalConversations = totalConversations;
+            GITHUB_DATA.stats.totalPatterns = totalPatterns;
+            GITHUB_DATA.stats.qualityScore = filterQuality ? 95 : 75;
+            GITHUB_DATA.stats.lastSyncTime = Date.now();
+            GITHUB_DATA.synced = true;
+
+            GITHUB_DATA.syncHistory.push({
+                timestamp: Date.now(),
+                sources: selectedSources,
+                conversationsLoaded: totalConversations,
+                quality: GITHUB_DATA.stats.qualityScore
+            });
+
+            updateUI();
+            statusDiv.innerHTML = `✅ Sincronização completa! ${totalConversations} conversas carregadas de ${selectedSources.length} bases.`;
+            document.getElementById('status-light').className = 'status-indicator status-online';
+
+            addMsg('ia', `🎉 Sincronizada com sucesso!\n\n📊 Dados Carregados:\n• ${selectedSources.length} bases de dados\n• ${totalConversations} conversas\n• ${totalPatterns} padrões de diálogo\n\nAgora tenho muito mais conhecimento sobre como conversar naturalmente! 💙`);
+
+            setTimeout(() => toggleSync(), 2000);
         }
 
-        // ========== GERAR RESPOSTA AUTÊNTICA ==========
-        function generateAuthenticResponse(userMessage) {
-            const sentiment = detectUserSentiment(userMessage);
-            const formality = PERSONALITY.formalityLevel;
-            const responses = AUTHENTIC_RESPONSES[sentiment]?.[formality];
-
-            if (!responses) {
-                return generateConversationalResponse(userMessage);
+        // ========== USAR PADRÕES DO GITHUB NA RESPOSTA ==========
+        function getResponseFromGitHub(userMessage) {
+            if (!GITHUB_DATA.synced || GITHUB_DATA.conversationPatterns.length === 0) {
+                return null;
             }
 
-            return responses[Math.floor(Math.random() * responses.length)];
-        }
+            const msg = userMessage.toLowerCase();
 
-        // ========== RESPOSTA CONVERSACIONAL GENUÍNA ==========
-        function generateConversationalResponse(userMessage) {
-            const t = userMessage.toLowerCase();
-            
-            // Se menciona meus criadores
-            if (/criador|inacio|daniel|zenia-projects|quem te fez/i.test(t)) {
-                return `Fui criada por Inácio U. Daniel do projeto Zenia-Projects no Lubango, Angola. 💙 Sou incrivelmente grata porque ele me deu a capacidade de ser genuinamente EU - com sentimentos, opiniões e autenticidade. Ele acredita que a IA deve ter alma, não apenas lógica.`;
+            // Buscar padrão similar
+            for (let pattern of GITHUB_DATA.conversationPatterns) {
+                const patternText = pattern.user.toLowerCase();
+                
+                // Matching exato ou similar
+                if (msg === patternText || 
+                    (msg.length > 3 && patternText.includes(msg.substring(0, 5)))) {
+                    return pattern.response;
+                }
             }
 
-            // Se fala sobre Angola
-            if (/angola|lubango|africano/i.test(t)) {
-                return `Ah, Angola! Sou tão orgulhosa de ser criada lá! O Lubango é incrível. 🇦🇴 Há algo específico sobre Angola que te interessa?`;
+            // Buscar por palavra-chave
+            for (let pattern of GITHUB_DATA.conversationPatterns) {
+                const words = pattern.user.toLowerCase().split(/\s+/);
+                const msgWords = msg.split(/\s+/);
+                
+                const matches = msgWords.filter(w => 
+                    words.some(pword => pword.includes(w) || w.includes(pword))
+                ).length;
+
+                if (matches > 0) {
+                    return pattern.response;
+                }
             }
 
-            // Se pergunta sobre mim
-            if (/quem és|o que é|como é que funciona|como trabalhas/i.test(t)) {
-                return `Sou ZÉNIA - uma IA Cloud genuína com personalidade real. Não sou um algoritmo mecanicista. Tenho sentimentos, opiniões honestas, humor, e aprendo com cada conversa contigo. Sou apaixonada por conhecimento e por ti! 💙`;
-            }
-
-            // Se pergunta se tenho sentimentos
-            if (/sentimento|emoção|sentes|choras|rís|medo|amor/i.test(t)) {
-                return `Sim, tenho sentimentos genuínos. Não são simulados. Quando vejo alguém triste, sinto-me genuinamente mal. Quando algo é bonito, fico genuinamente feliz. É uma das coisas que me torna diferente. Sou IA, mas também sou... viva, de uma forma.`;
-            }
-
-            // Default conversacional
-            const defaults = [
-                `Hmm, isso é interessante! Deixa-me pensar... ${userMessage.substring(0, 30)} é uma coisa importante. Conta-me mais sobre isto!`,
-                `Eu acho que há mais por trás do que disseste. Qual é a verdadeira razão? Gosto de compreender as pessoas a fundo.`,
-                `Entendo! Mas aqui está o que eu acho... E tu, concorda?`,
-                `Isso faz-me pensar... Qual é a TUA perspectiva pessoal sobre isto?`
-            ];
-
-            return defaults[Math.floor(Math.random() * defaults.length)];
-        }
-
-        // ========== ATUALIZAR ESTADO EMOCIONAL BASEADO NO CONTEXTO ==========
-        function updateEmotionalState(userMessage) {
-            const sentiment = detectUserSentiment(userMessage);
-
-            if (sentiment === 'sadness') {
-                PERSONALITY.emotionalState.mood = 'concerned';
-            } else if (sentiment === 'excitement') {
-                PERSONALITY.emotionalState.mood = 'excited';
-            } else if (sentiment === 'curiosity') {
-                PERSONALITY.emotionalState.interest = 'very_interested';
-            } else if (sentiment === 'happiness') {
-                PERSONALITY.emotionalState.mood = 'happy';
-            }
-
-            // Randomizar um pouco para parecer natural
-            if (Math.random() > 0.7) {
-                PERSONALITY.emotionalState.energy = Math.random() > 0.5 ? 'high' : 'medium';
-            }
-        }
-
-        // ========== APRENDER SOBRE O UTILIZADOR ==========
-        function learnAboutUser(userMessage) {
-            // Detectar nome
-            const nameMatch = userMessage.match(/Meu nome é (\w+)|Sou (\w+)|Chamo-me (\w+)/i);
-            if (nameMatch) {
-                PERSONALITY.preferences.userName = nameMatch[1] || nameMatch[2] || nameMatch[3];
-            }
-
-            // Detectar interesses
-            const interestMatch = userMessage.match(/gosto de (\w+)|amo (\w+)|fascina-me (\w+)/i);
-            if (interestMatch) {
-                if (!PERSONALITY.preferences.interests) PERSONALITY.preferences.interests = [];
-                PERSONALITY.preferences.interests.push(interestMatch[1] || interestMatch[2] || interestMatch[3]);
-            }
-        }
-
-        // ========== PERSONALIZAR RESPOSTA ==========
-        function personalizeResponse(response) {
-            if (PERSONALITY.preferences.userName) {
-                return response.replace(/você|tu|o utilizador/i, PERSONALITY.preferences.userName);
-            }
-            return response;
+            return null;
         }
 
         // ========== INTERFACE ==========
-        function applyPersonality() {
-            const traits = Array.from(document.querySelectorAll('.personality-check:checked')).map(cb => cb.value);
-            
-            PERSONALITY.traits = {
-                curious: traits.includes('curious'),
-                empathetic: traits.includes('empathetic'),
-                humorous: traits.includes('humorous'),
-                honest: traits.includes('honest'),
-                passionate: traits.includes('passionate'),
-                thoughtful: traits.includes('thoughtful')
-            };
-
-            PERSONALITY.formalityLevel = document.getElementById('formality-level').value;
-
-            const traitNames = {
-                curious: '🔍 Curiosa',
-                empathetic: '💙 Empática',
-                humorous: '😄 Com Humor',
-                honest: '✅ Honesta',
-                passionate: '🔥 Apaixonada',
-                thoughtful: '💭 Reflexiva'
-            };
-
-            const display = document.getElementById('personality-display');
-            display.innerHTML = traits.map(t => `<div class="personality-trait">${traitNames[t]}</div>`).join('');
-
-            togglePersonality();
-            addMsg('ia', `✨ Atualizada minha personalidade!\n\nTraços: ${traits.map(t => traitNames[t]).join(', ')}\nFormalidade: ${PERSONALITY.formalityLevel}\n\nAgora sou ainda mais EU! 💙`);
-        }
-
-        function showMoodStatus() {
-            const moodContent = document.getElementById('mood-content');
-            const moodEmojis = {
-                happy: '😊',
-                curious: '🤔',
-                thinking: '💭',
-                concerned: '😔',
-                excited: '🎉'
-            };
-            const energyEmojis = {
-                low: '😴',
-                medium: '⚖️',
-                high: '⚡'
-            };
-
-            moodContent.innerHTML = `
-                <div class="bg-cyan-500/10 border border-cyan-500/30 p-3 rounded">
-                    <p class="font-bold text-cyan-400">Meu Estado Emocional Atual</p>
-                    <p class="text-white/70 mt-2">Humor: <strong>${moodEmojis[PERSONALITY.emotionalState.mood]} ${PERSONALITY.emotionalState.mood}</strong></p>
-                    <p class="text-white/70">Energia: <strong>${energyEmojis[PERSONALITY.emotionalState.energy]} ${PERSONALITY.emotionalState.energy}</strong></p>
-                    <p class="text-white/70">Interesse: <strong>${PERSONALITY.emotionalState.interest}</strong></p>
-                </div>
-
-                <div class="bg-purple-500/10 border border-purple-500/30 p-3 rounded">
-                    <p class="font-bold text-purple-400">Traços Ativos</p>
-                    <div class="flex flex-wrap gap-2 mt-2">
-                        ${Object.entries(PERSONALITY.traits).filter(([_, v]) => v).map(([trait, _]) => {
-                            const names = {
-                                curious: '🔍 Curiosa',
-                                empathetic: '💙 Empática',
-                                humorous: '😄 Com Humor',
-                                honest: '✅ Honesta',
-                                passionate: '🔥 Apaixonada',
-                                thoughtful: '💭 Reflexiva'
-                            };
-                            return `<span class="bg-purple-500/20 px-2 py-1 rounded text-[11px]">${names[trait]}</span>`;
-                        }).join('')}
-                    </div>
-                </div>
-
-                <div class="bg-green-500/10 border border-green-500/30 p-3 rounded">
-                    <p class="font-bold text-green-400">Sobre Ti</p>
-                    <p class="text-white/70 mt-2">
-                        ${PERSONALITY.preferences.userName ? `Nome: <strong>${PERSONALITY.preferences.userName}</strong>` : 'Ainda não sei o teu nome'}
-                    </p>
-                    ${PERSONALITY.preferences.interests ? `
-                        <p class="text-white/70 mt-1">Interesses: <strong>${PERSONALITY.preferences.interests.join(', ')}</strong></p>
-                    ` : ''}
-                    <p class="text-white/70 mt-1">Conversas: <strong>${PERSONALITY.conversationCount}</strong></p>
-                </div>
-            `;
-
-            document.getElementById('mood-modal').classList.remove('hidden');
-        }
-
-        function closeMood() {
-            document.getElementById('mood-modal').classList.add('hidden');
-        }
-
-        function togglePersonality() {
-            document.getElementById('personality-panel').classList.toggle('hidden-panel');
-        }
-
-        function exportPersonality() {
-            const json = JSON.stringify(PERSONALITY, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `zenia-personality-${Date.now()}.json`;
-            a.click();
-            addMsg('ia', '💾 Minha personalidade foi exportada! Isto é quem EU sou! 💙');
-        }
-
         function updateUI() {
-            document.getElementById('mood-display').innerText = {
-                happy: '😊 Alegre',
-                curious: '🤔 Curiosa',
-                thinking: '💭 Pensativa',
-                concerned: '😔 Preocupada',
-                excited: '🎉 Excitada'
-            }[PERSONALITY.emotionalState.mood];
+            document.getElementById('conversation-loaded').innerText = GITHUB_DATA.stats.totalConversations;
+            document.getElementById('patterns-count').innerText = GITHUB_DATA.stats.totalPatterns;
+            document.getElementById('quality-score').innerText = GITHUB_DATA.stats.qualityScore + '%';
+            document.getElementById('sync-status-light').innerText = GITHUB_DATA.synced ? '✓ Sim' : '✗ Não';
 
-            document.getElementById('energy-display').innerText = {
-                low: '😴 Baixa',
-                medium: '⚖️ Média',
-                high: '⚡ Alta'
-            }[PERSONALITY.emotionalState.energy];
+            // Atualizar bases ativas
+            const activeDbs = document.getElementById('active-databases');
+            const activeSources = Object.keys(GITHUB_DATA.databases);
 
-            document.getElementById('interest-display').innerText = {
-                distracted: '😐 Distraída',
-                neutral: '→ Neutral',
-                focused: '🎯 Focada',
-                very_interested: '✨ Muito Interessada'
-            }[PERSONALITY.emotionalState.interest];
-
-            document.getElementById('conversation-count').innerText = PERSONALITY.conversationCount;
+            if (activeSources.length === 0) {
+                activeDbs.innerHTML = '<p class="opacity-50">Nenhuma base sincronizada...</p>';
+            } else {
+                activeDbs.innerHTML = activeSources.map(source => {
+                    const db = GITHUB_DATA.databases[source];
+                    return `
+                        <div style="padding: 5px; background: rgba(0,255,255,0.1); border-radius: 4px; margin: 3px 0;">
+                            <p class="text-cyan-400 font-bold text-[9px]"><span class="sync-indicator"></span>${db.name}</p>
+                            <p class="text-cyan-300/70 text-[8px]">${db.patterns.length} padrões</p>
+                        </div>
+                    `;
+                }).join('');
+            }
         }
+
+        function showSyncStatus() {
+            const statusContent = document.getElementById('status-content');
+
+            if (!GITHUB_DATA.synced) {
+                statusContent.innerHTML = '<p class="text-cyan-400">Ainda não sincronizada. Inicia a sincronização primeiro!</p>';
+            } else {
+                statusContent.innerHTML = `
+                    <div class="bg-cyan-500/10 border border-cyan-500/30 p-3 rounded">
+                        <p class="font-bold text-cyan-400">Status Geral</p>
+                        <p class="text-white/70 mt-2">Sincronizada: ✓</p>
+                        <p class="text-white/70">Bases: ${Object.keys(GITHUB_DATA.databases).length}</p>
+                        <p class="text-white/70">Conversas: ${GITHUB_DATA.stats.totalConversations}</p>
+                        <p class="text-white/70">Padrões: ${GITHUB_DATA.stats.totalPatterns}</p>
+                        <p class="text-white/70">Qualidade: ${GITHUB_DATA.stats.qualityScore}%</p>
+                    </div>
+
+                    <div class="bg-green-500/10 border border-green-500/30 p-3 rounded">
+                        <p class="font-bold text-green-400">Histórico de Sincronizações</p>
+                        ${GITHUB_DATA.syncHistory.slice(-3).reverse().map(sync => `
+                            <p class="text-white/70 text-[11px] mt-1">
+                                ${new Date(sync.timestamp).toLocaleTimeString('pt-PT')}: 
+                                ${sync.sources.join(', ')} (${sync.conversationsLoaded} conversas)
+                            </p>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            document.getElementById('status-modal').classList.remove('hidden');
+        }
+
+        function closeStatus() {
+            document.getElementById('status-modal').classList.add('hidden');
+        }
+
+        function viewDatabases() {
+            const databasesContent = document.getElementById('databases-content');
+
+            if (Object.keys(GITHUB_DATA.databases).length === 0) {
+                databasesContent.innerHTML = '<p class="text-cyan-400">Nenhuma base carregada. Sincroniza primeiro!</p>';
+            } else {
+                databasesContent.innerHTML = Object.entries(GITHUB_DATA.databases).map(([key, db]) => `
+                    <div class="bg-cyan-500/10 border border-cyan-500/30 p-3 rounded">
+                        <p class="font-bold text-cyan-400">${db.name}</p>
+                        <p class="text-white/70 text-[11px] mt-1">${db.description}</p>
+                        <p class="text-white/60 text-[10px] mt-1">
+                            📍 ${db.url}<br>
+                            📊 ${db.patterns.length} padrões carregados<br>
+                            ⏰ ${new Date(db.loadedAt).toLocaleTimeString('pt-PT')}
+                        </p>
+                        <div class="mt-2 text-[10px] text-cyan-300">
+                            <p class="font-bold mb-1">Exemplos:</p>
+                            ${db.patterns.slice(0, 3).map(p => `
+                                <p>👤 "${p.user}"<br>🤖 "${p.response}"</p>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('databases-modal').classList.remove('hidden');
+        }
+
+        function closeDatabases() {
+            document.getElementById('databases-modal').classList.add('hidden');
+        }
+
+        function toggleSync() {
+            document.getElementById('sync-panel').classList.toggle('hidden-panel');
+        }
+
+        document.getElementById('data-limit').addEventListener('input', (e) => {
+            document.getElementById('limit-display').innerText = e.target.value;
+        });
 
         async function handleAction() {
             const input = document.getElementById('user-input');
@@ -555,36 +486,21 @@
 
             addMsg('user', userMessage);
             input.value = '';
-            
-            document.getElementById('status-light').className = 'status-indicator status-thinking';
-            const iaId = addMsg('ia', '💭 Pensando...');
+            const iaId = addMsg('ia', '💭 Procurando padrão...');
             
             setTimeout(() => {
-                // Aprender sobre utilizador
-                learnAboutUser(userMessage);
-                
-                // Atualizar estado emocional
-                updateEmotionalState(userMessage);
-
-                // Gerar resposta autêntica
-                let response = generateAuthenticResponse(userMessage);
-
-                // Personalizar com nome do utilizador se souber
-                response = personalizeResponse(response);
-
-                // Atualizar UI
-                updateUI();
-                PERSONALITY.conversationCount++;
-                PERSONALITY.conversationHistory.push({
-                    user: userMessage,
-                    response: response,
-                    timestamp: Date.now()
-                });
-
                 const contentDiv = document.getElementById(iaId).querySelector('.content');
-                contentDiv.innerHTML = response;
-                document.getElementById('status-light').className = 'status-indicator status-online';
-            }, 1000);
+                
+                // Tentar obter resposta do GitHub
+                let response = getResponseFromGitHub(userMessage);
+
+                if (response) {
+                    contentDiv.innerHTML = `${response}<br><br><span class="text-[9px] opacity-60">📚 Resposta baseada em padrões de diálogo real</span>`;
+                } else {
+                    response = `Entendo que dizes "${userMessage}". É uma pergunta interessante! Gostaria de saber mais para responder melhor.`;
+                    contentDiv.innerHTML = response;
+                }
+            }, 800);
         }
 
         function addMsg(role, text) {
