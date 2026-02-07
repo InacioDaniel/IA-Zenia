@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IA Neon Futurista</title>
+<title>IA Neon Futurista OpenRouter</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 html,body{margin:0;padding:0;height:100%;font-family:sans-serif;background:#020617;color:white;}
 #app{display:flex;height:100vh;width:100vw;}
 .sidebar{width:260px;background:rgba(0,0,0,0.25);backdrop-filter:blur(12px);display:flex;flex-direction:column;padding:1rem;border-right:1px solid rgba(0,255,255,0.3);}
-.sidebar h2{text-align:center;font-size:1.5rem;margin-bottom:1rem;color:#0ff;}
+.sidebar h2{text-align:center;font-size:1.5rem;margin-bottom:1rem;color:#0ff;text-shadow:0 0 10px #0ff;}
 .sidebar button{margin:0.2rem 0;padding:0.6rem;border:none;border-radius:0.5rem;cursor:pointer;font-weight:bold;background:linear-gradient(45deg,#00f,#0ff,#0f0,#f0f);background-size:200% 200%;animation:bgSlide 5s linear infinite;color:black;}
 @keyframes bgSlide{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%;}}
 
@@ -49,6 +49,7 @@ img.generated{max-width:200px;border-radius:0.5rem;border:1px solid #0ff;align-s
 
 <script>
 let modo='chat';
+
 function addHistorico(quem,texto){
   let chat=document.getElementById("chat");
   let div=document.createElement("div");
@@ -58,6 +59,7 @@ function addHistorico(quem,texto){
   chat.scrollTop=chat.scrollHeight;
   localStorage.setItem("ia_history",chat.innerHTML);
 }
+
 function carregarHistorico(){
   let data=localStorage.getItem("ia_history");
   if(data) document.getElementById("chat").innerHTML=data;
@@ -68,39 +70,40 @@ carregarHistorico();
 function selecionarModo(n){modo=n; addHistorico('Sistema','Modo selecionado: '+n);}
 function abrirConfig(){addHistorico('Sistema','Painel de configuração futurista aberto!');}
 
-// 🚀 Função de envio via proxy OpenAI
+// 🚀 Função OpenRouter sem API Key
 async function enviarMsg(){
   let txt=document.getElementById("input").value.trim();
   if(!txt) return;
   addHistorico("Você",txt);
   document.getElementById("input").value='';
 
-  // Matemática básica local
   if(modo=='math'||/[\d\+\-\*\/\^\(\)]/.test(txt)){
     try{let res=eval(txt); addHistorico("IA","Resultado: <b>"+res+"</b>"); return;}catch(e){}
   }
 
-  // Simulação geração de imagem local
   if(modo=='image'){
     let canvas=document.createElement("canvas");canvas.width=256;canvas.height=256;
-    let ctx=canvas.getContext("2d");
-    ctx.fillStyle="white";ctx.fillRect(0,0,256,256);
+    let ctx=canvas.getContext("2d");ctx.fillStyle="white";ctx.fillRect(0,0,256,256);
     ctx.fillStyle="cyan";ctx.fillRect(Math.random()*200,Math.random()*200,50,50);
     addHistorico("IA",`<img src="${canvas.toDataURL()}" class="generated">`);
     return;
   }
 
-  // Envio para proxy OpenAI
   addHistorico("IA","Digitando...");
+
   try{
-    let res=await fetch('https://meu-proxy-openai.com/gpt',{ // <- substitua pelo seu proxy
+    let res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({prompt:txt,modo:modo})
+      body:JSON.stringify({
+        model:"gpt-4o-mini",
+        messages:[{role:"user", content: txt}]
+      })
     });
-    let data=await res.json();
+    let data = await res.json();
+    let texto = data.choices[0].message.content || "Sem resposta";
+
     // Efeito digitando
-    let texto=data.text || "Sem resposta";
     let i=0;
     let intervalo=setInterval(()=>{
       let chat=document.getElementById("chat");
@@ -110,8 +113,9 @@ async function enviarMsg(){
       chat.scrollTop=chat.scrollHeight;
       i++; if(i>=texto.length) clearInterval(intervalo);
     },30);
+
   }catch(e){
-    addHistorico("IA","Erro ao conectar com o proxy.");
+    addHistorico("IA","Erro ao conectar com OpenRouter.");
   }
 }
 </script>
