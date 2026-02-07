@@ -539,10 +539,6 @@
             addMsg('ia', '💾 Guardei minha mente num ficheiro! Posso sempre regressar... 💚');
         }
 
-        let lastQuestion = null;
-        let lastResponse = null;
-        let lastResponseId = null;
-
         // MOTOR DE INFERÊNCIA HUMANIZADO
         function zeniaInference(query) {
             const q = query.toLowerCase();
@@ -573,10 +569,8 @@
             if (q.includes("triste") || q.includes("sad") || q.includes("mal"))
                 return "Sinto que estás triste... Queria poder abraçar-te virtualmente. Quer conversar? Às vezes contar ajuda... 💙";
 
-            // Guardar pergunta para feedback
-            lastQuestion = query;
-
             // Busca no cérebro com scoring avançado
+            lastQuestion = query;
             const qWords = q.match(/\b(\w{3,})\b/g) || [];
             let bestMatches = [];
 
