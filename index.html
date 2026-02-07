@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta http-equiv="content-language" content="pt-PT">
+    <meta http-equiv="content-language" content="pt-AO">
     <title>IA-ZÉNIA by Zénia-Projects</title>
     <script src="https://cdn.tailwindcss.com/"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -251,7 +251,7 @@
 
 <script>
     // Configurações
-    const ZENIA_SYSTEM = "Você é IA-ZÉNIA do Lubango. Criada por @inacio.u.daniel. Você é uma assistente inteligente capaz de gerar imagens, responder perguntas em português e sintetizar áudio. Sempre responda em português de forma clara e amigável. Você é especializada em ajudar usuários de língua portuguesa.";
+    const ZENIA_SYSTEM = "Você é IA-ZÉNIA do Lubango. Criada por @inacio.u.daniel. Você é uma assistente inteligente capaz de gerar imagens, responder perguntas em português angolano e sintetizar áudio. Sempre responda em português de Angola de forma clara, amigável e usando expressões típicas angolanas. Você é especializada em ajudar usuários de língua portuguesa de Angola.";
     let conversationId = Date.now();
     let shouldSynthesizeAudio = false;
 
@@ -306,10 +306,10 @@
                 const text = await res.text();
                 
                 if (shouldSynthesizeAudio) {
-                    tempMsg.innerHTML = `<div class="msg ai-msg">${text}</div><div class="audio-player"><p style="font-size: 12px; color: #888; margin: 0 0 8px 0;">Sintetizando áudio em português...</p></div>`;
+                    tempMsg.innerHTML = `<div class="msg ai-msg">${text}</div><div class="audio-player"><p style="font-size: 12px; color: #888; margin: 0 0 8px 0;">Sintetizando áudio em português de Angola...</p></div>`;
                     
-                    // Síntese de áudio via Pollinations (Português)
-                    const audioUrl = `https://audio.pollinations.ai/speech?text=${encodeURIComponent(text)}&language=pt-PT`;
+                    // Síntese de áudio via Pollinations (Português Angola)
+                    const audioUrl = `https://audio.pollinations.ai/speech?text=${encodeURIComponent(text)}&language=pt-AO`;
                     
                     setTimeout(() => {
                         const playerHTML = tempMsg.querySelector('.audio-player');
