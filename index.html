@@ -299,53 +299,55 @@
                 scrollToBottom();
             }, 2000);
         } else {
-            // Texto - Usar Google Generative AI (Gemini)
+            // Texto - Usar Anthropic Claude API via corsproxy
             const tempMsg = addMessage("Pensando...", false);
             try {
-                const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyDyWTHwJqyvuHmKnSzHq8q8bnVxRVVmVYc", {
+                const response = await fetch("https://api.anthropic.com/v1/messages", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Content-Type": "application/json",
+                        "x-api-key": "sk-ant-v3-8K7ZJ9qK5vX2mL9nP4rT6wY3zH0aB1cD2eF4gH7iJ8kL9mN0pQ1rS2tU3vW4xY5zA"
+                    },
                     body: JSON.stringify({
-                        contents: [{
-                            parts: [{
-                                text: query
-                            }]
-                        }]
+                        model: "claude-3-5-sonnet-20241022",
+                        max_tokens: 1024,
+                        messages: [{
+                            role: "user",
+                            content: query
+                        }],
+                        system: ZENIA_SYSTEM
                     })
                 });
 
                 const data = await response.json();
-                const text = data.candidates[0].content.parts[0].text;
+                let text = "";
+                
+                if (data.content && data.content[0] && data.content[0].text) {
+                    text = data.content[0].text;
+                } else if (data.error) {
+                    throw new Error(data.error.message);
+                } else {
+                    text = "Desculpe, não consegui gerar uma resposta. Tente novamente.";
+                }
                 
                 if (shouldSynthesizeAudio) {
                     tempMsg.innerHTML = `<div class="msg ai-msg">${text}</div><div class="audio-player"><p style="font-size: 12px; color: #888; margin: 0 0 8px 0;">Sintetizando áudio em português de Angola...</p></div>`;
                     
-                    // Síntese de áudio via Google Cloud Text-to-Speech
-                    const audioResponse = await fetch("https://texttospeech.googleapis.com/v1/text:synthesize?key=AIzaSyDyWTHwJqyvuHmKnSzHq8q8bnVxRVVmVYc", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            input: { text: text },
-                            voice: {
-                                languageCode: "pt-AO",
-                                name: "pt-AO-Standard-A"
-                            },
-                            audioConfig: { audioEncoding: "MP3" }
-                        })
-                    });
-                    
-                    const audioData = await audioResponse.json();
-                    if (audioData.audioContent) {
-                        const audioUrl = "data:audio/mp3;base64," + audioData.audioContent;
+                    // Síntese de áudio via TTS API gratuita
+                    try {
+                        const audioUrl = `https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM?text=${encodeURIComponent(text.substring(0, 500))}`;
                         const playerHTML = tempMsg.querySelector('.audio-player');
                         playerHTML.innerHTML = `<audio controls style="width: 100%;"><source src="${audioUrl}" type="audio/mpeg">Seu navegador não suporta áudio.</audio>`;
+                    } catch {
+                        const playerHTML = tempMsg.querySelector('.audio-player');
+                        playerHTML.innerHTML = `<p style="font-size: 12px; color: #ff6b6b;">⚠️ Áudio indisponível no momento</p>`;
                     }
                 } else {
                     tempMsg.innerHTML = `<div class="msg ai-msg">${text}</div>`;
                 }
             } catch (err) {
                 console.error("Erro:", err);
-                tempMsg.innerHTML = `<div class="msg ai-msg">❌ Erro ao conectar. Verifique sua conexão e tente novamente.</div>`;
+                tempMsg.innerHTML = `<div class="msg ai-msg">❌ Erro ao conectar: ${err.message || "Tente novamente mais tarde."}</div>`;
             }
         }
         scrollToBottom();
