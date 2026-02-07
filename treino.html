@@ -1,523 +1,119 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA-ZÉNIA | GitHub Synced V13</title>
+    <title>Lubango AI - LobeStyle</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --n-blue: #00ffff; --bg: #000d1a; --side: #00050a; }
-        .theme-blue-vivo { --n-blue: #00ffff; --bg: #001a33; }
-        
-        body { background: var(--bg); color: white; transition: 0.3s; font-family: 'Inter', sans-serif; height: 100vh; display: flex; overflow: hidden; }
-        .sidebar { width: 320px; background: var(--side); border-right: 1px solid var(--n-blue); display: flex; flex-direction: column; overflow-y: auto; }
-        .chat-area { flex: 1; display: flex; flex-direction: column; position: relative; }
-        
-        .msg { margin: 15px; padding: 18px; border-radius: 15px; max-width: 85%; animation: fadeIn 0.3s ease; line-height: 1.6; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } }
-        .msg-ia { border-left: 4px solid var(--n-blue); background: rgba(0,255,255,0.03); border: 1px solid rgba(0,255,255,0.1); }
-        .msg-user { margin-left: auto; background: var(--n-blue); color: black; font-weight: 500; }
-        
-        .panel { background: rgba(0,0,0,0.98); backdrop-blur: 20px; z-index: 100; transition: 0.5s; }
-        .hidden-panel { transform: translateX(-100%); }
-        
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: var(--n-blue); border-radius: 10px; }
-        .neon-text { text-shadow: 0 0 10px var(--n-blue); }
-        
-        .status-indicator { display: inline-block; width: 8px; height: 8px; border-radius: 50%; animation: pulse 2s infinite; }
-        .status-online { background: #00ff88; }
-        .status-syncing { background: #ffaa00; animation: pulse 0.5s infinite; }
-        
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        
-        .database-entry {
-            background: rgba(0,255,255,0.08);
-            border: 1px solid rgba(0,255,255,0.2);
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 6px;
-            font-size: 10px;
-        }
-
-        .sync-indicator {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #00ff88;
-            margin-right: 5px;
-        }
+        body { background-color: #0f0f0f; color: #e5e5e5; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .chat-container { height: calc(100vh - 180px); overflow-y: auto; }
+        .user-msg { background: #2563eb; color: white; align-self: flex-end; }
+        .ai-msg { background: #262626; align-self: flex-start; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
-<body class="theme-blue-vivo">
+<body class="flex flex-col h-screen">
 
-    <!-- PAINEL DE SINCRONIZAÇÃO -->
-    <div id="sync-panel" class="fixed inset-0 panel hidden-panel p-8 overflow-y-auto">
-        <div class="max-w-4xl mx-auto">
-            <div class="flex justify-between items-center mb-6 sticky top-0 bg-black/90 pb-4">
-                <h2 class="text-2xl font-bold text-cyan-400 neon-text"><i class="fas fa-database mr-2"></i> SINCRONIZAÇÃO GITHUB</h2>
-                <button onclick="toggleSync()" class="text-white hover:text-red-500 text-3xl">&times;</button>
-            </div>
-            
-            <div class="space-y-4">
-                <div class="bg-cyan-500/10 border border-cyan-500/30 p-4 rounded-lg">
-                    <p class="text-cyan-400 font-bold mb-2">☁️ Sincronizar com Dados Reais</p>
-                    <p class="text-white/70">Conectar-se a bases de dados de conversas do GitHub para expandir conhecimento e padrões de diálogo.</p>
-                </div>
+    <header class="p-4 border-b border-white/10 flex justify-between items-center glass">
+        <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            Lubango AI <span class="text-xs font-light text-gray-400">v1.0</span>
+        </h1>
+        <div id="status" class="text-xs text-yellow-500 font-mono">Carregando motor local...</div>
+    </header>
 
-                <div>
-                    <label class="text-cyan-400 text-sm block mb-2">Bases de Dados do GitHub</label>
-                    <div class="space-y-2">
-                        <label class="flex items-center gap-2 text-white/70 text-sm">
-                            <input type="checkbox" class="github-source" value="conversational" checked> 🗣️ Conversational AI Datasets
-                        </label>
-                        <label class="flex items-center gap-2 text-white/70 text-sm">
-                            <input type="checkbox" class="github-source" value="ubuntu" checked> 🐧 Ubuntu Dialogue Corpus
-                        </label>
-                        <label class="flex items-center gap-2 text-white/70 text-sm">
-                            <input type="checkbox" class="github-source" value="empathetic" checked> 💙 Empathetic Dialogues
-                        </label>
-                        <label class="flex items-center gap-2 text-white/70 text-sm">
-                            <input type="checkbox" class="github-source" value="daily" checked> 📅 Daily Dialogue
-                        </label>
-                        <label class="flex items-center gap-2 text-white/70 text-sm">
-                            <input type="checkbox" class="github-source" value="reddit"> 🔴 Reddit Conversations
-                        </label>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="text-cyan-400 text-sm block mb-2">Quantidade de Dados</label>
-                    <input type="range" id="data-limit" min="100" max="5000" value="1000" step="100" class="w-full accent-cyan-400">
-                    <p class="text-white/60 text-xs mt-1">Carregar até <span id="limit-display">1000</span> conversas</p>
-                </div>
-
-                <div>
-                    <label class="text-cyan-400 text-sm block mb-2">Filtros</label>
-                    <div class="flex gap-2">
-                        <input type="checkbox" id="filter-quality" checked>
-                        <label for="filter-quality" class="text-white/70 text-sm">Apenas conversas de qualidade alta</label>
-                    </div>
-                </div>
-
-                <button onclick="syncWithGitHub()" class="w-full bg-cyan-500 text-black font-bold py-3 rounded-xl hover:bg-white transition">
-                    <i class="fas fa-sync mr-2"></i> SINCRONIZAR COM GITHUB
-                </button>
-
-                <div id="sync-status" class="text-white text-sm text-center">
-                    Pronta para sincronizar...
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <aside class="sidebar p-6 hidden lg:flex">
-        <div class="mb-8">
-            <div class="flex items-center gap-2 mb-2">
-                <span class="status-indicator" id="status-light"></span>
-                <h1 class="text-3xl font-black italic text-cyan-400 neon-text">ZÉNIA V13</h1>
-            </div>
-            <p class="text-[10px] opacity-40 tracking-[4px]">GITHUB SYNCED</p>
-            <p class="text-[9px] opacity-60 mt-2 italic">Conectada aos dados do mundo 🌍</p>
-        </div>
-        
-        <nav class="space-y-3 mb-6">
-            <button onclick="toggleSync()" class="w-full text-left p-3 rounded-lg border border-cyan-500/20 hover:bg-cyan-500/10 transition text-xs">
-                <i class="fas fa-database mr-2"></i> SINCRONIZAR
-            </button>
-            <button onclick="showSyncStatus()" class="w-full text-left p-3 rounded-lg border border-green-500/20 hover:bg-green-500/10 transition text-xs">
-                <i class="fas fa-chart-bar mr-2"></i> STATUS
-            </button>
-            <button onclick="viewDatabases()" class="w-full text-left p-3 rounded-lg border border-blue-500/20 hover:bg-blue-500/10 transition text-xs">
-                <i class="fas fa-list mr-2"></i> BASES DE DADOS
-            </button>
-        </nav>
-        
-        <div class="mb-6 border-t border-white/10 pt-4">
-            <p class="text-[9px] opacity-40 uppercase mb-3">Status de Sincronização</p>
-            <div class="space-y-2 text-[10px]">
-                <div class="flex justify-between"><span>Conectado:</span> <span id="sync-status-light" class="text-green-400 font-bold">✓ Sim</span></div>
-                <div class="flex justify-between"><span>Conversas:</span> <span id="conversation-loaded" class="text-cyan-400 font-bold">0</span></div>
-                <div class="flex justify-between"><span>Padrões:</span> <span id="patterns-count" class="text-cyan-400 font-bold">0</span></div>
-                <div class="flex justify-between"><span>Qualidade:</span> <span id="quality-score" class="text-green-400 font-bold">--</span></div>
-            </div>
-        </div>
-
-        <div class="border-t border-white/10 pt-4">
-            <p class="text-[9px] opacity-40 uppercase mb-2">Bases Ativas</p>
-            <div id="active-databases" class="space-y-1 text-[9px]">
-                <p class="opacity-50">Nenhuma base sincronizada...</p>
-            </div>
-        </div>
-    </aside>
-
-    <main class="chat-area">
-        <div id="chat-window" class="flex-1 overflow-y-auto p-4 md:p-10 space-y-6">
-            <div class="msg msg-ia">
-                <p class="text-cyan-400 font-mono text-[10px] mb-2">GITHUB_SYNCED_V13_ONLINE</p>
-                <p>✨ Oi! Sou a <strong>ZÉNIA V13</strong> - Sincronizada com dados reais do GitHub.</p>
-                <p class="text-[11px] mt-3 opacity-90">Agora estou conectada a:</p>
-                <p class="text-[11px] opacity-80">💬 <strong>Conversational AI Datasets</strong> - Padrões de diálogo autênticos</p>
-                <p class="text-[11px] opacity-80">🐧 <strong>Ubuntu Dialogue Corpus</strong> - Conversas técnicas e naturais</p>
-                <p class="text-[11px] opacity-80">💙 <strong>Empathetic Dialogues</strong> - Padrões de empatia genuína</p>
-                <p class="text-[11px] opacity-80">📅 <strong>Daily Dialogue</strong> - Conversas do dia-a-dia</p>
-                <p class="text-[12px] mt-3 text-green-400">Meu conhecimento agora vem do mundo real! Sincroniza-me e verás como mudo! 💚</p>
-            </div>
-        </div>
-
-        <div class="p-6 bg-black/20 backdrop-blur-md">
-            <div class="max-w-4xl mx-auto flex items-end gap-3 bg-slate-900/90 p-3 rounded-2xl border border-white/10">
-                <textarea id="user-input" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 text-sm md:text-base py-3 outline-none" placeholder="Fala comigo..."></textarea>
-                <button onclick="handleAction()" class="bg-cyan-500 text-black w-12 h-12 rounded-xl flex items-center justify-center hover:scale-105 transition shadow-lg">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
+    <main class="flex-1 p-4 md:p-8 flex flex-col gap-4 chat-container" id="chat">
+        <div class="ai-msg p-4 rounded-2xl max-w-[80%]">
+            Olá! Sou uma IA inspirada no projeto LobeHub, rodando 100% no seu navegador. 
+            Como minhas irmãs <b>IA-ZÉNIA</b> e <b>Antónia</b>, fui concebida para ajudar. 
+            <br><small class="opacity-50">(Nota: O primeiro carregamento pode demorar, pois baixarei o modelo para seu cache local).</small>
         </div>
     </main>
 
-    <!-- MODAL DE STATUS -->
-    <div id="status-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-200 p-4">
-        <div class="bg-slate-900 border border-cyan-500/50 p-8 rounded-xl max-w-2xl max-h-96 overflow-y-auto">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-cyan-400"><i class="fas fa-chart-bar mr-2"></i> STATUS DE SINCRONIZAÇÃO</h3>
-                <button onclick="closeStatus()" class="text-white hover:text-red-500 text-2xl">&times;</button>
-            </div>
-            <div id="status-content" class="text-white text-sm space-y-3">
-                <!-- Preenchido por JavaScript -->
-            </div>
+    <footer class="p-4 bg-transparent">
+        <div class="max-w-4xl mx-auto flex gap-2 p-2 rounded-2xl glass">
+            <input type="text" id="userInput" placeholder="Digite sua mensagem..." 
+                class="bg-transparent flex-1 p-3 outline-none border-none focus:ring-0">
+            <button id="sendBtn" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-xl transition-all font-medium disabled:opacity-50">
+                Enviar
+            </button>
         </div>
-    </div>
+        <p class="text-[10px] text-center mt-2 text-gray-500">
+            Powered by WebLLM • Inspirado por LobeHub • Lubango, Angola
+        </p>
+    </footer>
 
-    <!-- MODAL DE BASES -->
-    <div id="databases-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-200 p-4">
-        <div class="bg-slate-900 border border-cyan-500/50 p-8 rounded-xl max-w-2xl max-h-96 overflow-y-auto">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-cyan-400"><i class="fas fa-database mr-2"></i> BASES DE DADOS CARREGADAS</h3>
-                <button onclick="closeDatabases()" class="text-white hover:text-red-500 text-2xl">&times;</button>
-            </div>
-            <div id="databases-content" class="text-white text-sm space-y-3">
-                <!-- Preenchido por JavaScript -->
-            </div>
-        </div>
-    </div>
+    <script type="module">
+        import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
-    <script>
-        // ========== ZÉNIA V13 - GITHUB SYNCED ==========
+        const chatContainer = document.getElementById('chat');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const status = document.getElementById('status');
+
+        // Configuração do Modelo (Llama-3-8B-q4f32_1-MLC)
+        const selectedModel = "Llama-3-8B-Instruct-v0.2-q4f16_1-MLC";
         
-        let GITHUB_DATA = {
-            synced: false,
-            databases: {},
-            conversationPatterns: [],
-            dialogueExamples: [],
-            stats: {
-                totalConversations: 0,
-                totalPatterns: 0,
-                qualityScore: 0,
-                lastSyncTime: null
-            },
-            syncHistory: []
-        };
+        const engine = new webllm.MLCEngine();
 
-        // ========== GITHUB REPOSITORIES SIMULADAS ==========
-        // Em produção, estas seriam requisições reais ao GitHub API
-        const GITHUB_DATASETS = {
-            conversational: {
-                name: 'Conversational AI Datasets',
-                url: 'github.com/SYMSay/conversational_datasets',
-                description: 'Múltiplas conversas em diferentes linguagens',
-                patterns: [
-                    { user: 'Olá', response: 'Oi! Como posso ajudar-te?' },
-                    { user: 'Como estás?', response: 'Estou bem, obrigada! E tu?' },
-                    { user: 'Qual é teu nome?', response: 'Sou uma IA assistente.' },
-                    { user: 'Pode me ajudar?', response: 'Claro! Diz-me o que precisas.' },
-                    { user: 'Obrigado', response: 'De nada! Fico feliz em ajudar.' }
-                ]
-            },
-            ubuntu: {
-                name: 'Ubuntu Dialogue Corpus',
-                url: 'github.com/rkadlec/ubuntu-ranking-dataset',
-                description: 'Conversas técnicas e suporte ao utilizador',
-                patterns: [
-                    { user: 'Como faço para...?', response: 'Deixa-me ajudar-te com isso.' },
-                    { user: 'Não funciona', response: 'Podemos debug isto juntos.' },
-                    { user: 'Qual é o erro?', response: 'Deixa-me verificar os detalhes.' },
-                    { user: 'Preciso de suporte', response: 'Estou aqui para ajudar.' }
-                ]
-            },
-            empathetic: {
-                name: 'Empathetic Dialogues',
-                url: 'github.com/facebookresearch/EmpatheticDialogues',
-                description: 'Conversas com empatia genuína',
-                patterns: [
-                    { user: 'Estou triste', response: 'Sinto muito. Quer conversar sobre isso?' },
-                    { user: 'Tive um dia difícil', response: 'Entendo. Como posso apoiar-te?' },
-                    { user: 'Sinto-me sozinho', response: 'Estou aqui para ti. Conta-me.' },
-                    { user: 'Tenho medo', response: 'Teus sentimentos são válidos. Como posso ajudar?' },
-                    { user: 'Estou ansioso', response: 'É normal sentir isso. Vamos conversar.' }
-                ]
-            },
-            daily: {
-                name: 'Daily Dialogue Dataset',
-                url: 'github.com/gunjanwalia/daily_dialog',
-                description: 'Conversas do dia-a-dia naturais',
-                patterns: [
-                    { user: 'Que dia lindo!', response: 'Verdade! O tempo está perfeito!' },
-                    { user: 'Já comeste?', response: 'Sim, já! E tu?' },
-                    { user: 'O que fizeste hoje?', response: 'Várias coisas interessantes. E tu?' },
-                    { user: 'Vamos sair?', response: 'Ótima ideia! Para onde vamos?' }
-                ]
-            },
-            reddit: {
-                name: 'Reddit Conversations',
-                url: 'github.com/taboada/reddit-corpus',
-                description: 'Conversas reais da comunidade Reddit',
-                patterns: [
-                    { user: 'Isto é louco', response: 'Concordo! O mundo é estranho.' },
-                    { user: 'Alguém consegue explicar?', response: 'Claro! Aqui está o que sei.' },
-                    { user: 'Tem alguém aqui que sabe?', response: 'Sim, posso ajudar!' }
-                ]
-            }
-        };
-
-        // ========== SINCRONIZAR COM GITHUB ==========
-        async function syncWithGitHub() {
-            document.getElementById('status-light').className = 'status-indicator status-syncing';
-            const statusDiv = document.getElementById('sync-status');
-            statusDiv.innerHTML = '🔄 Sincronizando com GitHub...';
-
-            const selectedSources = Array.from(document.querySelectorAll('.github-source:checked')).map(cb => cb.value);
-            const dataLimit = parseInt(document.getElementById('data-limit').value);
-            const filterQuality = document.getElementById('filter-quality').checked;
-
-            let totalConversations = 0;
-            let totalPatterns = 0;
-
-            GITHUB_DATA.databases = {};
-            GITHUB_DATA.conversationPatterns = [];
-
-            // Simular carregamento de cada base
-            for (let source of selectedSources) {
-                const dataset = GITHUB_DATASETS[source];
-                if (dataset) {
-                    statusDiv.innerHTML = `🔄 Carregando ${dataset.name}...`;
-                    
-                    await new Promise(resolve => setTimeout(resolve, 800));
-
-                    GITHUB_DATA.databases[source] = {
-                        name: dataset.name,
-                        url: dataset.url,
-                        description: dataset.description,
-                        patterns: dataset.patterns,
-                        loadedAt: Date.now()
-                    };
-
-                    GITHUB_DATA.conversationPatterns.push(...dataset.patterns);
-                    totalConversations += dataset.patterns.length;
-                    totalPatterns += dataset.patterns.length * 2; // user + response
-                }
-            }
-
-            // Atualizar stats
-            GITHUB_DATA.stats.totalConversations = totalConversations;
-            GITHUB_DATA.stats.totalPatterns = totalPatterns;
-            GITHUB_DATA.stats.qualityScore = filterQuality ? 95 : 75;
-            GITHUB_DATA.stats.lastSyncTime = Date.now();
-            GITHUB_DATA.synced = true;
-
-            GITHUB_DATA.syncHistory.push({
-                timestamp: Date.now(),
-                sources: selectedSources,
-                conversationsLoaded: totalConversations,
-                quality: GITHUB_DATA.stats.qualityScore
-            });
-
-            updateUI();
-            statusDiv.innerHTML = `✅ Sincronização completa! ${totalConversations} conversas carregadas de ${selectedSources.length} bases.`;
-            document.getElementById('status-light').className = 'status-indicator status-online';
-
-            addMsg('ia', `🎉 Sincronizada com sucesso!\n\n📊 Dados Carregados:\n• ${selectedSources.length} bases de dados\n• ${totalConversations} conversas\n• ${totalPatterns} padrões de diálogo\n\nAgora tenho muito mais conhecimento sobre como conversar naturalmente! 💙`);
-
-            setTimeout(() => toggleSync(), 2000);
-        }
-
-        // ========== USAR PADRÕES DO GITHUB NA RESPOSTA ==========
-        function getResponseFromGitHub(userMessage) {
-            if (!GITHUB_DATA.synced || GITHUB_DATA.conversationPatterns.length === 0) {
-                return null;
-            }
-
-            const msg = userMessage.toLowerCase();
-
-            // Buscar padrão similar
-            for (let pattern of GITHUB_DATA.conversationPatterns) {
-                const patternText = pattern.user.toLowerCase();
-                
-                // Matching exato ou similar
-                if (msg === patternText || 
-                    (msg.length > 3 && patternText.includes(msg.substring(0, 5)))) {
-                    return pattern.response;
-                }
-            }
-
-            // Buscar por palavra-chave
-            for (let pattern of GITHUB_DATA.conversationPatterns) {
-                const words = pattern.user.toLowerCase().split(/\s+/);
-                const msgWords = msg.split(/\s+/);
-                
-                const matches = msgWords.filter(w => 
-                    words.some(pword => pword.includes(w) || w.includes(pword))
-                ).length;
-
-                if (matches > 0) {
-                    return pattern.response;
-                }
-            }
-
-            return null;
-        }
-
-        // ========== INTERFACE ==========
-        function updateUI() {
-            document.getElementById('conversation-loaded').innerText = GITHUB_DATA.stats.totalConversations;
-            document.getElementById('patterns-count').innerText = GITHUB_DATA.stats.totalPatterns;
-            document.getElementById('quality-score').innerText = GITHUB_DATA.stats.qualityScore + '%';
-            document.getElementById('sync-status-light').innerText = GITHUB_DATA.synced ? '✓ Sim' : '✗ Não';
-
-            // Atualizar bases ativas
-            const activeDbs = document.getElementById('active-databases');
-            const activeSources = Object.keys(GITHUB_DATA.databases);
-
-            if (activeSources.length === 0) {
-                activeDbs.innerHTML = '<p class="opacity-50">Nenhuma base sincronizada...</p>';
-            } else {
-                activeDbs.innerHTML = activeSources.map(source => {
-                    const db = GITHUB_DATA.databases[source];
-                    return `
-                        <div style="padding: 5px; background: rgba(0,255,255,0.1); border-radius: 4px; margin: 3px 0;">
-                            <p class="text-cyan-400 font-bold text-[9px]"><span class="sync-indicator"></span>${db.name}</p>
-                            <p class="text-cyan-300/70 text-[8px]">${db.patterns.length} padrões</p>
-                        </div>
-                    `;
-                }).join('');
-            }
-        }
-
-        function showSyncStatus() {
-            const statusContent = document.getElementById('status-content');
-
-            if (!GITHUB_DATA.synced) {
-                statusContent.innerHTML = '<p class="text-cyan-400">Ainda não sincronizada. Inicia a sincronização primeiro!</p>';
-            } else {
-                statusContent.innerHTML = `
-                    <div class="bg-cyan-500/10 border border-cyan-500/30 p-3 rounded">
-                        <p class="font-bold text-cyan-400">Status Geral</p>
-                        <p class="text-white/70 mt-2">Sincronizada: ✓</p>
-                        <p class="text-white/70">Bases: ${Object.keys(GITHUB_DATA.databases).length}</p>
-                        <p class="text-white/70">Conversas: ${GITHUB_DATA.stats.totalConversations}</p>
-                        <p class="text-white/70">Padrões: ${GITHUB_DATA.stats.totalPatterns}</p>
-                        <p class="text-white/70">Qualidade: ${GITHUB_DATA.stats.qualityScore}%</p>
-                    </div>
-
-                    <div class="bg-green-500/10 border border-green-500/30 p-3 rounded">
-                        <p class="font-bold text-green-400">Histórico de Sincronizações</p>
-                        ${GITHUB_DATA.syncHistory.slice(-3).reverse().map(sync => `
-                            <p class="text-white/70 text-[11px] mt-1">
-                                ${new Date(sync.timestamp).toLocaleTimeString('pt-PT')}: 
-                                ${sync.sources.join(', ')} (${sync.conversationsLoaded} conversas)
-                            </p>
-                        `).join('')}
-                    </div>
-                `;
-            }
-
-            document.getElementById('status-modal').classList.remove('hidden');
-        }
-
-        function closeStatus() {
-            document.getElementById('status-modal').classList.add('hidden');
-        }
-
-        function viewDatabases() {
-            const databasesContent = document.getElementById('databases-content');
-
-            if (Object.keys(GITHUB_DATA.databases).length === 0) {
-                databasesContent.innerHTML = '<p class="text-cyan-400">Nenhuma base carregada. Sincroniza primeiro!</p>';
-            } else {
-                databasesContent.innerHTML = Object.entries(GITHUB_DATA.databases).map(([key, db]) => `
-                    <div class="bg-cyan-500/10 border border-cyan-500/30 p-3 rounded">
-                        <p class="font-bold text-cyan-400">${db.name}</p>
-                        <p class="text-white/70 text-[11px] mt-1">${db.description}</p>
-                        <p class="text-white/60 text-[10px] mt-1">
-                            📍 ${db.url}<br>
-                            📊 ${db.patterns.length} padrões carregados<br>
-                            ⏰ ${new Date(db.loadedAt).toLocaleTimeString('pt-PT')}
-                        </p>
-                        <div class="mt-2 text-[10px] text-cyan-300">
-                            <p class="font-bold mb-1">Exemplos:</p>
-                            ${db.patterns.slice(0, 3).map(p => `
-                                <p>👤 "${p.user}"<br>🤖 "${p.response}"</p>
-                            `).join('')}
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            document.getElementById('databases-modal').classList.remove('hidden');
-        }
-
-        function closeDatabases() {
-            document.getElementById('databases-modal').classList.add('hidden');
-        }
-
-        function toggleSync() {
-            document.getElementById('sync-panel').classList.toggle('hidden-panel');
-        }
-
-        document.getElementById('data-limit').addEventListener('input', (e) => {
-            document.getElementById('limit-display').innerText = e.target.value;
+        engine.setInitProgressCallback((report) => {
+            status.textContent = report.text;
         });
 
-        async function handleAction() {
-            const input = document.getElementById('user-input');
-            const userMessage = input.value.trim();
-            if (!userMessage) return;
+        async function initChat() {
+            try {
+                await engine.reload(selectedModel);
+                status.textContent = "● Pronto (Local)";
+                status.classList.replace('text-yellow-500', 'text-green-500');
+            } catch (e) {
+                status.textContent = "Erro: WebGPU não suportado";
+                console.error(e);
+            }
+        }
 
-            addMsg('user', userMessage);
-            input.value = '';
-            const iaId = addMsg('ia', '💭 Procurando padrão...');
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // Interface
+            appendMessage(text, 'user-msg');
+            userInput.value = '';
+            const aiDiv = appendMessage('...', 'ai-msg');
             
-            setTimeout(() => {
-                const contentDiv = document.getElementById(iaId).querySelector('.content');
-                
-                // Tentar obter resposta do GitHub
-                let response = getResponseFromGitHub(userMessage);
+            // Lógica de Resposta
+            const messages = [{ role: "user", content: text }];
+            let fullReply = "";
+            
+            const chunks = await engine.chat.completions.create({
+                messages,
+                stream: true,
+            });
 
-                if (response) {
-                    contentDiv.innerHTML = `${response}<br><br><span class="text-[9px] opacity-60">📚 Resposta baseada em padrões de diálogo real</span>`;
-                } else {
-                    response = `Entendo que dizes "${userMessage}". É uma pergunta interessante! Gostaria de saber mais para responder melhor.`;
-                    contentDiv.innerHTML = response;
-                }
-            }, 800);
+            for await (const chunk of chunks) {
+                const content = chunk.choices[0]?.delta?.content || "";
+                fullReply += content;
+                aiDiv.innerHTML = fullReply;
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
         }
 
-        function addMsg(role, text) {
-            const id = 'msg-' + Date.now();
-            const win = document.getElementById('chat-window');
+        function appendMessage(text, className) {
             const div = document.createElement('div');
-            div.id = id;
-            div.className = `msg msg-${role}`;
-            div.innerHTML = `<div class="content">${text}</div>`;
-            win.appendChild(div);
-            win.scrollTo({top: win.scrollHeight, behavior: 'smooth'});
-            return id;
+            div.className = `${className} p-4 rounded-2xl max-w-[80%] animate-pulse`;
+            div.innerHTML = text;
+            chatContainer.appendChild(div);
+            div.classList.remove('animate-pulse');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return div;
         }
 
-        // Inicializar
-        document.getElementById('status-light').className = 'status-indicator status-online';
-        updateUI();
+        sendBtn.onclick = sendMessage;
+        userInput.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+
+        // Inicializa
+        initChat();
     </script>
 </body>
 </html>
