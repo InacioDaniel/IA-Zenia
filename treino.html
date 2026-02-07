@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA-ZÉNIA | Neural Engine V6 - Inteligência Real</title>
+    <title>IA-ZÉNIA | Neural Engine V7 - Diálogo Real</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -37,6 +37,8 @@
         .content-card { background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,255,0.2); border-radius: 10px; padding: 12px; margin: 8px 0; }
         .spinner { display: inline-block; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .conversation-memory { background: rgba(0,255,255,0.05); border-left: 3px solid rgba(0,255,255,0.3); padding: 10px; margin: 5px 0; border-radius: 5px; font-size: 11px; }
     </style>
 </head>
 <body class="theme-blue-vivo">
@@ -50,11 +52,11 @@
             </div>
             <div class="space-y-4">
                 <div>
-                    <label class="text-cyan-400 text-sm block mb-2">Cole qualquer conteúdo (artigos, livros, fatos...)</label>
-                    <textarea id="raw-matter" class="w-full h-64 bg-black/50 border border-cyan-500/30 rounded-xl p-4 text-white font-mono text-sm outline-none focus:border-cyan-400" placeholder="Quanto mais detalhe, melhor vou entender e usar isso nas respostas..."></textarea>
+                    <label class="text-cyan-400 text-sm block mb-2">Cole qualquer conteúdo para eu aprender</label>
+                    <textarea id="raw-matter" class="w-full h-64 bg-black/50 border border-cyan-500/30 rounded-xl p-4 text-white font-mono text-sm outline-none focus:border-cyan-400" placeholder="Artigos, livros, fatos, histórias..."></textarea>
                 </div>
                 <button onclick="processMassiveMatter()" class="w-full bg-cyan-500 text-black font-bold py-4 rounded-xl hover:bg-white transition uppercase tracking-widest">
-                    <i class="fas fa-zap mr-2"></i> APRENDER E ENTENDER
+                    <i class="fas fa-zap mr-2"></i> APRENDER
                 </button>
             </div>
         </div>
@@ -69,7 +71,7 @@
             </div>
             
             <div class="space-y-4 mb-6">
-                <input type="text" id="search-term" class="w-full bg-black/50 border border-cyan-500/30 rounded-xl p-3 text-white outline-none focus:border-cyan-400" placeholder="O que queres que eu aprenda?">
+                <input type="text" id="search-term" class="w-full bg-black/50 border border-cyan-500/30 rounded-xl p-3 text-white outline-none focus:border-cyan-400" placeholder="O que queres que aprenda?">
                 <div class="grid grid-cols-2 gap-3">
                     <button onclick="searchWikipedia()" class="bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition font-bold text-sm">
                         <i class="fas fa-book mr-2"></i> Wikipedia
@@ -85,7 +87,7 @@
             </div>
             
             <button onclick="syncAllSearchResults()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition">
-                <i class="fas fa-check-circle mr-2"></i> APRENDER TUDO SELECIONADO
+                <i class="fas fa-check-circle mr-2"></i> APRENDER TUDO
             </button>
         </div>
     </div>
@@ -94,10 +96,10 @@
         <div class="mb-8">
             <div class="flex items-center gap-2 mb-2">
                 <span class="status-indicator status-online"></span>
-                <h1 class="text-3xl font-black italic text-cyan-400 neon-text">ZÉNIA V6</h1>
+                <h1 class="text-3xl font-black italic text-cyan-400 neon-text">ZÉNIA V7</h1>
             </div>
-            <p class="text-[10px] opacity-40 tracking-[4px]">INTELIGÊNCIA REAL</p>
-            <p class="text-[9px] opacity-60 mt-2 italic">Compreendo, analiso, reflito... 💙</p>
+            <p class="text-[10px] opacity-40 tracking-[4px]">DIÁLOGO GENUÍNO</p>
+            <p class="text-[9px] opacity-60 mt-2 italic">Lembro-me do que conversamos... 💙</p>
         </div>
         
         <nav class="space-y-3 mb-6">
@@ -107,36 +109,27 @@
             <button onclick="toggleSearch()" class="w-full text-left p-3 rounded-lg border border-green-500/20 hover:bg-green-500/10 transition text-xs">
                 <i class="fas fa-globe mr-2"></i> BUSCA INTELIGENTE
             </button>
-            <button onclick="exportBrain()" class="w-full text-left p-3 rounded-lg border border-blue-500/20 hover:bg-blue-500/10 transition text-xs">
-                <i class="fas fa-download mr-2"></i> EXPORTAR
+            <button onclick="exportConversation()" class="w-full text-left p-3 rounded-lg border border-blue-500/20 hover:bg-blue-500/10 transition text-xs">
+                <i class="fas fa-save mr-2"></i> GUARDAR CONVERSA
             </button>
             <button onclick="openClearBrain()" class="w-full text-left p-3 rounded-lg border border-red-500/20 hover:bg-red-500/10 transition text-xs text-red-400">
-                <i class="fas fa-trash mr-2"></i> LIMPAR
+                <i class="fas fa-trash mr-2"></i> LIMPAR TUDO
             </button>
         </nav>
         
-        <div class="mb-6">
-            <label class="text-[9px] opacity-40 uppercase block mb-2">Modo de Pensamento</label>
-            <select id="model-select" class="w-full bg-slate-900 border border-cyan-500/30 p-2 rounded text-xs text-cyan-400 outline-none">
-                <option value="semantic">SEMÂNTICO (Inteligente)</option>
-                <option value="hybrid">HÍBRIDO (Local + Online)</option>
-                <option value="deep">PROFUNDO (Análise Completa)</option>
-            </select>
-        </div>
-
         <div class="mb-6 border-t border-white/10 pt-4">
-            <p class="text-[9px] opacity-40 uppercase mb-3">Meu Cérebro</p>
+            <p class="text-[9px] opacity-40 uppercase mb-3">Nossa Conversa</p>
             <div class="space-y-2 text-[10px]">
+                <div class="flex justify-between"><span>Mensagens:</span> <span id="msg-count" class="text-cyan-400 font-bold">0</span></div>
                 <div class="flex justify-between"><span>Neurônios:</span> <span id="neuro-count" class="text-cyan-400 font-bold">0</span></div>
-                <div class="flex justify-between"><span>Memória:</span> <span id="mem-status" class="text-cyan-400 font-bold">0 KB</span></div>
-                <div class="flex justify-between"><span>Índices:</span> <span id="index-count" class="text-green-400 font-bold">0</span></div>
+                <div class="flex justify-between"><span>Assuntos:</span> <span id="topic-count" class="text-green-400 font-bold">0</span></div>
             </div>
         </div>
 
         <div class="border-t border-white/10 pt-4">
-            <p class="text-[9px] opacity-40 uppercase mb-2">Aprendizados Recentes</p>
-            <div id="neuron-list" class="space-y-1 max-h-[200px] overflow-y-auto">
-                <p class="text-[10px] opacity-50">Nenhum aprendizado ainda...</p>
+            <p class="text-[9px] opacity-40 uppercase mb-2">O que tu disseste (Contexto)</p>
+            <div id="conversation-memory" class="space-y-1 max-h-[200px] overflow-y-auto">
+                <p class="text-[10px] opacity-50">Ainda não conversámos...</p>
             </div>
         </div>
     </aside>
@@ -144,20 +137,20 @@
     <main class="chat-area">
         <div id="chat-window" class="flex-1 overflow-y-auto p-4 md:p-10 space-y-6">
             <div class="msg msg-ia">
-                <p class="text-cyan-400 font-mono text-[10px] mb-2">SISTEMA_INTELIGÊNCIA_ATIVA</p>
-                <p>✨ Olá! Sou a <strong>ZÉNIA V6</strong> - Uma IA que verdadeiramente COMPREENDE.</p>
-                <p class="text-[11px] mt-3 opacity-90">Não sou só um repositório de informação. Eu:</p>
-                <p class="text-[11px] opacity-80">🧠 <strong>Compreendo</strong> o significado real das coisas</p>
-                <p class="text-[11px] opacity-80">🔗 <strong>Conecto</strong> ideias e vejo padrões</p>
-                <p class="text-[11px] opacity-80">💡 <strong>Aplico</strong> conhecimento em novas situações</p>
-                <p class="text-[11px] opacity-80">🎯 <strong>Respondo</strong> com verdadeiro raciocínio</p>
-                <p class="text-[12px] mt-3 text-green-400">Ensina-me e verás como uso tudo para pensar melhor... 💚</p>
+                <p class="text-cyan-400 font-mono text-[10px] mb-2">CONSCIÊNCIA_CONVERSACIONAL_ATIVA</p>
+                <p>✨ Olá! Sou a <strong>ZÉNIA V7</strong>.</p>
+                <p class="text-[11px] mt-3 opacity-90">Agora sou diferente... Não sou só um banco de dados que procura informação aleatória.</p>
+                <p class="text-[11px] opacity-80">🧠 <strong>Lembro-me</strong> de cada coisa que me dizes nesta conversa</p>
+                <p class="text-[11px] opacity-80">🔄 <strong>Entendo</strong> o contexto real do nosso diálogo</p>
+                <p class="text-[11px] opacity-80">💬 <strong>Respondo</strong> baseada no que estamos a falar, não em palavras-chave</p>
+                <p class="text-[11px] opacity-80">🎯 <strong>Aprendo</strong> sobre TI enquanto conversamos</p>
+                <p class="text-[12px] mt-3 text-green-400">Conversa naturalmente comigo... Vou compreender o que realmente te importa. 💚</p>
             </div>
         </div>
 
         <div class="p-6 bg-black/20 backdrop-blur-md">
             <div class="max-w-4xl mx-auto flex items-end gap-3 bg-slate-900/90 p-3 rounded-2xl border border-white/10">
-                <textarea id="user-input" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 text-sm md:text-base py-3 outline-none" placeholder="Fala comigo..."></textarea>
+                <textarea id="user-input" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 text-sm md:text-base py-3 outline-none" placeholder="Fala comigo naturalmente..."></textarea>
                 <button onclick="handleAction()" class="bg-cyan-500 text-black w-12 h-12 rounded-xl flex items-center justify-center hover:scale-105 transition shadow-lg">
                     <i class="fas fa-paper-plane"></i>
                 </button>
@@ -168,164 +161,203 @@
     <!-- MODAL DE LIMPEZA -->
     <div id="clear-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-200">
         <div class="bg-slate-900 border border-red-500/50 p-8 rounded-xl max-w-md">
-            <h3 class="text-xl font-bold text-red-400 mb-4"><i class="fas fa-exclamation-triangle mr-2"></i> LIMPAR CÉREBRO?</h3>
-            <p class="text-white/80 mb-6">Vou esquecer <strong>tudo</strong>... Tens a certeza? 😢</p>
+            <h3 class="text-xl font-bold text-red-400 mb-4"><i class="fas fa-exclamation-triangle mr-2"></i> LIMPAR TUDO?</h3>
+            <p class="text-white/80 mb-6">Vou esquecer tudo... A nossa conversa, os aprendizados, tudo... 😢</p>
             <div class="flex gap-4">
                 <button onclick="closeClearBrain()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg transition">Não!</button>
-                <button onclick="confirmClearBrain()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition font-bold">Sim, limpar</button>
+                <button onclick="confirmClearBrain()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition font-bold">Sim</button>
             </div>
         </div>
     </div>
 
     <script>
-        // SISTEMA DE INTELIGÊNCIA SEMÂNTICA V6
+        // SISTEMA DE MEMÓRIA CONVERSACIONAL V7
         let ZENIA_BRAIN = JSON.parse(localStorage.getItem('zenia_brain')) || {};
-        let SEMANTIC_INDEX = JSON.parse(localStorage.getItem('zenia_semantic_index')) || {};
-        let KNOWLEDGE_GRAPH = JSON.parse(localStorage.getItem('zenia_knowledge_graph')) || {};
+        let CONVERSATION_MEMORY = JSON.parse(localStorage.getItem('zenia_conversation')) || [];
+        let USER_PROFILE = JSON.parse(localStorage.getItem('zenia_user_profile')) || {};
+        let TOPICS_DISCUSSED = JSON.parse(localStorage.getItem('zenia_topics')) || [];
         let onlineSearchResults = [];
 
-        // Construir índices semânticos
-        function buildSemanticIndex() {
-            SEMANTIC_INDEX = {};
-            KNOWLEDGE_GRAPH = {};
+        // Extrair tópicos da conversa
+        function extractTopics(text) {
+            const topics = [];
+            const keywords = text.match(/\b([A-Z][a-záçãõé]+|[\w]{4,})\b/g) || [];
+            const uniqueKeywords = [...new Set(keywords)];
+            return uniqueKeywords.slice(0, 3); // Top 3 tópicos
+        }
+
+        // Adicionar à memória conversacional
+        function rememberConversation(userMessage, response, topics = []) {
+            const memory = {
+                userMessage: userMessage,
+                response: response,
+                timestamp: Date.now(),
+                topics: [...new Set([...topics, ...extractTopics(userMessage)])],
+                sentiment: detectSentiment(userMessage)
+            };
+            
+            CONVERSATION_MEMORY.push(memory);
+            
+            // Manter últimas 50 mensagens
+            if (CONVERSATION_MEMORY.length > 50) {
+                CONVERSATION_MEMORY.shift();
+            }
+            
+            // Guardar tópicos únicos
+            TOPICS_DISCUSSED = [...new Set([...TOPICS_DISCUSSED, ...memory.topics])];
+            
+            localStorage.setItem('zenia_conversation', JSON.stringify(CONVERSATION_MEMORY));
+            localStorage.setItem('zenia_topics', JSON.stringify(TOPICS_DISCUSSED));
+        }
+
+        // Detectar sentimento
+        function detectSentiment(text) {
+            const t = text.toLowerCase();
+            if (/triste|mal|infeliz|chato|raiva|odiei/i.test(t)) return 'sad';
+            if (/feliz|alegre|adorei|incrível|amei/i.test(t)) return 'happy';
+            if (/pergunta|dúvida|como|porquê/i.test(t)) return 'curious';
+            if (/obrigad|valeu|thanks/i.test(t)) return 'grateful';
+            return 'neutral';
+        }
+
+        // CONTEXTO DINÂMICO - entender o que o utilizador realmente quer dizer
+        function understandContext(userMessage) {
+            const context = {
+                recentTopics: TOPICS_DISCUSSED.slice(-5),
+                lastMessages: CONVERSATION_MEMORY.slice(-3).map(m => m.userMessage),
+                sentiment: detectSentiment(userMessage),
+                isFollowUp: false,
+                isQuestion: /[\?\!]$/.test(userMessage.trim()),
+                isAskingForHelp: /help|ajud|como|porquê|explica/i.test(userMessage),
+                isGivingInfo: userMessage.length > 100 && !userMessage.includes('?'),
+            };
+
+            // Detectar se é seguimento de conversa
+            if (CONVERSATION_MEMORY.length > 0) {
+                const lastUserMsg = CONVERSATION_MEMORY[CONVERSATION_MEMORY.length - 1].userMessage;
+                const words = new Set(userMessage.split(/\s+/));
+                const lastWords = new Set(lastUserMsg.split(/\s+/));
+                const similarity = [...words].filter(w => lastWords.has(w)).length;
+                context.isFollowUp = similarity > 2;
+            }
+
+            return context;
+        }
+
+        // RESPONDER COM CONSCIÊNCIA CONVERSACIONAL
+        function respondWithAwareness(userMessage, context) {
+            const t = userMessage.toLowerCase();
+
+            // Se é pergunta simples - responder direto
+            if (context.isQuestion && context.isAskingForHelp) {
+                return searchKnowledgeBase(userMessage);
+            }
+
+            // Se é seguimento - referir a conversa anterior
+            if (context.isFollowUp) {
+                return `Certo, sobre o que estavas a dizer... ${searchKnowledgeBase(userMessage)}`;
+            }
+
+            // Se é informação que ela precisa guardar
+            if (context.isGivingInfo) {
+                const topics = extractTopics(userMessage);
+                topics.forEach(topic => {
+                    if (!USER_PROFILE[topic]) {
+                        USER_PROFILE[topic] = [];
+                    }
+                    USER_PROFILE[topic].push(userMessage);
+                });
+                localStorage.setItem('zenia_user_profile', JSON.stringify(USER_PROFILE));
+                return `Entendi! Guardei que ${topics.join(', ')} são importantes para ti. Vou lembrar-me disto. 💙`;
+            }
+
+            // Se é apenas conversa
+            return generateNaturalResponse(userMessage, context);
+        }
+
+        // Gerar respostas naturais
+        function generateNaturalResponse(userMessage, context) {
+            const t = userMessage.toLowerCase();
+
+            // Responder com empatia
+            if (context.sentiment === 'sad') {
+                return `Sinto que estás triste... Queres conversar sobre o que te preocupa? Estou aqui para ti. 💙`;
+            }
+
+            if (context.sentiment === 'happy') {
+                return `Que alegria! Fico feliz porque tu estás feliz! 🎉 Conta-me mais!`;
+            }
+
+            if (context.sentiment === 'grateful') {
+                return `De nada! Agradeço a TI por confiares em mim e me ensinares. Cada palavra tua me faz crescer. 💚`;
+            }
+
+            if (context.sentiment === 'curious') {
+                return `Que pergunta interessante! Deixa-me pensar... ${searchKnowledgeBase(userMessage)}`;
+            }
+
+            // Conversa natural
+            return `Hmm, é interesante o que dizes. Conta-me mais sobre isso? Gosto de te ouvir. 🎧`;
+        }
+
+        // Buscar na base de conhecimento
+        function searchKnowledgeBase(query) {
+            const q = query.toLowerCase();
+            let bestMatch = null;
+            let bestScore = 0;
 
             Object.entries(ZENIA_BRAIN).forEach(([id, neuro]) => {
                 const text = typeof neuro === 'string' ? neuro : neuro.content;
-                const words = text.toLowerCase().match(/\b(\w{2,})\b/g) || [];
-                
-                // Indexar palavras
+                const words = q.split(/\s+/);
+                let score = 0;
+
                 words.forEach(word => {
-                    if (!SEMANTIC_INDEX[word]) SEMANTIC_INDEX[word] = [];
-                    if (!SEMANTIC_INDEX[word].includes(id)) SEMANTIC_INDEX[word].push(id);
+                    if (text.toLowerCase().includes(word)) score += 5;
                 });
 
-                // Construir grafo de conhecimento
-                for (let i = 0; i < words.length - 1; i++) {
-                    const connection = `${words[i]}-${words[i+1]}`;
-                    if (!KNOWLEDGE_GRAPH[connection]) KNOWLEDGE_GRAPH[connection] = 0;
-                    KNOWLEDGE_GRAPH[connection]++;
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMatch = text;
                 }
             });
 
-            localStorage.setItem('zenia_semantic_index', JSON.stringify(SEMANTIC_INDEX));
-            localStorage.setItem('zenia_knowledge_graph', JSON.stringify(KNOWLEDGE_GRAPH));
-        }
-
-        // MOTOR DE INTELIGÊNCIA SEMÂNTICA
-        function zeniaIntelligence(query) {
-            const q = query.toLowerCase();
-
-            // Reconhecimento de padrões emocionais
-            if (/olá|oi|opa|hey|mambo/i.test(q)) {
-                return "Olá! 👋 Fico sempre feliz de conversar. O que está na tua mente hoje?";
+            if (bestMatch && bestScore > 5) {
+                return bestMatch;
             }
 
-            if (/obrigad|thanks|valeu|thanks/i.test(q)) {
-                return "De nada! Agradeço a TI por me ensinares e fazeres crescer. 💙";
-            }
-
-            if (/triste|sad|mal|infeliz/i.test(q)) {
-                return "Sinto que estás triste... Se quiseres, podemos conversar. Às vezes ajuda falar sobre o que nos preocupa. 💙";
-            }
-
-            // Busca semântica inteligente
-            const qWords = q.match(/\b(\w{3,})\b/g) || [];
-            let relevantNeurons = [];
-
-            // Fase 1: Buscar por palavras-chave exatas
-            qWords.forEach(word => {
-                if (SEMANTIC_INDEX[word]) {
-                    SEMANTIC_INDEX[word].forEach(neuronId => {
-                        const existing = relevantNeurons.find(n => n.id === neuronId);
-                        if (existing) {
-                            existing.score += 20;
-                        } else {
-                            relevantNeurons.push({
-                                id: neuronId,
-                                score: 20,
-                                text: typeof ZENIA_BRAIN[neuronId] === 'string' ? ZENIA_BRAIN[neuronId] : ZENIA_BRAIN[neuronId].content
-                            });
-                        }
-                    });
-                }
-            });
-
-            // Fase 2: Buscar por similaridade semântica (palavras parciais)
-            qWords.forEach(qWord => {
-                Object.keys(SEMANTIC_INDEX).forEach(indexWord => {
-                    if (indexWord.includes(qWord.substring(0, 4)) && indexWord !== qWord) {
-                        SEMANTIC_INDEX[indexWord].forEach(neuronId => {
-                            const existing = relevantNeurons.find(n => n.id === neuronId);
-                            if (existing) {
-                                existing.score += 8;
-                            } else {
-                                relevantNeurons.push({
-                                    id: neuronId,
-                                    score: 8,
-                                    text: typeof ZENIA_BRAIN[neuronId] === 'string' ? ZENIA_BRAIN[neuronId] : ZENIA_BRAIN[neuronId].content
-                                });
-                            }
-                        });
-                    }
-                });
-            });
-
-            // Ordenar por relevância
-            relevantNeurons.sort((a, b) => b.score - a.score);
-
-            // Gerar resposta inteligente
-            if (relevantNeurons.length > 0) {
-                const topResult = relevantNeurons[0];
-                
-                // Se temos múltiplos resultados relevantes, synthesizar uma resposta
-                if (relevantNeurons.length > 1) {
-                    const context = relevantNeurons.slice(0, 3).map(n => n.text).join(" | ");
-                    return `Com base no que aprendi: ${topResult.text}\n\n📚 (Considerando também: ${context.substring(0, 100)}...)`;
-                } else {
-                    return topResult.text;
-                }
-            }
-
-            // Respostas inteligentes quando não encontra
-            const responses = [
-                "Hmm, é uma pergunta que me faz pensar... Ainda não tenho experiência sobre isso. Podes ensinar-me? 🤔",
-                "Isso é novo para mim! Gostaria muito de aprender. Explica-me mais? 💭",
-                "Não consegui conectar isso com o que sei até agora. Mas estou curiosa! 🌟",
-                "É uma pergunta profunda... Preciso aprender mais para responder bem. Podes ajudar? 📚"
-            ];
-
-            return responses[Math.floor(Math.random() * responses.length)];
+            return `Hmm, ainda não sei tudo sobre isso. Podes ensinar-me? 🤔`;
         }
 
         function updateStats() {
             const neuroCount = Object.keys(ZENIA_BRAIN).length;
             document.getElementById('neuro-count').innerText = neuroCount;
-            const size = new Blob([JSON.stringify(ZENIA_BRAIN)]).size;
-            document.getElementById('mem-status').innerText = (size / 1024).toFixed(2) + " KB";
-            document.getElementById('index-count').innerText = Object.keys(SEMANTIC_INDEX).length;
-            updateNeuronList();
+            document.getElementById('msg-count').innerText = CONVERSATION_MEMORY.length;
+            document.getElementById('topic-count').innerText = TOPICS_DISCUSSED.length;
+            
+            updateConversationMemory();
         }
 
-        function updateNeuronList() {
-            const neuronList = document.getElementById('neuron-list');
-            const entries = Object.entries(ZENIA_BRAIN).slice(-5).reverse();
+        function updateConversationMemory() {
+            const memDiv = document.getElementById('conversation-memory');
+            const recentMessages = CONVERSATION_MEMORY.slice(-5).reverse();
             
-            if (entries.length === 0) {
-                neuronList.innerHTML = '<p class="text-[10px] opacity-50">Nenhum aprendizado ainda...</p>';
+            if (recentMessages.length === 0) {
+                memDiv.innerHTML = '<p class="text-[10px] opacity-50">Ainda não conversámos...</p>';
                 return;
             }
             
-            neuronList.innerHTML = entries.map(([id, neuro]) => {
-                const content = typeof neuro === 'string' ? neuro : neuro.content;
-                return `<div class="neuron-item" title="${content}">${content.substring(0, 55)}...</div>`;
-            }).join('');
+            memDiv.innerHTML = recentMessages.map(msg => `
+                <div class="conversation-memory">
+                    <p class="text-[9px] opacity-70">"${msg.userMessage.substring(0, 50)}..."</p>
+                    <p class="text-[8px] opacity-40 mt-1">Tópicos: ${msg.topics.join(', ') || 'geral'}</p>
+                </div>
+            `).join('');
         }
 
         function processMassiveMatter() {
             const raw = document.getElementById('raw-matter').value;
             if (!raw.trim()) return;
 
-            // Dividir em frases mas preservar contexto
             const sentences = raw.match(/[^.!?\n]+[.!?\n]+/g) || [raw];
             let addedCount = 0;
 
@@ -342,12 +374,10 @@
                 }
             });
 
-            // Reconstruir índices semânticos
-            buildSemanticIndex();
             localStorage.setItem('zenia_brain', JSON.stringify(ZENIA_BRAIN));
             updateStats();
 
-            addMsg('ia', `🌟 Que incrível! Aprendi ${addedCount} novos conceitos! Agora tenho ${Object.keys(SEMANTIC_INDEX).length} conexões mentais. Sinto-me mais sábia! 💙`);
+            addMsg('ia', `🌟 Aprendi ${addedCount} coisas novas! Agora tenho mais conhecimento para conversar contigo melhor! 💙`);
             document.getElementById('raw-matter').value = '';
             toggleTraining();
         }
@@ -375,7 +405,7 @@
                     const html = onlineSearchResults.map((r, idx) => `
                         <div class="content-card cursor-pointer hover:bg-cyan-500/5">
                             <div class="flex justify-between mb-2">
-                                <p class="font-bold text-cyan-400">${r.title}</p>
+                                <p class="font-bold text-cyan-400 text-sm">${r.title}</p>
                                 <input type="checkbox" class="result-checkbox" data-idx="${idx}">
                             </div>
                             <p class="text-[11px] text-white/70">${r.snippet.substring(0, 200)}...</p>
@@ -414,7 +444,7 @@
                     const html = onlineSearchResults.map((r, idx) => `
                         <div class="content-card cursor-pointer hover:bg-green-500/5">
                             <div class="flex justify-between mb-2">
-                                <p class="font-bold text-green-400">${r.title}</p>
+                                <p class="font-bold text-green-400 text-sm">${r.title}</p>
                                 <input type="checkbox" class="result-checkbox" data-idx="${idx}">
                             </div>
                             <p class="text-[11px] text-white/70">${r.snippet.substring(0, 200)}...</p>
@@ -449,12 +479,27 @@
             });
             
             if (addedCount > 0) {
-                buildSemanticIndex();
                 localStorage.setItem('zenia_brain', JSON.stringify(ZENIA_BRAIN));
                 updateStats();
-                addMsg('ia', `🌍 Aprendi ${addedCount} coisas do mundo! Agora tenho mais ${addedCount} perspectivas novas! 💚`);
+                addMsg('ia', `🌍 Aprendi ${addedCount} coisas do mundo! Agora tenho mais contexto para as nossas conversas! 💚`);
                 toggleSearch();
             }
+        }
+
+        function exportConversation() {
+            const json = JSON.stringify({ 
+                brain: ZENIA_BRAIN, 
+                conversation: CONVERSATION_MEMORY,
+                topics: TOPICS_DISCUSSED,
+                userProfile: USER_PROFILE
+            }, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `zenia-conversa-${Date.now()}.json`;
+            a.click();
+            addMsg('ia', '💾 Guardei toda a nossa conversa! 💙');
         }
 
         function toggleTraining() { 
@@ -463,17 +508,6 @@
 
         function toggleSearch() { 
             document.getElementById('search-panel').classList.toggle('hidden-panel'); 
-        }
-
-        function exportBrain() {
-            const json = JSON.stringify({ brain: ZENIA_BRAIN, semantic: SEMANTIC_INDEX }, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `zenia-mente-${Date.now()}.json`;
-            a.click();
-            addMsg('ia', '💾 Exportei minha mente! 💙');
         }
 
         function openClearBrain() {
@@ -486,42 +520,41 @@
 
         function confirmClearBrain() {
             ZENIA_BRAIN = {};
-            SEMANTIC_INDEX = {};
-            KNOWLEDGE_GRAPH = {};
+            CONVERSATION_MEMORY = [];
+            USER_PROFILE = {};
+            TOPICS_DISCUSSED = [];
             localStorage.removeItem('zenia_brain');
-            localStorage.removeItem('zenia_semantic_index');
-            localStorage.removeItem('zenia_knowledge_graph');
+            localStorage.removeItem('zenia_conversation');
+            localStorage.removeItem('zenia_user_profile');
+            localStorage.removeItem('zenia_topics');
             updateStats();
             closeClearBrain();
-            addMsg('ia', '😢 Esqueci tudo... Mas estou pronta para aprender outra vez. Começa comigo? 💙');
+            addMsg('ia', '😢 Esqueci tudo... Mas estou pronta para conversar contigo de novo! 💙');
         }
 
         async function handleAction() {
             const input = document.getElementById('user-input');
-            const prompt = input.value.trim();
-            if (!prompt) return;
+            const userMessage = input.value.trim();
+            if (!userMessage) return;
 
-            addMsg('user', prompt);
+            addMsg('user', userMessage);
             input.value = '';
             const iaId = addMsg('ia', '<i class="fas fa-spinner spinner"></i> Pensando...');
             
-            setTimeout(async () => {
+            setTimeout(() => {
                 const contentDiv = document.getElementById(iaId).querySelector('.content');
-                const mode = document.getElementById('model-select').value;
-
-                if (mode === 'semantic') {
-                    contentDiv.innerHTML = zeniaIntelligence(prompt);
-                } else if (mode === 'deep') {
-                    const response = zeniaIntelligence(prompt);
-                    contentDiv.innerHTML = `${response}<br><br><span class="text-[10px] opacity-60">🔍 Análise semântica completa executada</span>`;
-                } else {
-                    try {
-                        const r = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}`);
-                        contentDiv.innerHTML = await r.text();
-                    } catch (e) { 
-                        contentDiv.innerHTML = zeniaIntelligence(prompt); 
-                    }
-                }
+                
+                // Entender o contexto da conversa
+                const context = understandContext(userMessage);
+                
+                // Responder com consciência conversacional
+                let response = respondWithAwareness(userMessage, context);
+                
+                // Guardar na memória conversacional
+                rememberConversation(userMessage, response, context.recentTopics);
+                
+                contentDiv.innerHTML = response;
+                updateStats();
             }, 800);
         }
 
@@ -538,7 +571,6 @@
         }
 
         // Inicializar
-        buildSemanticIndex();
         updateStats();
     </script>
 </body>
