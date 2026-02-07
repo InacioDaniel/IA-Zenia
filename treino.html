@@ -3,37 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IA Autônoma Sci-Fi Neon</title>
+<title>IA Neon Futurista</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers/dist/transformers.min.js"></script>
 <style>
-body, html { margin:0; padding:0; height:100%; font-family:sans-serif; background:#020617; overflow:hidden; }
-::-webkit-scrollbar { width:8px; }
-::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
-::-webkit-scrollbar-thumb { background: rgba(0,255,255,0.4); border-radius:4px; }
+html,body{margin:0;padding:0;height:100%;font-family:sans-serif;background:#020617;color:white;}
+::-webkit-scrollbar{width:8px;}
+::-webkit-scrollbar-track{background:rgba(255,255,255,0.05);}
+::-webkit-scrollbar-thumb{background:rgba(0,255,255,0.4);border-radius:4px;}
 
-#app { display:flex; height:100vh; width:100vw; color:white; }
-.sidebar { width:280px; background: rgba(0,0,0,0.3); backdrop-filter:blur(12px); border-right:1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column; padding:1rem; }
-.sidebar h2 { font-size:1.5rem; font-weight:bold; text-align:center; margin-bottom:1rem; color:#0ff; }
-.sidebar button { margin:0.2rem 0; padding:0.5rem; border:none; border-radius:0.5rem; cursor:pointer; font-weight:bold; background:linear-gradient(45deg,#00f,#0ff,#0f0,#f0f,#f0f,#f0f0f,#ff0); background-size:200% 200%; animation:bgSlide 5s linear infinite; color:black; }
-@keyframes bgSlide { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+#app{display:flex;flex-direction:row;height:100vh;width:100vw;overflow:hidden;}
+.sidebar{width:260px;background:rgba(0,0,0,0.25);backdrop-filter:blur(12px);display:flex;flex-direction:column;padding:1rem;border-right:1px solid rgba(0,255,255,0.3);}
+.sidebar h2{text-align:center;font-size:1.5rem;margin-bottom:1rem;color:#0ff;text-shadow:0 0 10px #0ff;}
+.sidebar button{margin:0.2rem 0;padding:0.6rem;border:none;border-radius:0.5rem;cursor:pointer;font-weight:bold;color:black;background:linear-gradient(45deg,#00f,#0ff,#0f0,#f0f);background-size:200% 200%;animation:bgSlide 5s linear infinite;}
+@keyframes bgSlide{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
-.main { flex:1; display:flex; flex-direction:column; backdrop-filter:blur(12px); background:rgba(0,0,0,0.2); }
-.header { padding:1rem; text-align:center; font-size:1.8rem; font-weight:bold; color:#0ff; text-shadow:0 0 10px #0ff,0 0 20px #0ff,0 0 30px #0ff; }
-.chat-window { flex:1; overflow-y:auto; padding:1rem; display:flex; flex-direction:column; gap:0.5rem; }
-.message { padding:0.5rem 1rem; border-radius:0.75rem; max-width:80%; word-wrap:break-word; }
-.user { align-self:flex-end; background:rgba(0,255,255,0.2); color:#0ff; border:1px solid #0ff; }
-.bot { align-self:flex-start; background:rgba(255,0,255,0.2); color:#f0f; border:1px solid #f0f; }
-
-.input-area { display:flex; padding:1rem; gap:0.5rem; background:rgba(0,0,0,0.25); border-top:1px solid rgba(255,255,255,0.1); }
-#input { flex:1; padding:0.5rem 1rem; border-radius:0.5rem; border:none; background:rgba(255,255,255,0.05); color:white; outline:none; }
-.send-btn { padding:0.5rem 1rem; border:none; border-radius:0.5rem; background:linear-gradient(45deg,#00f,#0ff,#0f0,#f0f,#f0f,#f0f0f,#ff0); background-size:200% 200%; animation:bgSlide 5s linear infinite; color:black; font-weight:bold; cursor:pointer; }
-img.generated { max-width:200px; border-radius:0.5rem; border:1px solid #0ff; align-self:flex-start; }
+.main{flex:1;display:flex;flex-direction:column;}
+.header{padding:1rem;text-align:center;font-size:1.8rem;font-weight:bold;color:#0ff;text-shadow:0 0 15px #0ff,0 0 25px #0ff;}
+.chat-window{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.5rem;background:rgba(0,0,0,0.15);}
+.message{padding:0.5rem 1rem;border-radius:0.75rem;max-width:80%;word-wrap:break-word;}
+.user{align-self:flex-end;background:rgba(0,255,255,0.2);color:#0ff;border:1px solid #0ff;}
+.bot{align-self:flex-start;background:rgba(255,0,255,0.2);color:#f0f;border:1px solid #f0f;}
+.input-area{display:flex;padding:0.5rem;gap:0.5rem;background:rgba(0,0,0,0.25);border-top:1px solid rgba(0,255,255,0.3);}
+#input{flex:1;padding:0.5rem 1rem;border-radius:0.5rem;border:none;background:rgba(255,255,255,0.05);color:white;outline:none;}
+.send-btn{padding:0.5rem 1rem;border:none;border-radius:0.5rem;background:linear-gradient(45deg,#00f,#0ff,#0f0,#f0f);background-size:200% 200%;animation:bgSlide 5s linear infinite;color:black;font-weight:bold;cursor:pointer;}
+img.generated{max-width:200px;border-radius:0.5rem;border:1px solid #0ff;align-self:flex-start;}
 
 @media(max-width:768px){
-  #app { flex-direction:column; }
-  .sidebar { width:100%; display:flex; flex-direction:row; overflow-x:auto; }
-  .sidebar button { flex:1; font-size:0.8rem; margin:0 0.2rem; }
+#app{flex-direction:column;}
+.sidebar{width:100%;flex-direction:row;overflow-x:auto;}
+.sidebar button{flex:1;margin:0 0.2rem;font-size:0.8rem;}
+.input-area{flex-direction:column;}
+.send-btn{width:100%;}
 }
 </style>
 </head>
@@ -59,8 +60,8 @@ img.generated { max-width:200px; border-radius:0.5rem; border:1px solid #0ff; al
 </div>
 
 <script>
-let pipelineLoaded=false;
 let generator=null;
+let pipelineLoaded=false;
 let modo='chat';
 async function loadModel(){
   if(!pipelineLoaded){
@@ -76,15 +77,20 @@ function addHistorico(quem,texto){
   div.innerHTML=`<b>${quem}:</b> ${texto}`;
   chat.appendChild(div);
   chat.scrollTop=chat.scrollHeight;
-  salvarLocalStorage();
+  localStorage.setItem("ia_history",chat.innerHTML);
 }
 
-function salvarLocalStorage(){localStorage.setItem("ia_history",document.getElementById("chat").innerHTML);}
-function carregarLocalStorage(){let data=localStorage.getItem("ia_history"); if(data) document.getElementById("chat").innerHTML=data;}
-function limparHistorico(){localStorage.removeItem("ia_history"); document.getElementById("chat").innerHTML="";}
-carregarLocalStorage();
+function carregarHistorico(){
+  let data=localStorage.getItem("ia_history");
+  if(data) document.getElementById("chat").innerHTML=data;
+}
+function limparHistorico(){
+  localStorage.removeItem("ia_history");
+  document.getElementById("chat").innerHTML="";
+}
+carregarHistorico();
 
-function selecionarModo(novo){modo=novo; addHistorico('Sistema','Modo selecionado: '+novo);}
+function selecionarModo(n){modo=n; addHistorico('Sistema','Modo selecionado: '+n);}
 function abrirConfig(){addHistorico('Sistema','Painel de configuração futurista aberto!');}
 
 async function gerarImagem(prompt){
@@ -93,30 +99,50 @@ async function gerarImagem(prompt){
   const ctx=canvas.getContext("2d");
   ctx.fillStyle="white"; ctx.fillRect(0,0,256,256);
   ctx.font="14px Arial"; ctx.fillStyle="black"; ctx.fillText("Gerando imagem...",50,128);
-  setTimeout(()=>{ctx.fillStyle="cyan"; ctx.fillRect(Math.random()*200,Math.random()*200,50,50);},1500);
+  await new Promise(r=>setTimeout(r,1500));
+  ctx.fillStyle="cyan"; ctx.fillRect(Math.random()*200,Math.random()*200,50,50);
   return canvas.toDataURL();
 }
 
 async function enviarMsg(){
   let txt=document.getElementById("input").value.trim();
   if(!txt) return;
-  addHistorico("Você",txt); document.getElementById("input").value='';
+  addHistorico("Você",txt);
+  document.getElementById("input").value='';
   if(modo=='image'){
-    addHistorico('IA','🎨 Gerando imagem...');
+    addHistorico("IA","🎨 Gerando imagem...");
     let img=await gerarImagem(txt);
-    let chat=document.getElementById("chat");
     let div=document.createElement("div");
     div.innerHTML=`<img src="${img}" class="generated">`;
-    chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
-    salvarLocalStorage();
+    document.getElementById("chat").appendChild(div);
+    document.getElementById("chat").scrollTop=document.getElementById("chat").scrollHeight;
+    localStorage.setItem("ia_history",document.getElementById("chat").innerHTML);
     return;
   }
   if(modo=='math' || /[\d\+\-\*\/\^\(\)]/.test(txt)){
-    try{let res=eval(txt); addHistorico('IA','Resultado: <b>'+res+'</b>'); return;}catch(e){}
+    try{
+      let res=eval(txt);
+      addHistorico("IA","Resultado: <b>"+res+"</b>");
+      return;
+    }catch(e){}
   }
   await loadModel();
   let resp=await generator(txt,{max_length:100});
-  addHistorico('IA',resp[0].generated_text);
+  // efeito digitando
+  let texto=resp[0].generated_text;
+  let i=0;
+  let intervalo=setInterval(()=>{
+    if(i>=texto.length){clearInterval(intervalo); return;}
+    let chat=document.getElementById("chat");
+    let last=chat.lastChild;
+    if(!last || !last.classList.contains('bot')){
+      addHistorico("IA","");
+      last=chat.lastChild;
+    }
+    last.innerHTML=`<b>IA:</b> ${texto.substring(0,i+1)}<span class="cursor">|</span>`;
+    chat.scrollTop=chat.scrollHeight;
+    i++;
+  },30);
 }
 </script>
 </body>
