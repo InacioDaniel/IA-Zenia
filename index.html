@@ -285,42 +285,37 @@
             }, 1500);
         } else {
             const tempMsg = addMessage("⏳ Pensando...", false);
-            try {
-                // Usar uma API pública simples
-                const res = await fetch(`https://api.qrserver.com/api/render/qr-code?size=250x250&data=${encodeURIComponent(query)}`);
-                
-                // Resposta criativa offline
-                const respostas = {
-                    "ola": "Oi! Como vai? 😊",
-                    "como vai": "Estou bem! Obrigada por perguntar! 😄",
-                    "qual é a capital de angola": "A capital de Angola é Luanda! 🇦🇴",
-                    "quanto é 2+2": "2+2 = 4 ✓",
-                    "quem é você": "Sou IA-ZÉNIA do Lubango, criada para ajudar! 👋",
-                };
+            
+            // Resposta criativa offline (sem requisições externas)
+            const respostas = {
+                "ola": "Oi! Como vai? 😊",
+                "como vai": "Estou bem! Obrigada por perguntar! 😄",
+                "capital de angola": "A capital de Angola é Luanda! 🇦🇴",
+                "quanto é 2+2": "2+2 = 4 ✓",
+                "quem é você": "Sou IA-ZÉNIA do Lubango, criada para ajudar! 👋",
+                "zénia": "Sou eu! IA-ZÉNIA, sua assistente inteligente 🤖",
+                "lubango": "Lubango é a capital da Huíla, em Angola! 🇦🇴",
+                "obrigada": "De nada! Fico feliz em ajudar! 💙",
+                "adeus": "Até logo! Volte sempre! 👋",
+                "tchau": "Tchau! Tenha um ótimo dia! 😊",
+                "angola": "Angola é um país incrível na África! 🇦🇴",
+                "help": "Você pode: desenhar (ex: 'desenha um gato'), perguntar coisas ou ativar áudio com 🔊",
+            };
 
-                let text = "Desculpe, estou com dificuldades no momento. Tente novamente!";
-                
-                // Procura correspondência (ignorando case)
-                for (const [chave, resposta] of Object.entries(respostas)) {
-                    if (query.toLowerCase().includes(chave)) {
-                        text = resposta;
-                        break;
-                    }
+            let text = "Entendi sua pergunta! Infelizmente não tenho uma resposta pronta para isso. Tente perguntar algo mais simples! 😊";
+            
+            // Procura correspondência (ignorando case)
+            for (const [chave, resposta] of Object.entries(respostas)) {
+                if (query.toLowerCase().includes(chave)) {
+                    text = resposta;
+                    break;
                 }
+            }
 
-                // Se não encontrou correspondência, resposta genérica
-                if (text === "Desculpe, estou com dificuldades no momento. Tente novamente!") {
-                    text = `Você perguntou: "${query.substring(0, 30)}..." - Desculpe, essa pergunta é complexa. Tente perguntar algo mais simples!`;
-                }
-
-                if (shouldSynthesizeAudio) {
-                    tempMsg.innerHTML = `<div class="msg ai-msg">${text}</div>`;
-                    speakText(text);
-                } else {
-                    tempMsg.innerHTML = `<div class="msg ai-msg">${text}</div>`;
-                }
-            } catch (err) {
-                tempMsg.innerHTML = `<div class="msg ai-msg">❌ Erro: ${err.message}</div>`;
+            tempMsg.innerHTML = `<div class="msg ai-msg">${text}</div>`;
+            
+            if (shouldSynthesizeAudio) {
+                speakText(text);
             }
         }
         scrollToBottom();
