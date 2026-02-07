@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA-ZÉNIA | Self-Correction & Deep Reasoning V10</title>
+    <title>IA-ZÉNIA | Cloud AI V11 - Search & Intent</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -28,82 +28,83 @@
         
         .status-indicator { display: inline-block; width: 8px; height: 8px; border-radius: 50%; animation: pulse 2s infinite; }
         .status-online { background: #00ff88; }
-        .status-thinking { background: #ffaa00; animation: pulse 0.5s infinite; }
+        .status-searching { background: #ffaa00; animation: pulse 0.5s infinite; }
+        .status-analyzing { background: #00ffff; animation: pulse 0.7s infinite; }
         
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         
-        .reasoning-box { 
-            background: rgba(255,170,0,0.08);
-            border: 1px solid rgba(255,170,0,0.3);
+        .search-box { 
+            background: rgba(0,255,255,0.08);
+            border: 1px solid rgba(0,255,255,0.3);
             border-radius: 8px;
             padding: 10px;
             margin: 8px 0;
             font-size: 11px;
-            font-family: monospace;
         }
 
-        .correction-box {
-            background: rgba(100,255,100,0.08);
-            border-left: 3px solid rgba(100,255,100,0.5);
+        .intent-box {
+            background: rgba(100,200,255,0.08);
+            border-left: 3px solid rgba(100,200,255,0.5);
             padding: 10px;
             margin: 8px 0;
             border-radius: 6px;
             font-size: 11px;
         }
 
-        .thought-chain {
-            background: rgba(0,255,255,0.05);
-            border: 1px dashed rgba(0,255,255,0.2);
+        .search-result {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(0,255,255,0.2);
+            border-radius: 6px;
             padding: 8px;
             margin: 5px 0;
-            border-radius: 5px;
             font-size: 10px;
         }
-
-        .tech-badge { display: inline-block; background: rgba(0,255,255,0.1); border: 1px solid var(--n-blue); padding: 4px 8px; border-radius: 4px; font-size: 9px; margin-right: 5px; }
     </style>
 </head>
 <body class="theme-blue-vivo">
 
-    <!-- PAINEL DE RACIOCÍNIO -->
-    <div id="reasoning-panel" class="fixed inset-0 panel hidden-panel p-8 overflow-y-auto">
+    <!-- PAINEL DE CONFIGURAÇÃO -->
+    <div id="config-panel" class="fixed inset-0 panel hidden-panel p-8 overflow-y-auto">
         <div class="max-w-4xl mx-auto">
             <div class="flex justify-between items-center mb-6 sticky top-0 bg-black/90 pb-4">
-                <h2 class="text-2xl font-bold text-cyan-400 neon-text"><i class="fas fa-brain mr-2"></i> CONFIGURAR RACIOCÍNIO</h2>
-                <button onclick="toggleReasoning()" class="text-white hover:text-red-500 text-3xl">&times;</button>
+                <h2 class="text-2xl font-bold text-cyan-400 neon-text"><i class="fas fa-cloud mr-2"></i> CONFIGURAÇÃO CLOUD AI</h2>
+                <button onclick="toggleConfig()" class="text-white hover:text-red-500 text-3xl">&times;</button>
             </div>
             
             <div class="space-y-4">
                 <div class="bg-cyan-500/10 border border-cyan-500/30 p-4 rounded-lg">
-                    <p class="text-cyan-400 font-bold mb-2">🧠 Sistema de Self-Correction Proprietário</p>
-                    <p class="text-white/70">Raciocínio multi-nível com verificação automática, correção interna e análise de coerência.</p>
+                    <p class="text-cyan-400 font-bold mb-2">☁️ Cloud AI com Busca Inteligente</p>
+                    <p class="text-white/70">Busca online, interpreta intenção do utilizador, dialoga contextualmente e aprende continuamente.</p>
                 </div>
 
                 <div>
-                    <label class="text-cyan-400 text-sm block mb-2">Modo de Raciocínio</label>
-                    <select id="reasoning-mode" class="w-full bg-black/50 border border-cyan-500/30 rounded-lg p-3 text-white">
-                        <option value="fast">⚡ Rápido (Sem análise profunda)</option>
-                        <option value="balanced">⚖️ Equilibrado (Recomendado)</option>
-                        <option value="deep" selected>🧠 Profundo (Self-Correction completo)</option>
+                    <label class="text-cyan-400 text-sm block mb-2">Modo de Busca</label>
+                    <select id="search-mode" class="w-full bg-black/50 border border-cyan-500/30 rounded-lg p-3 text-white">
+                        <option value="auto">🤖 Automático (Detecta quando buscar)</option>
+                        <option value="always">🔍 Sempre (Busca em tudo)</option>
+                        <option value="manual">👆 Manual (Tu dizes quando)</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="text-cyan-400 text-sm block mb-2">Nível de Auto-Crítica</label>
-                    <input type="range" id="criticism-level" min="0" max="100" value="70" class="w-full accent-cyan-400">
-                    <p class="text-white/60 text-xs mt-1">Quanto mais alto, mais ela questiona suas próprias respostas</p>
-                </div>
-
-                <div>
-                    <label class="text-cyan-400 text-sm block mb-2">Mostrar Processo de Raciocínio</label>
+                    <label class="text-cyan-400 text-sm block mb-2">Análise de Intenção</label>
                     <div class="flex gap-2">
-                        <input type="checkbox" id="show-reasoning" checked>
-                        <label for="show-reasoning" class="text-white/70 text-sm">Quero ver como ela pensa</label>
+                        <input type="checkbox" id="analyze-intent" checked>
+                        <label for="analyze-intent" class="text-white/70 text-sm">Analisar intenção do utilizador</label>
                     </div>
                 </div>
 
-                <button onclick="applyReasoningSettings()" class="w-full bg-cyan-500 text-black font-bold py-3 rounded-xl hover:bg-white transition">
-                    <i class="fas fa-check mr-2"></i> APLICAR CONFIGURAÇÕES
+                <div>
+                    <label class="text-cyan-400 text-sm block mb-2">Fontes de Busca</label>
+                    <div class="space-y-1">
+                        <label class="flex items-center gap-2 text-white/70 text-sm"><input type="checkbox" class="search-source" value="wikipedia" checked> Wikipedia</label>
+                        <label class="flex items-center gap-2 text-white/70 text-sm"><input type="checkbox" class="search-source" value="arxiv" checked> ArXiv</label>
+                        <label class="flex items-center gap-2 text-white/70 text-sm"><input type="checkbox" class="search-source" value="news" checked> Notícias</label>
+                    </div>
+                </div>
+
+                <button onclick="applyConfig()" class="w-full bg-cyan-500 text-black font-bold py-3 rounded-xl hover:bg-white transition">
+                    <i class="fas fa-check mr-2"></i> APLICAR
                 </button>
             </div>
         </div>
@@ -113,38 +114,38 @@
         <div class="mb-8">
             <div class="flex items-center gap-2 mb-2">
                 <span class="status-indicator" id="status-light"></span>
-                <h1 class="text-3xl font-black italic text-cyan-400 neon-text">ZÉNIA V10</h1>
+                <h1 class="text-3xl font-black italic text-cyan-400 neon-text">ZÉNIA V11</h1>
             </div>
-            <p class="text-[10px] opacity-40 tracking-[4px]">SELF-CORRECTION ENGINE</p>
-            <p class="text-[9px] opacity-60 mt-2 italic">Pensa, verifica, corrige... 🧠</p>
+            <p class="text-[10px] opacity-40 tracking-[4px]">CLOUD AI ENGINE</p>
+            <p class="text-[9px] opacity-60 mt-2 italic">Busca, analisa, compreende... ☁️</p>
         </div>
         
         <nav class="space-y-3 mb-6">
-            <button onclick="toggleReasoning()" class="w-full text-left p-3 rounded-lg border border-cyan-500/20 hover:bg-cyan-500/10 transition text-xs">
-                <i class="fas fa-sliders-h mr-2"></i> RACIOCÍNIO
+            <button onclick="toggleConfig()" class="w-full text-left p-3 rounded-lg border border-cyan-500/20 hover:bg-cyan-500/10 transition text-xs">
+                <i class="fas fa-cog mr-2"></i> CONFIGURAÇÃO
             </button>
-            <button onclick="showThinkingProcess()" class="w-full text-left p-3 rounded-lg border border-green-500/20 hover:bg-green-500/10 transition text-xs">
-                <i class="fas fa-eye mr-2"></i> PROCESSO
+            <button onclick="showSearchHistory()" class="w-full text-left p-3 rounded-lg border border-green-500/20 hover:bg-green-500/10 transition text-xs">
+                <i class="fas fa-history mr-2"></i> HISTÓRICO
             </button>
-            <button onclick="exportReasoning()" class="w-full text-left p-3 rounded-lg border border-blue-500/20 hover:bg-blue-500/10 transition text-xs">
+            <button onclick="exportCloud()" class="w-full text-left p-3 rounded-lg border border-blue-500/20 hover:bg-blue-500/10 transition text-xs">
                 <i class="fas fa-download mr-2"></i> EXPORTAR
             </button>
         </nav>
         
         <div class="mb-6 border-t border-white/10 pt-4">
-            <p class="text-[9px] opacity-40 uppercase mb-3">Estado Cognitivo</p>
+            <p class="text-[9px] opacity-40 uppercase mb-3">Status Cloud</p>
             <div class="space-y-2 text-[10px]">
-                <div class="flex justify-between"><span>Modo:</span> <span id="reasoning-mode-display" class="text-cyan-400 font-bold">Profundo</span></div>
-                <div class="flex justify-between"><span>Auto-Crítica:</span> <span id="criticism-display" class="text-cyan-400 font-bold">70%</span></div>
-                <div class="flex justify-between"><span>Correções:</span> <span id="correction-count" class="text-green-400 font-bold">0</span></div>
-                <div class="flex justify-between"><span>Validações:</span> <span id="validation-count" class="text-cyan-400 font-bold">0</span></div>
+                <div class="flex justify-between"><span>Modo:</span> <span id="mode-display" class="text-cyan-400 font-bold">Automático</span></div>
+                <div class="flex justify-between"><span>Buscas:</span> <span id="search-count" class="text-green-400 font-bold">0</span></div>
+                <div class="flex justify-between"><span>Intenções:</span> <span id="intent-count" class="text-cyan-400 font-bold">0</span></div>
+                <div class="flex justify-between"><span>Conversas:</span> <span id="chat-count" class="text-cyan-400 font-bold">0</span></div>
             </div>
         </div>
 
         <div class="border-t border-white/10 pt-4">
-            <p class="text-[9px] opacity-40 uppercase mb-2">Últimas Correções</p>
-            <div id="correction-log" class="space-y-1 max-h-[150px] overflow-y-auto text-[9px]">
-                <p class="opacity-50">Nenhuma correção ainda...</p>
+            <p class="text-[9px] opacity-40 uppercase mb-2">Últimas Ações</p>
+            <div id="action-log" class="space-y-1 max-h-[150px] overflow-y-auto text-[9px]">
+                <p class="opacity-50">Aguardando primeiras ações...</p>
             </div>
         </div>
     </aside>
@@ -152,20 +153,20 @@
     <main class="chat-area">
         <div id="chat-window" class="flex-1 overflow-y-auto p-4 md:p-10 space-y-6">
             <div class="msg msg-ia">
-                <p class="text-cyan-400 font-mono text-[10px] mb-2">SELF_CORRECTION_V10_ONLINE</p>
-                <p>✨ Sou a <strong>ZÉNIA V10</strong> - Com <strong>Raciocínio de Alto Nível Proprietário</strong>.</p>
-                <p class="text-[11px] mt-3 opacity-90">Agora tenho um sistema de correção interna genuína:</p>
-                <p class="text-[11px] opacity-80">🧠 <strong>Raciocínio Multi-Nível</strong> - Penso antes de responder</p>
-                <p class="text-[11px] opacity-80">✅ <strong>Auto-Verificação</strong> - Verifico minhas respostas automaticamente</p>
-                <p class="text-[11px] opacity-80">🔄 <strong>Self-Correction</strong> - Corrijo-me quando detecto inconsistências</p>
-                <p class="text-[11px] opacity-80">💭 <strong>Análise de Coerência</strong> - Garanto que faço sentido</p>
-                <p class="text-[12px] mt-3 text-green-400">Pensa comigo... Vê como penso e me corrijo! 💚</p>
+                <p class="text-cyan-400 font-mono text-[10px] mb-2">CLOUD_AI_V11_ONLINE</p>
+                <p>✨ Sou a <strong>ZÉNIA V11</strong> - Uma <strong>Cloud AI</strong> genuína.</p>
+                <p class="text-[11px] mt-3 opacity-90">Agora sou diferente:</p>
+                <p class="text-[11px] opacity-80">🔍 <strong>Busca Inteligente</strong> - Procuro na web quando preciso</p>
+                <p class="text-[11px] opacity-80">🧠 <strong>Interpretação de Intenção</strong> - Compreendo O QUÊ queres dizer</p>
+                <p class="text-[11px] opacity-80">💬 <strong>Diálogo Contextualizado</strong> - Respondo baseado em tudo</p>
+                <p class="text-[11px] opacity-80">☁️ <strong>Arquitetura Cloud</strong> - Funciono como um serviço real</p>
+                <p class="text-[12px] mt-3 text-green-400">Fala comigo como falavas com qualquer assistente cloud... Vou buscar, analisar e responder! 💚</p>
             </div>
         </div>
 
         <div class="p-6 bg-black/20 backdrop-blur-md">
             <div class="max-w-4xl mx-auto flex items-end gap-3 bg-slate-900/90 p-3 rounded-2xl border border-white/10">
-                <textarea id="user-input" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 text-sm md:text-base py-3 outline-none" placeholder="Fala comigo..."></textarea>
+                <textarea id="user-input" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 text-sm md:text-base py-3 outline-none" placeholder="Fala comigo naturalmente..."></textarea>
                 <button onclick="handleAction()" class="bg-cyan-500 text-black w-12 h-12 rounded-xl flex items-center justify-center hover:scale-105 transition shadow-lg">
                     <i class="fas fa-paper-plane"></i>
                 </button>
@@ -173,427 +174,303 @@
         </div>
     </main>
 
-    <!-- MODAL DE PROCESSO -->
-    <div id="process-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-200 p-4">
-        <div class="bg-slate-900 border border-cyan-500/50 p-8 rounded-xl max-w-3xl max-h-96 overflow-y-auto">
+    <!-- MODAL DE HISTÓRICO -->
+    <div id="history-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-200 p-4">
+        <div class="bg-slate-900 border border-cyan-500/50 p-8 rounded-xl max-w-2xl max-h-96 overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-cyan-400"><i class="fas fa-network-wired mr-2"></i> PROCESSO DE RACIOCÍNIO</h3>
-                <button onclick="closeProcess()" class="text-white hover:text-red-500 text-2xl">&times;</button>
+                <h3 class="text-xl font-bold text-cyan-400"><i class="fas fa-history mr-2"></i> HISTÓRICO DE BUSCAS</h3>
+                <button onclick="closeHistory()" class="text-white hover:text-red-500 text-2xl">&times;</button>
             </div>
-            <div id="process-content" class="text-white text-sm space-y-3">
+            <div id="history-content" class="text-white text-sm space-y-3">
                 <!-- Preenchido por JavaScript -->
             </div>
         </div>
     </div>
 
     <script>
-        // ========== ZÉNIA V10 - SELF-CORRECTION & RACIOCÍNIO ==========
+        // ========== ZÉNIA V11 - CLOUD AI ==========
         
-        let REASONING_ENGINE = {
-            thoughtChains: [],
-            corrections: [],
-            validations: [],
-            confidenceScores: {},
-            inconsistencies: [],
-            correctionHistory: [],
-            lastThinking: null
+        let CLOUD_STATE = {
+            searchHistory: [],
+            intentAnalysis: [],
+            conversations: [],
+            stats: {
+                totalSearches: 0,
+                totalIntentDetections: 0,
+                totalConversations: 0
+            },
+            config: {
+                searchMode: 'auto',
+                analyzeIntent: true,
+                searchSources: ['wikipedia', 'arxiv', 'news']
+            }
         };
 
-        let REASONING_CONFIG = {
-            mode: 'deep', // fast, balanced, deep
-            criticismLevel: 70,
-            showReasoning: true,
-            enableSelfCorrection: true
+        const INTENT_PATTERNS = {
+            SEARCH: { keywords: ['quem', 'o quê', 'como', 'onde', 'quando', 'porquê', 'qual', 'procura', 'busca', 'tell me about'] },
+            OPINION: { keywords: ['acho', 'opina', 'parece', 'pensa', 'crê', 'diria', 'opinião'] },
+            INFORMATION: { keywords: ['informação', 'sabe', 'diz', 'fala', 'conta', 'explica', 'descreve'] },
+            CONVERSATION: { keywords: ['como vai', 'como estás', 'tudo bem', 'oi', 'olá', 'opa'] },
+            COMMAND: { keywords: ['faz', 'cria', 'gera', 'procura', 'busca', 'encontra'] },
+            QUESTION_ABOUT_CREATOR: { keywords: ['criadores', 'quem te criou', 'quem fez', 'inacio', 'daniel', 'zenia-projects'] }
         };
 
-        // ========== EXTRAIR CONCEITOS E RELAÇÕES ==========
-        function extractConcepts(text) {
-            const words = text.toLowerCase().split(/\s+/);
-            const concepts = {};
-            
-            for (let i = 0; i < words.length; i++) {
-                const word = words[i].replace(/[^\w]/g, '');
-                if (word.length > 3) {
-                    if (!concepts[word]) {
-                        concepts[word] = { frequency: 0, connections: [] };
+        // ========== DETECTAR INTENÇÃO ==========
+        function detectIntent(userMessage) {
+            const msg = userMessage.toLowerCase();
+            const detectedIntents = [];
+            let confidence = {};
+
+            Object.entries(INTENT_PATTERNS).forEach(([intentType, pattern]) => {
+                let score = 0;
+                pattern.keywords.forEach(keyword => {
+                    if (msg.includes(keyword)) {
+                        score += 30;
                     }
-                    concepts[word].frequency++;
-                    
-                    if (i > 0) {
-                        const prevWord = words[i-1].replace(/[^\w]/g, '');
-                        if (prevWord.length > 3) {
-                            concepts[word].connections.push(prevWord);
-                        }
-                    }
+                });
+
+                if (score > 0) {
+                    detectedIntents.push(intentType);
+                    confidence[intentType] = Math.min(100, score);
+                }
+            });
+
+            // Se nenhuma intenção detectada, assume busca/conversação
+            if (detectedIntents.length === 0) {
+                const hasQuestion = /\?/.test(userMessage);
+                if (hasQuestion) {
+                    detectedIntents.push('SEARCH');
+                    confidence['SEARCH'] = 70;
+                } else {
+                    detectedIntents.push('CONVERSATION');
+                    confidence['CONVERSATION'] = 60;
                 }
             }
-            
-            return concepts;
-        }
-
-        // ========== ANÁLISE DE COERÊNCIA ==========
-        function analyzeCoherence(response, context) {
-            const issues = [];
-            const concepts = extractConcepts(response);
-            const contextConcepts = extractConcepts(context);
-
-            // Verificar contradições lógicas
-            const negationWords = ['não', 'nunca', 'jamais'];
-            const affirmationWords = ['sim', 'sempre', 'certamente'];
-
-            let hasNegation = false;
-            let hasAffirmation = false;
-
-            negationWords.forEach(word => {
-                if (response.toLowerCase().includes(word)) hasNegation = true;
-            });
-            affirmationWords.forEach(word => {
-                if (response.toLowerCase().includes(word)) hasAffirmation = true;
-            });
-
-            if (hasNegation && hasAffirmation) {
-                // Verificar se são sobre o mesmo tópico
-                const negationIndex = response.toLowerCase().search(negationWords.join('|'));
-                const affirmationIndex = response.toLowerCase().search(affirmationWords.join('|'));
-                
-                if (Math.abs(negationIndex - affirmationIndex) < 50) {
-                    issues.push('Possível contradição: afirmação e negação muito próximas');
-                }
-            }
-
-            // Verificar relevância do contexto
-            let relevanceScore = 0;
-            Object.keys(concepts).forEach(concept => {
-                if (contextConcepts[concept]) {
-                    relevanceScore++;
-                }
-            });
 
             return {
-                issues: issues,
-                relevanceScore: relevanceScore / Math.max(Object.keys(concepts).length, 1),
-                coherenceScore: Math.max(0, 100 - (issues.length * 20))
+                intents: detectedIntents,
+                primary: detectedIntents[0],
+                confidence: confidence,
+                message: userMessage
             };
         }
 
-        // ========== VALIDAÇÃO MULTI-NÍVEL ==========
-        function validateResponse(response, userMessage) {
-            const validation = {
+        // ========== BUSCA INTELIGENTE ==========
+        async function intelligentSearch(query, sources = ['wikipedia']) {
+            const results = {
+                query: query,
+                sources: {},
                 timestamp: Date.now(),
-                passes: [],
-                fails: [],
-                score: 0
+                success: false
             };
 
-            // Validação 1: Comprimento apropriado
-            if (response.length > 20) {
-                validation.passes.push('✓ Comprimento apropriado');
-            } else {
-                validation.fails.push('✗ Resposta muito curta');
-            }
-
-            // Validação 2: Contém conceitos relacionados ao contexto
-            const contextWords = userMessage.toLowerCase().split(/\s+/).slice(0, 5);
-            let contextMatch = 0;
-            contextWords.forEach(word => {
-                if (response.toLowerCase().includes(word)) {
-                    contextMatch++;
+            for (let source of sources) {
+                try {
+                    if (source === 'wikipedia') {
+                        const response = await fetch(
+                            `https://pt.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=3&format=json&origin=*`
+                        );
+                        const data = await response.json();
+                        
+                        if (data.query?.search?.length > 0) {
+                            results.sources.wikipedia = data.query.search.map(r => ({
+                                title: r.title,
+                                snippet: r.snippet.replace(/<[^>]*>/g, ''),
+                                link: `https://pt.wikipedia.org/wiki/${encodeURIComponent(r.title)}`
+                            }));
+                            results.success = true;
+                        }
+                    } else if (source === 'arxiv') {
+                        const response = await fetch(
+                            `https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&limit=3&fields=title,abstract,url`
+                        );
+                        const data = await response.json();
+                        
+                        if (data.data?.length > 0) {
+                            results.sources.arxiv = data.data.map(p => ({
+                                title: p.title,
+                                snippet: p.abstract?.substring(0, 200) || 'Sem resumo',
+                                link: p.url || '#'
+                            }));
+                            results.success = true;
+                        }
+                    }
+                } catch (err) {
+                    console.log(`Erro ao buscar em ${source}:`, err);
                 }
-            });
-
-            if (contextMatch > 0) {
-                validation.passes.push(`✓ Relevante ao contexto (${contextMatch} conexões)`);
-            } else {
-                validation.fails.push('✗ Pouca relevância ao contexto');
             }
 
-            // Validação 3: Coerência lógica
-            const coherence = analyzeCoherence(response, userMessage);
-            if (coherence.coherenceScore > 60) {
-                validation.passes.push('✓ Logicamente coerente');
-            } else if (coherence.issues.length > 0) {
-                validation.fails.push(`✗ ${coherence.issues[0]}`);
+            if (results.success) {
+                CLOUD_STATE.searchHistory.push(results);
+                CLOUD_STATE.stats.totalSearches++;
+                updateUI();
             }
 
-            // Validação 4: Sem repetição excessiva
-            const words = response.split(/\s+/);
-            const uniqueWords = new Set(words);
-            const repetitionRatio = uniqueWords.size / words.length;
-            
-            if (repetitionRatio > 0.6) {
-                validation.passes.push('✓ Vocabulário variado');
-            } else {
-                validation.fails.push('✗ Repetição excessiva');
-            }
-
-            // Calcular score
-            validation.score = (validation.passes.length / (validation.passes.length + validation.fails.length)) * 100;
-
-            return validation;
+            return results;
         }
 
-        // ========== SELF-CORRECTION ==========
-        function attemptSelfCorrection(originalResponse, userMessage, validationResult) {
-            if (validationResult.score > 70 || REASONING_CONFIG.mode === 'fast') {
+        // ========== INTERPRETAR RESULTADO E RESPONDER ==========
+        async function respondToIntent(intentData) {
+            const intent = intentData.primary;
+            const msg = intentData.message;
+
+            // Caso 1: Pergunta sobre criadores
+            if (intent === 'QUESTION_ABOUT_CREATOR') {
+                const searchResults = await intelligentSearch('Inacio Daniel Zenia Projects Angola');
+                
                 return {
-                    corrected: false,
-                    response: originalResponse,
-                    reason: 'Validação aceita'
+                    action: 'SEARCH_AND_RESPOND',
+                    intent: intent,
+                    response: `🔍 Encontrei informação sobre meus criadores!\n\n${
+                        searchResults.sources.wikipedia ? 
+                        searchResults.sources.wikipedia.map(r => `📄 <strong>${r.title}</strong>: ${r.snippet.substring(0, 150)}...`).join('\n') :
+                        'A informação não está disponível online no momento.'
+                    }\n\n💙 São criadores incríveis que me desenvolveram com paixão em Angola!`,
+                    searchResults: searchResults
                 };
             }
 
-            const correction = {
-                original: originalResponse,
-                corrected: originalResponse,
-                issues: validationResult.fails,
-                changes: [],
-                confidence: 0
-            };
+            // Caso 2: Busca genérica
+            if (intent === 'SEARCH') {
+                const searchTerms = msg.replace(/.*?(quem|o quê|como|onde|quando|porquê|qual)\s+/i, '');
+                if (searchTerms.length > 2) {
+                    const searchResults = await intelligentSearch(searchTerms, CLOUD_STATE.config.searchSources);
+                    
+                    if (searchResults.success) {
+                        let response = `🔍 Encontrei isto sobre "<strong>${searchTerms}</strong>":\n\n`;
+                        
+                        Object.entries(searchResults.sources).forEach(([source, items]) => {
+                            response += `<strong>${source.toUpperCase()}:</strong>\n`;
+                            items.slice(0, 2).forEach(item => {
+                                response += `📌 <strong>${item.title}</strong>\n${item.snippet.substring(0, 150)}...\n`;
+                            });
+                        });
 
-            // Tentar corrigir based em issues
-            if (validationResult.fails.some(f => f.includes('curta'))) {
-                correction.corrected += ` Deixa-me elaborar melhor: ${generateImprovedResponse(userMessage)}`;
-                correction.changes.push('Expandida com mais detalhe');
-            }
-
-            if (validationResult.fails.some(f => f.includes('contexto'))) {
-                const contextWords = userMessage.split(/\s+/).slice(0, 3).join(' ');
-                correction.corrected = `Relativamente a "${contextWords}": ${correction.corrected}`;
-                correction.changes.push('Contextualizada melhor');
-            }
-
-            if (validationResult.fails.some(f => f.includes('Repetição'))) {
-                correction.corrected = improveVariety(correction.corrected);
-                correction.changes.push('Variada linguagem');
-            }
-
-            correction.confidence = Math.min(100, 50 + (correction.changes.length * 15));
-
-            return correction;
-        }
-
-        // ========== GERAR RESPOSTA MELHORADA ==========
-        function generateImprovedResponse(userMessage) {
-            const words = userMessage.split(/\s+/);
-            const mainTopic = words[0];
-            
-            const templates = [
-                `Especificamente sobre ${mainTopic}, é importante notar que`,
-                `Considerando ${mainTopic}, podemos dizer que`,
-                `Uma análise mais profunda de ${mainTopic} revela que`,
-                `Relativamente a ${mainTopic}, a perspectiva é que`
-            ];
-
-            const template = templates[Math.floor(Math.random() * templates.length)];
-            return template + ` há múltiplas dimensões a considerar...`;
-        }
-
-        function improveVariety(text) {
-            const words = text.split(/\s+/);
-            const seen = new Set();
-            let improved = [];
-
-            words.forEach((word, index) => {
-                if (seen.has(word.toLowerCase()) && index > words.length / 2) {
-                    // Tentar substituir por sinónimo
-                    const synonyms = {
-                        'é': 'constitui',
-                        'tem': 'possui',
-                        'pode': 'consegue',
-                        'faz': 'realiza'
-                    };
-                    improved.push(synonyms[word.toLowerCase()] || word);
-                } else {
-                    improved.push(word);
+                        return {
+                            action: 'SEARCH_AND_RESPOND',
+                            intent: intent,
+                            response: response,
+                            searchResults: searchResults
+                        };
+                    }
                 }
-                seen.add(word.toLowerCase());
-            });
+            }
 
-            return improved.join(' ');
-        }
+            // Caso 3: Conversação
+            if (intent === 'CONVERSATION') {
+                const responses = [
+                    `Olá! Fico feliz de te ver! Como posso ajudar-te? 😊`,
+                    `Opa! Tudo bem? O que está na tua mente hoje? 💙`,
+                    `Que alegria conversar contigo! Diz-me algo... 🎧`
+                ];
+                return {
+                    action: 'RESPOND',
+                    intent: intent,
+                    response: responses[Math.floor(Math.random() * responses.length)]
+                };
+            }
 
-        // ========== RACIOCÍNIO PROFUNDO ==========
-        function deepThinking(userMessage) {
-            const thinking = {
-                question: userMessage,
-                stages: [],
-                finalResponse: '',
-                confidenceScore: 0,
-                corrections: []
+            // Caso 4: Pedido de informação
+            if (intent === 'INFORMATION') {
+                const searchTerms = msg.replace(/.*?(sabe|diz|fala|conta|explica|descreve)\s+/i, '');
+                const searchResults = await intelligentSearch(searchTerms, CLOUD_STATE.config.searchSources);
+                
+                if (searchResults.success) {
+                    return {
+                        action: 'SEARCH_AND_RESPOND',
+                        intent: intent,
+                        response: `📚 Aqui está o que sei sobre isso:\n\n${Object.values(searchResults.sources)[0]?.[0]?.snippet || 'Não encontrei essa informação.'}`,
+                        searchResults: searchResults
+                    };
+                }
+            }
+
+            // Default
+            return {
+                action: 'RESPOND',
+                intent: intent,
+                response: `Entendi que estás a ${intent.toLowerCase()}. Como posso ajudar melhor? 💙`
             };
-
-            // Estágio 1: Parsing da pergunta
-            thinking.stages.push({
-                stage: 'Parsing',
-                action: 'Analisar pergunta',
-                result: `Pergunta detectada: "${userMessage.substring(0, 50)}..."`
-            });
-
-            // Estágio 2: Extrair conceitos
-            const concepts = extractConcepts(userMessage);
-            thinking.stages.push({
-                stage: 'Extração de Conceitos',
-                action: 'Identificar palavras-chave',
-                result: `${Object.keys(concepts).length} conceitos identificados`
-            });
-
-            // Estágio 3: Gerar resposta candidata
-            const baseResponse = generateText(userMessage);
-            thinking.stages.push({
-                stage: 'Geração de Resposta',
-                action: 'Criar resposta candidata',
-                result: `Resposta de ${baseResponse.split(/\s+/).length} palavras gerada`
-            });
-
-            // Estágio 4: Validação
-            const validation = validateResponse(baseResponse, userMessage);
-            thinking.stages.push({
-                stage: 'Validação',
-                action: 'Verificar coerência e relevância',
-                result: `Score: ${validation.score.toFixed(1)}% - ${validation.passes.length} passes, ${validation.fails.length} falhas`
-            });
-
-            // Estágio 5: Self-Correction
-            const correction = attemptSelfCorrection(baseResponse, userMessage, validation);
-            if (correction.corrected !== baseResponse) {
-                thinking.stages.push({
-                    stage: 'Self-Correction',
-                    action: 'Detectar e corrigir problemas',
-                    result: `${correction.changes.join(', ')} (Confiança: ${correction.confidence.toFixed(0)}%)`
-                });
-                thinking.corrections.push(correction);
-            }
-
-            thinking.finalResponse = correction.corrected;
-            thinking.confidenceScore = validation.score;
-
-            REASONING_ENGINE.lastThinking = thinking;
-            REASONING_ENGINE.correctionHistory.push(correction);
-            if (REASONING_ENGINE.correctionHistory.length > 20) {
-                REASONING_ENGINE.correctionHistory.shift();
-            }
-
-            return thinking;
         }
 
-        // ========== GERAÇÃO DE TEXTO ==========
-        function generateText(prompt, maxLength = 150) {
-            const templates = [
-                `A respeito de "${prompt.substring(0, 30)}", é relevante considerar que`,
-                `Quando pensamos em "${prompt.substring(0, 30)}", devemos notar que`,
-                `${prompt.substring(0, 30).charAt(0).toUpperCase() + prompt.substring(1, 30)} implica em diversos aspetos`,
-                `Analisando "${prompt.substring(0, 30)}", encontramos que`
-            ];
+        // ========== INTERFACE ==========
+        function updateUI() {
+            document.getElementById('search-count').innerText = CLOUD_STATE.stats.totalSearches;
+            document.getElementById('intent-count').innerText = CLOUD_STATE.stats.totalIntentDetections;
+            document.getElementById('chat-count').innerText = CLOUD_STATE.conversations.length;
 
-            const base = templates[Math.floor(Math.random() * templates.length)];
-            const extensions = [
-                ' há múltiplas perspectivas válidas.',
-                ' o contexto é fundamental para compreender.',
-                ' a complexidade é maior do que aparenta.',
-                ' diferentes abordagens são possíveis.'
-            ];
-
-            return base + extensions[Math.floor(Math.random() * extensions.length)];
-        }
-
-        // ========== INTERFACE E UPDATES ==========
-        function applyReasoningSettings() {
-            REASONING_CONFIG.mode = document.getElementById('reasoning-mode').value;
-            REASONING_CONFIG.criticismLevel = parseInt(document.getElementById('criticism-level').value);
-            REASONING_CONFIG.showReasoning = document.getElementById('show-reasoning').checked;
-
-            document.getElementById('reasoning-mode-display').innerText = 
-                REASONING_CONFIG.mode === 'fast' ? 'Rápido' : 
-                REASONING_CONFIG.mode === 'balanced' ? 'Equilibrado' : 'Profundo';
-            document.getElementById('criticism-display').innerText = REASONING_CONFIG.criticismLevel + '%';
-
-            toggleReasoning();
-            addMsg('ia', `✅ Configurações aplicadas!\n\n📊 Modo: ${REASONING_CONFIG.mode}\n🎯 Auto-Crítica: ${REASONING_CONFIG.criticismLevel}%\n📋 Mostrar Processo: ${REASONING_CONFIG.showReasoning ? 'Sim' : 'Não'}`);
-        }
-
-        function showThinkingProcess() {
-            if (!REASONING_ENGINE.lastThinking) {
-                addMsg('ia', '💭 Ainda não tenho um processo de raciocínio para mostrar. Faz-me uma pergunta!');
+            const actionLog = document.getElementById('action-log');
+            const recentActions = CLOUD_STATE.searchHistory.slice(-5).reverse();
+            
+            if (recentActions.length === 0) {
+                actionLog.innerHTML = '<p class="opacity-50">Aguardando primeiras ações...</p>';
                 return;
             }
 
-            const thinking = REASONING_ENGINE.lastThinking;
-            const processContent = document.getElementById('process-content');
-
-            processContent.innerHTML = `
-                <div class="bg-cyan-500/10 border border-cyan-500/30 p-3 rounded">
-                    <p class="font-bold text-cyan-400">Pergunta Analisada</p>
-                    <p>"${thinking.question.substring(0, 100)}..."</p>
+            actionLog.innerHTML = recentActions.map(action => `
+                <div style="background: rgba(0,255,255,0.1); padding: 5px; border-radius: 4px; margin: 3px 0;">
+                    <p class="text-cyan-400 font-bold text-[9px]">🔍 ${action.query.substring(0, 40)}</p>
+                    <p class="text-cyan-300/70 text-[8px]">${new Date(action.timestamp).toLocaleTimeString('pt-PT')}</p>
                 </div>
+            `).join('');
+        }
 
-                <div class="bg-purple-500/10 border border-purple-500/30 p-3 rounded">
-                    <p class="font-bold text-purple-400">Estágios de Raciocínio</p>
-                    ${thinking.stages.map(s => `
-                        <div class="thought-chain">
-                            <p class="font-bold text-purple-300">${s.stage}</p>
-                            <p class="text-purple-200">${s.action}</p>
-                            <p class="text-purple-400/70">→ ${s.result}</p>
-                        </div>
-                    `).join('')}
-                </div>
-
-                ${thinking.corrections.length > 0 ? `
-                    <div class="bg-green-500/10 border border-green-500/30 p-3 rounded">
-                        <p class="font-bold text-green-400">Correções Realizadas</p>
-                        ${thinking.corrections.map(c => `
-                            <div class="correction-box">
-                                <p class="text-green-300">Alterações: ${c.changes.join(', ')}</p>
-                                <p class="text-green-400/70">Confiança: ${c.confidence.toFixed(0)}%</p>
+        function showSearchHistory() {
+            const historyContent = document.getElementById('history-content');
+            
+            if (CLOUD_STATE.searchHistory.length === 0) {
+                historyContent.innerHTML = '<p class="text-cyan-400">Nenhuma busca realizada ainda...</p>';
+            } else {
+                historyContent.innerHTML = CLOUD_STATE.searchHistory.reverse().map(search => `
+                    <div class="bg-cyan-500/10 border border-cyan-500/30 p-3 rounded">
+                        <p class="font-bold text-cyan-400">🔍 ${search.query}</p>
+                        <p class="text-white/70 text-[11px] mt-2">
+                            Fontes: ${Object.keys(search.sources).join(', ')}<br>
+                            Resultados: ${Object.values(search.sources).flat().length}
+                        </p>
+                        ${Object.entries(search.sources).map(([source, results]) => `
+                            <div class="mt-2 text-[10px]">
+                                <p class="text-green-400 font-bold">${source}</p>
+                                ${results.slice(0, 2).map(r => `<p class="text-white/60">• ${r.title}</p>`).join('')}
                             </div>
                         `).join('')}
                     </div>
-                ` : ''}
-
-                <div class="bg-blue-500/10 border border-blue-500/30 p-3 rounded">
-                    <p class="font-bold text-blue-400">Score de Confiança Final</p>
-                    <p class="text-blue-300">${thinking.confidenceScore.toFixed(1)}%</p>
-                </div>
-            `;
-
-            document.getElementById('process-modal').classList.remove('hidden');
+                `).join('');
+            }
+            
+            document.getElementById('history-modal').classList.remove('hidden');
         }
 
-        function closeProcess() {
-            document.getElementById('process-modal').classList.add('hidden');
+        function closeHistory() {
+            document.getElementById('history-modal').classList.add('hidden');
         }
 
-        function toggleReasoning() {
-            document.getElementById('reasoning-panel').classList.toggle('hidden-panel');
+        function toggleConfig() {
+            document.getElementById('config-panel').classList.toggle('hidden-panel');
         }
 
-        function exportReasoning() {
-            const json = JSON.stringify(REASONING_ENGINE, null, 2);
+        function applyConfig() {
+            CLOUD_STATE.config.searchMode = document.getElementById('search-mode').value;
+            CLOUD_STATE.config.analyzeIntent = document.getElementById('analyze-intent').checked;
+            CLOUD_STATE.config.searchSources = Array.from(document.querySelectorAll('.search-source:checked')).map(cb => cb.value);
+
+            document.getElementById('mode-display').innerText = 
+                CLOUD_STATE.config.searchMode === 'auto' ? 'Automático' :
+                CLOUD_STATE.config.searchMode === 'always' ? 'Sempre' : 'Manual';
+
+            toggleConfig();
+            addMsg('ia', `✅ Configuração Cloud aplicada!\n\n📡 Modo: ${CLOUD_STATE.config.searchMode}\n🧠 Análise de Intenção: ${CLOUD_STATE.config.analyzeIntent ? 'Ativa' : 'Desativa'}\n🔍 Fontes: ${CLOUD_STATE.config.searchSources.join(', ')}`);
+        }
+
+        function exportCloud() {
+            const json = JSON.stringify(CLOUD_STATE, null, 2);
             const blob = new Blob([json], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `zenia-reasoning-${Date.now()}.json`;
+            a.download = `zenia-cloud-v11-${Date.now()}.json`;
             a.click();
-            addMsg('ia', '💾 Processo de raciocínio exportado! 💙');
-        }
-
-        function updateCorrectionLog() {
-            const logDiv = document.getElementById('correction-log');
-            const corrections = REASONING_ENGINE.correctionHistory.slice(-5);
-
-            if (corrections.length === 0) {
-                logDiv.innerHTML = '<p class="opacity-50">Nenhuma correção ainda...</p>';
-                return;
-            }
-
-            logDiv.innerHTML = corrections.reverse().map(c => `
-                <div style="background: rgba(100,255,100,0.1); padding: 5px; border-radius: 4px; margin: 3px 0;">
-                    <p class="text-green-400 font-bold text-[9px]">${c.changes.join(', ')}</p>
-                    <p class="text-green-300/70 text-[8px]">Conf: ${c.confidence.toFixed(0)}%</p>
-                </div>
-            `).join('');
-
-            document.getElementById('correction-count').innerText = REASONING_ENGINE.correctionHistory.length;
+            addMsg('ia', '☁️ Dados Cloud exportados! 💙');
         }
 
         async function handleAction() {
@@ -604,40 +481,56 @@
             addMsg('user', userMessage);
             input.value = '';
             
-            const iaId = addMsg('ia', '<i class="fas fa-spinner spinner"></i> Pensando profundamente...');
+            document.getElementById('status-light').className = 'status-indicator status-analyzing';
+            const iaId = addMsg('ia', '<i class="fas fa-spinner spinner"></i> Analisando intenção...');
             
-            setTimeout(() => {
-                document.getElementById('status-light').className = 'status-indicator status-thinking';
+            setTimeout(async () => {
+                // Detectar intenção
+                const intentData = detectIntent(userMessage);
+                CLOUD_STATE.stats.totalIntentDetections++;
+                
+                document.getElementById('status-light').className = 'status-indicator status-searching';
+                
+                // Responder baseado em intenção
+                const response = await respondToIntent(intentData);
+                
+                document.getElementById('status-light').className = 'status-indicator status-online';
 
-                setTimeout(() => {
-                    const contentDiv = document.getElementById(iaId).querySelector('.content');
-                    
-                    // Executar raciocínio baseado no modo
-                    let response = '';
-                    if (REASONING_CONFIG.mode === 'deep') {
-                        const thinking = deepThinking(userMessage);
-                        response = thinking.finalResponse;
-                        
-                        if (REASONING_CONFIG.showReasoning) {
-                            response += `\n\n<div class="reasoning-box">
-                                <strong>📊 Processo de Raciocínio:</strong>
-                                <br>Estágios: ${thinking.stages.length} | Correções: ${thinking.corrections.length} | Confiança: ${thinking.confidenceScore.toFixed(1)}%
-                                <br><span class="text-cyan-300/60">[Clica em "Processo" na barra lateral para ver detalhes]</span>
-                            </div>`;
-                        }
-                    } else if (REASONING_CONFIG.mode === 'balanced') {
-                        const thinking = deepThinking(userMessage);
-                        response = thinking.finalResponse;
-                    } else {
-                        response = generateText(userMessage);
-                    }
+                const contentDiv = document.getElementById(iaId).querySelector('.content');
+                
+                let fullResponse = response.response;
 
-                    contentDiv.innerHTML = response;
-                    updateCorrectionLog();
-                    document.getElementById('status-light').className = 'status-indicator status-online';
+                // Adicionar análise de intenção se configurado
+                if (CLOUD_STATE.config.analyzeIntent) {
+                    fullResponse += `\n\n<div class="intent-box">
+                        <strong>🧠 Análise de Intenção:</strong><br>
+                        Detectei: <strong>${intentData.primary}</strong><br>
+                        Confiança: ${Math.round(intentData.confidence[intentData.primary] || 0)}%<br>
+                        Ação: ${response.action}
+                    </div>`;
+                }
 
-                }, 1500);
-            }, 500);
+                // Adicionar detalhes de busca se houver
+                if (response.searchResults) {
+                    fullResponse += `\n\n<div class="search-box">
+                        <strong>📊 Resultados de Busca:</strong><br>
+                        Fontes consultadas: ${Object.keys(response.searchResults.sources).join(', ')}<br>
+                        Resultados encontrados: ${Object.values(response.searchResults.sources).flat().length}
+                    </div>`;
+                }
+
+                contentDiv.innerHTML = fullResponse;
+
+                // Guardar conversa
+                CLOUD_STATE.conversations.push({
+                    user: userMessage,
+                    response: response.response,
+                    intent: intentData.primary,
+                    timestamp: Date.now()
+                });
+
+                updateUI();
+            }, 1500);
         }
 
         function addMsg(role, text) {
@@ -652,13 +545,9 @@
             return id;
         }
 
-        document.getElementById('criticism-level').addEventListener('input', (e) => {
-            document.getElementById('criticism-display').innerText = e.target.value + '%';
-        });
-
         // Inicializar
         document.getElementById('status-light').className = 'status-indicator status-online';
-        updateCorrectionLog();
+        updateUI();
     </script>
 </body>
 </html>
