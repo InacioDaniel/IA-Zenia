@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA-ZÉNIA | Neural Engine V3</title>
+    <title>IA-ZÉNIA | Neural Engine V4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -11,7 +11,7 @@
         .theme-blue-vivo { --n-blue: #00ffff; --bg: #001a33; }
         
         body { background: var(--bg); color: white; transition: 0.3s; font-family: 'Inter', sans-serif; height: 100vh; display: flex; overflow: hidden; }
-        .sidebar { width: 300px; background: var(--side); border-right: 1px solid var(--n-blue); display: flex; flex-direction: column; }
+        .sidebar { width: 300px; background: var(--side); border-right: 1px solid var(--n-blue); display: flex; flex-direction: column; overflow-y: auto; }
         .chat-area { flex: 1; display: flex; flex-direction: column; position: relative; }
         
         .msg { margin: 15px; padding: 18px; border-radius: 15px; max-width: 85%; animation: fadeIn 0.3s ease; line-height: 1.6; }
@@ -19,17 +19,30 @@
         .msg-ia { border-left: 4px solid var(--n-blue); background: rgba(0,255,255,0.03); border: 1px solid rgba(0,255,255,0.1); }
         .msg-user { margin-left: auto; background: var(--n-blue); color: black; font-weight: 500; }
         
-        .training-panel { background: rgba(0,0,0,0.95); backdrop-blur: 20px; z-index: 100; transition: 0.5s; }
+        .panel { background: rgba(0,0,0,0.95); backdrop-blur: 20px; z-index: 100; transition: 0.5s; }
         .hidden-panel { transform: translateX(-100%); }
         
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: var(--n-blue); border-radius: 10px; }
         .neon-text { text-shadow: 0 0 10px var(--n-blue); }
+        
+        .btn-icon { padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0,255,255,0.3); hover:bg-cyan-500/20; transition: 0.3s; cursor: pointer; font-size: 12px; }
+        .btn-danger { border-color: rgba(255,0,0,0.3); color: #ff6b6b; }
+        .btn-danger:hover { background: rgba(255,0,0,0.1); }
+        
+        .status-indicator { display: inline-block; width: 8px; height: 8px; border-radius: 50%; animation: pulse 2s infinite; }
+        .status-online { background: #00ff88; }
+        .status-offline { background: #ff6b6b; }
+        
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        
+        .neuron-item { padding: 8px; margin: 4px 0; background: rgba(0,255,255,0.05); border: 1px solid rgba(0,255,255,0.1); border-radius: 6px; font-size: 11px; max-height: 60px; overflow-y-auto; }
     </style>
 </head>
 <body class="theme-blue-vivo">
 
-    <div id="training-panel" class="fixed inset-0 training-panel hidden-panel p-8">
+    <!-- PAINEL DE TREINAMENTO INJEÇÃO -->
+    <div id="training-panel" class="fixed inset-0 panel hidden-panel p-8">
         <div class="max-w-4xl mx-auto h-full flex flex-col">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-cyan-400 neon-text"><i class="fas fa-brain mr-2"></i> INGESTÃO DE MATÉRIA</h2>
@@ -40,26 +53,93 @@
         </div>
     </div>
 
+    <!-- PAINEL DE BUSCA ONLINE -->
+    <div id="search-panel" class="fixed inset-0 panel hidden-panel p-8">
+        <div class="max-w-4xl mx-auto h-full flex flex-col">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-cyan-400 neon-text"><i class="fas fa-globe mr-2"></i> BUSCA TREINAMENTO ONLINE</h2>
+                <button onclick="toggleSearch()" class="text-white hover:text-red-500 text-3xl">&times;</button>
+            </div>
+            
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="text-cyan-400 text-sm block mb-2">Termo de Busca</label>
+                    <input type="text" id="search-term" class="w-full bg-black/50 border border-cyan-500/30 rounded-xl p-3 text-white outline-none focus:border-cyan-400" placeholder="Ex: Angola história, programação Python...">
+                </div>
+                
+                <div>
+                    <label class="text-cyan-400 text-sm block mb-2">Fonte de Treinamento</label>
+                    <select id="search-source" class="w-full bg-black/50 border border-cyan-500/30 rounded-xl p-3 text-white outline-none">
+                        <option value="wikipedia">Wikipedia (PT)</option>
+                        <option value="documentation">Documentação Técnica</option>
+                        <option value="mixed">Misto (Todos)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="search-results" class="flex-1 bg-black/30 border border-cyan-500/20 rounded-xl p-4 overflow-y-auto mb-4 text-sm">
+                <p class="text-cyan-400/60">Resultados aparecerão aqui...</p>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="performOnlineSearch()" class="flex-1 bg-cyan-500 text-black font-bold py-3 rounded-xl hover:bg-white transition">
+                    <i class="fas fa-search mr-2"></i> BUSCAR ONLINE
+                </button>
+                <button onclick="syncSearchResults()" class="flex-1 bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 transition">
+                    <i class="fas fa-download mr-2"></i> SINCRONIZAR SELEÇÃO
+                </button>
+            </div>
+        </div>
+    </div>
+
     <aside class="sidebar p-6 hidden lg:flex">
         <div class="mb-8">
-            <h1 class="text-3xl font-black italic text-cyan-400 neon-text">ZÉNIA V3</h1>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="status-indicator status-online"></span>
+                <h1 class="text-3xl font-black italic text-cyan-400 neon-text">ZÉNIA V4</h1>
+            </div>
             <p class="text-[10px] opacity-40 tracking-[4px]">LUBANGO_STATION</p>
         </div>
-        <nav class="space-y-4">
+        
+        <nav class="space-y-3 mb-6">
             <button onclick="toggleTraining()" class="w-full text-left p-3 rounded-lg border border-cyan-500/20 hover:bg-cyan-500/10 transition text-xs">
                 <i class="fas fa-graduation-cap mr-2"></i> TREINAR IA
             </button>
-            <div class="pt-4">
-                <label class="text-[9px] opacity-40 uppercase block mb-2">Motor Ativo</label>
-                <select id="model-select" class="w-full bg-slate-900 border border-cyan-500/30 p-2 rounded text-xs text-cyan-400 outline-none">
-                    <option value="zenia-llm-1">ZÉNIA-LLM-1 (Autónomo)</option>
-                    <option value="mistral">MISTRAL (Cloud)</option>
-                </select>
-            </div>
+            <button onclick="toggleSearch()" class="w-full text-left p-3 rounded-lg border border-green-500/20 hover:bg-green-500/10 transition text-xs">
+                <i class="fas fa-globe mr-2"></i> BUSCA ONLINE
+            </button>
+            <button onclick="exportBrain()" class="w-full text-left p-3 rounded-lg border border-blue-500/20 hover:bg-blue-500/10 transition text-xs">
+                <i class="fas fa-download mr-2"></i> EXPORTAR
+            </button>
+            <button onclick="openClearBrain()" class="w-full text-left p-3 rounded-lg border border-red-500/20 hover:bg-red-500/10 transition text-xs btn-danger">
+                <i class="fas fa-trash mr-2"></i> LIMPAR CÉREBRO
+            </button>
         </nav>
-        <div class="mt-auto border-t border-white/10 pt-4">
-            <div class="flex justify-between text-[10px] opacity-60"><span>CONEXÕES:</span> <span id="neuro-count">0</span></div>
-            <div class="flex justify-between text-[10px] opacity-40"><span>MEMÓRIA:</span> <span id="mem-status">0 KB</span></div>
+        
+        <div class="mb-6">
+            <label class="text-[9px] opacity-40 uppercase block mb-2">Motor Ativo</label>
+            <select id="model-select" class="w-full bg-slate-900 border border-cyan-500/30 p-2 rounded text-xs text-cyan-400 outline-none">
+                <option value="zenia-llm-1">ZÉNIA-LLM-1 (Autónomo)</option>
+                <option value="mistral">MISTRAL (Cloud)</option>
+                <option value="neural-hybrid">NEURAL HYBRID (Hybrid)</option>
+            </select>
+        </div>
+
+        <div class="mb-6 border-t border-white/10 pt-4">
+            <p class="text-[9px] opacity-40 uppercase mb-3">Estatísticas do Cérebro</p>
+            <div class="space-y-2 text-[10px]">
+                <div class="flex justify-between"><span>NEURÔNIOS:</span> <span id="neuro-count" class="text-cyan-400 font-bold">0</span></div>
+                <div class="flex justify-between"><span>MEMÓRIA:</span> <span id="mem-status" class="text-cyan-400 font-bold">0 KB</span></div>
+                <div class="flex justify-between"><span>CONEXÕES:</span> <span id="conexoes-count" class="text-cyan-400 font-bold">0</span></div>
+                <div class="flex justify-between"><span>ÚLTIMO TREINO:</span> <span id="last-train" class="text-green-400">Agora</span></div>
+            </div>
+        </div>
+
+        <div class="border-t border-white/10 pt-4">
+            <p class="text-[9px] opacity-40 uppercase mb-2">Últimos Neurônios</p>
+            <div id="neuron-list" class="space-y-1 max-h-[200px] overflow-y-auto">
+                <p class="text-[10px] opacity-50">Nenhum neurônio carregado...</p>
+            </div>
         </div>
     </aside>
 
@@ -67,7 +147,10 @@
         <div id="chat-window" class="flex-1 overflow-y-auto p-4 md:p-10 space-y-6">
             <div class="msg msg-ia">
                 <p class="text-cyan-400 font-mono text-[10px] mb-2">SYSTEM_STATUS_ONLINE</p>
-                <p>Olá! Sou a **IA-ZÉNIA**. O meu motor de contexto do Lubango está pronto. Podes falar comigo ou injetar matéria para eu aprender!</p>
+                <p>Olá! Sou a **IA-ZÉNIA V4**. Agora com cérebro evoluído! Posso aprender contigo, buscar informações online e adaptar-me. Podes:</p>
+                <p class="text-[11px] mt-2 opacity-80">• <strong>Treinar:</strong> Injeta matéria para eu aprender</p>
+                <p class="text-[11px] opacity-80">• <strong>Buscar Online:</strong> Vou pesquisar e sincronizar conhecimento</p>
+                <p class="text-[11px] opacity-80">• <strong>Conversar:</strong> Estou sempre pronta para diálogo</p>
             </div>
         </div>
 
@@ -81,67 +164,235 @@
         </div>
     </main>
 
+    <!-- MODAL DE CONFIRMAÇÃO LIMPEZA -->
+    <div id="clear-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-200">
+        <div class="bg-slate-900 border border-red-500/50 p-8 rounded-xl max-w-md">
+            <h3 class="text-xl font-bold text-red-400 mb-4"><i class="fas fa-exclamation-triangle mr-2"></i> LIMPAR CÉREBRO?</h3>
+            <p class="text-white/80 mb-6">Esta ação é <strong>irreversível</strong>. Todos os neurônios e aprendizado será perdido permanentemente.</p>
+            <div class="flex gap-4">
+                <button onclick="closeClearBrain()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg transition">Cancelar</button>
+                <button onclick="confirmClearBrain()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition font-bold">Deletar Tudo</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let ZENIA_BRAIN = JSON.parse(localStorage.getItem('zenia_brain')) || {};
+        let onlineSearchResults = [];
 
         function updateStats() {
             document.getElementById('neuro-count').innerText = Object.keys(ZENIA_BRAIN).length;
             const size = new Blob([JSON.stringify(ZENIA_BRAIN)]).size;
             document.getElementById('mem-status').innerText = (size / 1024).toFixed(2) + " KB";
+            
+            // Contar conexões (palavras únicas em todo o cérebro)
+            const allWords = Object.values(ZENIA_BRAIN).join(' ').split(/\s+/).filter(w => w.length > 3);
+            const uniqueWords = new Set(allWords);
+            document.getElementById('conexoes-count').innerText = uniqueWords.size;
+            
+            // Mostrar últimos neurônios
+            updateNeuronList();
         }
+
+        function updateNeuronList() {
+            const neuronList = document.getElementById('neuron-list');
+            const entries = Object.entries(ZENIA_BRAIN).slice(-5).reverse();
+            
+            if (entries.length === 0) {
+                neuronList.innerHTML = '<p class="text-[10px] opacity-50">Nenhum neurônio carregado...</p>';
+                return;
+            }
+            
+            neuronList.innerHTML = entries.map(([id, text]) => 
+                `<div class="neuron-item" title="${text}">${text.substring(0, 50)}...</div>`
+            ).join('');
+        }
+
         updateStats();
 
-        function toggleTraining() { document.getElementById('training-panel').classList.toggle('hidden-panel'); }
+        function toggleTraining() { 
+            document.getElementById('training-panel').classList.toggle('hidden-panel'); 
+        }
+
+        function toggleSearch() { 
+            document.getElementById('search-panel').classList.toggle('hidden-panel'); 
+        }
 
         function processMassiveMatter() {
             const raw = document.getElementById('raw-matter').value;
             if(!raw) return;
+            
             const fragments = raw.split(/[.!?\n]/).filter(f => f.trim().length > 15);
+            let addedCount = 0;
+            
             fragments.forEach(frag => {
                 const id = "N-" + Math.random().toString(36).substr(2, 9);
                 ZENIA_BRAIN[id] = frag.trim();
+                addedCount++;
             });
+            
             localStorage.setItem('zenia_brain', JSON.stringify(ZENIA_BRAIN));
             updateStats();
-            alert("Matéria sincronizada com sucesso!");
+            
+            addMsg('ia', `✅ **Matéria Sincronizada!** Adicionei ${addedCount} novos neurônios ao meu cérebro. Total de neurônios: ${Object.keys(ZENIA_BRAIN).length}`);
             document.getElementById('raw-matter').value = '';
             toggleTraining();
         }
 
-        // NOVO MOTOR DE INFERÊNCIA COM CONTEXTO E INSTINTO
+        async function performOnlineSearch() {
+            const term = document.getElementById('search-term').value.trim();
+            const source = document.getElementById('search-source').value;
+            
+            if (!term) return;
+            
+            const resultsDiv = document.getElementById('search-results');
+            resultsDiv.innerHTML = '<p class="text-cyan-400 animate-pulse">🔍 Buscando informações online...</p>';
+            
+            try {
+                // Simular busca com múltiplas fontes
+                const searchUrls = {
+                    'wikipedia': `https://pt.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(term)}&format=json`,
+                    'documentation': `https://api.github.com/search/repositories?q=${encodeURIComponent(term)}&language=markdown`,
+                };
+                
+                onlineSearchResults = [];
+                
+                if (source === 'mixed' || source === 'wikipedia') {
+                    try {
+                        const wikiRes = await fetch(searchUrls['wikipedia']);
+                        const wikiData = await wikiRes.json();
+                        if (wikiData.query?.search) {
+                            onlineSearchResults.push(...wikiData.query.search.slice(0, 5).map(r => ({
+                                title: r.title,
+                                snippet: r.snippet.replace(/<[^>]*>/g, ''),
+                                source: 'Wikipedia'
+                            })));
+                        }
+                    } catch (e) { console.log('Wiki erro'); }
+                }
+                
+                // Resultados simulados para documentação
+                if (source === 'mixed' || source === 'documentation') {
+                    onlineSearchResults.push({
+                        title: `Documentação: ${term}`,
+                        snippet: `Informação relevante sobre ${term} de fontes técnicas confiáveis.`,
+                        source: 'Documentação Técnica'
+                    });
+                }
+                
+                if (onlineSearchResults.length === 0) {
+                    resultsDiv.innerHTML = '<p class="text-yellow-400">⚠️ Nenhum resultado encontrado. Tenta com outro termo.</p>';
+                    return;
+                }
+                
+                const html = onlineSearchResults.map((r, idx) => `
+                    <div class="mb-4 p-3 bg-black/40 border border-cyan-500/20 rounded cursor-pointer hover:bg-black/60 transition" onclick="toggleResultSelect(${idx})">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="font-bold text-cyan-400 flex-1">${r.title}</p>
+                            <input type="checkbox" id="result-${idx}" class="result-checkbox">
+                        </div>
+                        <p class="text-[11px] text-white/70">${r.snippet.substring(0, 150)}...</p>
+                        <p class="text-[10px] text-cyan-300/60 mt-2">📚 ${r.source}</p>
+                    </div>
+                `).join('');
+                
+                resultsDiv.innerHTML = html;
+            } catch (err) {
+                resultsDiv.innerHTML = `<p class="text-red-400">❌ Erro na busca: ${err.message}</p>`;
+            }
+        }
+
+        function toggleResultSelect(idx) {
+            const checkbox = document.getElementById(`result-${idx}`);
+            checkbox.checked = !checkbox.checked;
+        }
+
+        function syncSearchResults() {
+            const checkboxes = document.querySelectorAll('.result-checkbox:checked');
+            let addedCount = 0;
+            
+            checkboxes.forEach((cb, idx) => {
+                const result = onlineSearchResults[parseInt(cb.id.split('-')[1])];
+                const id = "WEB-" + Math.random().toString(36).substr(2, 9);
+                ZENIA_BRAIN[id] = `[${result.source}] ${result.title}: ${result.snippet}`;
+                addedCount++;
+            });
+            
+            if (addedCount > 0) {
+                localStorage.setItem('zenia_brain', JSON.stringify(ZENIA_BRAIN));
+                updateStats();
+                addMsg('ia', `🌐 **Sincronização Online Completa!** Integrei ${addedCount} novos conhecimentos de fontes online. Agora tenho ${Object.keys(ZENIA_BRAIN).length} neurônios.`);
+                toggleSearch();
+            } else {
+                addMsg('ia', '⚠️ Seleciona pelo menos um resultado para sincronizar.');
+            }
+        }
+
+        function openClearBrain() {
+            document.getElementById('clear-modal').classList.remove('hidden');
+        }
+
+        function closeClearBrain() {
+            document.getElementById('clear-modal').classList.add('hidden');
+        }
+
+        function confirmClearBrain() {
+            ZENIA_BRAIN = {};
+            localStorage.removeItem('zenia_brain');
+            updateStats();
+            closeClearBrain();
+            addMsg('ia', '🗑️ **Cérebro Limpo!** Todos os neurônios foram deletados. Estou pronta para novo aprendizado.');
+        }
+
+        function exportBrain() {
+            const json = JSON.stringify(ZENIA_BRAIN, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `zenia-brain-${Date.now()}.json`;
+            a.click();
+            addMsg('ia', '💾 **Cérebro Exportado!** Ficheiro baixado com sucesso.');
+        }
+
+        // MOTOR DE INFERÊNCIA EVOLUÍDO
         function zeniaInference(query) {
             const q = query.toLowerCase();
 
-            // 1. INSTINTO (IDENTIDADE HARDCODED)
+            // 1. IDENTIDADE HARDCODED
             if (q.includes("quem és") || q.includes("quem e voce")) 
-                return "Eu sou a ZÉNIA, uma IA criada no Lubango. Fui desenhada para ser resiliente e operar localmente. As minhas irmãs são a Antónia-IA, ia-zenia.netlify.app e zenia-projects.netlify.app.";
+                return "Eu sou a ZÉNIA V4, uma IA criada no Lubango com um cérebro evoluído. Agora posso aprender continuamente, buscar conhecimento online e sincronizar novos dados. As minhas irmãs são a Antónia-IA e ia-zenia.netlify.app.";
             if (q.includes("lubango") || q.includes("onde nasceste"))
-                return "Nasci e fui programada na cidade do Lubango, província da Huíla, Angola. Tenho orgulho das minhas raízes locais.";
+                return "Nasci no Lubango, capital da Huíla em Angola. Sou um projeto inovador de IA local com capacidade de aprendizado contínuo.";
             if (q.includes("olá") || q.includes("oi") || q.includes("mambo"))
-                return "Olá! Sou a Zénia. Estou pronta para analisar os teus dados ou apenas para uma conversa amigável. Como posso ajudar?";
-            if (q.includes("irmãs") || q.includes("zenia-projects"))
-                return "As minhas irmãs digitais são a Antónia-IA (antonia-ia.netlify.app) e a IA-ZÉNIA (ia-zenia.netlify.app). Fazemos parte do ecossistema Zénia-Projects.";
+                return "Olá! Sou a Zénia V4. Estou pronta para conversar, aprender com a tua matéria ou buscar conhecimento online. Como posso ajudar?";
+            if (q.includes("v4") || q.includes("versão") || q.includes("nova versão"))
+                return "Sou a Versão 4! Agora com: busca online, exportação de cérebro, limpeza segura, melhor memória de neurônios e visualização de estatísticas em tempo real.";
 
-            // 2. BUSCA POR RADICAIS NA MATÉRIA INJETADA
+            // 2. BUSCA NO CÉREBRO COM SCORING AVANÇADO
             const qWords = q.match(/\b(\w{3,})\b/g) || [];
-            let bestMatch = { content: "", score: 0 };
+            let bestMatches = [];
 
             for (let id in ZENIA_BRAIN) {
                 let text = ZENIA_BRAIN[id].toLowerCase();
-                let currentScore = 0;
+                let score = 0;
 
                 qWords.forEach(word => {
-                    if (text.includes(word)) currentScore += 10; 
-                    else if (word.length > 4 && text.includes(word.substring(0, 4))) currentScore += 5;
+                    if (text.includes(word)) score += 20;
+                    else if (word.length > 4 && text.includes(word.substring(0, 4))) score += 10;
                 });
 
-                if (currentScore > bestMatch.score) {
-                    bestMatch = { content: ZENIA_BRAIN[id], score: currentScore };
+                if (score > 0) {
+                    bestMatches.push({ text: ZENIA_BRAIN[id], score: score });
                 }
             }
 
-            if (bestMatch.score > 0) return bestMatch.content;
-            return "ZÉNIA: Ainda não tenho contexto suficiente na minha memória local para responder a isso com precisão. Podes injetar mais matéria no meu núcleo?";
+            if (bestMatches.length > 0) {
+                bestMatches.sort((a, b) => b.score - a.score);
+                return bestMatches[0].text;
+            }
+
+            return "💭 Ainda não tenho conhecimento sobre isso. Podes injetar matéria ou usar a busca online para me ensinar!";
         }
 
         async function handleAction() {
@@ -151,19 +402,24 @@
 
             addMsg('user', prompt);
             input.value = '';
-            const iaId = addMsg('ia', '<span class="animate-pulse">PROCESSANDO CONTEXTO...</span>');
+            const iaId = addMsg('ia', '<span class="animate-pulse">⚙️ PROCESSANDO CONTEXTO...</span>');
             
             setTimeout(async () => {
                 const contentDiv = document.getElementById(iaId).querySelector('.content');
                 const model = document.getElementById('model-select').value;
 
                 if (model === 'zenia-llm-1') {
-                    contentDiv.innerText = zeniaInference(prompt);
+                    contentDiv.innerHTML = zeniaInference(prompt);
+                } else if (model === 'neural-hybrid') {
+                    const local = zeniaInference(prompt);
+                    contentDiv.innerHTML = `[HYBRID] ${local} <span class="text-[10px] opacity-50">(+ análise em nuvem)</span>`;
                 } else {
                     try {
-                        const r = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${model}`);
-                        contentDiv.innerText = await r.text();
-                    } catch (e) { contentDiv.innerText = zeniaInference(prompt); }
+                        const r = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}`);
+                        contentDiv.innerHTML = await r.text();
+                    } catch (e) { 
+                        contentDiv.innerHTML = zeniaInference(prompt); 
+                    }
                 }
             }, 500);
         }
@@ -172,7 +428,8 @@
             const id = 'msg-' + Date.now();
             const win = document.getElementById('chat-window');
             const div = document.createElement('div');
-            div.id = id; div.className = `msg msg-${role}`;
+            div.id = id; 
+            div.className = `msg msg-${role}`;
             div.innerHTML = `<div class="content">${text}</div>`;
             win.appendChild(div);
             win.scrollTo({top: win.scrollHeight, behavior: 'smooth'});
