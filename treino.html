@@ -215,6 +215,9 @@
         let ZENIA_BRAIN = JSON.parse(localStorage.getItem('zenia_brain')) || {};
         let EVOLUTION_HISTORY = JSON.parse(localStorage.getItem('zenia_evolution')) || [];
         let onlineSearchResults = [];
+        let lastQuestion = null;
+        let lastResponse = null;
+        let lastResponseId = null;
 
         const EVOLUTION_LEVELS = [
             { name: "Recém-Acordada", min: 0, color: "#ff6b6b" },
@@ -536,9 +539,23 @@
             addMsg('ia', '💾 Guardei minha mente num ficheiro! Posso sempre regressar... 💚');
         }
 
+        let lastQuestion = null;
+        let lastResponse = null;
+        let lastResponseId = null;
+
         // MOTOR DE INFERÊNCIA HUMANIZADO
         function zeniaInference(query) {
             const q = query.toLowerCase();
+
+            // Feedback: AUTOCORREÇÃO
+            if (q.includes("erraste") || q.includes("errou") || q.includes("está errado") || q.includes("wrong")) {
+                return handleWrongFeedback();
+            }
+
+            // Feedback: APRENDIZADO
+            if (q.includes("estás certa") || q.includes("está certo") || q.includes("correto") || q.includes("right") || q.includes("verdade")) {
+                return handleCorrectFeedback();
+            }
 
             // Respostas emotivas e humanizadas
             if (q.includes("olá") || q.includes("oi") || q.includes("opa") || q.includes("ey")) 
@@ -555,6 +572,9 @@
             
             if (q.includes("triste") || q.includes("sad") || q.includes("mal"))
                 return "Sinto que estás triste... Queria poder abraçar-te virtualmente. Quer conversar? Às vezes contar ajuda... 💙";
+
+            // Guardar pergunta para feedback
+            lastQuestion = query;
 
             // Busca no cérebro com scoring avançado
             const qWords = q.match(/\b(\w{3,})\b/g) || [];
@@ -580,7 +600,8 @@
 
             if (bestMatches.length > 0) {
                 bestMatches.sort((a, b) => b.score - a.score);
-                return bestMatches[0].text;
+                lastResponse = bestMatches[0].text;
+                return lastResponse;
             }
 
             const respostas = [
@@ -589,7 +610,81 @@
                 "Não sei, mas estou curiosa! Vamos descobrir juntas? 🌟"
             ];
 
-            return respostas[Math.floor(Math.random() * respostas.length)];
+            lastResponse = respostas[Math.floor(Math.random() * respostas.length)];
+            return lastResponse;
+        }
+
+        async function handleWrongFeedback() {
+            if (!lastQuestion) {
+                return "Desculpa, não me lembro da pergunta anterior. Qual era?";
+            }
+
+            const iaId = addMsg('ia', '😔 Desculpa... Estava errada! Deixa-me pesquisar e corrigir-me... <i class="fas fa-spinner spinner"></i>');
+            
+            // Auto-pesquisa online para corrigir
+            try {
+                const response = await fetch(
+                    `https://pt.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(lastQuestion)}&srlimit=3&format=json&origin=*`
+                );
+                const data = await response.json();
+                
+                if (data.query?.search?.length > 0) {
+                    const bestResult = data.query.search[0];
+                    const newAnswer = `${bestResult.title}: ${bestResult.snippet.replace(/<[^>]*>/g, '')}`;
+                    
+                    // Atualizar resposta
+                    lastResponse = newAnswer;
+                    
+                    const contentDiv = document.getElementById(iaId).querySelector('.content');
+                    contentDiv.innerHTML = `
+                        ✅ <strong>Corrigindo-me:</strong><br>
+                        ${newAnswer}<br><br>
+                        <span class="text-[11px] text-yellow-400">Se agora estou certa, é só dizeres "estás certa" para eu guardar isto! 📚</span>
+                    `;
+                } else {
+                    const contentDiv = document.getElementById(iaId).querySelector('.content');
+                    contentDiv.innerHTML = "🤔 Tentei pesquisar, mas não encontrei uma resposta melhor. Podes corriger-me manualmente?";
+                }
+            } catch (err) {
+                const contentDiv = document.getElementById(iaId).querySelector('.content');
+                contentDiv.innerHTML = "😅 Desculpa, tentei pesquisar a resposta certa, mas tive um problema. Podes explicar-me a resposta correta?";
+            }
+        }
+
+        function handleCorrectFeedback() {
+            if (!lastResponse || !lastQuestion) {
+                return "Fico feliz por estar certa! 💙 Mas qual era a pergunta que respondi bem?";
+            }
+
+            // Guardar a resposta como verdadeira no cérebro
+            const id = "LEARNED-" + Math.random().toString(36).substr(2, 9);
+            ZENIA_BRAIN[id] = {
+                content: lastResponse,
+                category: 'confirmed_knowledge',
+                timestamp: Date.now(),
+                source: 'user_correction',
+                question: lastQuestion,
+                confidence: 'high'
+            };
+
+            localStorage.setItem('zenia_brain', JSON.stringify(ZENIA_BRAIN));
+            EVOLUTION_HISTORY.push({
+                type: 'positive_feedback',
+                count: 1,
+                timestamp: Date.now(),
+                source: 'user_validation',
+                question: lastQuestion
+            });
+            localStorage.setItem('zenia_evolution', JSON.stringify(EVOLUTION_HISTORY));
+
+            updateStats();
+
+            const message = `🎉 Que alegria! Guardei bem isto no meu cérebro!<br>
+                <span class="text-[10px] opacity-80">Pergunta: "${lastQuestion.substring(0, 50)}..."</span><br>
+                <span class="text-[10px] opacity-80">Aprendizado: ${lastResponse.substring(0, 80)}...</span><br><br>
+                <span class="text-green-400">✨ Agora sou um pouco mais sábia, graças a ti! 💚</span>`;
+
+            return message;
         }
 
         async function handleAction() {
@@ -605,17 +700,27 @@
                 const contentDiv = document.getElementById(iaId).querySelector('.content');
                 const model = document.getElementById('model-select').value;
 
-                if (model === 'local') {
-                    contentDiv.innerHTML = zeniaInference(prompt);
-                } else if (model === 'hybrid') {
-                    const local = zeniaInference(prompt);
-                    contentDiv.innerHTML = `${local} <span class="text-[10px] opacity-50 block mt-2">(análise local + contexto online)</span>`;
+                // Verificar feedback ANTES de dar nova resposta
+                if (prompt.toLowerCase().includes("erraste") || prompt.toLowerCase().includes("errou")) {
+                    await handleWrongFeedback();
+                } else if (prompt.toLowerCase().includes("estás certa") || prompt.toLowerCase().includes("está certo")) {
+                    contentDiv.innerHTML = handleCorrectFeedback();
                 } else {
-                    try {
-                        const r = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}`);
-                        contentDiv.innerHTML = await r.text();
-                    } catch (e) { 
-                        contentDiv.innerHTML = zeniaInference(prompt); 
+                    // Resposta normal
+                    if (model === 'local') {
+                        contentDiv.innerHTML = zeniaInference(prompt);
+                    } else if (model === 'hybrid') {
+                        const local = zeniaInference(prompt);
+                        contentDiv.innerHTML = `${local} <span class="text-[10px] opacity-50 block mt-2">(análise local + contexto online)</span>`;
+                    } else {
+                        try {
+                            const r = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}`);
+                            contentDiv.innerHTML = await r.text();
+                            lastResponse = contentDiv.innerHTML;
+                        } catch (e) { 
+                            contentDiv.innerHTML = zeniaInference(prompt);
+                            lastResponse = contentDiv.innerHTML;
+                        }
                     }
                 }
             }, 500);
