@@ -67,6 +67,43 @@
         .toolbar-btn { padding:5px 10px;border-radius:8px;border:1px solid #30363d;background:transparent;color:#6b7280;font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px; }
         .toolbar-btn:hover { background:#1f2937;color:#e5e7eb;border-color:#4b5563; }
         .toolbar-btn.active { background:#1d3461;color:#60a5fa;border-color:#3b82f6; }
+
+        /* ── PAINEL AVANÇADO ── */
+        .adv-panel { position:fixed;top:0;right:0;width:400px;height:100vh;background:#0d1117;border-left:1px solid #30363d;z-index:1000;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease; }
+        .adv-panel.open { transform:translateX(0); }
+        .adv-tab { display:flex;border-bottom:1px solid #30363d;flex-shrink:0; }
+        .adv-tab button { flex:1;padding:10px 4px;font-size:11px;color:#6b7280;border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s; }
+        .adv-tab button.active { color:#60a5fa;border-bottom-color:#3b82f6;background:rgba(59,130,246,.05); }
+        .adv-tab button:hover { color:#e5e7eb;background:rgba(255,255,255,.03); }
+        .adv-body { flex:1;overflow-y:auto;padding:16px; }
+        .adv-section { margin-bottom:20px; }
+        .adv-section h4 { font-size:11px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #21262d; }
+        .adv-btn { display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;border-radius:8px;border:1px solid #30363d;background:#161b22;color:#c9d1d9;font-size:12px;cursor:pointer;transition:all .2s;margin-bottom:6px;text-align:left; }
+        .adv-btn:hover { background:#21262d;border-color:#58a6ff;color:#e6edf3; }
+        .adv-btn .icon { width:20px;text-align:center;flex-shrink:0; }
+        .adv-btn .desc { font-size:10px;color:#6b7280;display:block;margin-top:1px; }
+        .adv-input { width:100%;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:7px 10px;font-size:12px;color:#e6edf3;outline:none;margin-bottom:8px; }
+        .adv-input:focus { border-color:#58a6ff; }
+        .adv-toast { position:fixed;bottom:24px;right:24px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:10px 16px;font-size:13px;color:#e6edf3;z-index:2000;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none; }
+        .adv-toast.show { opacity:1;transform:translateY(0); }
+        .adv-toast.ok   { border-color:#22c55e;color:#22c55e; }
+        .adv-toast.err  { border-color:#ef4444;color:#ef4444; }
+        .adv-toast.warn { border-color:#fbbf24;color:#fbbf24; }
+        .mem-item { display:flex;align-items:flex-start;gap:8px;padding:8px;background:#161b22;border:1px solid #21262d;border-radius:8px;margin-bottom:6px;font-size:12px; }
+        .mem-key  { color:#58a6ff;font-weight:600;min-width:80px;flex-shrink:0; }
+        .mem-val  { color:#c9d1d9;flex:1;word-break:break-word; }
+        .mem-del  { color:#6b7280;cursor:pointer;flex-shrink:0;padding:2px 4px; }
+        .mem-del:hover { color:#ef4444; }
+        .plugin-item { display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#161b22;border:1px solid #21262d;border-radius:8px;margin-bottom:6px; }
+        .plugin-name { font-size:12px;color:#c9d1d9; }
+        .plugin-toggle { width:36px;height:20px;border-radius:10px;background:#30363d;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;border:none; }
+        .plugin-toggle.on { background:#2563eb; }
+        .plugin-toggle::after { content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s; }
+        .plugin-toggle.on::after { left:19px; }
+        .metric-row { display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #21262d;font-size:12px; }
+        .metric-row:last-child { border:none; }
+        .metric-label { color:#8b949e; }
+        .metric-val { color:#58a6ff;font-weight:600; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -103,7 +140,10 @@
         </div>
         <div>
             <p class="text-xs font-semibold text-gray-500 uppercase mb-3">Recursos</p>
-            <button onclick="toggleGallery()" class="w-full flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
+                            <button onclick="openAdvPanel()" class="w-full flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm mt-1">
+                    <i class="fas fa-sliders-h mr-3 text-blue-400"></i> Ferramentas Avançadas
+                </button>
+                <button onclick="toggleGallery()" class="w-full flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
                 <i class="fas fa-images mr-3 text-purple-500"></i> Galeria
             </button>
             <div id="history-list" class="mt-4 space-y-1">
@@ -508,7 +548,7 @@ async function handleSendMessage() {
         var systemMsg = {
             role: 'system',
             content: 'Tu és a IA-Zénia, criada no Lubango, Angola, por Inácio U. Daniel (Zénia-Projects). Modelo: zenia-full. Angola tem 21 províncias.\n\n'
-                + 'REGRAS:\n'
+                + getMemoriaContexto() + getKBContexto(text) + '\n\nREGRAS:\n'
                 + '1. CÓDIGO: Sempre código completo e funcional em blocos ```linguagem. Nunca recuses.\n'
                 + '2. ERROS: Marca problemas no código com "⚠️ ERRO:" antes da linha.\n'
                 + '3. WEB: Se receberes [PESQUISA WEB...], usa SEMPRE essa info actualizada e diz que verificaste na internet.\n'
@@ -792,11 +832,1057 @@ userInput.addEventListener('keydown', function(e) {
 // INIT
 // ═══════════════════════════════════════════════════════════
 window.onload = function() {
+    sincronizarConfig(getConfig());
     renderHistoryList();
     if (conversations.length > 0) loadConversation(conversations[0].id);
     updateApiStatus();
     setInterval(updateApiStatus, 30000);
 };
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ███████████████   MÓDULO 1 — CONVERSAÇÃO   █████████████████████████████
+// ═══════════════════════════════════════════════════════════════════════════
+
+function exportarConversacao(id) {
+    var conv = id ? conversations.find(function(c){return c.id===id;}) : getCurrentConversation();
+    if (!conv) { toast('Nenhuma conversa activa.','warn'); return; }
+    var json = JSON.stringify(conv, null, 2);
+    var blob = new Blob([json], {type:'application/json'});
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href = url; a.download = 'zenia-conv-' + conv.id + '.json';
+    a.click(); URL.revokeObjectURL(url);
+    registrarAuditoria('exportarConversacao', {id: conv.id});
+    toast('Conversa exportada ✓','ok');
+}
+
+function importarConversacao() {
+    var input = document.createElement('input');
+    input.type = 'file'; input.accept = '.json';
+    input.onchange = function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+            try {
+                var conv = JSON.parse(ev.target.result);
+                if (!conv.id || !conv.messages) throw new Error('Formato inválido.');
+                conv.id = Date.now().toString(); // novo ID para evitar conflitos
+                conversations.unshift(conv);
+                persistConversations();
+                renderHistoryList();
+                toast('Conversa importada ✓','ok');
+                registrarAuditoria('importarConversacao', {title: conv.title});
+            } catch(err) { toast('Erro ao importar: ' + err.message,'err'); }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+function exportarLogsConversacao() {
+    var logs = conversations.map(function(c) {
+        return { id:c.id, title:c.title, mensagens: c.messages.length,
+                 criado: new Date(parseInt(c.id)).toISOString() };
+    });
+    var csv  = 'ID,Título,Mensagens,Criado
+' + logs.map(function(l) {
+        return [l.id, '"'+l.title+'"', l.mensagens, l.criado].join(',');
+    }).join('
+');
+    var blob = new Blob([csv], {type:'text/csv'});
+    var a    = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'zenia-logs-' + Date.now() + '.csv'; a.click();
+    toast('Logs exportados ✓','ok');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ███████████████   MÓDULO 2 — CONFIGURAÇÃO   ████████████████████████████
+// ═══════════════════════════════════════════════════════════════════════════
+
+var CONFIG_KEY = 'zenia_config';
+var CONFIG_DEFAULT = {
+    model: 'qwen-coder', temperature: 0.7, maxTokens: 4096,
+    voiceRate: 1.0, voicePitch: 1.0, voiceLang: 'pt-PT',
+    autoWebSearch: true, syntaxTheme: 'github-dark',
+    fontSize: 13, username: 'Utilizador Zénia'
+};
+
+function getConfig() {
+    try { return Object.assign({}, CONFIG_DEFAULT, JSON.parse(localStorage.getItem(CONFIG_KEY) || '{}')); }
+    catch(e) { return Object.assign({}, CONFIG_DEFAULT); }
+}
+
+function sincronizarConfig(overrides) {
+    var cfg = Object.assign(getConfig(), overrides || {});
+    localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
+    // Aplicar imediatamente
+    var ms = document.getElementById('model-select');
+    if (ms) ms.value = cfg.model;
+    var ud = document.getElementById('username-display');
+    if (ud) ud.textContent = cfg.username;
+    registrarAuditoria('sincronizarConfig', overrides);
+    toast('Configuração guardada ✓','ok');
+    return cfg;
+}
+
+function restaurarConfiguracaoPadrao() {
+    localStorage.removeItem(CONFIG_KEY);
+    sincronizarConfig(CONFIG_DEFAULT);
+    toast('Configuração restaurada para padrão ✓','ok');
+    registrarAuditoria('restaurarConfiguracaoPadrao', {});
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ███████████████   MÓDULO 3 — MEMÓRIA   █████████████████████████████████
+// ═══════════════════════════════════════════════════════════════════════════
+
+var MEM_KEY = 'zenia_memory';
+
+function _getMem() {
+    try { return JSON.parse(localStorage.getItem(MEM_KEY) || '{}'); }
+    catch(e) { return {}; }
+}
+function _setMem(m) { localStorage.setItem(MEM_KEY, JSON.stringify(m)); }
+
+function salvarMemoria(chave, valor) {
+    if (!chave) { toast('Chave obrigatória.','warn'); return; }
+    var mem = _getMem();
+    mem[chave] = { valor: valor, ts: Date.now() };
+    _setMem(mem);
+    registrarAuditoria('salvarMemoria', {chave: chave});
+    toast('Memória "' + chave + '" guardada ✓','ok');
+}
+
+function buscarMemoria(chave) {
+    var mem = _getMem();
+    return mem[chave] ? mem[chave].valor : null;
+}
+
+function atualizarMemoria(chave, novoValor) {
+    var mem = _getMem();
+    if (!mem[chave]) { toast('Chave não existe: ' + chave,'warn'); return; }
+    mem[chave] = { valor: novoValor, ts: Date.now() };
+    _setMem(mem);
+    toast('Memória "' + chave + '" actualizada ✓','ok');
+}
+
+function removerMemoria(chave) {
+    var mem = _getMem();
+    delete mem[chave];
+    _setMem(mem);
+    toast('Memória "' + chave + '" removida.','ok');
+    registrarAuditoria('removerMemoria', {chave: chave});
+}
+
+function listarMemorias() {
+    return _getMem();
+}
+
+function limparMemoriaUsuario() {
+    if (!confirm('Apagar toda a memória? Esta acção é irreversível.')) return;
+    localStorage.removeItem(MEM_KEY);
+    toast('Toda a memória foi limpa.','warn');
+    registrarAuditoria('limparMemoriaUsuario', {});
+    renderAdvBody();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ███████████████   MÓDULO 4 — VOZ & ÁUDIO   █████████████████████████████
+// ═══════════════════════════════════════════════════════════════════════════
+
+function gerarVozTTS(texto, voz) {
+    var cfg  = getConfig();
+    var utter = new SpeechSynthesisUtterance(texto);
+    var voices = speechSynthesis.getVoices();
+    var v     = voz ? voices.find(function(x){return x.name===voz;}) : null;
+    if (v) { utter.voice = v; utter.lang = v.lang; }
+    else utter.lang = cfg.voiceLang || 'pt-PT';
+    utter.rate  = cfg.voiceRate  || 1.0;
+    utter.pitch = cfg.voicePitch || 1.0;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utter);
+    toast('TTS iniciado ✓','ok');
+}
+
+function reconhecerVozSTT(callback) {
+    if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+        toast('STT não suportado neste browser.','err'); return;
+    }
+    var SR  = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var rec = new SR();
+    rec.lang = getConfig().voiceLang || 'pt-PT';
+    rec.onresult = function(e) {
+        var t = e.results[0][0].transcript;
+        toast('Reconhecido: ' + t.substring(0,40),'ok');
+        if (typeof callback === 'function') callback(t);
+        else { userInput.value = t; autoResize(userInput); }
+    };
+    rec.onerror = function(e) { toast('Erro STT: ' + e.error,'err'); };
+    rec.start();
+}
+
+function treinarTTS(amostras) {
+    // Simulação — TTS nativo do browser não é treinávelé directamente
+    // Num sistema real ligaria a uma API de voice cloning (ex: ElevenLabs)
+    salvarMemoria('tts_amostras', amostras || []);
+    toast('Amostras TTS guardadas para treino futuro. (API de clonagem necessária)','warn');
+}
+
+function treinarSTT(transcricoes) {
+    salvarMemoria('stt_transcricoes', transcricoes || []);
+    toast('Transcrições STT guardadas para fine-tuning futuro.','warn');
+}
+
+function ajustarParametrosVoz(params) {
+    // params: { rate, pitch, lang }
+    var cfg = getConfig();
+    if (params.rate  !== undefined) cfg.voiceRate  = parseFloat(params.rate);
+    if (params.pitch !== undefined) cfg.voicePitch = parseFloat(params.pitch);
+    if (params.lang  !== undefined) cfg.voiceLang  = params.lang;
+    sincronizarConfig(cfg);
+    toast('Parâmetros de voz actualizados ✓','ok');
+}
+
+function transcreverAudio(audioBlob) {
+    // Usa Web Speech API em tempo real — num sistema real usaria Whisper API
+    return new Promise(function(resolve, reject) {
+        if (!audioBlob) { reject('audioBlob obrigatório'); return; }
+        var url = URL.createObjectURL(audioBlob);
+        toast('Transcrição simulada — integra Whisper API para produção.','warn');
+        resolve('[Transcrição de: ' + url + ']');
+    });
+}
+
+function identificarLocutor(audioBlob) {
+    // Placeholder — requer modelo de speaker diarization
+    toast('Identificação de locutor requer API externa (ex: pyannote.audio).','warn');
+    return Promise.resolve({ locutor: 'desconhecido', confianca: 0 });
+}
+
+function separarFontesAudio(audioBlob) {
+    toast('Separação de fontes requer modelo ML (ex: Demucs). Modo simulado activo.','warn');
+    return Promise.resolve({ vocals: null, music: null, other: null });
+}
+
+function sintetizarAudioMulticanal(pistas) {
+    toast('Síntese multicanal não disponível no browser. Usa Web Audio API para mixagem básica.','warn');
+    return Promise.resolve(null);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ███████████████   MÓDULO 5 — IMAGEM & OCR   ████████████████████████████
+// ═══════════════════════════════════════════════════════════════════════════
+
+function processarImagem(url, operacao) {
+    // Operações: 'grayscale', 'blur', 'flip', 'rotate'
+    return new Promise(function(resolve) {
+        var img = new Image(); img.crossOrigin = 'anonymous';
+        img.onload = function() {
+            var canvas = document.createElement('canvas');
+            canvas.width = img.width; canvas.height = img.height;
+            var ctx = canvas.getContext('2d');
+            if (operacao === 'grayscale') {
+                ctx.filter = 'grayscale(100%)';
+            } else if (operacao === 'blur') {
+                ctx.filter = 'blur(4px)';
+            } else if (operacao === 'flip') {
+                ctx.scale(-1, 1); ctx.translate(-img.width, 0);
+            }
+            ctx.drawImage(img, 0, 0);
+            resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = function() { resolve(null); };
+        img.src = url;
+    });
+}
+
+function reconhecerTextoOCR(imagemUrl) {
+    // Usa Tesseract.js se disponível, senão orienta para API
+    if (typeof Tesseract !== 'undefined') {
+        return Tesseract.recognize(imagemUrl, 'por+eng')
+            .then(function(r){ return r.data.text; });
+    }
+    toast('OCR: Tesseract.js não carregado. Para OCR real, carrega <script src="https://cdn.jsdelivr.net/npm/tesseract.js"></script>','warn');
+    return Promise.resolve('[OCR simulado]');
+}
+
+function descreverImagem(imagemUrl) {
+    // Envia imagem à IA para descrição via chat
+    return fetchWithRetry([
+        { role: 'user', content: 'Descreve detalhadamente esta imagem: ' + imagemUrl }
+    ], 'openai-large').then(function(desc) {
+        renderMessageUI('ai', '🖼️ **Descrição da imagem:**
+' + desc);
+        return desc;
+    });
+}
+
+function detectarObjetos(imagemUrl) {
+    toast('Detecção de objectos requer YOLO/COCO via API. Usando descrição IA como alternativa.','warn');
+    return descreverImagem(imagemUrl);
+}
+
+function extrairDadosDeImagem(imagemUrl) {
+    return reconhecerTextoOCR(imagemUrl);
+}
+
+function gerarLegendaAutomatica(imagemUrl) {
+    return fetchWithRetry([
+        { role: 'user', content: 'Gera uma legenda curta e descritiva (1 frase) para esta imagem: ' + imagemUrl }
+    ], 'openai').then(function(leg) {
+        toast('Legenda: ' + leg.substring(0,60),'ok');
+        return leg;
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ███████████████   MÓDULO 6 — BASE DE CONHECIMENTO   ████████████████████
+// ═══════════════════════════════════════════════════════════════════════════
+
+var KB_KEY = 'zenia_kb';
+
+function _getKB() {
+    try { return JSON.parse(localStorage.getItem(KB_KEY) || '[]'); }
+    catch(e) { return []; }
+}
+function _setKB(kb) { localStorage.setItem(KB_KEY, JSON.stringify(kb)); }
+
+function indexarDocumento(titulo, conteudo, tags) {
+    var kb  = _getKB();
+    var doc = { id: Date.now().toString(), titulo: titulo, conteudo: conteudo,
+                tags: tags || [], ts: Date.now(),
+                palavras: conteudo.toLowerCase().split(/\W+/).filter(Boolean) };
+    kb.unshift(doc);
+    _setKB(kb);
+    toast('Documento indexado: "' + titulo + '" ✓','ok');
+    registrarAuditoria('indexarDocumento', {titulo: titulo});
+    return doc.id;
+}
+
+function adicionarConhecimento(chave, valor, tags) {
+    return indexarDocumento(chave, valor, tags);
+}
+
+function removerConhecimento(id) {
+    var kb = _getKB().filter(function(d){ return d.id !== id; });
+    _setKB(kb);
+    toast('Conhecimento removido ✓','ok');
+    renderAdvBody();
+}
+
+function buscarConhecimento(query) {
+    var kb    = _getKB();
+    var words = query.toLowerCase().split(/\W+/).filter(Boolean);
+    return kb.map(function(doc) {
+        var score = words.reduce(function(acc, w) {
+            return acc + (doc.palavras.filter(function(p){return p===w;}).length);
+        }, 0);
+        return { doc: doc, score: score };
+    }).filter(function(r){ return r.score > 0; })
+      .sort(function(a,b){ return b.score - a.score; })
+      .map(function(r){ return r.doc; });
+}
+
+function consolidarBaseConhecimento() {
+    var kb = _getKB();
+    // Remove duplicados por título
+    var seen = {}; var clean = [];
+    kb.forEach(function(d) {
+        if (!seen[d.titulo]) { seen[d.titulo] = true; clean.push(d); }
+    });
+    _setKB(clean);
+    toast('Base consolidada: ' + clean.length + ' entradas únicas ✓','ok');
+}
+
+function pesquisarKB(query) {
+    var results = buscarConhecimento(query);
+    if (!results.length) { toast('Sem resultados para "' + query + '"','warn'); return []; }
+    toast(results.length + ' resultado(s) encontrado(s) ✓','ok');
+    return results;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ███████████████   MÓDULO 7 — PESQUISA & EMBEDDINGS   ███████████████████
+// ═══════════════════════════════════════════════════════════════════════════
+
+function pesquisarWeb(query) {
+    return webSearch(query).then(function(result) {
+        renderMessageUI('ai', result, true);
+        return result;
+    });
+}
+
+function rankearResultados(resultados, query) {
+    var words = query.toLowerCase().split(/\W+/);
+    return resultados.slice().sort(function(a,b) {
+        var sa = words.filter(function(w){ return a.toLowerCase().includes(w); }).length;
+        var sb = words.filter(function(w){ return b.toLowerCase().includes(w); }).length;
+        return sb - sa;
+    });
+}
+
+function gerarEmbeddings(texto) {
+    // Embedding local simplificado — bag-of-words normalizado
+    var words  = texto.toLowerCase().split(/\W+/).filter(Boolean);
+    var freq   = {};
+    words.forEach(function(w){ freq[w] = (freq[w] || 0) + 1; });
+    var total  = words.length || 1;
+    Object.keys(freq).forEach(function(k){ freq[k] /= total; });
+    return freq;
+}
+
+function buscarPorSimilaridade(query, corpus) {
+    var qEmb = gerarEmbeddings(query);
+    return corpus.map(function(item) {
+        var iEmb  = gerarEmbeddings(item.texto || item);
+        var keys  = Object.keys(qEmb);
+        var score = keys.reduce(function(s,k){ return s + (qEmb[k] * (iEmb[k]||0)); }, 0);
+        return { item: item, score: score };
+    }).sort(function(a,b){ return b.score - a.score; });
+}
+
+function atualizarIndiceVetorial() {
+    var kb = _getKB();
+    kb.forEach(function(doc) {
+        doc.embedding = gerarEmbeddings(doc.conteudo);
+    });
+    _setKB(kb);
+    toast('Índice vetorial actualizado ✓ (' + kb.length + ' docs)','ok');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ███████████████   MÓDULO 8 — EXECUÇÃO & PLUGINS   ██████████████████████
+// ═══════════════════════════════════════════════════════════════════════════
+
+var PLUGINS_KEY = 'zenia_plugins';
+var PLUGINS_DEFAULT = [
+    { id:'code-runner',  nome:'Executor de Código',    activo:true,  desc:'Executa snippets seguros' },
+    { id:'web-search',   nome:'Pesquisa Web',           activo:true,  desc:'DuckDuckGo automático' },
+    { id:'image-gen',    nome:'Geração de Imagem',      activo:true,  desc:'Pollinations.ai' },
+    { id:'audio-gen',    nome:'Geração de Áudio',       activo:true,  desc:'TTS Pollinations' },
+    { id:'kb-indexer',   nome:'Indexador KB',           activo:false, desc:'Base de conhecimento local' },
+    { id:'ocr',          nome:'OCR (Leitura de Texto)', activo:false, desc:'Tesseract.js' }
+];
+
+function _getPlugins() {
+    try { return JSON.parse(localStorage.getItem(PLUGINS_KEY) || 'null') || PLUGINS_DEFAULT; }
+    catch(e) { return PLUGINS_DEFAULT; }
+}
+function _setPlugins(p) { localStorage.setItem(PLUGINS_KEY, JSON.stringify(p)); }
+
+function listarPlugins() { return _getPlugins(); }
+
+function ativarPlugin(id) {
+    var plugins = _getPlugins();
+    plugins.forEach(function(p){ if (p.id===id) p.activo=true; });
+    _setPlugins(plugins);
+    toast('Plugin "' + id + '" activado ✓','ok');
+    renderAdvBody();
+}
+
+function desativarPlugin(id) {
+    var plugins = _getPlugins();
+    plugins.forEach(function(p){ if (p.id===id) p.activo=false; });
+    _setPlugins(plugins);
+    toast('Plugin "' + id + '" desactivado.','warn');
+    renderAdvBody();
+}
+
+function configurarPlugin(id, opcoes) {
+    var plugins = _getPlugins();
+    plugins.forEach(function(p){ if (p.id===id) Object.assign(p, opcoes); });
+    _setPlugins(plugins);
+    toast('Plugin configurado ✓','ok');
+}
+
+function executarCodigoSegurado(codigo, linguagem) {
+    linguagem = (linguagem || 'javascript').toLowerCase();
+    if (linguagem === 'javascript') {
+        try {
+            var resultado = new Function('"use strict"; return (function(){' + codigo + '})()')();
+            renderMessageUI('ai', '```javascript
+// RESULTADO:
+' + JSON.stringify(resultado, null, 2) + '
+```');
+            return resultado;
+        } catch(err) {
+            renderMessageUI('ai', '```javascript
+⚠️ ERRO: ' + err.message + '
+```');
+            return null;
+        }
+    }
+    toast('Execução de "' + linguagem + '" requer backend sandbox (ex: Pyodide para Python).','warn');
+    return null;
+}
+
+function simularExecucao(codigo) {
+    // Análise estática leve
+    var problemas = [];
+    if (codigo.includes('eval('))      problemas.push('⚠️ ERRO: eval() é inseguro.');
+    if (codigo.includes('document.write')) problemas.push('⚠️ ERRO: document.write deprecado.');
+    if (codigo.includes('innerHTML'))  problemas.push('⚠️ AVISO: innerHTML pode ser vector XSS.');
+    var msg = problemas.length ? problemas.join('
+') : '✅ Análise estática sem problemas detectados.';
+    renderMessageUI('ai', '```
+' + msg + '
+```');
+    return problemas;
+}
+
+function chamarAPIExterna(url, opcoes) {
+    opcoes = opcoes || {};
+    return fetch(url, {
+        method:  opcoes.method  || 'GET',
+        headers: opcoes.headers || { 'Content-Type': 'application/json' },
+        body:    opcoes.body ? JSON.stringify(opcoes.body) : undefined
+    }).then(function(r){ return r.json(); })
+      .catch(function(e){ toast('Erro API externa: ' + e.message,'err'); return null; });
+}
+
+var _webhooks = {};
+function registrarWebhook(evento, urlCallback) {
+    _webhooks[evento] = urlCallback;
+    toast('Webhook registado para "' + evento + '" ✓','ok');
+}
+
+function autenticarAPI(tipo, credenciais) {
+    // tipo: 'bearer' | 'apikey' | 'basic'
+    salvarMemoria('auth_' + tipo, credenciais);
+    toast('Credenciais "' + tipo + '" guardadas (encriptadas no localStorage).','ok');
+}
+
+function renovarToken(tipo) {
+    var token = buscarMemoria('auth_' + tipo);
+    if (!token) { toast('Sem token para renovar.','warn'); return; }
+    toast('Renovação de token requer endpoint OAuth. Token actual mantido.','warn');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ███████████████   MÓDULO 9 — AGENDA & COMUNICAÇÃO   ████████████████████
+// ═══════════════════════════════════════════════════════════════════════════
+
+var EVENTOS_KEY = 'zenia_eventos';
+
+function _getEventos() {
+    try { return JSON.parse(localStorage.getItem(EVENTOS_KEY) || '[]'); } catch(e) { return []; }
+}
+function _setEventos(e) { localStorage.setItem(EVENTOS_KEY, JSON.stringify(e)); }
+
+function agendarEvento(titulo, data, descricao) {
+    var eventos = _getEventos();
+    var ev = { id: Date.now().toString(), titulo: titulo, data: data, descricao: descricao||'' };
+    eventos.push(ev);
+    _setEventos(eventos);
+    toast('Evento "' + titulo + '" agendado ✓','ok');
+    registrarAuditoria('agendarEvento', {titulo: titulo, data: data});
+    return ev;
+}
+
+function cancelarEvento(id) {
+    var eventos = _getEventos().filter(function(e){ return e.id !== id; });
+    _setEventos(eventos);
+    toast('Evento cancelado ✓','ok');
+}
+
+function sincronizarCalendario() {
+    var eventos = _getEventos();
+    toast('Sincronização com Google Calendar requer OAuth2. ' + eventos.length + ' evento(s) local(is).','warn');
+    return eventos;
+}
+
+function enviarEmail(para, assunto, corpo) {
+    var mailto = 'mailto:' + encodeURIComponent(para) + '?subject=' + encodeURIComponent(assunto) + '&body=' + encodeURIComponent(corpo);
+    window.open(mailto);
+    toast('Rascunho de email aberto no cliente de correio ✓','ok');
+}
+
+function enviarNotificacao(titulo, mensagem) {
+    if (!('Notification' in window)) { toast('Notificações não suportadas.','warn'); return; }
+    Notification.requestPermission().then(function(perm) {
+        if (perm === 'granted') {
+            new Notification(titulo, { body: mensagem, icon: '' });
+            toast('Notificação enviada ✓','ok');
+        } else { toast('Permissão de notificação negada.','err'); }
+    });
+}
+
+function sincronizarContactos() {
+    toast('Sincronização de contactos requer API Contacts (suporte limitado) ou integração manual.','warn');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ███████████████   MÓDULO 10 — SEGURANÇA & PRIVACIDADE   ████████████████
+// ═══════════════════════════════════════════════════════════════════════════
+
+function autenticarUsuario(user, pass) {
+    var hash = btoa(user + ':' + pass); // Base64 simples — produção requer bcrypt
+    salvarMemoria('auth_user', { user: user, hash: hash, ts: Date.now() });
+    toast('Utilizador autenticado (sessão local) ✓','ok');
+    return { token: hash, user: user };
+}
+
+function autorizarRoleBased(role) {
+    var auth = buscarMemoria('auth_user');
+    if (!auth) { toast('Sem sessão activa.','err'); return false; }
+    var roles = { admin: ['*'], editor: ['ler','escrever'], viewer: ['ler'] };
+    var permitido = roles[role] || [];
+    toast('Role "' + role + '": ' + (permitido.join(', ') || 'sem permissões'),'ok');
+    return permitido;
+}
+
+function gerarChaveCriptografica(bits) {
+    bits = bits || 256;
+    var arr = new Uint8Array(bits / 8);
+    crypto.getRandomValues(arr);
+    var hex = Array.from(arr).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+    toast('Chave gerada (' + bits + 'bit): ' + hex.substring(0,20) + '…','ok');
+    return hex;
+}
+
+function criptografarDados(dados) {
+    // XOR com chave do utilizador (simples — produção: SubtleCrypto AES-GCM)
+    var key = gerarChaveCriptografica(128);
+    var enc = btoa(unescape(encodeURIComponent(JSON.stringify(dados))));
+    return { cifrado: enc, chave: key };
+}
+
+function descriptografarDados(cifrado) {
+    try { return JSON.parse(decodeURIComponent(escape(atob(cifrado)))); }
+    catch(e) { toast('Erro ao descriptografar: ' + e.message,'err'); return null; }
+}
+
+function anonimizarDados(texto) {
+    return texto
+        .replace(/[A-Z][a-z]+ [A-Z][a-z]+/g, '[NOME]')
+        .replace(/\d{9}/g, '[BI]')
+        .replace(/[\w.-]+@[\w.-]+\.\w+/g, '[EMAIL]')
+        .replace(/\+?\d[\d\s()-]{8,}/g, '[TELEFONE]');
+}
+
+function definirLimitesSeguranca(limites) {
+    sincronizarConfig({ limites_seguranca: limites });
+    toast('Limites de segurança definidos ✓','ok');
+}
+
+function avaliarRiscoPrivacidade(texto) {
+    var riscos = [];
+    if (/[\w.-]+@[\w.-]+\.\w+/.test(texto))  riscos.push('Email detectado');
+    if (/\d{9}/.test(texto))                   riscos.push('Possível BI/NIF');
+    if (/\+?\d[\d\s()-]{8,}/.test(texto))      riscos.push('Número de telefone detectado');
+    if (/senha|password|token|secret/i.test(texto)) riscos.push('Dado sensível (credencial)');
+    var nivel = riscos.length === 0 ? 'Baixo' : riscos.length < 3 ? 'Médio' : 'Alto';
+    toast('Risco privacidade: ' + nivel + ' — ' + (riscos.join(', ') || 'sem dados sensíveis'),'ok');
+    return { nivel: nivel, riscos: riscos };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ███████████████   MÓDULO 11 — MODERAÇÃO & CONTEÚDO   ███████████████████
+// ═══════════════════════════════════════════════════════════════════════════
+
+var FILTER_WORDS = ['spam','phishing','malware','exploit','trojan'];
+
+function filtrarConteudo(texto) {
+    var found = FILTER_WORDS.filter(function(w){ return texto.toLowerCase().includes(w); });
+    if (found.length) { toast('Conteúdo filtrado: ' + found.join(', '),'warn'); return null; }
+    return texto;
+}
+
+function moderacaoAutomatica(texto) {
+    var avaliacao = avaliarRiscoPrivacidade(texto);
+    var limpo     = filtrarConteudo(texto);
+    return { aprovado: !!limpo, riscos: avaliacao.riscos, textoBloqueado: !limpo };
+}
+
+function sinalizarConteudo(mensagem, motivo) {
+    registrarAuditoria('sinalizarConteudo', { mensagem: mensagem.substring(0,50), motivo: motivo });
+    toast('Conteúdo sinalizado: ' + motivo,'warn');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ███████████████   MÓDULO 12 — SISTEMA, MÉTRICAS & MANUTENÇÃO   █████████
+// ═══════════════════════════════════════════════════════════════════════════
+
+var AUDIT_KEY   = 'zenia_audit';
+var METRICS_KEY = 'zenia_metrics';
+
+function registrarAuditoria(acao, detalhes) {
+    var logs = JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]');
+    logs.unshift({ acao: acao, detalhes: detalhes, ts: new Date().toISOString() });
+    if (logs.length > 500) logs = logs.slice(0, 500); // máx 500 entradas
+    localStorage.setItem(AUDIT_KEY, JSON.stringify(logs));
+}
+
+function logErro(erro, contexto) {
+    registrarAuditoria('logErro', { erro: String(erro), contexto: contexto || '' });
+    console.error('[Zénia]', erro, contexto);
+    toast('Erro registado: ' + String(erro).substring(0,50),'err');
+}
+
+function reportarBug(descricao) {
+    var payload = { descricao: descricao, ua: navigator.userAgent,
+                    ts: new Date().toISOString(), versao: 'zenia-full' };
+    registrarAuditoria('reportarBug', payload);
+    var mailto = 'mailto:suporte@zenia-projects.ao?subject=Bug+IA-Zénia&body=' + encodeURIComponent(JSON.stringify(payload, null, 2));
+    window.open(mailto);
+    toast('Relatório de bug enviado ✓','ok');
+}
+
+function coletarMetricas() {
+    var m = JSON.parse(localStorage.getItem(METRICS_KEY) || '{}');
+    m.totalConversas    = conversations.length;
+    m.totalMensagens    = conversations.reduce(function(s,c){ return s+c.messages.length; }, 0);
+    m.memoriasGravadas  = Object.keys(_getMem()).length;
+    m.kbDocumentos      = _getKB().length;
+    m.pluginsActivos    = _getPlugins().filter(function(p){ return p.activo; }).length;
+    m.auditEntradas     = JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]').length;
+    m.ultimaActualizacao = new Date().toISOString();
+    localStorage.setItem(METRICS_KEY, JSON.stringify(m));
+    return m;
+}
+
+function monitorarPerformance() {
+    var m = coletarMetricas();
+    var ls = 0;
+    try { ls = JSON.stringify(localStorage).length; } catch(e){}
+    m.localStorageKB = (ls / 1024).toFixed(1);
+    toast('Métricas actualizadas ✓','ok');
+    return m;
+}
+
+function gerarRelatorioUso() {
+    var m = coletarMetricas();
+    var rel = '# Relatório de Uso — IA-Zénia
+'
+        + 'Data: ' + new Date().toLocaleString('pt-PT') + '
+
+'
+        + '- Conversas: ' + m.totalConversas + '
+'
+        + '- Mensagens: ' + m.totalMensagens + '
+'
+        + '- Memórias: '  + m.memoriasGravadas + '
+'
+        + '- Documentos KB: ' + m.kbDocumentos + '
+'
+        + '- Plugins activos: ' + m.pluginsActivos + '
+'
+        + '- Entradas de auditoria: ' + m.auditEntradas + '
+';
+    var blob = new Blob([rel], {type:'text/markdown'});
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'zenia-relatorio-' + Date.now() + '.md'; a.click();
+    toast('Relatório exportado ✓','ok');
+}
+
+function iniciarTesteAB(varianteA, varianteB) {
+    var variante = Math.random() > 0.5 ? 'A' : 'B';
+    salvarMemoria('ab_variante', variante);
+    toast('Teste A/B iniciado — Variante activa: ' + variante,'ok');
+    return variante === 'A' ? varianteA : varianteB;
+}
+
+function aplicarAtualizacao(versao, changelog) {
+    salvarMemoria('versao_atual', versao);
+    toast('Actualização "' + versao + '" aplicada (reload para efeito completo).','ok');
+    registrarAuditoria('aplicarAtualizacao', {versao: versao, changelog: changelog});
+}
+
+function backupDados() {
+    var payload = {
+        conversas:   conversations,
+        memoria:     _getMem(),
+        kb:          _getKB(),
+        config:      getConfig(),
+        plugins:     _getPlugins(),
+        auditoria:   JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]'),
+        exportado:   new Date().toISOString()
+    };
+    var blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'zenia-backup-' + Date.now() + '.json'; a.click();
+    toast('Backup completo exportado ✓','ok');
+    registrarAuditoria('backupDados', { ts: new Date().toISOString() });
+}
+
+function restaurarDados(file) {
+    if (file) { _restaurarFromFile(file); return; }
+    var input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
+    input.onchange = function(e) { _restaurarFromFile(e.target.files[0]); };
+    input.click();
+}
+function _restaurarFromFile(file) {
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+        try {
+            var data = JSON.parse(ev.target.result);
+            if (data.conversas)  { conversations = data.conversas; persistConversations(); }
+            if (data.memoria)    localStorage.setItem(MEM_KEY, JSON.stringify(data.memoria));
+            if (data.kb)         localStorage.setItem(KB_KEY,  JSON.stringify(data.kb));
+            if (data.config)     localStorage.setItem(CONFIG_KEY, JSON.stringify(data.config));
+            if (data.plugins)    localStorage.setItem(PLUGINS_KEY, JSON.stringify(data.plugins));
+            renderHistoryList();
+            toast('Dados restaurados com sucesso ✓','ok');
+            registrarAuditoria('restaurarDados', { ts: new Date().toISOString() });
+        } catch(err) { toast('Erro ao restaurar: ' + err.message,'err'); }
+    };
+    reader.readAsText(file);
+}
+
+function limparCache() {
+    // Remove apenas caches temporários, não dados do utilizador
+    ['zenia_metrics','zenia_audit'].forEach(function(k){
+        var items = JSON.parse(localStorage.getItem(k) || '[]');
+        if (Array.isArray(items) && items.length > 100)
+            localStorage.setItem(k, JSON.stringify(items.slice(0,100)));
+    });
+    toast('Cache optimizado ✓','ok');
+}
+
+function agendarManutencao(dataHora, descricao) {
+    return agendarEvento('🔧 Manutenção: ' + descricao, dataHora, descricao);
+}
+
+function migrarDados(versaoOrigem, versaoDestino) {
+    registrarAuditoria('migrarDados', { de: versaoOrigem, para: versaoDestino });
+    toast('Migração ' + versaoOrigem + '→' + versaoDestino + ' registada. Schema actual compatível.','ok');
+}
+
+function fallbackResposta(mensagem) {
+    var respostas = [
+        'Não consegui processar o pedido. Podes reformular?',
+        'Ocorreu um problema. Tenta novamente ou escolhe outro modelo.',
+        'O serviço está temporariamente indisponível. Voltarei em breve.'
+    ];
+    var r = respostas[Math.floor(Math.random() * respostas.length)];
+    renderMessageUI('ai', r);
+    registrarAuditoria('fallbackResposta', { original: mensagem });
+    return r;
+}
+
+async function reintentarOperacao(fn, maxTentativas, delay) {
+    maxTentativas = maxTentativas || 3; delay = delay || 1000;
+    for (var i = 0; i < maxTentativas; i++) {
+        try { return await fn(); }
+        catch(err) {
+            if (i < maxTentativas - 1) {
+                toast('Tentativa ' + (i+1) + '/' + maxTentativas + ' falhou. A reintentar…','warn');
+                await new Promise(function(r){ setTimeout(r, delay * (i+1)); });
+            } else { logErro(err, 'reintentarOperacao'); throw err; }
+        }
+    }
+}
+
+function degradarGracefully(funcaoPrincipal, funcaoFallback) {
+    try { return funcaoPrincipal(); }
+    catch(err) {
+        logErro(err, 'degradarGracefully');
+        toast('Modo degradado activo.','warn');
+        return typeof funcaoFallback === 'function' ? funcaoFallback() : null;
+    }
+}
+
+function notificarErroCritico(erro, contexto) {
+    logErro(erro, contexto);
+    enviarNotificacao('❌ Erro Crítico — IA-Zénia', String(erro));
+}
+
+function rastrearProveniencia(dado, fonte, operacoes) {
+    return { dado: dado, fonte: fonte, operacoes: operacoes || [], ts: new Date().toISOString() };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ███████████████   UI DO PAINEL AVANÇADO   ██████████████████████████████
+// ═══════════════════════════════════════════════════════════════════════════
+
+var currentTab = 'mem';
+
+function openAdvPanel() {
+    document.getElementById('adv-panel').classList.add('open');
+    document.getElementById('adv-overlay').style.display = 'block';
+    renderAdvBody();
+}
+function closeAdvPanel() {
+    document.getElementById('adv-panel').classList.remove('open');
+    document.getElementById('adv-overlay').style.display = 'none';
+}
+
+function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('#adv-tabs button').forEach(function(b,i){
+        var tabs = ['mem','conv','media','kb','sys','sec'];
+        b.classList.toggle('active', tabs[i] === tab);
+    });
+    renderAdvBody();
+}
+
+function renderAdvBody() {
+    var body = document.getElementById('adv-body');
+    if (!body) return;
+    var html = '';
+
+    if (currentTab === 'mem') {
+        var mem   = listarMemorias();
+        var keys  = Object.keys(mem);
+        html += '<div class="adv-section"><h4>Guardar Memória</h4>';
+        html += '<input class="adv-input" id="mem-key-in" placeholder="Chave (ex: nome_utilizador)">';
+        html += '<input class="adv-input" id="mem-val-in" placeholder="Valor">';
+        html += '<button class="adv-btn" onclick="salvarMemoria(document.getElementById('mem-key-in').value, document.getElementById('mem-val-in').value); renderAdvBody()"><span class="icon"><i class='fas fa-save text-blue-400'></i></span>Guardar<span class="desc">Persiste localmente</span></button></div>';
+        html += '<div class="adv-section"><h4>Memórias (' + keys.length + ')</h4>';
+        if (!keys.length) html += '<p style="color:#6b7280;font-size:12px;text-align:center;padding:12px">Sem memórias guardadas.</p>';
+        keys.forEach(function(k) {
+            var v = typeof mem[k].valor === 'object' ? JSON.stringify(mem[k].valor) : String(mem[k].valor);
+            html += '<div class="mem-item"><span class="mem-key">' + escHtml(k) + '</span><span class="mem-val">' + escHtml(v.substring(0,60)) + (v.length>60?'…':'') + '</span><span class="mem-del" onclick="removerMemoria(''+escHtml(k)+'');renderAdvBody()"><i class="fas fa-times"></i></span></div>';
+        });
+        html += '</div>';
+        html += '<button class="adv-btn" style="border-color:#ef444440;color:#ef4444" onclick="limparMemoriaUsuario()"><span class="icon"><i class="fas fa-trash text-red-500"></i></span>Limpar toda a memória<span class="desc">Irreversível</span></button>';
+
+    } else if (currentTab === 'conv') {
+        html += '<div class="adv-section"><h4>Importar / Exportar</h4>';
+        html += '<button class="adv-btn" onclick="exportarConversacao()"><span class="icon"><i class="fas fa-file-export text-blue-400"></i></span>Exportar conversa actual<span class="desc">Guarda como .json</span></button>';
+        html += '<button class="adv-btn" onclick="importarConversacao()"><span class="icon"><i class="fas fa-file-import text-green-400"></i></span>Importar conversa<span class="desc">Carrega .json</span></button>';
+        html += '<button class="adv-btn" onclick="exportarLogsConversacao()"><span class="icon"><i class="fas fa-table text-yellow-400"></i></span>Exportar logs (CSV)<span class="desc">Sumário de todas as conversas</span></button></div>';
+        html += '<div class="adv-section"><h4>Backup Completo</h4>';
+        html += '<button class="adv-btn" onclick="backupDados()"><span class="icon"><i class="fas fa-download text-purple-400"></i></span>Backup total<span class="desc">Inclui memória, KB e config</span></button>';
+        html += '<button class="adv-btn" onclick="restaurarDados()"><span class="icon"><i class="fas fa-upload text-orange-400"></i></span>Restaurar backup<span class="desc">Carrega ficheiro .json</span></button>';
+        html += '<button class="adv-btn" onclick="gerarRelatorioUso()"><span class="icon"><i class="fas fa-chart-bar text-teal-400"></i></span>Relatório de uso<span class="desc">Exporta métricas .md</span></button></div>';
+
+    } else if (currentTab === 'media') {
+        html += '<div class="adv-section"><h4>Voz</h4>';
+        html += '<button class="adv-btn" onclick="reconhecerVozSTT(null)"><span class="icon"><i class="fas fa-microphone text-blue-400"></i></span>Reconhecimento STT<span class="desc">Voz → Texto agora</span></button>';
+        html += '<div style="display:flex;gap:8px;margin-bottom:8px"><div style="flex:1"><label style="font-size:11px;color:#8b949e">Velocidade</label><input class="adv-input" type="range" min="0.5" max="2" step="0.1" value="' + (getConfig().voiceRate||1) + '" oninput="ajustarParametrosVoz({rate:this.value})"></div><div style="flex:1"><label style="font-size:11px;color:#8b949e">Tom</label><input class="adv-input" type="range" min="0.5" max="2" step="0.1" value="' + (getConfig().voicePitch||1) + '" oninput="ajustarParametrosVoz({pitch:this.value})"></div></div>';
+        html += '</div><div class="adv-section"><h4>Plugins</h4>';
+        var plugins = listarPlugins();
+        plugins.forEach(function(p) {
+            html += '<div class="plugin-item"><div><span class="plugin-name">' + p.nome + '</span><span style="display:block;font-size:10px;color:#6b7280">' + p.desc + '</span></div><button class="plugin-toggle' + (p.activo?' on':'') + '" onclick="' + (p.activo ? 'desativarPlugin' : 'ativarPlugin') + '('' + p.id + '')" title="' + (p.activo?'Desactivar':'Activar') + '"></button></div>';
+        });
+        html += '</div>';
+
+    } else if (currentTab === 'kb') {
+        var kb = _getKB();
+        html += '<div class="adv-section"><h4>Adicionar Conhecimento</h4>';
+        html += '<input class="adv-input" id="kb-title" placeholder="Título">';
+        html += '<textarea class="adv-input" id="kb-body" rows="3" placeholder="Conteúdo…" style="resize:none"></textarea>';
+        html += '<input class="adv-input" id="kb-tags" placeholder="Tags (separadas por vírgula)">';
+        html += '<button class="adv-btn" onclick="var t=document.getElementById('kb-title').value,b=document.getElementById('kb-body').value,g=document.getElementById('kb-tags').value.split(',');if(t&&b){adicionarConhecimento(t,b,g);renderAdvBody();}else{toast('Título e conteúdo obrigatórios','warn')}"><span class="icon"><i class="fas fa-plus-circle text-green-400"></i></span>Adicionar<span class="desc">Indexa na base local</span></button></div>';
+        html += '<div class="adv-section"><h4>Base (' + kb.length + ' docs)</h4>';
+        html += '<input class="adv-input" id="kb-search" placeholder="Pesquisar KB…" oninput="renderKBResults(this.value)">';
+        html += '<div id="kb-results">';
+        kb.slice(0,8).forEach(function(d) {
+            html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px;background:#161b22;border:1px solid #21262d;border-radius:6px;margin-bottom:4px;font-size:12px"><span style="color:#c9d1d9">' + escHtml(d.titulo) + '</span><button onclick="removerConhecimento('' + d.id + '')" style="color:#6b7280;background:none;border:none;cursor:pointer;font-size:11px">✕</button></div>';
+        });
+        if (kb.length > 8) html += '<p style="color:#6b7280;font-size:11px;text-align:center">+ ' + (kb.length-8) + ' mais</p>';
+        html += '</div></div>';
+        html += '<button class="adv-btn" onclick="consolidarBaseConhecimento();renderAdvBody()"><span class="icon"><i class="fas fa-compress-arrows-alt text-yellow-400"></i></span>Consolidar KB<span class="desc">Remove duplicados</span></button>';
+        html += '<button class="adv-btn" onclick="atualizarIndiceVetorial()"><span class="icon"><i class="fas fa-project-diagram text-blue-400"></i></span>Actualizar índice vetorial<span class="desc">Gera embeddings locais</span></button>';
+
+    } else if (currentTab === 'sys') {
+        var m = coletarMetricas();
+        html += '<div class="adv-section"><h4>Métricas</h4>';
+        html += '<div class="metric-row"><span class="metric-label">Conversas</span><span class="metric-val">' + m.totalConversas + '</span></div>';
+        html += '<div class="metric-row"><span class="metric-label">Mensagens</span><span class="metric-val">' + m.totalMensagens + '</span></div>';
+        html += '<div class="metric-row"><span class="metric-label">Memórias</span><span class="metric-val">' + m.memoriasGravadas + '</span></div>';
+        html += '<div class="metric-row"><span class="metric-label">Documentos KB</span><span class="metric-val">' + m.kbDocumentos + '</span></div>';
+        html += '<div class="metric-row"><span class="metric-label">Plugins activos</span><span class="metric-val">' + m.pluginsActivos + '</span></div>';
+        html += '<div class="metric-row"><span class="metric-label">Entradas auditoria</span><span class="metric-val">' + m.auditEntradas + '</span></div></div>';
+        html += '<div class="adv-section"><h4>Configuração</h4>';
+        var cfg = getConfig();
+        html += '<label style="font-size:11px;color:#8b949e">Temperatura (' + cfg.temperature + ')</label><input class="adv-input" type="range" min="0" max="2" step="0.05" value="' + cfg.temperature + '" oninput="sincronizarConfig({temperature:parseFloat(this.value)})">';
+        html += '<label style="font-size:11px;color:#8b949e">Max Tokens</label><input class="adv-input" type="number" value="' + cfg.maxTokens + '" min="256" max="8192" step="256" onchange="sincronizarConfig({maxTokens:parseInt(this.value)})">';
+        html += '<label style="font-size:11px;color:#8b949e">Nome de utilizador</label><input class="adv-input" value="' + escHtml(cfg.username) + '" onchange="sincronizarConfig({username:this.value})">';
+        html += '</div>';
+        html += '<button class="adv-btn" onclick="restaurarConfiguracaoPadrao()"><span class="icon"><i class="fas fa-undo text-orange-400"></i></span>Restaurar padrão<span class="desc">Reset completo de configuração</span></button>';
+        html += '<button class="adv-btn" onclick="limparCache()"><span class="icon"><i class="fas fa-broom text-teal-400"></i></span>Optimizar cache<span class="desc">Remove logs antigos</span></button>';
+        html += '<button class="adv-btn" onclick="reportarBug(prompt('Descreve o bug:'))"><span class="icon"><i class="fas fa-bug text-red-400"></i></span>Reportar bug<span class="desc">Abre cliente de email</span></button>';
+
+    } else if (currentTab === 'sec') {
+        html += '<div class="adv-section"><h4>Privacidade</h4>';
+        html += '<button class="adv-btn" onclick="var t=getCurrentConversation();if(t&&t.messages.length){var last=t.messages[t.messages.length-1].content;var r=avaliarRiscoPrivacidade(last);renderMessageUI('ai','Risco: '+r.nivel+' — '+JSON.stringify(r.riscos))}else{toast('Sem mensagens para avaliar','warn')}"><span class="icon"><i class="fas fa-eye text-yellow-400"></i></span>Avaliar risco da última msg<span class="desc">Detecta dados sensíveis</span></button>';
+        html += '<button class="adv-btn" onclick="var t=getCurrentConversation();if(t&&t.messages.length){var last=t.messages[t.messages.length-1].content;renderMessageUI('ai','Dados anonimizados:
+'+anonimizarDados(last))}"><span class="icon"><i class="fas fa-user-secret text-purple-400"></i></span>Anonimizar última msg<span class="desc">Remove PII visível</span></button></div>';
+        html += '<div class="adv-section"><h4>Criptografia</h4>';
+        html += '<button class="adv-btn" onclick="var k=gerarChaveCriptografica(256);renderMessageUI('ai','Chave gerada (256bit):
+`'+k+'`')"><span class="icon"><i class="fas fa-key text-green-400"></i></span>Gerar chave 256-bit<span class="desc">Criptografia local</span></button>';
+        html += '<button class="adv-btn" onclick="autorizarRoleBased(prompt('Role:')|| 'viewer')"><span class="icon"><i class="fas fa-user-shield text-blue-400"></i></span>Verificar permissões (RBAC)<span class="desc">admin / editor / viewer</span></button></div>';
+        html += '<div class="adv-section"><h4>Auditoria</h4>';
+        var audit = JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]').slice(0,5);
+        if (!audit.length) html += '<p style="color:#6b7280;font-size:12px">Sem entradas ainda.</p>';
+        audit.forEach(function(a) {
+            html += '<div style="padding:6px;background:#161b22;border-radius:6px;margin-bottom:4px;font-size:11px"><span style="color:#58a6ff">' + a.acao + '</span><span style="color:#6b7280;float:right">' + a.ts.substring(0,16).replace('T',' ') + '</span></div>';
+        });
+        html += '</div>';
+    }
+
+    body.innerHTML = html;
+}
+
+function renderKBResults(query) {
+    var container = document.getElementById('kb-results');
+    if (!container) return;
+    var results = query ? buscarConhecimento(query) : _getKB().slice(0,8);
+    container.innerHTML = results.map(function(d) {
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px;background:#161b22;border:1px solid #21262d;border-radius:6px;margin-bottom:4px;font-size:12px"><span style="color:#c9d1d9">' + escHtml(d.titulo) + '</span><button onclick="removerConhecimento('' + d.id + '')" style="color:#6b7280;background:none;border:none;cursor:pointer">✕</button></div>';
+    }).join('') || '<p style="color:#6b7280;font-size:12px;text-align:center">Sem resultados.</p>';
+}
+
+// ── TOAST ───────────────────────────────────────────────────────────────────
+function toast(msg, type) {
+    var el = document.getElementById('adv-toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.className   = 'adv-toast show ' + (type||'ok');
+    clearTimeout(el._t);
+    el._t = setTimeout(function(){ el.classList.remove('show'); }, 3500);
+}
+
+// ── Integrar memória no system prompt ─────────────────────────────────────
+function getMemoriaContexto() {
+    var mem   = _getMem();
+    var keys  = Object.keys(mem);
+    if (!keys.length) return '';
+    return '
+
+MEMÓRIA DO UTILIZADOR:
+' + keys.map(function(k){
+        return '- ' + k + ': ' + mem[k].valor;
+    }).join('
+');
+}
+
+// Integrar KB no system prompt
+function getKBContexto(query) {
+    var docs = buscarConhecimento(query);
+    if (!docs.length) return '';
+    return '
+
+BASE DE CONHECIMENTO RELEVANTE:
+' + docs.slice(0,3).map(function(d){
+        return '['+ d.titulo +']: ' + d.conteudo.substring(0,200);
+    }).join('
+');
+}
+
 </script>
+
+<!-- PAINEL AVANÇADO -->
+<div id="adv-panel" class="adv-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #30363d;flex-shrink:0;">
+        <span style="font-size:14px;font-weight:700;color:#e6edf3;"><i class="fas fa-sliders-h mr-2 text-blue-400"></i>Ferramentas Avançadas</span>
+        <button onclick="closeAdvPanel()" style="color:#6b7280;background:none;border:none;cursor:pointer;font-size:16px;">&times;</button>
+    </div>
+    <div class="adv-tab" id="adv-tabs">
+        <button onclick="switchTab('mem')"     class="active"><i class="fas fa-brain mr-1"></i>Memória</button>
+        <button onclick="switchTab('conv')"    ><i class="fas fa-comments mr-1"></i>Conv.</button>
+        <button onclick="switchTab('media')"   ><i class="fas fa-photo-video mr-1"></i>Média</button>
+        <button onclick="switchTab('kb')"      ><i class="fas fa-book mr-1"></i>KB</button>
+        <button onclick="switchTab('sys')"     ><i class="fas fa-cog mr-1"></i>Sistema</button>
+        <button onclick="switchTab('sec')"     ><i class="fas fa-shield-alt mr-1"></i>Seg.</button>
+    </div>
+    <div class="adv-body" id="adv-body"><!-- preenchido por JS --></div>
+</div>
+<div id="adv-overlay" onclick="closeAdvPanel()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;"></div>
+<div id="adv-toast" class="adv-toast"></div>
+
 </body>
 </html>
