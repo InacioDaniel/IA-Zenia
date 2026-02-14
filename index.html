@@ -6,814 +6,797 @@
     <title>IA-Zénia</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
         body { background-color: #0b0d11; color: #e5e7eb; font-family: 'Inter', sans-serif; }
-        .sidebar { background-color: #161b22; transition: all 0.3s ease; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .sidebar { background-color: #161b22; }
+        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         .chat-container::-webkit-scrollbar { width: 5px; }
         .chat-container::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
-        .glow-button { transition: all 0.3s ease; }
-        .glow-button:hover { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
-
-        /* CORRIGIDO: animação pulse-red corretamente nomeada */
-        @keyframes pulse-red {
-            0%   { transform: scale(1); background: transparent; }
-            50%  { transform: scale(1.1); background: #ef4444; color: white; }
-            100% { transform: scale(1); background: transparent; }
-        }
+        .glow-button:hover { box-shadow: 0 0 15px rgba(59,130,246,0.5); }
+        @keyframes pulse-red { 50% { background:#ef4444;color:#fff;transform:scale(1.1); } }
         .recording { animation: pulse-red 1.5s infinite; border-radius: 9999px; }
-
-        @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fade-in { from { opacity:0;transform:translateY(4px); } to { opacity:1;transform:translateY(0); } }
         .animate-fade-in { animation: fade-in 200ms ease-out; }
-
         .loading-spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            vertical-align: middle;
+            width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);
+            border-radius:50%;border-top-color:#fff;
+            animation:spin 1s linear infinite;display:inline-block;vertical-align:middle;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+        /* História */
+        .history-item { display:flex;align-items:center;justify-content:space-between;gap:8px; }
+
+        /* Status */
+        .status-ok   { color:#22c55e;border-color:#22c55e40; }
+        .status-err  { color:#ef4444;border-color:#ef444440; }
+        .status-wait { color:#9ca3af;border-color:#4b556340; }
 
         /* Blocos de código */
-        .code-block {
-            position: relative;
-            background: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-        .code-block pre {
-            padding: 14px 16px;
-            overflow-x: auto;
-            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
-            font-size: 12.5px;
-            line-height: 1.6;
-            color: #e6edf3;
-            margin: 0;
-            white-space: pre;
-        }
-        .code-lang {
-            display: block;
-            background: #161b22;
-            color: #8b949e;
-            font-size: 11px;
-            padding: 4px 12px;
-            border-bottom: 1px solid #30363d;
-            font-family: monospace;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .copy-btn {
-            position: absolute;
-            top: 6px;
-            right: 8px;
-            background: #21262d;
-            border: 1px solid #30363d;
-            color: #8b949e;
-            border-radius: 6px;
-            padding: 3px 8px;
-            font-size: 11px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .copy-btn:hover { background: #30363d; color: #e6edf3; }
-        .inline-code {
-            background: rgba(110,118,129,0.2);
-            border-radius: 4px;
-            padding: 1px 5px;
-            font-family: monospace;
-            font-size: 12px;
-            color: #e6edf3;
-        }
+        .code-block { position:relative;background:#0d1117;border:1px solid #30363d;border-radius:10px;margin:12px 0;overflow:hidden; }
+        .code-header { display:flex;align-items:center;justify-content:space-between;background:#161b22;border-bottom:1px solid #30363d;padding:5px 12px; }
+        .code-lang-label { font-family:monospace;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#58a6ff;font-weight:600; }
+        .copy-btn { background:#21262d;border:1px solid #30363d;color:#8b949e;border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px; }
+        .copy-btn:hover { background:#30363d;color:#e6edf3; }
+        .code-block pre { margin:0!important;padding:14px 16px!important;overflow-x:auto;font-size:13px!important;line-height:1.65!important;background:transparent!important; }
+        .code-block pre code.hljs { background:transparent!important;padding:0!important;font-size:inherit!important; }
 
-        /* ADICIONADO: item do histórico com layout flex correto */
-        .history-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-        }
+        /* Linhas de erro em amarelo */
+        .error-line { background:rgba(251,191,36,0.08);display:block; }
+        .error-line .hljs-keyword,.error-line .hljs-built_in,.error-line .hljs-string,
+        .error-line .hljs-number,.error-line .hljs-comment,.error-line span { color:#fbbf24!important; }
+        .error-marker { color:#fbbf24;font-weight:bold; }
 
-        /* ADICIONADO: status badges */
-        .status-ok   { color: #22c55e; border-color: #22c55e40; }
-        .status-err  { color: #ef4444; border-color: #ef444440; }
-        .status-wait { color: #9ca3af; border-color: #4b556340; }
+        /* Código inline */
+        .inline-code { background:rgba(110,118,129,0.2);border-radius:4px;padding:1px 6px;font-family:monospace;font-size:12px;color:#e6edf3; }
+
+        /* Badge web */
+        .web-badge { display:inline-flex;align-items:center;gap:5px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);border-radius:20px;padding:3px 10px;font-size:11px;color:#60a5fa;margin-bottom:8px; }
+
+        /* Media cards */
+        .media-card { background:#0d1117;border:1px solid #30363d;border-radius:10px;overflow:hidden;margin:10px 0; }
+        .media-card img { width:100%;display:block; }
+        .media-card-label { padding:6px 12px;font-size:11px;color:#8b949e;background:#161b22;border-top:1px solid #30363d; }
+        .media-actions { display:flex;gap:8px;padding:8px 12px;background:#161b22;border-top:1px solid #30363d; }
+        .media-btn { font-size:11px;padding:3px 10px;border-radius:6px;cursor:pointer;border:1px solid #30363d;background:#21262d;color:#8b949e;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:4px; }
+        .media-btn:hover { background:#30363d;color:#e6edf3; }
+
+        /* Toolbar de modo */
+        .toolbar-btn { padding:5px 10px;border-radius:8px;border:1px solid #30363d;background:transparent;color:#6b7280;font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px; }
+        .toolbar-btn:hover { background:#1f2937;color:#e5e7eb;border-color:#4b5563; }
+        .toolbar-btn.active { background:#1d3461;color:#60a5fa;border-color:#3b82f6; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
 
-    <aside class="sidebar w-72 flex flex-col border-r border-gray-800">
-        <div class="p-6 text-2xl font-bold tracking-tight text-blue-500">
-            IA-Zénia <span class="text-xs font-light text-gray-500 block">by Zénia-Projects</span>
+<!-- SIDEBAR -->
+<aside class="sidebar w-72 flex flex-col border-r border-gray-800">
+    <div class="p-6 text-2xl font-bold tracking-tight text-blue-500">
+        IA-Zénia <span class="text-xs font-light text-gray-500 block">by Zénia-Projects</span>
+    </div>
+    <div class="px-4 mb-4">
+        <button onclick="startNewConversation()" class="w-full bg-blue-600/10 hover:bg-blue-600/20 text-blue-500 border border-blue-500/30 rounded-lg py-2 text-sm font-medium transition flex items-center justify-center gap-2">
+            <i class="fas fa-plus"></i> Novo Chat
+        </button>
+    </div>
+    <div class="px-4 mb-4">
+        <div class="relative">
+            <i class="fas fa-search absolute left-3 top-3 text-gray-500 text-sm"></i>
+            <input id="search-input" type="text" placeholder="Buscar em chats..."
+                class="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 pl-9 pr-4 text-sm focus:ring-1 focus:ring-blue-500 outline-none"
+                oninput="filterHistory(this.value)">
         </div>
-
-        <div class="px-4 mb-4">
-            <button onclick="startNewConversation()" class="w-full bg-blue-600/10 hover:bg-blue-600/20 text-blue-500 border border-blue-500/30 rounded-lg py-2 text-sm font-medium transition flex items-center justify-center gap-2">
-                <i class="fas fa-plus"></i> Novo Chat
+    </div>
+    <nav class="flex-1 overflow-y-auto px-4 space-y-6">
+        <div>
+            <p class="text-xs font-semibold text-gray-500 uppercase mb-3">Aplicativos</p>
+            <div class="space-y-2">
+                <a href="https://antonia-ia.netlify.app" target="_blank" rel="noopener noreferrer" class="flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
+                    <i class="fas fa-robot mr-3 text-pink-500"></i> Antónia-IA
+                </a>
+                <a href="https://zenia-projects.netlify.app" target="_blank" rel="noopener noreferrer" class="flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
+                    <i class="fas fa-code mr-3 text-blue-500"></i> Zénia-Projects
+                </a>
+            </div>
+        </div>
+        <div>
+            <p class="text-xs font-semibold text-gray-500 uppercase mb-3">Recursos</p>
+            <button onclick="toggleGallery()" class="w-full flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
+                <i class="fas fa-images mr-3 text-purple-500"></i> Galeria
             </button>
-        </div>
-
-        <div class="px-4 mb-4">
-            <div class="relative">
-                <i class="fas fa-search absolute left-3 top-3 text-gray-500 text-sm"></i>
-                <!-- CORRIGIDO: input de busca com outline correto -->
-                <input id="search-input" type="text" placeholder="Buscar em chats..."
-                    class="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 pl-9 pr-4 text-sm focus:ring-1 focus:ring-blue-500 outline-none"
-                    oninput="filterHistory(this.value)">
+            <div id="history-list" class="mt-4 space-y-1">
+                <p class="text-xs text-gray-600 px-2 italic">Histórico Local</p>
             </div>
         </div>
-
-        <nav class="flex-1 overflow-y-auto px-4 space-y-6">
-            <div>
-                <p class="text-xs font-semibold text-gray-500 uppercase mb-3">Aplicativos</p>
-                <div class="space-y-2">
-                    <a href="https://antonia-ia.netlify.app" target="_blank" rel="noopener noreferrer"
-                        class="flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
-                        <i class="fas fa-robot mr-3 text-pink-500"></i> Antónia-IA
-                    </a>
-                    <a href="https://zenia-projects.netlify.app" target="_blank" rel="noopener noreferrer"
-                        class="flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
-                        <i class="fas fa-code mr-3 text-blue-500"></i> Zénia-Projects
-                    </a>
-                </div>
-            </div>
-
-            <div>
-                <p class="text-xs font-semibold text-gray-500 uppercase mb-3">Recursos</p>
-                <button onclick="toggleGallery()" class="w-full flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
-                    <i class="fas fa-images mr-3 text-purple-500"></i> Galeria
-                </button>
-                <div id="history-list" class="mt-4 space-y-1">
-                    <p class="text-xs text-gray-600 px-2 italic">Histórico Local</p>
-                </div>
-            </div>
-        </nav>
-
-        <div class="p-4 border-t border-gray-800 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold flex-shrink-0">U</div>
-            <div class="flex-1 overflow-hidden">
-                <p class="text-sm font-medium truncate" id="username-display">Utilizador Zénia</p>
-                <p class="text-xs text-green-500 italic">Online</p>
-            </div>
+    </nav>
+    <div class="p-4 border-t border-gray-800 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold flex-shrink-0">U</div>
+        <div class="flex-1 overflow-hidden">
+            <p class="text-sm font-medium truncate" id="username-display">Utilizador Zénia</p>
+            <p class="text-xs text-green-500 italic">Online</p>
         </div>
-    </aside>
+    </div>
+</aside>
 
-    <main class="flex-1 flex flex-col relative overflow-hidden">
-
-        <header class="h-16 border-b border-gray-800 flex items-center justify-between px-6 glass flex-shrink-0">
-            <div class="flex items-center gap-4 flex-wrap">
-                <!-- CORRIGIDO: select de voz populado dinamicamente via JS -->
-                <select id="voice-select" class="bg-transparent text-xs border border-gray-700 rounded p-1 outline-none focus:ring-1 focus:ring-blue-500 max-w-[180px]">
-                    <option value="">Voz padrão</option>
-                </select>
-                <button id="voice-assist-btn" onclick="toggleVoiceAssist()"
-                    class="text-xs px-3 py-1 rounded-full border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition">
-                    <i class="fas fa-headset mr-2"></i>Modo Voz Assist.
-                </button>
-                <!-- CORRIGIDO: status com classes dinâmicas adequadas -->
-                <span id="api-status" class="text-[11px] px-2 py-1 rounded border status-wait">API: verificando…</span>
-            </div>
-            <div class="flex items-center gap-2 flex-shrink-0">
-                <label class="text-xs text-gray-500">Modelo:</label>
-                <select id="model-select" class="bg-transparent text-xs border border-gray-700 rounded p-1 outline-none focus:ring-1 focus:ring-blue-500 text-blue-400">
-                    <option value="openai">openai (geral)</option>
-                    <option value="qwen-coder" selected>qwen-coder (código)</option>
-                    <option value="openai-large">openai-large (avançado)</option>
-                    <option value="mistral">mistral</option>
-                    <option value="deepseek">deepseek</option>
-                </select>
-            </div>
-        </header>
-
-        <div id="chat-window" class="flex-1 overflow-y-auto p-6 space-y-6 chat-container">
-            <div class="flex flex-col items-center justify-center h-full text-center space-y-4 opacity-50" id="welcome-msg">
-                <i class="fas fa-shield-cat text-6xl text-blue-500"></i>
-                <h2 class="text-2xl font-bold">Olá, eu sou a Zénia.</h2>
-                <p class="max-w-md">Criada no Lubango por Inácio U. Daniel. Como posso ajudar Angola hoje?</p>
-            </div>
+<!-- MAIN -->
+<main class="flex-1 flex flex-col relative overflow-hidden">
+    <header class="h-16 border-b border-gray-800 flex items-center justify-between px-6 glass flex-shrink-0">
+        <div class="flex items-center gap-3 flex-wrap">
+            <select id="voice-select" class="bg-transparent text-xs border border-gray-700 rounded p-1 outline-none focus:ring-1 focus:ring-blue-500 max-w-[150px]">
+                <option value="">Voz padrão</option>
+            </select>
+            <button id="voice-assist-btn" onclick="toggleVoiceAssist()" class="text-xs px-3 py-1 rounded-full border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition">
+                <i class="fas fa-headset mr-1"></i>Voz Assist.
+            </button>
+            <span id="api-status" class="text-[11px] px-2 py-1 rounded border status-wait">API: verificando…</span>
+            <span id="web-status" class="hidden text-[11px] px-2 py-1 rounded border border-yellow-500/40 text-yellow-400">
+                <i class="fas fa-globe mr-1"></i>A pesquisar web…
+            </span>
         </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <label class="text-xs text-gray-500">Modelo:</label>
+            <select id="model-select" class="bg-transparent text-xs border border-gray-700 rounded p-1 outline-none focus:ring-1 focus:ring-blue-500 text-blue-400">
+                <option value="openai">openai (geral)</option>
+                <option value="qwen-coder" selected>qwen-coder (código)</option>
+                <option value="openai-large">openai-large (avançado)</option>
+                <option value="mistral">mistral</option>
+                <option value="deepseek">deepseek</option>
+            </select>
+        </div>
+    </header>
 
-        <div class="p-4 bg-gradient-to-t from-[#0b0d11] to-transparent flex-shrink-0">
-            <div class="max-w-4xl mx-auto glass rounded-2xl p-2 flex flex-col">
+    <div id="chat-window" class="flex-1 overflow-y-auto p-6 space-y-6 chat-container">
+        <div class="flex flex-col items-center justify-center h-full text-center space-y-4 opacity-50" id="welcome-msg">
+            <i class="fas fa-shield-cat text-6xl text-blue-500"></i>
+            <h2 class="text-2xl font-bold">Olá, eu sou a Zénia.</h2>
+            <p class="max-w-sm text-sm">Criada no Lubango por Inácio U. Daniel.<br>Código · Imagens · Áudio · Pesquisa Web</p>
+        </div>
+    </div>
+
+    <div class="p-4 bg-gradient-to-t from-[#0b0d11] to-transparent flex-shrink-0">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex gap-2 mb-2 px-1 flex-wrap">
+                <button id="btn-mode-chat"  onclick="setMode('chat')"  class="toolbar-btn active"><i class="fas fa-comment"></i> Chat</button>
+                <button id="btn-mode-image" onclick="setMode('image')" class="toolbar-btn"><i class="fas fa-image text-purple-400"></i> Imagem</button>
+                <button id="btn-mode-audio" onclick="setMode('audio')" class="toolbar-btn"><i class="fas fa-music text-green-400"></i> Áudio</button>
+                <button id="btn-mode-web"   onclick="setMode('web')"   class="toolbar-btn"><i class="fas fa-globe text-yellow-400"></i> Web</button>
+            </div>
+            <div class="glass rounded-2xl p-2">
                 <div class="flex items-end gap-2 px-2 pb-2">
-                    <button class="p-3 text-gray-400 hover:text-white transition" title="Anexar Arquivo">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                    <!-- CORRIGIDO: textarea com auto-resize e Enter para enviar -->
-                    <textarea id="user-input" rows="1"
-                        placeholder="Pergunte qualquer coisa à Zénia..."
+                    <textarea id="user-input" rows="1" placeholder="Pergunte qualquer coisa à Zénia…"
                         class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-3 resize-none outline-none"
-                        style="max-height: 120px; overflow-y: auto;"></textarea>
-
+                        style="max-height:120px;overflow-y:auto;"></textarea>
                     <button id="mic-btn" class="p-3 text-gray-400 hover:text-blue-500 transition" title="Microfone">
                         <i class="fas fa-microphone"></i>
                     </button>
-                    <button id="send-btn" onclick="handleSendMessage()"
-                        class="p-3 bg-blue-600 rounded-xl hover:bg-blue-700 glow-button transition min-w-[44px] flex items-center justify-center">
+                    <button id="send-btn" onclick="handleSendMessage()" class="p-3 bg-blue-600 rounded-xl hover:bg-blue-700 glow-button transition min-w-[44px] flex items-center justify-center">
                         <i class="fas fa-paper-plane" id="send-icon"></i>
                     </button>
                 </div>
             </div>
-            <p class="text-[10px] text-center mt-3 text-gray-600 uppercase tracking-widest">
-                A Zénia pode cometer erros. Verifique informações importantes. Desenvolvido por Zénia-Projects.
+            <p class="text-[10px] text-center mt-2 text-gray-600 uppercase tracking-widest">
+                A Zénia verifica na web para info actualizada · Desenvolvido por Zénia-Projects
             </p>
         </div>
-    </main>
+    </div>
+</main>
 
-    <script>
-        // ─── CONFIGURAÇÃO ────────────────────────────────────────────────────────────
-        const API_KEY       = "pk_urEpxcajGs5TF9Fs"; // Substitua pelo seu token secreto
-        const CHAT_ENDPOINT = "https://gen.pollinations.ai/v1/chat/completions";
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════
+const API_KEY       = "pk_urEpxcajGs5TF9Fs";
+const CHAT_ENDPOINT = "https://gen.pollinations.ai/v1/chat/completions";
+const IMG_BASE      = "https://image.pollinations.ai/prompt/";
+const TTS_BASE      = "https://text.pollinations.ai/";
 
-        // ─── ESTADO ──────────────────────────────────────────────────────────────────
-        const chatWindow = document.getElementById('chat-window');
-        const userInput  = document.getElementById('user-input');
-        const sendBtn    = document.getElementById('send-btn');
-        const sendIcon   = document.getElementById('send-icon');
+const chatWindow = document.getElementById('chat-window');
+const userInput  = document.getElementById('user-input');
+const sendBtn    = document.getElementById('send-btn');
+const sendIcon   = document.getElementById('send-icon');
 
-        let isVoiceAssist        = false;
-        let conversations        = JSON.parse(localStorage.getItem('conversations') || '[]');
-        let currentConversationId = null;
+let isVoiceAssist = false;
+let currentMode   = 'chat';
+let conversations = JSON.parse(localStorage.getItem('conversations') || '[]');
+let currentConversationId = null;
 
-        // ─── GESTÃO DE CONVERSAS ──────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// MODO
+// ═══════════════════════════════════════════════════════════
+function setMode(mode) {
+    currentMode = mode;
+    const ph = {
+        chat:  'Pergunte qualquer coisa à Zénia…',
+        image: 'Descreve a imagem que queres gerar… (ex: pôr do sol em Luanda)',
+        audio: 'Que música ou áudio queres? (ex: jazz relaxante, chuva tropical)',
+        web:   'O que queres pesquisar na internet?'
+    };
+    userInput.placeholder = ph[mode] || ph.chat;
+    ['chat','image','audio','web'].forEach(m =>
+        document.getElementById('btn-mode-' + m).classList.toggle('active', m === mode)
+    );
+}
 
-        function createConversation(title) {
-            const id   = Date.now().toString();
-            const conv = { id, title, messages: [] };
-            conversations.unshift(conv);
-            currentConversationId = id;
-            persistConversations();
-            renderHistoryList();
-            return conv;
-        }
+// ═══════════════════════════════════════════════════════════
+// CONVERSAS
+// ═══════════════════════════════════════════════════════════
+function createConversation(title) {
+    const id   = Date.now().toString();
+    const conv = { id, title, messages: [] };
+    conversations.unshift(conv);
+    currentConversationId = id;
+    persistConversations();
+    renderHistoryList();
+    return conv;
+}
+function getCurrentConversation() {
+    return conversations.find(c => c.id === currentConversationId) || null;
+}
+function persistConversations() {
+    localStorage.setItem('conversations', JSON.stringify(conversations));
+}
+function filterHistory(v) { renderHistoryList(v); }
 
-        function getCurrentConversation() {
-            return conversations.find(c => c.id === currentConversationId) || null;
-        }
+function renderHistoryList(filter) {
+    filter = filter || '';
+    const hist = document.getElementById('history-list');
+    hist.innerHTML = '<p class="text-xs text-gray-600 px-2 italic mb-1">Histórico Local</p>';
+    const list = filter
+        ? conversations.filter(c => c.title.toLowerCase().includes(filter.toLowerCase()))
+        : conversations;
+    if (!list.length) {
+        const e = document.createElement('p');
+        e.className = 'text-xs text-gray-600 px-2 italic';
+        e.textContent = filter ? 'Nenhum resultado.' : 'Sem conversas ainda.';
+        hist.appendChild(e); return;
+    }
+    list.forEach(function(conv) {
+        const isActive = conv.id === currentConversationId;
+        const item = document.createElement('div');
+        item.className = 'history-item p-2 rounded-lg cursor-pointer text-[11px] text-gray-300 hover:bg-gray-800 transition'
+            + (isActive ? ' bg-gray-800/60 border-l-2 border-blue-500 text-blue-400' : '');
+        const left = document.createElement('div');
+        left.className = 'flex items-center gap-2 overflow-hidden flex-1';
+        left.onclick = function() { loadConversation(conv.id); };
+        const icon  = document.createElement('i'); icon.className = 'far fa-comment-alt flex-shrink-0 text-gray-500';
+        const title = document.createElement('span'); title.className = 'truncate'; title.textContent = conv.title || 'Conversa';
+        left.appendChild(icon); left.appendChild(title);
+        const del = document.createElement('button');
+        del.title = 'Apagar'; del.className = 'text-gray-600 hover:text-red-500 transition flex-shrink-0';
+        del.innerHTML = '<i class="fas fa-trash text-xs"></i>';
+        del.onclick = function(e) { e.stopPropagation(); deleteConversation(conv.id); };
+        item.appendChild(left); item.appendChild(del);
+        hist.appendChild(item);
+    });
+}
 
-        function persistConversations() {
-            localStorage.setItem('conversations', JSON.stringify(conversations));
-        }
+function deleteConversation(id) {
+    conversations = conversations.filter(c => c.id !== id);
+    persistConversations();
+    if (currentConversationId === id) startNewConversation();
+    else renderHistoryList();
+}
 
-        // CORRIGIDO: renderHistoryList com estrutura flex correta e sem bugs de layout
-        function renderHistoryList(filter = '') {
-            const hist = document.getElementById('history-list');
-            hist.innerHTML = '<p class="text-xs text-gray-600 px-2 italic mb-1">Histórico Local</p>';
+function loadConversation(id) {
+    currentConversationId = id;
+    chatWindow.innerHTML = '';
+    hideWelcome();
+    const conv = getCurrentConversation();
+    if (!conv) return;
+    conv.messages.forEach(function(m) {
+        if (m.role !== 'system') renderMessageUI(m.role === 'user' ? 'user' : 'ai', m.content);
+    });
+    renderHistoryList();
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+}
 
-            const filtered = filter
-                ? conversations.filter(c => c.title.toLowerCase().includes(filter.toLowerCase()))
-                : conversations;
+function startNewConversation() {
+    chatWindow.innerHTML = '';
+    showWelcome();
+    currentConversationId = null;
+    renderHistoryList();
+}
 
-            if (filtered.length === 0) {
-                const empty = document.createElement('p');
-                empty.className = 'text-xs text-gray-600 px-2 italic';
-                empty.textContent = filter ? 'Nenhum resultado.' : 'Sem conversas ainda.';
-                hist.appendChild(empty);
-                return;
-            }
+function hideWelcome() {
+    var w = document.getElementById('welcome-msg');
+    if (w) w.style.display = 'none';
+}
+function showWelcome() {
+    var w = document.getElementById('welcome-msg');
+    if (!w) {
+        w = document.createElement('div');
+        w.id = 'welcome-msg';
+        w.className = 'flex flex-col items-center justify-center h-full text-center space-y-4 opacity-50';
+        w.innerHTML = '<i class="fas fa-shield-cat text-6xl text-blue-500"></i><h2 class="text-2xl font-bold">Olá, eu sou a Zénia.</h2><p class="max-w-md text-sm">Criada no Lubango por Inácio U. Daniel.</p>';
+        chatWindow.appendChild(w);
+    } else { w.style.display = 'flex'; }
+}
 
-            filtered.forEach(conv => {
-                const isActive = conv.id === currentConversationId;
+// ═══════════════════════════════════════════════════════════
+// PESQUISA WEB — DuckDuckGo Instant Answers (sem chave, CORS livre)
+// ═══════════════════════════════════════════════════════════
+function needsWebSearch(text) {
+    return /\b(2024|2025|2026|agora|hoje|actual|atualiz|recente|latest|current|version|versão|preço|price|quem é|presidente|notícia|news|lançamento|release|update|framework|library|npm|pip)\b/i.test(text);
+}
 
-                const item = document.createElement('div');
-                item.className = [
-                    'history-item p-2 rounded-lg cursor-pointer text-[11px] text-gray-300',
-                    'hover:bg-gray-800 transition',
-                    isActive ? 'bg-gray-800/60 border-l-2 border-blue-500 text-blue-400' : ''
-                ].join(' ');
-
-                // Parte esquerda: ícone + título
-                const left = document.createElement('div');
-                left.className = 'flex items-center gap-2 overflow-hidden flex-1';
-                left.onclick = () => loadConversation(conv.id);
-
-                const icon = document.createElement('i');
-                icon.className = 'far fa-comment-alt flex-shrink-0 text-gray-500';
-
-                const title = document.createElement('span');
-                title.className = 'truncate';
-                title.textContent = conv.title || 'Conversa';
-
-                left.appendChild(icon);
-                left.appendChild(title);
-
-                // Botão de apagar
-                const delBtn = document.createElement('button');
-                delBtn.title = 'Apagar conversa';
-                delBtn.className = 'text-gray-600 hover:text-red-500 transition flex-shrink-0';
-                delBtn.innerHTML = '<i class="fas fa-trash text-xs"></i>';
-                delBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    deleteConversation(conv.id);
-                };
-
-                item.appendChild(left);
-                item.appendChild(delBtn);
-                hist.appendChild(item);
+async function webSearch(query) {
+    var el = document.getElementById('web-status');
+    el.classList.remove('hidden');
+    try {
+        var url = 'https://api.duckduckgo.com/?q=' + encodeURIComponent(query) + '&format=json&no_html=1&skip_disambig=1';
+        var res  = await fetch(url);
+        var data = await res.json();
+        var parts = [];
+        if (data.Answer)       parts.push('Resposta directa: ' + data.Answer);
+        if (data.AbstractText) parts.push(data.AbstractText);
+        if (data.RelatedTopics) {
+            data.RelatedTopics.slice(0, 4).forEach(function(t) {
+                if (t.Text) parts.push('• ' + t.Text);
             });
         }
-
-        // ADICIONADO: função de filtro chamada pelo input de busca
-        function filterHistory(value) {
-            renderHistoryList(value);
-        }
-
-        function deleteConversation(id) {
-            conversations = conversations.filter(c => c.id !== id);
-            persistConversations();
-            if (currentConversationId === id) {
-                startNewConversation();
-            } else {
-                renderHistoryList();
-            }
-        }
-
-        function loadConversation(id) {
-            currentConversationId = id;
-            chatWindow.innerHTML = '';
-            const welcomeMsg = document.getElementById('welcome-msg');
-            if (welcomeMsg) welcomeMsg.style.display = 'none';
-
-            const conv = getCurrentConversation();
-            if (!conv) return;
-
-            conv.messages.forEach(m => {
-                if (m.role !== 'system') {
-                    renderMessageUI(m.role === 'user' ? 'user' : 'ai', m.content, m.img || null);
-                }
-            });
-
-            renderHistoryList();
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-        }
-
-        function startNewConversation() {
-            chatWindow.innerHTML = '';
-            // Recria a mensagem de boas-vindas se necessário
-            let welcomeMsg = document.getElementById('welcome-msg');
-            if (!welcomeMsg) {
-                welcomeMsg = document.createElement('div');
-                welcomeMsg.id = 'welcome-msg';
-                welcomeMsg.className = 'flex flex-col items-center justify-center h-full text-center space-y-4 opacity-50';
-                welcomeMsg.innerHTML = `
-                    <i class="fas fa-shield-cat text-6xl text-blue-500"></i>
-                    <h2 class="text-2xl font-bold">Olá, eu sou a Zénia.</h2>
-                    <p class="max-w-md">Criada no Lubango por Inácio U. Daniel. Como posso ajudar Angola hoje?</p>
-                `;
-                chatWindow.appendChild(welcomeMsg);
-            } else {
-                welcomeMsg.style.display = 'flex';
-            }
-
-            currentConversationId = null;
-            renderHistoryList();
-        }
-
-        // ─── FETCH COM RETRY ──────────────────────────────────────────────────────────
-
-        async function fetchWithRetry(messages, model, attempt = 1) {
-            const MAX_ATTEMPTS = 3;
-            const TIMEOUT_MS   = 60000; // 60s — respostas longas podem demorar
-
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-            try {
-                const response = await fetch(CHAT_ENDPOINT, {
-                    method: 'POST',
-                    signal: controller.signal,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_KEY}`
-                    },
-                    body: JSON.stringify({
-                        messages,
-                        model,
-                        max_tokens: 4096,
-                        temperature: model === 'qwen-coder' ? 0.3 : 0.7,
-                        top_p: 1,
-                        stream: false
-                    })
-                });
-
-                clearTimeout(timer);
-
-                if (!response.ok) {
-                    const errBody = await response.text();
-                    // Rate limit — espera e tenta de novo
-                    if (response.status === 429 && attempt < MAX_ATTEMPTS) {
-                        await new Promise(r => setTimeout(r, 2000 * attempt));
-                        return fetchWithRetry(messages, model, attempt + 1);
-                    }
-                    throw new Error(`Erro HTTP ${response.status}: ${errBody}`);
-                }
-
-                const data = await response.json();
-
-                if (!data.choices?.[0]?.message) {
-                    throw new Error("Formato de resposta inesperado da API.");
-                }
-
-                const content = (data.choices[0].message.content || '').trim();
-
-                if (!content) {
-                    // Resposta vazia — tenta com modelo diferente automaticamente
-                    if (attempt < MAX_ATTEMPTS) {
-                        // Roda pelos modelos: qwen-coder → openai-large → mistral
-                        const fallbackChain = ['qwen-coder', 'openai-large', 'mistral'];
-                        const nextIdx = fallbackChain.indexOf(model) + 1;
-                        const fallback = fallbackChain[nextIdx] || fallbackChain[fallbackChain.length - 1];
-                        console.warn(`Resposta vazia com "${model}", tentando "${fallback}" (tentativa ${attempt})...`);
-                        return fetchWithRetry(messages, fallback, attempt + 1);
-                    }
-                    throw new Error("Resposta vazia após várias tentativas. Tenta simplificar o pedido ou escolhe outro modelo.");
-                }
-
-                return content;
-
-            } catch (err) {
-                clearTimeout(timer);
-                if (err.name === 'AbortError') {
-                    if (attempt < MAX_ATTEMPTS) {
-                        console.warn(`Timeout na tentativa ${attempt}, tentando novamente...`);
-                        return fetchWithRetry(messages, model, attempt + 1);
-                    }
-                    throw new Error("Tempo esgotado após várias tentativas. Verifica a tua ligação à internet.");
-                }
-                throw err;
-            }
-        }
-
-        function renderTypingIndicator() {
-            const row = document.createElement('div');
-            row.className = 'flex justify-start animate-fade-in';
-            row.id = 'typing-indicator';
-            row.innerHTML = `
-                <div class="glass p-4 rounded-2xl flex items-center gap-2 text-sm text-gray-400">
-                    <span class="loading-spinner"></span>
-                    <span>Zénia está a escrever…</span>
-                </div>`;
-            chatWindow.appendChild(row);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-            return row;
-        }
-
-        // ─── ENVIO DE MENSAGEM ────────────────────────────────────────────────────────
-
-        async function handleSendMessage() {
-            const text = userInput.value.trim();
-            if (!text || sendBtn.disabled) return;
-
-            let conv = getCurrentConversation();
-            if (!conv) {
-                conv = createConversation(text.substring(0, 35) + (text.length > 35 ? '…' : ''));
-            }
-
-            // Esconde boas-vindas
-            const welcomeMsg = document.getElementById('welcome-msg');
-            if (welcomeMsg) welcomeMsg.style.display = 'none';
-
-            renderMessageUI('user', text);
-            userInput.value = '';
-            autoResize(userInput);
-            setLoading(true);
-
-            const systemMsg = {
-                role: "system",
-                content: "Tu és a IA-Zénia, uma inteligência artificial avançada criada no Lubango, Angola, pelo Inácio U. Daniel (Zénia-Projects). O teu modelo interno chama-se zenia-full. Angola tem 21 províncias e és especialista em línguas nacionais angolanas.\n\nQuando o utilizador pede código ou programação: SEMPRE responde com o código completo e funcional, dentro de blocos de código formatados com três backticks e o nome da linguagem (ex: ```python). Nunca recuses escrever código. Se pedires uma imagem, descreve-a em detalhe pois não tens capacidade de gerar imagens directamente.\n\nRespondes sempre em Português de Angola."
-            };
-
-            const messages = [systemMsg, ...conv.messages, { role: "user", content: text }];
-
-            // Indicador de "a escrever..."
-            const typingEl = renderTypingIndicator();
-
-            try {
-                // Detecção automática: se o pedido contém palavras de código, usa qwen-coder
-                const codeKeywords = /\b(program|código|code|script|função|function|html|css|javascript|python|java|c\+\+|typescript|sql|php|bash|react|vue|angular|api|algoritmo|algorithm|classe|class|array|loop|for|while|if|def|var|const|let|import|module|component|debug|erro|fix|bug|implement|create|make|build|desenvolv)\b/i;
-                const manualModel  = document.getElementById('model-select').value;
-                const autoModel    = codeKeywords.test(text) ? 'qwen-coder' : manualModel;
-                if (autoModel !== manualModel) {
-                    console.info(`Auto-switched model to ${autoModel} for code request`);
-                }
-                const aiResponse = await fetchWithRetry(messages, autoModel);
-
-                typingEl.remove();
-
-                conv.messages.push({ role: "user", content: text });
-                conv.messages.push({ role: "assistant", content: aiResponse });
-                persistConversations();
-
-                renderMessageUI('ai', aiResponse);
-                if (isVoiceAssist) speakText(aiResponse);
-                setApiStatus('ok');
-
-            } catch (error) {
-                typingEl.remove();
-                console.error("Erro na API:", error);
-                renderMessageUI('ai', `⚠️ ${error.message}`);
-                setApiStatus('error');
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        function setLoading(isLoading) {
-            sendBtn.disabled = isLoading;
-            if (isLoading) {
-                sendIcon.className = 'loading-spinner';
-            } else {
-                sendIcon.className = 'fas fa-paper-plane';
-            }
-        }
-
-        // Formata texto: converte blocos ```code``` em <pre><code> e preserva quebras de linha
-        function formatMessage(text) {
-            const escaped = text
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
-
-            // Blocos de código com linguagem: ```lang\ncode```
-            const withCodeBlocks = escaped.replace(
-                /```([\w-]*)\n([\s\S]*?)```/g,
-                (_, lang, code) => {
-                    const label = lang ? `<span class="code-lang">${lang}</span>` : '';
-                    return `<div class="code-block">${label}<pre><code>${code.trimEnd()}</code></pre><button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copiar</button></div>`;
-                }
-            );
-
-            // Código inline: `code`
-            const withInline = withCodeBlocks.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
-
-            // Negrito: **text**
-            const withBold = withInline.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-
-            // Quebras de linha normais
-            return withBold.replace(/\n/g, '<br>');
-        }
-
-        function copyCode(btn) {
-            const code = btn.previousElementSibling.textContent;
-            navigator.clipboard.writeText(code).then(() => {
-                btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
-                setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i> Copiar'; }, 2000);
-            });
-        }
-
-        function renderMessageUI(role, text, img = null) {
-            const row = document.createElement('div');
-            row.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`;
-
-            const bubble = document.createElement('div');
-            bubble.className = `max-w-[80%] p-4 rounded-2xl text-sm leading-relaxed ${role === 'user' ? 'bg-blue-600' : 'glass'}`;
-            bubble.style.wordBreak = 'break-word';
-
-            if (role === 'ai') {
-                bubble.innerHTML = formatMessage(text);
-            } else {
-                bubble.style.whiteSpace = 'pre-wrap';
-                bubble.textContent = text;
-            }
-
-            if (img) {
-                const image = document.createElement('img');
-                image.src = img;
-                image.alt = 'Imagem gerada';
-                image.loading = 'lazy';
-                image.className = 'mt-3 rounded-lg w-full border border-gray-700 shadow-xl';
-                bubble.appendChild(image);
-            }
-
-            row.appendChild(bubble);
-            chatWindow.appendChild(row);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-        }
-
-        // ─── SÍNTESE DE VOZ ───────────────────────────────────────────────────────────
-
-        // CORRIGIDO: populamos as vozes do sistema no select
-        function populateVoices() {
-            const sel = document.getElementById('voice-select');
-            const voices = window.speechSynthesis.getVoices();
-            if (voices.length === 0) return;
-
-            sel.innerHTML = '';
-            voices.forEach((v, i) => {
-                const opt = document.createElement('option');
-                opt.value = i;
-                opt.textContent = `${v.name} (${v.lang})`;
-                if (v.lang.startsWith('pt')) opt.selected = true;
-                sel.appendChild(opt);
-            });
-        }
-
-        if (typeof speechSynthesis !== 'undefined') {
-            speechSynthesis.onvoiceschanged = populateVoices;
-            populateVoices();
-        }
-
-        function speakText(text) {
-            if (typeof speechSynthesis === 'undefined') return;
-            speechSynthesis.cancel(); // Para fala anterior se houver
-
-            const utter = new SpeechSynthesisUtterance(text);
-            const voices = speechSynthesis.getVoices();
-            const selIdx = parseInt(document.getElementById('voice-select').value);
-
-            if (!isNaN(selIdx) && voices[selIdx]) {
-                utter.voice = voices[selIdx];
-                utter.lang  = voices[selIdx].lang;
-            } else {
-                utter.lang = 'pt-PT';
-            }
-
-            utter.rate = 1.0;
-            utter.pitch = 1.0;
-            speechSynthesis.speak(utter);
-        }
-
-        // ─── RECONHECIMENTO DE VOZ ────────────────────────────────────────────────────
-
-        const micBtn = document.getElementById('mic-btn');
-
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'pt-PT';
-
-            let isListening = false;
-
-            micBtn.onclick = () => {
-                if (isListening) {
-                    recognition.stop();
-                    return;
-                }
-                try {
-                    recognition.start();
-                    isListening = true;
-                    micBtn.classList.add('recording');
-                    micBtn.title = 'A ouvir... (clique para parar)';
-                } catch (e) {
-                    console.warn("Erro ao iniciar reconhecimento:", e);
-                }
-            };
-
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                userInput.value = transcript;
-                autoResize(userInput);
-                isListening = false;
-                micBtn.classList.remove('recording');
-                micBtn.title = 'Microfone';
-                handleSendMessage();
-            };
-
-            // CORRIGIDO: handler de erro no reconhecimento de voz
-            recognition.onerror = (event) => {
-                console.warn("Erro no reconhecimento de voz:", event.error);
-                isListening = false;
-                micBtn.classList.remove('recording');
-                micBtn.title = 'Microfone';
-                if (event.error !== 'no-speech') {
-                    renderMessageUI('ai', `⚠️ Erro no microfone: ${event.error}. Verifique as permissões do browser.`);
-                }
-            };
-
-            recognition.onend = () => {
-                isListening = false;
-                micBtn.classList.remove('recording');
-                micBtn.title = 'Microfone';
-            };
-        } else {
-            micBtn.disabled = true;
-            micBtn.title = 'Reconhecimento de voz não suportado neste browser';
-            micBtn.classList.add('opacity-30', 'cursor-not-allowed');
-        }
-
-        // ─── MODO ASSISTENTE DE VOZ ───────────────────────────────────────────────────
-
-        // CORRIGIDO: toggleVoiceAssist usando classList.toggle de forma segura
-        function toggleVoiceAssist() {
-            isVoiceAssist = !isVoiceAssist;
-            const btn = document.getElementById('voice-assist-btn');
-
-            if (isVoiceAssist) {
-                btn.classList.remove('text-blue-500', 'border-blue-500', 'hover:bg-blue-500', 'hover:text-white');
-                btn.classList.add('bg-red-600', 'text-white', 'border-red-600');
-                renderMessageUI('ai', "Modo Assistente de Voz ligado. Podes falar comigo naturalmente.");
-            } else {
-                btn.classList.remove('bg-red-600', 'border-red-600');
-                btn.classList.add('text-blue-500', 'border-blue-500', 'hover:bg-blue-500', 'hover:text-white');
-                speechSynthesis.cancel();
-            }
-        }
-
-        // ─── GALERIA ──────────────────────────────────────────────────────────────────
-
-        function toggleGallery() {
-            let gallery = document.getElementById('gallery-container');
-            if (!gallery) {
-                const recursos = document.querySelector('button[onclick="toggleGallery()"]').parentElement;
-                gallery = document.createElement('div');
-                gallery.id = 'gallery-container';
-                gallery.className = 'mt-3 grid grid-cols-3 gap-2';
-
-                const seeds = ['zenia1','zenia2','zenia3','zenia4','zenia5','zenia6'];
-                seeds.forEach(seed => {
-                    const img = document.createElement('img');
-                    img.src = `https://picsum.photos/seed/${seed}/300/200`;
-                    img.alt = 'Galeria Zénia';
-                    img.loading = 'lazy';
-                    img.className = 'rounded-lg border border-gray-800 hover:opacity-80 transition cursor-pointer';
-                    gallery.appendChild(img);
-                });
-                recursos.appendChild(gallery);
-            } else {
-                gallery.style.display = gallery.style.display === 'none' ? '' : 'none';
-            }
-        }
-
-        // ─── STATUS DA API ────────────────────────────────────────────────────────────
-
-        // CORRIGIDO: updateApiStatus agora existe e funciona corretamente
-        function setApiStatus(state) {
-            const el = document.getElementById('api-status');
-            el.className = 'text-[11px] px-2 py-1 rounded border';
-            if (state === 'ok') {
-                el.classList.add('status-ok');
-                el.textContent = 'API: ativa ✓';
-            } else if (state === 'error') {
-                el.classList.add('status-err');
-                el.textContent = 'API: erro ✗';
-            } else {
-                el.classList.add('status-wait');
-                el.textContent = 'API: verificando…';
-            }
-        }
-
-        async function updateApiStatus() {
-            setApiStatus('wait');
-            try {
-                const controller = new AbortController();
-                const timer = setTimeout(() => controller.abort(), 10000);
-                const response = await fetch(CHAT_ENDPOINT, {
-                    method: 'POST',
-                    signal: controller.signal,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_KEY}`
-                    },
-                    body: JSON.stringify({
-                        messages: [{ role: "user", content: "oi" }],
-                        model: "openai",
-                        max_tokens: 5,
-                        temperature: 0,
-                        stream: false
-                    })
-                });
-                clearTimeout(timer);
-                setApiStatus(response.ok ? 'ok' : 'error');
-            } catch {
-                setApiStatus('error');
-            }
-        }
-
-        // ─── TEXTAREA AUTO-RESIZE ─────────────────────────────────────────────────────
-
-        // ADICIONADO: auto-resize do textarea ao digitar
-        function autoResize(el) {
-            el.style.height = 'auto';
-            el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-        }
-
-        userInput.addEventListener('input', () => autoResize(userInput));
-
-        // CORRIGIDO: Enter para enviar (Shift+Enter para nova linha)
-        userInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage();
-            }
+        el.classList.add('hidden');
+        var date = new Date().toLocaleDateString('pt-PT');
+        return parts.length > 0
+            ? '[PESQUISA WEB — ' + date + ' — "' + query + '"]:\n' + parts.join('\n')
+            : '[Pesquisa web sem resultados relevantes para "' + query + '"]';
+    } catch (err) {
+        el.classList.add('hidden');
+        return '[Pesquisa web indisponível: ' + err.message + ']';
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// GERAÇÃO DE IMAGEM — Pollinations gratuito
+// ═══════════════════════════════════════════════════════════
+async function generateImage(prompt) {
+    var seed    = Math.floor(Math.random() * 999999);
+    var url     = IMG_BASE + encodeURIComponent(prompt) + '?width=768&height=512&seed=' + seed + '&nologo=true';
+
+    var row = document.createElement('div');
+    row.className = 'flex justify-start animate-fade-in';
+    var card = document.createElement('div');
+    card.className = 'media-card max-w-[80%]';
+    card.innerHTML = '<div class="p-4 flex items-center gap-3 text-sm text-gray-400"><span class="loading-spinner"></span> A gerar imagem…</div>';
+    row.appendChild(card); chatWindow.appendChild(row);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+
+    var img = new Image();
+    img.onload = function() {
+        card.innerHTML =
+            '<img src="' + url + '" alt="' + escHtml(prompt) + '" loading="lazy">' +
+            '<div class="media-card-label"><i class="fas fa-image mr-1"></i>' + escHtml(prompt) + '</div>' +
+            '<div class="media-actions">' +
+                '<button class="media-btn" onclick="window.open(\'' + url + '\',\'_blank\')"><i class="fas fa-external-link-alt"></i> Abrir</button>' +
+                '<a href="' + url + '" download="zenia-image.jpg" class="media-btn"><i class="fas fa-download"></i> Guardar</a>' +
+            '</div>';
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    };
+    img.onerror = function() {
+        card.innerHTML = '<div class="p-4 text-yellow-400 text-sm"><i class="fas fa-exclamation-triangle mr-2"></i>Imagem não gerada. Tenta uma descrição diferente.</div>';
+    };
+    img.src = url;
+}
+
+// ═══════════════════════════════════════════════════════════
+// GERAÇÃO DE ÁUDIO — Pollinations TTS
+// ═══════════════════════════════════════════════════════════
+async function generateAudio(prompt) {
+    var ttsText  = 'Aqui está o áudio que pediste sobre: ' + prompt;
+    var audioUrl = TTS_BASE + encodeURIComponent(ttsText) + '?model=openai-audio&voice=alloy';
+    var imgUrl   = IMG_BASE + encodeURIComponent('sound wave music equalizer dark neon') + '?width=600&height=160&nologo=true&seed=' + Date.now();
+
+    var row = document.createElement('div');
+    row.className = 'flex justify-start animate-fade-in';
+    var card = document.createElement('div');
+    card.className = 'media-card max-w-[85%] w-full';
+    card.innerHTML =
+        '<img src="' + imgUrl + '" alt="audio" style="height:100px;object-fit:cover;width:100%">' +
+        '<div class="p-3">' +
+            '<div class="text-xs text-green-400 mb-2"><i class="fas fa-music mr-1"></i>' + escHtml(prompt) + '</div>' +
+            '<audio controls style="width:100%;border-radius:6px"><source src="' + audioUrl + '" type="audio/mpeg">Browser sem suporte.</audio>' +
+        '</div>' +
+        '<div class="media-actions">' +
+            '<a href="' + audioUrl + '" download="zenia-audio.mp3" class="media-btn"><i class="fas fa-download"></i> Guardar</a>' +
+        '</div>';
+    row.appendChild(card); chatWindow.appendChild(row);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+
+    renderMessageUI('ai', 'Audio gerado para: **' + prompt + '**\n\nPodes ouvir e descarregar acima. Para músicas com instrumentação complexa, experimenta Suno AI ou Udio.');
+}
+
+// ═══════════════════════════════════════════════════════════
+// FETCH COM RETRY
+// ═══════════════════════════════════════════════════════════
+async function fetchWithRetry(messages, model, attempt) {
+    attempt = attempt || 1;
+    var MAX = 3;
+    var ctrl  = new AbortController();
+    var timer = setTimeout(function() { ctrl.abort(); }, 60000);
+
+    try {
+        var res = await fetch(CHAT_ENDPOINT, {
+            method: 'POST',
+            signal: ctrl.signal,
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_KEY },
+            body: JSON.stringify({
+                messages: messages,
+                model: model,
+                max_tokens: 4096,
+                temperature: model === 'qwen-coder' ? 0.3 : 0.7,
+                top_p: 1,
+                stream: false,
+                frequency_penalty: 0,
+                presence_penalty: 0
+            })
         });
+        clearTimeout(timer);
 
-        // ─── INICIALIZAÇÃO ────────────────────────────────────────────────────────────
-
-        window.onload = () => {
-            renderHistoryList();
-            if (conversations.length > 0) {
-                loadConversation(conversations[0].id);
+        if (!res.ok) {
+            var errText = await res.text();
+            if (res.status === 429 && attempt < MAX) {
+                await new Promise(function(r) { setTimeout(r, 2000 * attempt); });
+                return fetchWithRetry(messages, model, attempt + 1);
             }
-            updateApiStatus();
-            setInterval(updateApiStatus, 30000);
+            throw new Error('HTTP ' + res.status + ': ' + errText);
+        }
+
+        var data    = await res.json();
+        if (!data.choices || !data.choices[0] || !data.choices[0].message) throw new Error('Formato inesperado da API.');
+        var content = (data.choices[0].message.content || '').trim();
+
+        if (!content && attempt < MAX) {
+            var chain = ['qwen-coder','openai-large','mistral','openai'];
+            var next  = chain[(chain.indexOf(model) + 1) % chain.length];
+            console.warn('Resposta vazia com "' + model + '", tentando "' + next + '"…');
+            return fetchWithRetry(messages, next, attempt + 1);
+        }
+        if (!content) throw new Error('Resposta vazia após várias tentativas. Tenta reformular.');
+        return content;
+
+    } catch (err) {
+        clearTimeout(timer);
+        if (err.name === 'AbortError') {
+            if (attempt < MAX) return fetchWithRetry(messages, model, attempt + 1);
+            throw new Error('Tempo esgotado. Verifica a ligação.');
+        }
+        throw err;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// ENVIO — ROUTER PRINCIPAL
+// ═══════════════════════════════════════════════════════════
+async function handleSendMessage() {
+    var text = userInput.value.trim();
+    if (!text || sendBtn.disabled) return;
+
+    var conv = getCurrentConversation();
+    if (!conv) conv = createConversation(text.substring(0, 35) + (text.length > 35 ? '…' : ''));
+
+    hideWelcome();
+    renderMessageUI('user', text);
+    userInput.value = '';
+    autoResize(userInput);
+    setLoading(true);
+
+    // MODO IMAGEM
+    if (currentMode === 'image' || /\b(gera?|cria?|faz|draw|desenha?|pinta?)\s+(uma?\s+)?(imagem|foto|image|picture|ilustra)/i.test(text)) {
+        var imgPrompt = text.replace(/\b(gera?|cria?|faz|draw|desenha?|pinta?)\s+(uma?\s+)?(imagem|foto|image|picture|ilustra[çc][ãa]o)[\s:]*/i, '').trim() || text;
+        await generateImage(imgPrompt);
+        setLoading(false); return;
+    }
+
+    // MODO ÁUDIO
+    if (currentMode === 'audio' || /\b(gera?|cria?|faz|toca?|compõe?)\s+(uma?\s+)?(música|musica|music|áudio|audio|som|song|beat)/i.test(text)) {
+        var audPrompt = text.replace(/\b(gera?|cria?|faz|toca?|compõe?)\s+(uma?\s+)?(música|musica|music|áudio|audio|som|song|beat)[\s:]*/i, '').trim() || text;
+        await generateAudio(audPrompt);
+        setLoading(false); return;
+    }
+
+    var typingEl = renderTypingIndicator();
+
+    try {
+        // PESQUISA WEB automática para tópicos que podem estar desactualizados
+        var webCtx = '';
+        if (currentMode === 'web' || needsWebSearch(text)) {
+            webCtx = await webSearch(text);
+        }
+
+        var today = new Date().toLocaleDateString('pt-PT');
+        var systemMsg = {
+            role: 'system',
+            content: 'Tu és a IA-Zénia, criada no Lubango, Angola, por Inácio U. Daniel (Zénia-Projects). Modelo: zenia-full. Angola tem 21 províncias.\n\n'
+                + 'REGRAS:\n'
+                + '1. CÓDIGO: Sempre código completo e funcional em blocos ```linguagem. Nunca recuses.\n'
+                + '2. ERROS: Marca problemas no código com "⚠️ ERRO:" antes da linha.\n'
+                + '3. WEB: Se receberes [PESQUISA WEB...], usa SEMPRE essa info actualizada e diz que verificaste na internet.\n'
+                + '4. DATA: Hoje é ' + today + '. O teu treino tem limite — usa dados web quando disponíveis.\n'
+                + '5. Respondes em Português de Angola.'
         };
-    </script>
+
+        var userContent = webCtx ? (webCtx + '\n\nPergunta: ' + text) : text;
+        var messages = [systemMsg].concat(conv.messages).concat([{ role: 'user', content: userContent }]);
+
+        // Auto-detecta pedidos de código
+        var codeRx = /\b(código|code|script|função|function|html|css|javascript|python|java|typescript|sql|php|bash|react|vue|angular|api|algoritmo|classe|array|loop|def|const|let|import|component|bug|debug|implement)\b/i;
+        var manualModel = document.getElementById('model-select').value;
+        var autoModel   = codeRx.test(text) ? 'qwen-coder' : manualModel;
+
+        var aiResponse = await fetchWithRetry(messages, autoModel);
+
+        typingEl.remove();
+        conv.messages.push({ role: 'user', content: text });
+        conv.messages.push({ role: 'assistant', content: aiResponse });
+        persistConversations();
+
+        renderMessageUI('ai', aiResponse, !!webCtx);
+        if (isVoiceAssist) speakText(aiResponse.replace(/```[\s\S]*?```/g, 'bloco de código omitido'));
+        setApiStatus('ok');
+
+    } catch (err) {
+        typingEl.remove();
+        console.error(err);
+        renderMessageUI('ai', '⚠️ ' + err.message);
+        setApiStatus('error');
+    } finally {
+        setLoading(false);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// SYNTAX HIGHLIGHTING + FORMATAÇÃO
+// ═══════════════════════════════════════════════════════════
+function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function highlightCode(code, lang) {
+    try {
+        if (lang && hljs.getLanguage(lang)) return hljs.highlight(code, { language: lang }).value;
+        return hljs.highlightAuto(code).value;
+    } catch(e) { return escHtml(code); }
+}
+
+// Marca linhas com padrões de erro — ficam em amarelo via CSS .error-line
+function markErrorLines(html) {
+    var errorPatterns = /error|exception|traceback|syntaxerror|typeerror|nameerror|valueerror|runtimeerror|referenceerror|undefined is not|cannot read|null pointer|segfault|failed|fatal|⚠️/i;
+    return html.split('\n').map(function(line) {
+        // Texto visível sem tags HTML
+        var plain = line.replace(/<[^>]+>/g, '');
+        return errorPatterns.test(plain) ? '<span class="error-line">' + line + '</span>' : line;
+    }).join('\n');
+}
+
+function formatMessage(raw) {
+    // 1. Blocos de código
+    var html = raw.replace(/```([^\n`]*)\n?([\s\S]*?)```/g, function(_, lang, code) {
+        lang = (lang || '').trim().toLowerCase();
+        var highlighted = markErrorLines(highlightCode(code.trimEnd(), lang));
+        var id = 'cb' + Math.random().toString(36).slice(2);
+        return '<div class="code-block">'
+            + '<div class="code-header">'
+            +   '<span class="code-lang-label">' + (lang || 'código') + '</span>'
+            +   '<button class="copy-btn" id="' + id + '-btn" onclick="copyCode(\'' + id + '\')">'
+            +     '<i class="fas fa-copy"></i> Copiar'
+            +   '</button>'
+            + '</div>'
+            + '<pre><code id="' + id + '" class="hljs">' + highlighted + '</code></pre>'
+            + '</div>';
+    });
+
+    // 2. Código inline
+    html = html.replace(/`([^`\n]+)`/g, '<code class="inline-code">$1</code>');
+    // 3. Negrito
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    // 4. Itálico
+    html = html.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+    // 5. Marcadores de erro em amarelo
+    html = html.replace(/(⚠️\s*ERRO:[^\n<]*)/g, '<span class="error-marker">$1</span>');
+    // 6. Quebras de linha
+    html = html.replace(/\n/g, '<br>');
+
+    return html;
+}
+
+function copyCode(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    navigator.clipboard.writeText(el.innerText).then(function() {
+        var btn = document.getElementById(id + '-btn');
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+            setTimeout(function() { btn.innerHTML = '<i class="fas fa-copy"></i> Copiar'; }, 2000);
+        }
+    });
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER MENSAGEM
+// ═══════════════════════════════════════════════════════════
+function renderMessageUI(role, text, fromWeb) {
+    fromWeb = fromWeb || false;
+    var row = document.createElement('div');
+    row.className = 'flex ' + (role === 'user' ? 'justify-end' : 'justify-start') + ' animate-fade-in';
+
+    var bubble = document.createElement('div');
+    bubble.className = 'max-w-[82%] p-4 rounded-2xl text-sm leading-relaxed ' + (role === 'user' ? 'bg-blue-600' : 'glass');
+    bubble.style.wordBreak = 'break-word';
+
+    if (role === 'ai') {
+        if (fromWeb) {
+            var badge = document.createElement('div');
+            badge.className = 'web-badge';
+            badge.innerHTML = '<i class="fas fa-globe"></i> Verificado na internet agora';
+            bubble.appendChild(badge);
+        }
+        var content = document.createElement('div');
+        content.innerHTML = formatMessage(text);
+        bubble.appendChild(content);
+    } else {
+        bubble.style.whiteSpace = 'pre-wrap';
+        bubble.textContent = text;
+    }
+
+    row.appendChild(bubble);
+    chatWindow.appendChild(row);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+function renderTypingIndicator() {
+    var row = document.createElement('div');
+    row.className = 'flex justify-start animate-fade-in';
+    row.id = 'typing-indicator';
+    row.innerHTML = '<div class="glass p-4 rounded-2xl flex items-center gap-2 text-sm text-gray-400"><span class="loading-spinner"></span><span>Zénia está a processar…</span></div>';
+    chatWindow.appendChild(row);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+    return row;
+}
+
+function setLoading(on) {
+    sendBtn.disabled = on;
+    sendIcon.className = on ? 'loading-spinner' : 'fas fa-paper-plane';
+}
+
+// ═══════════════════════════════════════════════════════════
+// SÍNTESE DE VOZ
+// ═══════════════════════════════════════════════════════════
+function populateVoices() {
+    var sel    = document.getElementById('voice-select');
+    var voices = speechSynthesis.getVoices();
+    if (!voices.length) return;
+    sel.innerHTML = '';
+    voices.forEach(function(v, i) {
+        var opt = document.createElement('option');
+        opt.value = i; opt.textContent = v.name + ' (' + v.lang + ')';
+        if (v.lang.startsWith('pt')) opt.selected = true;
+        sel.appendChild(opt);
+    });
+}
+if (typeof speechSynthesis !== 'undefined') {
+    speechSynthesis.onvoiceschanged = populateVoices;
+    populateVoices();
+}
+
+function speakText(text) {
+    if (typeof speechSynthesis === 'undefined') return;
+    speechSynthesis.cancel();
+    var utter  = new SpeechSynthesisUtterance(text);
+    var voices = speechSynthesis.getVoices();
+    var idx    = parseInt(document.getElementById('voice-select').value);
+    if (!isNaN(idx) && voices[idx]) { utter.voice = voices[idx]; utter.lang = voices[idx].lang; }
+    else utter.lang = 'pt-PT';
+    utter.rate = 1.0; speechSynthesis.speak(utter);
+}
+
+// ═══════════════════════════════════════════════════════════
+// RECONHECIMENTO DE VOZ
+// ═══════════════════════════════════════════════════════════
+var micBtn = document.getElementById('mic-btn');
+if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var recognition = new SR();
+    recognition.lang = 'pt-PT'; recognition.continuous = false;
+    var listening = false;
+
+    micBtn.onclick = function() {
+        if (listening) { recognition.stop(); return; }
+        try { recognition.start(); listening = true; micBtn.classList.add('recording'); } catch(e) {}
+    };
+    recognition.onresult = function(e) {
+        userInput.value = e.results[0][0].transcript;
+        autoResize(userInput); listening = false; micBtn.classList.remove('recording');
+        handleSendMessage();
+    };
+    recognition.onerror = function(e) {
+        listening = false; micBtn.classList.remove('recording');
+        if (e.error !== 'no-speech') renderMessageUI('ai', '⚠️ Erro no microfone: ' + e.error);
+    };
+    recognition.onend = function() { listening = false; micBtn.classList.remove('recording'); };
+} else {
+    micBtn.disabled = true; micBtn.classList.add('opacity-30','cursor-not-allowed');
+}
+
+// ═══════════════════════════════════════════════════════════
+// VOZ ASSIST
+// ═══════════════════════════════════════════════════════════
+function toggleVoiceAssist() {
+    isVoiceAssist = !isVoiceAssist;
+    var btn = document.getElementById('voice-assist-btn');
+    if (isVoiceAssist) {
+        btn.classList.remove('text-blue-500','border-blue-500','hover:bg-blue-500','hover:text-white');
+        btn.classList.add('bg-red-600','text-white','border-red-600');
+        renderMessageUI('ai', 'Modo Assistente de Voz ligado. Podes falar comigo.');
+    } else {
+        btn.classList.remove('bg-red-600','border-red-600');
+        btn.classList.add('text-blue-500','border-blue-500','hover:bg-blue-500','hover:text-white');
+        if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// GALERIA
+// ═══════════════════════════════════════════════════════════
+function toggleGallery() {
+    var g = document.getElementById('gallery-container');
+    if (!g) {
+        var parent = document.querySelector('button[onclick="toggleGallery()"]').parentElement;
+        g = document.createElement('div'); g.id = 'gallery-container'; g.className = 'mt-3 grid grid-cols-3 gap-2';
+        ['zenia1','zenia2','zenia3','zenia4','zenia5','zenia6'].forEach(function(seed) {
+            var img = document.createElement('img');
+            img.src = 'https://picsum.photos/seed/' + seed + '/300/200'; img.loading = 'lazy';
+            img.className = 'rounded-lg border border-gray-800 hover:opacity-80 transition cursor-pointer';
+            g.appendChild(img);
+        });
+        parent.appendChild(g);
+    } else { g.style.display = g.style.display === 'none' ? '' : 'none'; }
+}
+
+// ═══════════════════════════════════════════════════════════
+// API STATUS
+// ═══════════════════════════════════════════════════════════
+function setApiStatus(state) {
+    var el  = document.getElementById('api-status');
+    var map = { ok: ['status-ok','API: ativa ✓'], error: ['status-err','API: erro ✗'], wait: ['status-wait','API: verificando…'] };
+    var cfg = map[state] || map.wait;
+    el.className = 'text-[11px] px-2 py-1 rounded border ' + cfg[0];
+    el.textContent = cfg[1];
+}
+
+async function updateApiStatus() {
+    setApiStatus('wait');
+    try {
+        var r = await fetch(CHAT_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_KEY },
+            body: JSON.stringify({ messages: [{ role: 'user', content: 'ping' }], model: 'openai', max_tokens: 5, stream: false })
+        });
+        setApiStatus(r.ok ? 'ok' : 'error');
+    } catch { setApiStatus('error'); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// TEXTAREA AUTO-RESIZE + ENTER
+// ═══════════════════════════════════════════════════════════
+function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+userInput.addEventListener('input', function() { autoResize(userInput); });
+userInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); }
+});
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+window.onload = function() {
+    renderHistoryList();
+    if (conversations.length > 0) loadConversation(conversations[0].id);
+    updateApiStatus();
+    setInterval(updateApiStatus, 30000);
+};
+</script>
 </body>
 </html>
