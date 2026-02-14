@@ -14,18 +14,11 @@
         .chat-container::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
         .glow-button { transition: all 0.3s ease; }
         .glow-button:hover { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
-
-        /* CORRIGIDO: animação pulse-red corretamente nomeada */
-        @keyframes pulse-red {
-            0%   { transform: scale(1); background: transparent; }
-            50%  { transform: scale(1.1); background: #ef4444; color: white; }
-            100% { transform: scale(1); background: transparent; }
-        }
-        .recording { animation: pulse-red 1.5s infinite; border-radius: 9999px; }
-
+        @keyframes pulse-red { 0% { transform: scale(1); } 50% { transform: scale(1.1); background: #ef4444; } 100% { transform: scale(1); } }
+        .recording { animation: pulse-red 1.5s infinite; }
         @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fade-in 200ms ease-out; }
-
+        
         .loading-spinner {
             width: 16px;
             height: 16px;
@@ -34,22 +27,8 @@
             border-top-color: #fff;
             animation: spin 1s linear infinite;
             display: inline-block;
-            vertical-align: middle;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* ADICIONADO: item do histórico com layout flex correto */
-        .history-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-        }
-
-        /* ADICIONADO: status badges */
-        .status-ok   { color: #22c55e; border-color: #22c55e40; }
-        .status-err  { color: #ef4444; border-color: #ef444440; }
-        .status-wait { color: #9ca3af; border-color: #4b556340; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -68,10 +47,7 @@
         <div class="px-4 mb-4">
             <div class="relative">
                 <i class="fas fa-search absolute left-3 top-3 text-gray-500 text-sm"></i>
-                <!-- CORRIGIDO: input de busca com outline correto -->
-                <input id="search-input" type="text" placeholder="Buscar em chats..."
-                    class="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 pl-9 pr-4 text-sm focus:ring-1 focus:ring-blue-500 outline-none"
-                    oninput="filterHistory(this.value)">
+                <input type="text" placeholder="Buscar em chats..." class="w-full bg-gray-900 border-none rounded-lg py-2 pl-9 pr-4 text-sm focus:ring-1 focus:ring-blue-500">
             </div>
         </div>
 
@@ -79,12 +55,10 @@
             <div>
                 <p class="text-xs font-semibold text-gray-500 uppercase mb-3">Aplicativos</p>
                 <div class="space-y-2">
-                    <a href="https://antonia-ia.netlify.app" target="_blank" rel="noopener noreferrer"
-                        class="flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
+                    <a href="https://antonia-ia.netlify.app" target="_blank" rel="noopener noreferrer" class="flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
                         <i class="fas fa-robot mr-3 text-pink-500"></i> Antónia-IA
                     </a>
-                    <a href="https://zenia-projects.netlify.app" target="_blank" rel="noopener noreferrer"
-                        class="flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
+                    <a href="https://zenia-projects.netlify.app" target="_blank" rel="noopener noreferrer" class="flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
                         <i class="fas fa-code mr-3 text-blue-500"></i> Zénia-Projects
                     </a>
                 </div>
@@ -95,14 +69,14 @@
                 <button onclick="toggleGallery()" class="w-full flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
                     <i class="fas fa-images mr-3 text-purple-500"></i> Galeria
                 </button>
-                <div id="history-list" class="mt-4 space-y-1">
+                <div id="history-list" class="mt-4 space-y-2">
                     <p class="text-xs text-gray-600 px-2 italic">Histórico Local</p>
                 </div>
             </div>
         </nav>
 
         <div class="p-4 border-t border-gray-800 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold flex-shrink-0">U</div>
+            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold">U</div>
             <div class="flex-1 overflow-hidden">
                 <p class="text-sm font-medium truncate" id="username-display">Utilizador Zénia</p>
                 <p class="text-xs text-green-500 italic">Online</p>
@@ -110,22 +84,19 @@
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col relative overflow-hidden">
-
-        <header class="h-16 border-b border-gray-800 flex items-center justify-between px-6 glass flex-shrink-0">
-            <div class="flex items-center gap-4 flex-wrap">
-                <!-- CORRIGIDO: select de voz populado dinamicamente via JS -->
-                <select id="voice-select" class="bg-transparent text-xs border border-gray-700 rounded p-1 outline-none focus:ring-1 focus:ring-blue-500 max-w-[180px]">
-                    <option value="">Voz padrão</option>
+    <main class="flex-1 flex flex-col relative">
+        
+        <header class="h-16 border-b border-gray-800 flex items-center justify-between px-6 glass">
+            <div class="flex items-center gap-4">
+                <select id="voice-select" class="bg-transparent text-xs border border-gray-700 rounded p-1 outline-none focus:ring-1 focus:ring-blue-500">
+                    <option value="pt-BR">Voz: Português Padrão</option>
                 </select>
-                <button id="voice-assist-btn" onclick="toggleVoiceAssist()"
-                    class="text-xs px-3 py-1 rounded-full border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition">
+                <button id="voice-assist-btn" onclick="toggleVoiceAssist()" class="text-xs px-3 py-1 rounded-full border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition">
                     <i class="fas fa-headset mr-2"></i>Modo Voz Assist.
                 </button>
-                <!-- CORRIGIDO: status com classes dinâmicas adequadas -->
-                <span id="api-status" class="text-[11px] px-2 py-1 rounded border status-wait">API: verificando…</span>
+                <span id="api-status" class="text-[11px] px-2 py-1 rounded border border-gray-700 text-gray-400">API: verificando…</span>
             </div>
-            <div class="text-xs text-gray-500 flex-shrink-0">Modelo: <span class="text-blue-400">Zenia-Full</span></div>
+            <div class="text-xs text-gray-500">Modelo: <span class="text-blue-400">Zenia-Full</span></div>
         </header>
 
         <div id="chat-window" class="flex-1 overflow-y-auto p-6 space-y-6 chat-container">
@@ -136,23 +107,18 @@
             </div>
         </div>
 
-        <div class="p-4 bg-gradient-to-t from-[#0b0d11] to-transparent flex-shrink-0">
+        <div class="p-4 bg-gradient-to-t from-[#0b0d11] to-transparent">
             <div class="max-w-4xl mx-auto glass rounded-2xl p-2 flex flex-col">
                 <div class="flex items-end gap-2 px-2 pb-2">
                     <button class="p-3 text-gray-400 hover:text-white transition" title="Anexar Arquivo">
                         <i class="fas fa-plus"></i>
                     </button>
-                    <!-- CORRIGIDO: textarea com auto-resize e Enter para enviar -->
-                    <textarea id="user-input" rows="1"
-                        placeholder="Pergunte qualquer coisa à Zénia..."
-                        class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-3 resize-none outline-none"
-                        style="max-height: 120px; overflow-y: auto;"></textarea>
-
-                    <button id="mic-btn" class="p-3 text-gray-400 hover:text-blue-500 transition" title="Microfone">
+                    <textarea id="user-input" rows="1" placeholder="Pergunte qualquer coisa à Zénia..." class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-3 resize-none outline-none"></textarea>
+                    
+                    <button id="mic-btn" class="p-3 text-gray-400 hover:text-blue-500 transition">
                         <i class="fas fa-microphone"></i>
                     </button>
-                    <button id="send-btn" onclick="handleSendMessage()"
-                        class="p-3 bg-blue-600 rounded-xl hover:bg-blue-700 glow-button transition min-w-[44px] flex items-center justify-center">
+                    <button id="send-btn" onclick="handleSendMessage()" class="p-3 bg-blue-600 rounded-xl hover:bg-blue-700 glow-button transition min-w-[44px] flex items-center justify-center">
                         <i class="fas fa-paper-plane" id="send-icon"></i>
                     </button>
                 </div>
@@ -164,24 +130,19 @@
     </main>
 
     <script>
-        // ─── CONFIGURAÇÃO ────────────────────────────────────────────────────────────
-        const API_KEY       = "pk_urEpxcajGs5TF9Fs"; // Substitua pelo seu token secreto
-        const CHAT_ENDPOINT = "https://gen.pollinations.ai/v1/chat/completions";
-
-        // ─── ESTADO ──────────────────────────────────────────────────────────────────
+        const API_KEY = "pk_urEpxcajGs5TF9Fs"; // Substitua pelo seu token secreto
+        const CHAT_ENDPOINT = "https://gen.pollinations.ai/v1/chat/completions"; // Endpoint correto
         const chatWindow = document.getElementById('chat-window');
-        const userInput  = document.getElementById('user-input');
-        const sendBtn    = document.getElementById('send-btn');
-        const sendIcon   = document.getElementById('send-icon');
-
-        let isVoiceAssist        = false;
-        let conversations        = JSON.parse(localStorage.getItem('conversations') || '[]');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const sendIcon = document.getElementById('send-icon');
+        let isVoiceAssist = false;
+        let conversations = JSON.parse(localStorage.getItem('conversations') || '[]');
         let currentConversationId = null;
 
-        // ─── GESTÃO DE CONVERSAS ──────────────────────────────────────────────────────
-
+        // Gestão de Conversas
         function createConversation(title) {
-            const id   = Date.now().toString();
+            const id = Date.now().toString();
             const conv = { id, title, messages: [] };
             conversations.unshift(conv);
             currentConversationId = id;
@@ -198,75 +159,44 @@
             localStorage.setItem('conversations', JSON.stringify(conversations));
         }
 
-        // CORRIGIDO: renderHistoryList com estrutura flex correta e sem bugs de layout
-        function renderHistoryList(filter = '') {
+        function renderHistoryList() {
             const hist = document.getElementById('history-list');
-            hist.innerHTML = '<p class="text-xs text-gray-600 px-2 italic mb-1">Histórico Local</p>';
-
-            const filtered = filter
-                ? conversations.filter(c => c.title.toLowerCase().includes(filter.toLowerCase()))
-                : conversations;
-
-            if (filtered.length === 0) {
-                const empty = document.createElement('p');
-                empty.className = 'text-xs text-gray-600 px-2 italic';
-                empty.textContent = filter ? 'Nenhum resultado.' : 'Sem conversas ainda.';
-                hist.appendChild(empty);
-                return;
-            }
-
-            filtered.forEach(conv => {
-                const isActive = conv.id === currentConversationId;
-
+            hist.innerHTML = '<p class="text-xs text-gray-600 px-2 italic">Histórico Local</p>';
+            conversations.forEach(conv => {
                 const item = document.createElement('div');
-                item.className = [
-                    'history-item p-2 rounded-lg cursor-pointer text-[11px] text-gray-300',
-                    'hover:bg-gray-800 transition',
-                    isActive ? 'bg-gray-800/60 border-l-2 border-blue-500 text-blue-400' : ''
-                ].join(' ');
-
-                // Parte esquerda: ícone + título
+                item.className = `p-2 hover:bg-gray-800 rounded text-[11px] text-gray-300 truncate cursor-pointer ${conv.id === currentConversationId ? 'bg-gray-800/50 border-l-2 border-blue-500 text-blue-400' : ''}`;
+                
                 const left = document.createElement('div');
-                left.className = 'flex items-center gap-2 overflow-hidden flex-1';
+                left.className = "flex items-center gap-2 overflow-hidden flex-1";
                 left.onclick = () => loadConversation(conv.id);
-
+                
                 const icon = document.createElement('i');
-                icon.className = 'far fa-comment-alt flex-shrink-0 text-gray-500';
-
+                icon.className = "far fa-comment-alt flex-shrink-0";
                 const title = document.createElement('span');
-                title.className = 'truncate';
+                title.className = "truncate";
                 title.textContent = conv.title || 'Conversa';
-
+                
                 left.appendChild(icon);
                 left.appendChild(title);
-
-                // Botão de apagar
+                
                 const delBtn = document.createElement('button');
-                delBtn.title = 'Apagar conversa';
-                delBtn.className = 'text-gray-600 hover:text-red-500 transition flex-shrink-0';
-                delBtn.innerHTML = '<i class="fas fa-trash text-xs"></i>';
-                delBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    deleteConversation(conv.id);
-                };
-
+                delBtn.title = "Apagar conversa";
+                delBtn.className = "text-gray-500 hover:text-red-500 ml-2";
+                delBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                delBtn.onclick = (e) => { e.stopPropagation(); deleteConversation(conv.id); };
+                
                 item.appendChild(left);
                 item.appendChild(delBtn);
                 hist.appendChild(item);
             });
         }
 
-        // ADICIONADO: função de filtro chamada pelo input de busca
-        function filterHistory(value) {
-            renderHistoryList(value);
-        }
-
         function deleteConversation(id) {
             conversations = conversations.filter(c => c.id !== id);
-            persistConversations();
             if (currentConversationId === id) {
                 startNewConversation();
             } else {
+                persistConversations();
                 renderHistoryList();
             }
         }
@@ -274,109 +204,97 @@
         function loadConversation(id) {
             currentConversationId = id;
             chatWindow.innerHTML = '';
-            const welcomeMsg = document.getElementById('welcome-msg');
-            if (welcomeMsg) welcomeMsg.style.display = 'none';
-
+            document.getElementById('welcome-msg').style.display = 'none';
             const conv = getCurrentConversation();
             if (!conv) return;
-
             conv.messages.forEach(m => {
-                if (m.role !== 'system') {
+                if(m.role !== 'system') {
                     renderMessageUI(m.role === 'user' ? 'user' : 'ai', m.content, m.img || null);
                 }
             });
-
             renderHistoryList();
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
         function startNewConversation() {
             chatWindow.innerHTML = '';
-            // Recria a mensagem de boas-vindas se necessário
-            let welcomeMsg = document.getElementById('welcome-msg');
-            if (!welcomeMsg) {
-                welcomeMsg = document.createElement('div');
-                welcomeMsg.id = 'welcome-msg';
-                welcomeMsg.className = 'flex flex-col items-center justify-center h-full text-center space-y-4 opacity-50';
-                welcomeMsg.innerHTML = `
-                    <i class="fas fa-shield-cat text-6xl text-blue-500"></i>
-                    <h2 class="text-2xl font-bold">Olá, eu sou a Zénia.</h2>
-                    <p class="max-w-md">Criada no Lubango por Inácio U. Daniel. Como posso ajudar Angola hoje?</p>
-                `;
-                chatWindow.appendChild(welcomeMsg);
-            } else {
-                welcomeMsg.style.display = 'flex';
-            }
-
+            document.getElementById('welcome-msg').style.display = 'flex';
             currentConversationId = null;
             renderHistoryList();
         }
 
-        // ─── ENVIO DE MENSAGEM ────────────────────────────────────────────────────────
-
         async function handleSendMessage() {
             const text = userInput.value.trim();
-            if (!text || sendBtn.disabled) return;
+            if(!text || sendBtn.disabled) return;
 
             let conv = getCurrentConversation();
             if (!conv) {
-                conv = createConversation(text.substring(0, 35) + (text.length > 35 ? '…' : ''));
+                conv = createConversation(text.substring(0, 30) + (text.length > 30 ? '...' : ''));
             }
-
-            // Esconde boas-vindas
-            const welcomeMsg = document.getElementById('welcome-msg');
-            if (welcomeMsg) welcomeMsg.style.display = 'none';
 
             renderMessageUI('user', text);
             userInput.value = '';
-            autoResize(userInput);
+            document.getElementById('welcome-msg').style.display = 'none';
             setLoading(true);
 
-            const systemMsg = {
-                role: "system",
-                content: "Tu és a IA-Zénia, uma inteligência avançada feita no Lubango, Angola, pelo Inácio U. Daniel (Zénia-Projects). Teu modelo é o zenia-full. Angola tem 21 províncias. És especialista em línguas nacionais angolanas."
+            const messages = [
+                {
+                    role: "system",
+                    content: "Tu és a IA-Zénia, uma inteligência avançada feita no Lubango, Angola, pelo Inácio U. Daniel (Zénia-Projects). Teu modelo é o zenia-full. Angola tem 21 províncias. És especialista em línguas nacionais angolanas."
+                },
+                { role: "user", content: text }
+            ];
+
+            const settings = {
+                async: true,
+                crossDomain: true,
+                url: CHAT_ENDPOINT,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${API_KEY}`
+                },
+                processData: false,
+                data: JSON.stringify({
+                    messages: messages,
+                    model: "openai",
+                    modalities: ["text"],
+                    frequency_penalty: 0,
+                    repetition_penalty: 0,
+                    logit_bias: null,
+                    logprobs: false,
+                    top_logprobs: 0,
+                    max_tokens: 1200,
+                    presence_penalty: 0,
+                    response_format: { type: "text" },
+                    seed: -1,
+                    stop: "",
+                    stream: false,
+                    stream_options: { include_usage: true },
+                    thinking: { type: "disabled", budget_tokens: 1 },
+                    reasoning_effort: "none",
+                    thinking_budget: 0,
+                    temperature: 1,
+                    top_p: 1,
+                    tools: [],
+                    user: "",
+                    function_call: "none",
+                    functions: []
+                })
             };
 
-            const messages = [systemMsg, ...conv.messages, { role: "user", content: text }];
-
             try {
-                const response = await fetch(CHAT_ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_KEY}`
-                    },
-                    body: JSON.stringify({
-                        messages,
-                        model: "openai",
-                        modalities: ["text"],
-                        max_tokens: 1200,
-                        temperature: 1,
-                        top_p: 1,
-                        stream: false,
-                        frequency_penalty: 0,
-                        presence_penalty: 0,
-                        response_format: { type: "text" },
-                        seed: -1,
-                        stop: "",
-                        tools: [],
-                        function_call: "none",
-                        functions: []
-                    })
+                const response = await fetch(settings.url, {
+                    method: settings.method,
+                    headers: settings.headers,
+                    body: settings.data
                 });
 
                 if (!response.ok) {
-                    const errBody = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}. ${errBody}`);
+                    throw new Error(`Erro: ${response.statusText}`);
                 }
 
                 const data = await response.json();
-
-                // CORRIGIDO: verificação defensiva da resposta
-                if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-                    throw new Error("Resposta da API em formato inesperado.");
-                }
-
                 const aiResponse = data.choices[0].message.content;
 
                 conv.messages.push({ role: "user", content: text });
@@ -385,14 +303,9 @@
 
                 renderMessageUI('ai', aiResponse);
                 if (isVoiceAssist) speakText(aiResponse);
-
-                // Atualiza status como OK após sucesso
-                setApiStatus('ok');
-
             } catch (error) {
-                console.error("Erro na API:", error);
-                renderMessageUI('ai', `⚠️ Erro ao comunicar com a IA: ${error.message}. Tente novamente.`);
-                setApiStatus('error');
+                console.error("API Error:", error);
+                renderMessageUI('ai', "Ocorreu um erro ao comunicar com a IA. Tente novamente.");
             } finally {
                 setLoading(false);
             }
@@ -400,11 +313,7 @@
 
         function setLoading(isLoading) {
             sendBtn.disabled = isLoading;
-            if (isLoading) {
-                sendIcon.className = 'loading-spinner';
-            } else {
-                sendIcon.className = 'fas fa-paper-plane';
-            }
+            sendIcon.className = isLoading ? "loading-spinner" : "fas fa-paper-plane";
         }
 
         function renderMessageUI(role, text, img = null) {
@@ -412,11 +321,12 @@
             row.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`;
 
             const bubble = document.createElement('div');
-            bubble.className = `max-w-[80%] p-4 rounded-2xl text-sm leading-relaxed ${role === 'user' ? 'bg-blue-600' : 'glass'}`;
-            // CORRIGIDO: preserva quebras de linha nas mensagens
-            bubble.style.whiteSpace = 'pre-wrap';
-            bubble.style.wordBreak = 'break-word';
-            bubble.textContent = text;
+            bubble.className = `max-w-[80%] p-4 rounded-2xl ${role === 'user' ? 'bg-blue-600' : 'glass'}`;
+
+            const p = document.createElement('p');
+            p.className = 'text-sm leading-relaxed';
+            p.textContent = text;
+            bubble.appendChild(p);
 
             if (img) {
                 const image = document.createElement('img');
@@ -432,211 +342,76 @@
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
-        // ─── SÍNTESE DE VOZ ───────────────────────────────────────────────────────────
-
-        // CORRIGIDO: populamos as vozes do sistema no select
-        function populateVoices() {
-            const sel = document.getElementById('voice-select');
-            const voices = window.speechSynthesis.getVoices();
-            if (voices.length === 0) return;
-
-            sel.innerHTML = '';
-            voices.forEach((v, i) => {
-                const opt = document.createElement('option');
-                opt.value = i;
-                opt.textContent = `${v.name} (${v.lang})`;
-                if (v.lang.startsWith('pt')) opt.selected = true;
-                sel.appendChild(opt);
-            });
-        }
-
-        if (typeof speechSynthesis !== 'undefined') {
-            speechSynthesis.onvoiceschanged = populateVoices;
-            populateVoices();
-        }
-
+        // Síntese de Voz
         function speakText(text) {
-            if (typeof speechSynthesis === 'undefined') return;
-            speechSynthesis.cancel(); // Para fala anterior se houver
-
+            const synth = window.speechSynthesis;
             const utter = new SpeechSynthesisUtterance(text);
-            const voices = speechSynthesis.getVoices();
-            const selIdx = parseInt(document.getElementById('voice-select').value);
-
-            if (!isNaN(selIdx) && voices[selIdx]) {
-                utter.voice = voices[selIdx];
-                utter.lang  = voices[selIdx].lang;
-            } else {
-                utter.lang = 'pt-PT';
-            }
-
+            utter.lang = document.getElementById('voice-select').value;
             utter.rate = 1.0;
-            utter.pitch = 1.0;
-            speechSynthesis.speak(utter);
+            synth.speak(utter);
         }
 
-        // ─── RECONHECIMENTO DE VOZ ────────────────────────────────────────────────────
-
+        // Reconhecimento de Voz
         const micBtn = document.getElementById('mic-btn');
-
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = new SpeechRecognition();
+        if ('webkitSpeechRecognition' in window) {
+            const recognition = new webkitSpeechRecognition();
             recognition.continuous = false;
-            recognition.interimResults = false;
             recognition.lang = 'pt-PT';
 
-            let isListening = false;
-
             micBtn.onclick = () => {
-                if (isListening) {
-                    recognition.stop();
-                    return;
-                }
-                try {
-                    recognition.start();
-                    isListening = true;
-                    micBtn.classList.add('recording');
-                    micBtn.title = 'A ouvir... (clique para parar)';
-                } catch (e) {
-                    console.warn("Erro ao iniciar reconhecimento:", e);
-                }
+                recognition.start();
+                micBtn.classList.add('recording');
             };
 
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
                 userInput.value = transcript;
-                autoResize(userInput);
-                isListening = false;
                 micBtn.classList.remove('recording');
-                micBtn.title = 'Microfone';
                 handleSendMessage();
             };
-
-            // CORRIGIDO: handler de erro no reconhecimento de voz
-            recognition.onerror = (event) => {
-                console.warn("Erro no reconhecimento de voz:", event.error);
-                isListening = false;
-                micBtn.classList.remove('recording');
-                micBtn.title = 'Microfone';
-                if (event.error !== 'no-speech') {
-                    renderMessageUI('ai', `⚠️ Erro no microfone: ${event.error}. Verifique as permissões do browser.`);
-                }
-            };
-
-            recognition.onend = () => {
-                isListening = false;
-                micBtn.classList.remove('recording');
-                micBtn.title = 'Microfone';
-            };
-        } else {
-            micBtn.disabled = true;
-            micBtn.title = 'Reconhecimento de voz não suportado neste browser';
-            micBtn.classList.add('opacity-30', 'cursor-not-allowed');
         }
 
-        // ─── MODO ASSISTENTE DE VOZ ───────────────────────────────────────────────────
-
-        // CORRIGIDO: toggleVoiceAssist usando classList.toggle de forma segura
         function toggleVoiceAssist() {
             isVoiceAssist = !isVoiceAssist;
             const btn = document.getElementById('voice-assist-btn');
-
-            if (isVoiceAssist) {
-                btn.classList.remove('text-blue-500', 'border-blue-500', 'hover:bg-blue-500', 'hover:text-white');
-                btn.classList.add('bg-red-600', 'text-white', 'border-red-600');
+            if(isVoiceAssist) {
+                btn.classList.replace('text-blue-500', 'bg-red-500');
+                btn.classList.add('text-white');
                 renderMessageUI('ai', "Modo Assistente de Voz ligado. Podes falar comigo naturalmente.");
             } else {
-                btn.classList.remove('bg-red-600', 'border-red-600');
-                btn.classList.add('text-blue-500', 'border-blue-500', 'hover:bg-blue-500', 'hover:text-white');
-                speechSynthesis.cancel();
+                btn.classList.replace('bg-red-500', 'text-blue-500');
+                btn.classList.remove('text-white');
             }
         }
-
-        // ─── GALERIA ──────────────────────────────────────────────────────────────────
 
         function toggleGallery() {
             let gallery = document.getElementById('gallery-container');
             if (!gallery) {
-                const recursos = document.querySelector('button[onclick="toggleGallery()"]').parentElement;
+                const recursosBlock = document.querySelector('button[onclick="toggleGallery()"]').parentElement;
                 gallery = document.createElement('div');
                 gallery.id = 'gallery-container';
                 gallery.className = 'mt-3 grid grid-cols-3 gap-2';
-
-                const seeds = ['zenia1','zenia2','zenia3','zenia4','zenia5','zenia6'];
-                seeds.forEach(seed => {
+                const sources = [
+                    'https://picsum.photos/seed/zenia1/300/200',
+                    'https://picsum.photos/seed/zenia2/300/200',
+                    'https://picsum.photos/seed/zenia3/300/200',
+                    'https://picsum.photos/seed/zenia4/300/200',
+                    'https://picsum.photos/seed/zenia5/300/200',
+                    'https://picsum.photos/seed/zenia6/300/200'
+                ];
+                sources.forEach(src => {
                     const img = document.createElement('img');
-                    img.src = `https://picsum.photos/seed/${seed}/300/200`;
+                    img.src = src;
                     img.alt = 'Galeria Zénia';
                     img.loading = 'lazy';
-                    img.className = 'rounded-lg border border-gray-800 hover:opacity-80 transition cursor-pointer';
+                    img.className = 'rounded-lg border border-gray-800';
                     gallery.appendChild(img);
                 });
-                recursos.appendChild(gallery);
+                recursosBlock.appendChild(gallery);
             } else {
                 gallery.style.display = gallery.style.display === 'none' ? '' : 'none';
             }
         }
-
-        // ─── STATUS DA API ────────────────────────────────────────────────────────────
-
-        // CORRIGIDO: updateApiStatus agora existe e funciona corretamente
-        function setApiStatus(state) {
-            const el = document.getElementById('api-status');
-            el.className = 'text-[11px] px-2 py-1 rounded border';
-            if (state === 'ok') {
-                el.classList.add('status-ok');
-                el.textContent = 'API: ativa ✓';
-            } else if (state === 'error') {
-                el.classList.add('status-err');
-                el.textContent = 'API: erro ✗';
-            } else {
-                el.classList.add('status-wait');
-                el.textContent = 'API: verificando…';
-            }
-        }
-
-        async function updateApiStatus() {
-            setApiStatus('wait');
-            try {
-                const response = await fetch(CHAT_ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_KEY}`
-                    },
-                    body: JSON.stringify({
-                        messages: [{ role: "user", content: "ping" }],
-                        model: "openai",
-                        max_tokens: 5,
-                        temperature: 0
-                    })
-                });
-                setApiStatus(response.ok ? 'ok' : 'error');
-            } catch {
-                setApiStatus('error');
-            }
-        }
-
-        // ─── TEXTAREA AUTO-RESIZE ─────────────────────────────────────────────────────
-
-        // ADICIONADO: auto-resize do textarea ao digitar
-        function autoResize(el) {
-            el.style.height = 'auto';
-            el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-        }
-
-        userInput.addEventListener('input', () => autoResize(userInput));
-
-        // CORRIGIDO: Enter para enviar (Shift+Enter para nova linha)
-        userInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage();
-            }
-        });
-
-        // ─── INICIALIZAÇÃO ────────────────────────────────────────────────────────────
 
         window.onload = () => {
             renderHistoryList();
