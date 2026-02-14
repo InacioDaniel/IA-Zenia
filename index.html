@@ -178,7 +178,16 @@
                 <!-- CORRIGIDO: status com classes dinâmicas adequadas -->
                 <span id="api-status" class="text-[11px] px-2 py-1 rounded border status-wait">API: verificando…</span>
             </div>
-            <div class="text-xs text-gray-500 flex-shrink-0">Modelo: <span class="text-blue-400">Zenia-Full</span></div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <label class="text-xs text-gray-500">Modelo:</label>
+                <select id="model-select" class="bg-transparent text-xs border border-gray-700 rounded p-1 outline-none focus:ring-1 focus:ring-blue-500 text-blue-400">
+                    <option value="openai">openai (geral)</option>
+                    <option value="qwen-coder" selected>qwen-coder (código)</option>
+                    <option value="openai-large">openai-large (avançado)</option>
+                    <option value="mistral">mistral</option>
+                    <option value="deepseek">deepseek</option>
+                </select>
+            </div>
         </header>
 
         <div id="chat-window" class="flex-1 overflow-y-auto p-6 space-y-6 chat-container">
@@ -365,6 +374,95 @@
             renderHistoryList();
         }
 
+        // ─── FETCH COM RETRY ──────────────────────────────────────────────────────────
+
+        async function fetchWithRetry(messages, model, attempt = 1) {
+            const MAX_ATTEMPTS = 3;
+            const TIMEOUT_MS   = 60000; // 60s — respostas longas podem demorar
+
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+            try {
+                const response = await fetch(CHAT_ENDPOINT, {
+                    method: 'POST',
+                    signal: controller.signal,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        messages,
+                        model,
+                        max_tokens: 4096,
+                        temperature: model === 'qwen-coder' ? 0.3 : 0.7,
+                        top_p: 1,
+                        stream: false
+                    })
+                });
+
+                clearTimeout(timer);
+
+                if (!response.ok) {
+                    const errBody = await response.text();
+                    // Rate limit — espera e tenta de novo
+                    if (response.status === 429 && attempt < MAX_ATTEMPTS) {
+                        await new Promise(r => setTimeout(r, 2000 * attempt));
+                        return fetchWithRetry(messages, model, attempt + 1);
+                    }
+                    throw new Error(`Erro HTTP ${response.status}: ${errBody}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.choices?.[0]?.message) {
+                    throw new Error("Formato de resposta inesperado da API.");
+                }
+
+                const content = (data.choices[0].message.content || '').trim();
+
+                if (!content) {
+                    // Resposta vazia — tenta com modelo diferente automaticamente
+                    if (attempt < MAX_ATTEMPTS) {
+                        // Roda pelos modelos: qwen-coder → openai-large → mistral
+                        const fallbackChain = ['qwen-coder', 'openai-large', 'mistral'];
+                        const nextIdx = fallbackChain.indexOf(model) + 1;
+                        const fallback = fallbackChain[nextIdx] || fallbackChain[fallbackChain.length - 1];
+                        console.warn(`Resposta vazia com "${model}", tentando "${fallback}" (tentativa ${attempt})...`);
+                        return fetchWithRetry(messages, fallback, attempt + 1);
+                    }
+                    throw new Error("Resposta vazia após várias tentativas. Tenta simplificar o pedido ou escolhe outro modelo.");
+                }
+
+                return content;
+
+            } catch (err) {
+                clearTimeout(timer);
+                if (err.name === 'AbortError') {
+                    if (attempt < MAX_ATTEMPTS) {
+                        console.warn(`Timeout na tentativa ${attempt}, tentando novamente...`);
+                        return fetchWithRetry(messages, model, attempt + 1);
+                    }
+                    throw new Error("Tempo esgotado após várias tentativas. Verifica a tua ligação à internet.");
+                }
+                throw err;
+            }
+        }
+
+        function renderTypingIndicator() {
+            const row = document.createElement('div');
+            row.className = 'flex justify-start animate-fade-in';
+            row.id = 'typing-indicator';
+            row.innerHTML = `
+                <div class="glass p-4 rounded-2xl flex items-center gap-2 text-sm text-gray-400">
+                    <span class="loading-spinner"></span>
+                    <span>Zénia está a escrever…</span>
+                </div>`;
+            chatWindow.appendChild(row);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            return row;
+        }
+
         // ─── ENVIO DE MENSAGEM ────────────────────────────────────────────────────────
 
         async function handleSendMessage() {
@@ -387,48 +485,25 @@
 
             const systemMsg = {
                 role: "system",
-                content: "Tu és a IA-Zénia, uma inteligência avançada feita no Lubango, Angola, pelo Inácio U. Daniel (Zénia-Projects). Teu modelo é o zenia-full. Angola tem 21 províncias. És especialista em línguas nacionais angolanas."
+                content: "Tu és a IA-Zénia, uma inteligência artificial avançada criada no Lubango, Angola, pelo Inácio U. Daniel (Zénia-Projects). O teu modelo interno chama-se zenia-full. Angola tem 21 províncias e és especialista em línguas nacionais angolanas.\n\nQuando o utilizador pede código ou programação: SEMPRE responde com o código completo e funcional, dentro de blocos de código formatados com três backticks e o nome da linguagem (ex: ```python). Nunca recuses escrever código. Se pedires uma imagem, descreve-a em detalhe pois não tens capacidade de gerar imagens directamente.\n\nRespondes sempre em Português de Angola."
             };
 
             const messages = [systemMsg, ...conv.messages, { role: "user", content: text }];
 
+            // Indicador de "a escrever..."
+            const typingEl = renderTypingIndicator();
+
             try {
-                const response = await fetch(CHAT_ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_KEY}`
-                    },
-                    body: JSON.stringify({
-                        messages,
-                        model: "openai",
-                        max_tokens: 4096,
-                        temperature: 0.7,
-                        top_p: 1,
-                        stream: false,
-                        frequency_penalty: 0,
-                        presence_penalty: 0
-                    })
-                });
-
-                if (!response.ok) {
-                    const errBody = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}. ${errBody}`);
+                // Detecção automática: se o pedido contém palavras de código, usa qwen-coder
+                const codeKeywords = /\b(program|código|code|script|função|function|html|css|javascript|python|java|c\+\+|typescript|sql|php|bash|react|vue|angular|api|algoritmo|algorithm|classe|class|array|loop|for|while|if|def|var|const|let|import|module|component|debug|erro|fix|bug|implement|create|make|build|desenvolv)\b/i;
+                const manualModel  = document.getElementById('model-select').value;
+                const autoModel    = codeKeywords.test(text) ? 'qwen-coder' : manualModel;
+                if (autoModel !== manualModel) {
+                    console.info(`Auto-switched model to ${autoModel} for code request`);
                 }
+                const aiResponse = await fetchWithRetry(messages, autoModel);
 
-                const data = await response.json();
-
-                // CORRIGIDO: verificação defensiva da resposta
-                if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-                    throw new Error("Resposta da API em formato inesperado.");
-                }
-
-                const aiResponse = (data.choices[0].message.content || '').trim();
-
-                // Resposta vazia — avisa o utilizador
-                if (!aiResponse) {
-                    throw new Error("A API devolveu uma resposta vazia. Tente reformular a pergunta ou reduza o tamanho do pedido.");
-                }
+                typingEl.remove();
 
                 conv.messages.push({ role: "user", content: text });
                 conv.messages.push({ role: "assistant", content: aiResponse });
@@ -436,13 +511,12 @@
 
                 renderMessageUI('ai', aiResponse);
                 if (isVoiceAssist) speakText(aiResponse);
-
-                // Atualiza status como OK após sucesso
                 setApiStatus('ok');
 
             } catch (error) {
+                typingEl.remove();
                 console.error("Erro na API:", error);
-                renderMessageUI('ai', `⚠️ Erro ao comunicar com a IA: ${error.message}. Tente novamente.`);
+                renderMessageUI('ai', `⚠️ ${error.message}`);
                 setApiStatus('error');
             } finally {
                 setLoading(false);
@@ -688,20 +762,24 @@
         async function updateApiStatus() {
             setApiStatus('wait');
             try {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 10000);
                 const response = await fetch(CHAT_ENDPOINT, {
                     method: 'POST',
+                    signal: controller.signal,
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${API_KEY}`
                     },
                     body: JSON.stringify({
-                        messages: [{ role: "user", content: "ping" }],
+                        messages: [{ role: "user", content: "oi" }],
                         model: "openai",
                         max_tokens: 5,
                         temperature: 0,
                         stream: false
                     })
                 });
+                clearTimeout(timer);
                 setApiStatus(response.ok ? 'ok' : 'error');
             } catch {
                 setApiStatus('error');
