@@ -77,6 +77,9 @@
                 <button id="voice-assist-btn" onclick="toggleVoiceAssist()" class="text-xs px-3 py-1 rounded-full border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition">
                     <i class="fas fa-headset mr-2"></i>Modo Voz Assist.
                 </button>
+                <button id="new-chat-btn" title="Nova conversa" class="text-xs px-3 py-1 rounded-full border border-gray-700 text-gray-300 hover:bg-gray-800 transition">
+                    <i class="fas fa-comments mr-2"></i>Novo Chat
+                </button>
             </div>
             <div class="text-xs text-gray-500">Modelo: <span class="text-blue-400">Zenia-Full</span></div>
         </header>
@@ -117,6 +120,8 @@
         const userInput = document.getElementById('user-input');
         let cmData = {};
         let isVoiceAssist = false;
+        let conversations = JSON.parse(localStorage.getItem('conversations') || '[]');
+        let currentConversationId = null;
 
         // Carregar CM.JSON simulação (conhecimento personalizado)
         async function loadCustomKnowledge() {
@@ -139,10 +144,93 @@
             return `[Informação atualizada de 2026: Angola agora possui oficialmente 21 províncias após a nova divisão político-administrativa.]`;
         }
 
+        // Utilitários de Conversa
+        function createConversation(title) {
+            const id = Date.now().toString();
+            const conv = { id, title, messages: [] };
+            conversations.unshift(conv);
+            currentConversationId = id;
+            persistConversations();
+            renderHistoryList();
+            return conv;
+        }
+
+        function getCurrentConversation() {
+            return conversations.find(c => c.id === currentConversationId) || null;
+        }
+
+        function persistConversations() {
+            localStorage.setItem('conversations', JSON.stringify(conversations));
+        }
+
+        function renderHistoryList() {
+            const hist = document.getElementById('history-list');
+            hist.innerHTML = '<p class="text-xs text-gray-600 px-2 italic">Histórico Local</p>';
+            conversations.forEach(conv => {
+                const item = document.createElement('div');
+                item.className = "p-2 hover:bg-gray-800 rounded text-[11px] text-gray-300 truncate cursor-pointer flex items-center justify-between";
+                const left = document.createElement('div');
+                left.className = "flex items-center gap-2";
+                const icon = document.createElement('i');
+                icon.className = "far fa-comment-alt";
+                const title = document.createElement('span');
+                title.textContent = conv.title || 'Conversa';
+                left.appendChild(icon);
+                left.appendChild(title);
+                const actions = document.createElement('div');
+                actions.className = "flex items-center gap-2";
+                const openBtn = document.createElement('button');
+                openBtn.title = "Abrir conversa";
+                openBtn.className = "text-gray-400 hover:text-white";
+                openBtn.innerHTML = '<i class="fas fa-folder-open"></i>';
+                openBtn.onclick = () => loadConversation(conv.id);
+                const delBtn = document.createElement('button');
+                delBtn.title = "Apagar conversa";
+                delBtn.className = "text-gray-400 hover:text-red-500";
+                delBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                delBtn.onclick = (e) => { e.stopPropagation(); deleteConversation(conv.id); };
+                actions.appendChild(openBtn);
+                actions.appendChild(delBtn);
+                item.appendChild(left);
+                item.appendChild(actions);
+                hist.appendChild(item);
+            });
+        }
+
+        function deleteConversation(id) {
+            conversations = conversations.filter(c => c.id !== id);
+            if (currentConversationId === id) {
+                currentConversationId = null;
+                chatWindow.innerHTML = '';
+                document.getElementById('welcome-msg').style.display = '';
+            }
+            persistConversations();
+            renderHistoryList();
+        }
+
+        function loadConversation(id) {
+            currentConversationId = id;
+            chatWindow.innerHTML = '';
+            document.getElementById('welcome-msg').style.display = 'none';
+            const conv = getCurrentConversation();
+            if (!conv) return;
+            conv.messages.forEach(m => appendMessage(m.role, m.content, m.img || null, false));
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function startNewConversation() {
+            chatWindow.innerHTML = '';
+            document.getElementById('welcome-msg').style.display = '';
+            currentConversationId = null;
+        }
+
         // Envio de Mensagem
         async function handleSendMessage() {
             const text = userInput.value.trim();
             if(!text) return;
+
+            const title = text.substring(0, 50);
+            const conv = getCurrentConversation() || createConversation(title + '...');
 
             appendMessage('user', text);
             userInput.value = '';
@@ -156,16 +244,23 @@
 
             // Gerar Resposta via Pollinations
             try {
+                const messages = [{ role: "system", content: context }, ...conv.messages, { role: "user", content: text }];
                 const response = await fetch(`https://text.pollinations.ai/`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    mode: 'cors',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'text/plain' },
                     body: JSON.stringify({
-                        messages: [{ role: "system", content: context }, { role: "user", content: text }],
+                        messages,
                         seed: Math.floor(Math.random() * 1000)
                     })
                 });
                 
-                const data = await response.text();
+                let data;
+                if (response.ok) {
+                    data = await response.text();
+                } else {
+                    throw new Error('Pollinations text API falhou');
+                }
                 
                 // Lógica para detectar comando de imagem
                 if(text.toLowerCase().includes("gera uma imagem") || text.toLowerCase().includes("desenha")) {
@@ -176,11 +271,13 @@
                     if (isVoiceAssist) speakText(data);
                 }
             } catch (error) {
-                appendMessage('ai', "Desculpa, tive um problema na minha rede do Lubango. Podes repetir?");
+                // Fallback: tentar um resumo via busca simulada ou mensagem clara
+                const fallback = await webSearch(text);
+                appendMessage('ai', fallback || "Desculpa, tive um problema na minha rede do Lubango. Podes repetir?");
             }
         }
 
-        function appendMessage(role, text, img = null) {
+        function appendMessage(role, text, img = null, persist = true) {
             const row = document.createElement('div');
             row.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`;
 
@@ -204,7 +301,13 @@
             row.appendChild(bubble);
             chatWindow.appendChild(row);
             chatWindow.scrollTop = chatWindow.scrollHeight;
-            saveHistory(text.substring(0, 30));
+
+            const conv = getCurrentConversation();
+            if (persist && conv) {
+                conv.messages.push({ role, content: text, img: img || null });
+                persistConversations();
+                renderHistoryList();
+            }
         }
 
         // Síntese de Voz
@@ -250,16 +353,8 @@
         }
 
         function saveHistory(title) {
-            const hist = document.getElementById('history-list');
-            const item = document.createElement('div');
-            item.className = "p-2 hover:bg-gray-800 rounded text-[11px] text-gray-400 truncate cursor-pointer flex items-center";
-            const icon = document.createElement('i');
-            icon.className = "far fa-comment-alt mr-2";
-            const textNode = document.createElement('span');
-            textNode.textContent = `${title}...`;
-            item.appendChild(icon);
-            item.appendChild(textNode);
-            hist.prepend(item);
+            // Mantido por compatibilidade, agora não usado; renderHistoryList cuida do histórico
+            renderHistoryList();
         }
 
         function toggleGallery() {
@@ -291,7 +386,11 @@
             }
         }
 
-        window.onload = loadCustomKnowledge;
+        window.onload = () => {
+            loadCustomKnowledge();
+            renderHistoryList();
+            document.getElementById('new-chat-btn').onclick = startNewConversation;
+        };
     </script>
 </body>
 </html>
