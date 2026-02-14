@@ -123,8 +123,7 @@
         let isVoiceAssist = false;
         let conversations = JSON.parse(localStorage.getItem('conversations') || '[]');
         let currentConversationId = null;
-        const USE_PROXY = location.hostname.endsWith('netlify.app');
-        const TEXT_ENDPOINT = USE_PROXY ? '/api/text' : 'https://text.pollinations.ai/';
+        const TEXT_ENDPOINT = 'https://text.pollinations.ai/';
 
         // Carregar CM.JSON simulação (conhecimento personalizado)
         async function loadCustomKnowledge() {
@@ -248,15 +247,10 @@
             // Gerar Resposta via Pollinations
             try {
                 const messages = [{ role: "system", content: context }, ...conv.messages, { role: "user", content: text }];
-                const response = await tryFetchWithBackoff(TEXT_ENDPOINT, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'text/plain' },
-                    body: JSON.stringify({
-                        messages,
-                        seed: Math.floor(Math.random() * 1000)
-                    })
-                });
+                const prompt = buildPrompt(getCurrentConversation(), text, context);
+                const seed = Math.floor(Math.random() * 1000);
+                const url = `${TEXT_ENDPOINT}${encodeURIComponent(prompt)}?model=openai&seed=${seed}&temperature=0.8`;
+                const response = await tryFetchWithBackoff(url, { mode: 'cors' });
                 
                 let data;
                 if (response.ok) {
@@ -293,15 +287,20 @@
             throw lastErr;
         }
 
+        function buildPrompt(conv, userText, systemContext) {
+            const header = systemContext.replace(/\s+/g, ' ').trim();
+            const history = (conv?.messages || []).slice(-6).map(m => {
+                const role = m.role === 'user' ? 'User' : (m.role === 'ai' ? 'Assistant' : 'System');
+                return `${role}: ${m.content}`;
+            }).join('\n');
+            const combined = `${header}\n${history ? history + '\n' : ''}User: ${userText}\nAssistant:`;
+            return combined.length > 4000 ? combined.slice(-4000) : combined;
+        }
+
         async function updateApiStatus() {
             const el = document.getElementById('api-status');
             try {
-                const resp = await fetch(TEXT_ENDPOINT, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'text/plain' },
-                    body: JSON.stringify({ ping: true })
-                });
+                const resp = await fetch(`${TEXT_ENDPOINT}${encodeURIComponent('ping')}?model=openai`, { mode: 'cors' });
                 if (resp.ok) {
                     el.textContent = 'API: online';
                     el.className = 'text-[11px] px-2 py-1 rounded border border-green-700 text-green-400';
