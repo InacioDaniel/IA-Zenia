@@ -1,1879 +1,1503 @@
 <!DOCTYPE html>
-<html lang="pt-PT" class="dark">
+<html lang="pt-PT">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA-Zénia</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <style>
-        body { background-color: #0b0d11; color: #e5e7eb; font-family: 'Inter', sans-serif; }
-        .sidebar { background-color: #161b22; }
-        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .chat-container::-webkit-scrollbar { width: 5px; }
-        .chat-container::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
-        .glow-button:hover { box-shadow: 0 0 15px rgba(59,130,246,0.5); }
-        @keyframes pulse-red { 50% { background:#ef4444;color:#fff;transform:scale(1.1); } }
-        .recording { animation: pulse-red 1.5s infinite; border-radius: 9999px; }
-        @keyframes fade-in { from { opacity:0;transform:translateY(4px); } to { opacity:1;transform:translateY(0); } }
-        .animate-fade-in { animation: fade-in 200ms ease-out; }
-        .loading-spinner {
-            width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);
-            border-radius:50%;border-top-color:#fff;
-            animation:spin 1s linear infinite;display:inline-block;vertical-align:middle;
-        }
-        @keyframes spin { to { transform:rotate(360deg); } }
-
-        /* História */
-        .history-item { display:flex;align-items:center;justify-content:space-between;gap:8px; }
-
-        /* Status */
-        .status-ok   { color:#22c55e;border-color:#22c55e40; }
-        .status-err  { color:#ef4444;border-color:#ef444440; }
-        .status-wait { color:#9ca3af;border-color:#4b556340; }
-
-        /* Blocos de código */
-        .code-block { position:relative;background:#0d1117;border:1px solid #30363d;border-radius:10px;margin:12px 0;overflow:hidden; }
-        .code-header { display:flex;align-items:center;justify-content:space-between;background:#161b22;border-bottom:1px solid #30363d;padding:5px 12px; }
-        .code-lang-label { font-family:monospace;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#58a6ff;font-weight:600; }
-        .copy-btn { background:#21262d;border:1px solid #30363d;color:#8b949e;border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px; }
-        .copy-btn:hover { background:#30363d;color:#e6edf3; }
-        .code-block pre { margin:0!important;padding:14px 16px!important;overflow-x:auto;font-size:13px!important;line-height:1.65!important;background:transparent!important; }
-        .code-block pre code.hljs { background:transparent!important;padding:0!important;font-size:inherit!important; }
-
-        /* Linhas de erro em amarelo */
-        .error-line { background:rgba(251,191,36,0.08);display:block; }
-        .error-line .hljs-keyword,.error-line .hljs-built_in,.error-line .hljs-string,
-        .error-line .hljs-number,.error-line .hljs-comment,.error-line span { color:#fbbf24!important; }
-        .error-marker { color:#fbbf24;font-weight:bold; }
-
-        /* Código inline */
-        .inline-code { background:rgba(110,118,129,0.2);border-radius:4px;padding:1px 6px;font-family:monospace;font-size:12px;color:#e6edf3; }
-
-        /* Badge web */
-        .web-badge { display:inline-flex;align-items:center;gap:5px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);border-radius:20px;padding:3px 10px;font-size:11px;color:#60a5fa;margin-bottom:8px; }
-
-        /* Media cards */
-        .media-card { background:#0d1117;border:1px solid #30363d;border-radius:10px;overflow:hidden;margin:10px 0; }
-        .media-card img { width:100%;display:block; }
-        .media-card-label { padding:6px 12px;font-size:11px;color:#8b949e;background:#161b22;border-top:1px solid #30363d; }
-        .media-actions { display:flex;gap:8px;padding:8px 12px;background:#161b22;border-top:1px solid #30363d; }
-        .media-btn { font-size:11px;padding:3px 10px;border-radius:6px;cursor:pointer;border:1px solid #30363d;background:#21262d;color:#8b949e;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:4px; }
-        .media-btn:hover { background:#30363d;color:#e6edf3; }
-
-        /* Toolbar de modo */
-        .toolbar-btn { padding:5px 10px;border-radius:8px;border:1px solid #30363d;background:transparent;color:#6b7280;font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px; }
-        .toolbar-btn:hover { background:#1f2937;color:#e5e7eb;border-color:#4b5563; }
-        .toolbar-btn.active { background:#1d3461;color:#60a5fa;border-color:#3b82f6; }
-
-        /* ── PAINEL AVANÇADO ── */
-        .adv-panel { position:fixed;top:0;right:0;width:400px;height:100vh;background:#0d1117;border-left:1px solid #30363d;z-index:1000;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease; }
-        .adv-panel.open { transform:translateX(0); }
-        .adv-tab { display:flex;border-bottom:1px solid #30363d;flex-shrink:0; }
-        .adv-tab button { flex:1;padding:10px 4px;font-size:11px;color:#6b7280;border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s; }
-        .adv-tab button.active { color:#60a5fa;border-bottom-color:#3b82f6;background:rgba(59,130,246,.05); }
-        .adv-tab button:hover { color:#e5e7eb;background:rgba(255,255,255,.03); }
-        .adv-body { flex:1;overflow-y:auto;padding:16px; }
-        .adv-section { margin-bottom:20px; }
-        .adv-section h4 { font-size:11px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #21262d; }
-        .adv-btn { display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;border-radius:8px;border:1px solid #30363d;background:#161b22;color:#c9d1d9;font-size:12px;cursor:pointer;transition:all .2s;margin-bottom:6px;text-align:left; }
-        .adv-btn:hover { background:#21262d;border-color:#58a6ff;color:#e6edf3; }
-        .adv-btn .icon { width:20px;text-align:center;flex-shrink:0; }
-        .adv-btn .desc { font-size:10px;color:#6b7280;display:block;margin-top:1px; }
-        .adv-input { width:100%;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:7px 10px;font-size:12px;color:#e6edf3;outline:none;margin-bottom:8px; }
-        .adv-input:focus { border-color:#58a6ff; }
-        .adv-toast { position:fixed;bottom:24px;right:24px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:10px 16px;font-size:13px;color:#e6edf3;z-index:2000;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none; }
-        .adv-toast.show { opacity:1;transform:translateY(0); }
-        .adv-toast.ok   { border-color:#22c55e;color:#22c55e; }
-        .adv-toast.err  { border-color:#ef4444;color:#ef4444; }
-        .adv-toast.warn { border-color:#fbbf24;color:#fbbf24; }
-        .mem-item { display:flex;align-items:flex-start;gap:8px;padding:8px;background:#161b22;border:1px solid #21262d;border-radius:8px;margin-bottom:6px;font-size:12px; }
-        .mem-key  { color:#58a6ff;font-weight:600;min-width:80px;flex-shrink:0; }
-        .mem-val  { color:#c9d1d9;flex:1;word-break:break-word; }
-        .mem-del  { color:#6b7280;cursor:pointer;flex-shrink:0;padding:2px 4px; }
-        .mem-del:hover { color:#ef4444; }
-        .plugin-item { display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#161b22;border:1px solid #21262d;border-radius:8px;margin-bottom:6px; }
-        .plugin-name { font-size:12px;color:#c9d1d9; }
-        .plugin-toggle { width:36px;height:20px;border-radius:10px;background:#30363d;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;border:none; }
-        .plugin-toggle.on { background:#2563eb; }
-        .plugin-toggle::after { content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s; }
-        .plugin-toggle.on::after { left:19px; }
-        .metric-row { display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #21262d;font-size:12px; }
-        .metric-row:last-child { border:none; }
-        .metric-label { color:#8b949e; }
-        .metric-val { color:#58a6ff;font-weight:600; }
-    </style>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA-Zénia</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+body{background:#0b0d11;color:#e5e7eb;font-family:Inter,sans-serif}
+.sidebar{background:#161b22}
+.glass{background:rgba(255,255,255,.03);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1)}
+.chat-container::-webkit-scrollbar{width:5px}
+.chat-container::-webkit-scrollbar-thumb{background:#30363d;border-radius:10px}
+.glow-button:hover{box-shadow:0 0 15px rgba(59,130,246,.5)}
+@keyframes pulse-red{50%{background:#ef4444;color:#fff;transform:scale(1.1)}}
+.recording{animation:pulse-red 1.5s infinite;border-radius:9999px}
+@keyframes fade-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.animate-fade-in{animation:fade-in 200ms ease-out}
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-radius:50%;border-top-color:#fff;animation:spin 1s linear infinite;display:inline-block;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.history-item{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.status-ok{color:#22c55e;border-color:#22c55e40}
+.status-err{color:#ef4444;border-color:#ef444440}
+.status-wait{color:#9ca3af;border-color:#4b556340}
+.code-block{position:relative;background:#0d1117;border:1px solid #30363d;border-radius:10px;margin:12px 0;overflow:hidden}
+.code-header{display:flex;align-items:center;justify-content:space-between;background:#161b22;border-bottom:1px solid #30363d;padding:5px 12px}
+.code-lang-label{font-family:monospace;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#58a6ff;font-weight:600}
+.copy-btn{background:#21262d;border:1px solid #30363d;color:#8b949e;border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px}
+.copy-btn:hover{background:#30363d;color:#e6edf3}
+.code-block pre{margin:0!important;padding:14px 16px!important;overflow-x:auto;font-size:13px!important;line-height:1.65!important;background:transparent!important}
+.code-block pre code.hljs{background:transparent!important;padding:0!important;font-size:inherit!important}
+.error-line{background:rgba(251,191,36,.08);display:block}
+.error-line span{color:#fbbf24!important}
+.error-marker{color:#fbbf24;font-weight:bold}
+.inline-code{background:rgba(110,118,129,.2);border-radius:4px;padding:1px 6px;font-family:monospace;font-size:12px;color:#e6edf3}
+.web-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);border-radius:20px;padding:3px 10px;font-size:11px;color:#60a5fa;margin-bottom:8px}
+.media-card{background:#0d1117;border:1px solid #30363d;border-radius:10px;overflow:hidden;margin:10px 0}
+.media-card img{width:100%;display:block}
+.media-card-label{padding:6px 12px;font-size:11px;color:#8b949e;background:#161b22;border-top:1px solid #30363d}
+.media-actions{display:flex;gap:8px;padding:8px 12px;background:#161b22;border-top:1px solid #30363d}
+.media-btn{font-size:11px;padding:3px 10px;border-radius:6px;cursor:pointer;border:1px solid #30363d;background:#21262d;color:#8b949e;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.media-btn:hover{background:#30363d;color:#e6edf3}
+.toolbar-btn{padding:5px 10px;border-radius:8px;border:1px solid #30363d;background:transparent;color:#6b7280;font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}
+.toolbar-btn:hover{background:#1f2937;color:#e5e7eb;border-color:#4b5563}
+.toolbar-btn.active{background:#1d3461;color:#60a5fa;border-color:#3b82f6}
+/* Painel avançado */
+.adv-panel{position:fixed;top:0;right:0;width:400px;height:100vh;background:#0d1117;border-left:1px solid #30363d;z-index:1000;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease}
+.adv-panel.open{transform:translateX(0)}
+.adv-tab{display:flex;border-bottom:1px solid #30363d;flex-shrink:0}
+.adv-tab button{flex:1;padding:10px 4px;font-size:11px;color:#6b7280;border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.adv-tab button.active{color:#60a5fa;border-bottom-color:#3b82f6;background:rgba(59,130,246,.05)}
+.adv-tab button:hover{color:#e5e7eb;background:rgba(255,255,255,.03)}
+.adv-body{flex:1;overflow-y:auto;padding:16px}
+.adv-section{margin-bottom:20px}
+.adv-section h4{font-size:11px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #21262d}
+.adv-btn{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;border-radius:8px;border:1px solid #30363d;background:#161b22;color:#c9d1d9;font-size:12px;cursor:pointer;transition:all .2s;margin-bottom:6px;text-align:left}
+.adv-btn:hover{background:#21262d;border-color:#58a6ff;color:#e6edf3}
+.adv-btn .icon{width:20px;text-align:center;flex-shrink:0}
+.adv-btn .desc{font-size:10px;color:#6b7280;display:block;margin-top:1px}
+.adv-input{width:100%;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:7px 10px;font-size:12px;color:#e6edf3;outline:none;margin-bottom:8px}
+.adv-input:focus{border-color:#58a6ff}
+.adv-toast{position:fixed;bottom:24px;right:24px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:10px 16px;font-size:13px;color:#e6edf3;z-index:2000;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;max-width:320px}
+.adv-toast.show{opacity:1;transform:translateY(0)}
+.adv-toast.ok{border-color:#22c55e;color:#22c55e}
+.adv-toast.err{border-color:#ef4444;color:#ef4444}
+.adv-toast.warn{border-color:#fbbf24;color:#fbbf24}
+.mem-item{display:flex;align-items:flex-start;gap:8px;padding:8px;background:#161b22;border:1px solid #21262d;border-radius:8px;margin-bottom:6px;font-size:12px}
+.mem-key{color:#58a6ff;font-weight:600;min-width:80px;flex-shrink:0}
+.mem-val{color:#c9d1d9;flex:1;word-break:break-word}
+.mem-del{color:#6b7280;cursor:pointer;flex-shrink:0;padding:2px 4px;background:none;border:none}
+.mem-del:hover{color:#ef4444}
+.plugin-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#161b22;border:1px solid #21262d;border-radius:8px;margin-bottom:6px}
+.plugin-toggle{width:36px;height:20px;border-radius:10px;background:#30363d;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;border:none}
+.plugin-toggle.on{background:#2563eb}
+.plugin-toggle::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s}
+.plugin-toggle.on::after{left:19px}
+.metric-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #21262d;font-size:12px}
+.metric-row:last-child{border:none}
+.metric-label{color:#8b949e}
+.metric-val{color:#58a6ff;font-weight:600}
+</style>
 </head>
 <body class="flex h-screen overflow-hidden">
 
 <!-- SIDEBAR -->
 <aside class="sidebar w-72 flex flex-col border-r border-gray-800">
-    <div class="p-6 text-2xl font-bold tracking-tight text-blue-500">
-        IA-Zénia <span class="text-xs font-light text-gray-500 block">by Zénia-Projects</span>
+  <div class="p-6 text-2xl font-bold tracking-tight text-blue-500">
+    IA-Zénia <span class="text-xs font-light text-gray-500 block">by Zénia-Projects</span>
+  </div>
+  <div class="px-4 mb-4">
+    <button onclick="startNewConversation()" class="w-full bg-blue-600/10 hover:bg-blue-600/20 text-blue-500 border border-blue-500/30 rounded-lg py-2 text-sm font-medium transition flex items-center justify-center gap-2">
+      <i class="fas fa-plus"></i> Novo Chat
+    </button>
+  </div>
+  <div class="px-4 mb-4">
+    <div class="relative">
+      <i class="fas fa-search absolute left-3 top-3 text-gray-500 text-sm"></i>
+      <input id="search-input" type="text" placeholder="Buscar em chats..."
+        class="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 pl-9 pr-4 text-sm focus:ring-1 focus:ring-blue-500 outline-none"
+        oninput="filterHistory(this.value)">
     </div>
-    <div class="px-4 mb-4">
-        <button onclick="startNewConversation()" class="w-full bg-blue-600/10 hover:bg-blue-600/20 text-blue-500 border border-blue-500/30 rounded-lg py-2 text-sm font-medium transition flex items-center justify-center gap-2">
-            <i class="fas fa-plus"></i> Novo Chat
-        </button>
+  </div>
+  <nav class="flex-1 overflow-y-auto px-4 space-y-6">
+    <div>
+      <p class="text-xs font-semibold text-gray-500 uppercase mb-3">Aplicativos</p>
+      <div class="space-y-2">
+        <a href="https://antonia-ia.netlify.app" target="_blank" rel="noopener noreferrer" class="flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
+          <i class="fas fa-robot mr-3 text-pink-500"></i> Antónia-IA
+        </a>
+        <a href="https://zenia-projects.netlify.app" target="_blank" rel="noopener noreferrer" class="flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
+          <i class="fas fa-code mr-3 text-blue-500"></i> Zénia-Projects
+        </a>
+      </div>
     </div>
-    <div class="px-4 mb-4">
-        <div class="relative">
-            <i class="fas fa-search absolute left-3 top-3 text-gray-500 text-sm"></i>
-            <input id="search-input" type="text" placeholder="Buscar em chats..."
-                class="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 pl-9 pr-4 text-sm focus:ring-1 focus:ring-blue-500 outline-none"
-                oninput="filterHistory(this.value)">
-        </div>
+    <div>
+      <p class="text-xs font-semibold text-gray-500 uppercase mb-3">Recursos</p>
+      <button onclick="openAdvPanel()" class="w-full flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
+        <i class="fas fa-sliders-h mr-3 text-blue-400"></i> Ferramentas Avançadas
+      </button>
+      <button onclick="toggleGallery()" class="w-full flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
+        <i class="fas fa-images mr-3 text-purple-500"></i> Galeria
+      </button>
+      <div id="history-list" class="mt-4 space-y-1">
+        <p class="text-xs text-gray-600 px-2 italic">Histórico Local</p>
+      </div>
     </div>
-    <nav class="flex-1 overflow-y-auto px-4 space-y-6">
-        <div>
-            <p class="text-xs font-semibold text-gray-500 uppercase mb-3">Aplicativos</p>
-            <div class="space-y-2">
-                <a href="https://antonia-ia.netlify.app" target="_blank" rel="noopener noreferrer" class="flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
-                    <i class="fas fa-robot mr-3 text-pink-500"></i> Antónia-IA
-                </a>
-                <a href="https://zenia-projects.netlify.app" target="_blank" rel="noopener noreferrer" class="flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
-                    <i class="fas fa-code mr-3 text-blue-500"></i> Zénia-Projects
-                </a>
-            </div>
-        </div>
-        <div>
-            <p class="text-xs font-semibold text-gray-500 uppercase mb-3">Recursos</p>
-                            <button onclick="openAdvPanel()" class="w-full flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm mt-1">
-                    <i class="fas fa-sliders-h mr-3 text-blue-400"></i> Ferramentas Avançadas
-                </button>
-                <button onclick="toggleGallery()" class="w-full flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
-                <i class="fas fa-images mr-3 text-purple-500"></i> Galeria
-            </button>
-            <div id="history-list" class="mt-4 space-y-1">
-                <p class="text-xs text-gray-600 px-2 italic">Histórico Local</p>
-            </div>
-        </div>
-    </nav>
-    <div class="p-4 border-t border-gray-800 flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold flex-shrink-0">U</div>
-        <div class="flex-1 overflow-hidden">
-            <p class="text-sm font-medium truncate" id="username-display">Utilizador Zénia</p>
-            <p class="text-xs text-green-500 italic">Online</p>
-        </div>
+  </nav>
+  <div class="p-4 border-t border-gray-800 flex items-center gap-3">
+    <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold flex-shrink-0">U</div>
+    <div class="flex-1 overflow-hidden">
+      <p class="text-sm font-medium truncate" id="username-display">Utilizador Zénia</p>
+      <p class="text-xs text-green-500 italic">Online</p>
     </div>
+  </div>
 </aside>
 
 <!-- MAIN -->
 <main class="flex-1 flex flex-col relative overflow-hidden">
-    <header class="h-16 border-b border-gray-800 flex items-center justify-between px-6 glass flex-shrink-0">
-        <div class="flex items-center gap-3 flex-wrap">
-            <select id="voice-select" class="bg-transparent text-xs border border-gray-700 rounded p-1 outline-none focus:ring-1 focus:ring-blue-500 max-w-[150px]">
-                <option value="">Voz padrão</option>
-            </select>
-            <button id="voice-assist-btn" onclick="toggleVoiceAssist()" class="text-xs px-3 py-1 rounded-full border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition">
-                <i class="fas fa-headset mr-1"></i>Voz Assist.
-            </button>
-            <span id="api-status" class="text-[11px] px-2 py-1 rounded border status-wait">API: verificando…</span>
-            <span id="web-status" class="hidden text-[11px] px-2 py-1 rounded border border-yellow-500/40 text-yellow-400">
-                <i class="fas fa-globe mr-1"></i>A pesquisar web…
-            </span>
-        </div>
-        <div class="flex items-center gap-2 flex-shrink-0">
-            <label class="text-xs text-gray-500">Modelo:</label>
-            <select id="model-select" class="bg-transparent text-xs border border-gray-700 rounded p-1 outline-none focus:ring-1 focus:ring-blue-500 text-blue-400">
-                <option value="openai">openai (geral)</option>
-                <option value="qwen-coder" selected>qwen-coder (código)</option>
-                <option value="openai-large">openai-large (avançado)</option>
-                <option value="mistral">mistral</option>
-                <option value="deepseek">deepseek</option>
-            </select>
-        </div>
-    </header>
-
-    <div id="chat-window" class="flex-1 overflow-y-auto p-6 space-y-6 chat-container">
-        <div class="flex flex-col items-center justify-center h-full text-center space-y-4 opacity-50" id="welcome-msg">
-            <i class="fas fa-shield-cat text-6xl text-blue-500"></i>
-            <h2 class="text-2xl font-bold">Olá, eu sou a Zénia.</h2>
-            <p class="max-w-sm text-sm">Criada no Lubango por Inácio U. Daniel.<br>Código · Imagens · Áudio · Pesquisa Web</p>
-        </div>
+  <header class="h-16 border-b border-gray-800 flex items-center justify-between px-6 glass flex-shrink-0">
+    <div class="flex items-center gap-3 flex-wrap">
+      <select id="voice-select" class="bg-transparent text-xs border border-gray-700 rounded p-1 outline-none focus:ring-1 focus:ring-blue-500 max-w-[150px]">
+        <option value="">Voz padrão</option>
+      </select>
+      <button id="voice-assist-btn" onclick="toggleVoiceAssist()" class="text-xs px-3 py-1 rounded-full border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition">
+        <i class="fas fa-headset mr-1"></i>Voz Assist.
+      </button>
+      <span id="api-status" class="text-[11px] px-2 py-1 rounded border status-wait">API: verificando…</span>
+      <span id="web-status" class="hidden text-[11px] px-2 py-1 rounded border border-yellow-500/40 text-yellow-400">
+        <i class="fas fa-globe mr-1"></i>Pesquisando…
+      </span>
     </div>
-
-    <div class="p-4 bg-gradient-to-t from-[#0b0d11] to-transparent flex-shrink-0">
-        <div class="max-w-4xl mx-auto">
-            <div class="flex gap-2 mb-2 px-1 flex-wrap">
-                <button id="btn-mode-chat"  onclick="setMode('chat')"  class="toolbar-btn active"><i class="fas fa-comment"></i> Chat</button>
-                <button id="btn-mode-image" onclick="setMode('image')" class="toolbar-btn"><i class="fas fa-image text-purple-400"></i> Imagem</button>
-                <button id="btn-mode-audio" onclick="setMode('audio')" class="toolbar-btn"><i class="fas fa-music text-green-400"></i> Áudio</button>
-                <button id="btn-mode-web"   onclick="setMode('web')"   class="toolbar-btn"><i class="fas fa-globe text-yellow-400"></i> Web</button>
-            </div>
-            <div class="glass rounded-2xl p-2">
-                <div class="flex items-end gap-2 px-2 pb-2">
-                    <textarea id="user-input" rows="1" placeholder="Pergunte qualquer coisa à Zénia…"
-                        class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-3 resize-none outline-none"
-                        style="max-height:120px;overflow-y:auto;"></textarea>
-                    <button id="mic-btn" class="p-3 text-gray-400 hover:text-blue-500 transition" title="Microfone">
-                        <i class="fas fa-microphone"></i>
-                    </button>
-                    <button id="send-btn" onclick="handleSendMessage()" class="p-3 bg-blue-600 rounded-xl hover:bg-blue-700 glow-button transition min-w-[44px] flex items-center justify-center">
-                        <i class="fas fa-paper-plane" id="send-icon"></i>
-                    </button>
-                </div>
-            </div>
-            <p class="text-[10px] text-center mt-2 text-gray-600 uppercase tracking-widest">
-                A Zénia verifica na web para info actualizada · Desenvolvido por Zénia-Projects
-            </p>
-        </div>
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <label class="text-xs text-gray-500">Modelo:</label>
+      <select id="model-select" class="bg-transparent text-xs border border-gray-700 rounded p-1 outline-none focus:ring-1 focus:ring-blue-500 text-blue-400">
+        <option value="openai">openai (geral)</option>
+        <option value="qwen-coder" selected>qwen-coder (código)</option>
+        <option value="openai-large">openai-large (avançado)</option>
+        <option value="mistral">mistral</option>
+        <option value="deepseek">deepseek</option>
+      </select>
     </div>
+  </header>
+
+  <div id="chat-window" class="flex-1 overflow-y-auto p-6 space-y-6 chat-container">
+    <div class="flex flex-col items-center justify-center h-full text-center space-y-4 opacity-50" id="welcome-msg">
+      <i class="fas fa-shield-cat text-6xl text-blue-500"></i>
+      <h2 class="text-2xl font-bold">Olá, eu sou a Zénia.</h2>
+      <p class="max-w-sm text-sm">Criada no Lubango por Inácio U. Daniel.<br>Código · Imagens · Áudio · Pesquisa Web</p>
+    </div>
+  </div>
+
+  <div class="p-4 bg-gradient-to-t from-[#0b0d11] to-transparent flex-shrink-0">
+    <div class="max-w-4xl mx-auto">
+      <div class="flex gap-2 mb-2 px-1 flex-wrap">
+        <button id="btn-mode-chat"  onclick="setMode('chat')"  class="toolbar-btn active"><i class="fas fa-comment"></i> Chat</button>
+        <button id="btn-mode-image" onclick="setMode('image')" class="toolbar-btn"><i class="fas fa-image text-purple-400"></i> Imagem</button>
+        <button id="btn-mode-audio" onclick="setMode('audio')" class="toolbar-btn"><i class="fas fa-music text-green-400"></i> Áudio</button>
+        <button id="btn-mode-web"   onclick="setMode('web')"   class="toolbar-btn"><i class="fas fa-globe text-yellow-400"></i> Web</button>
+      </div>
+      <div class="glass rounded-2xl p-2">
+        <div class="flex items-end gap-2 px-2 pb-2">
+          <textarea id="user-input" rows="1" placeholder="Pergunte qualquer coisa à Zénia…"
+            class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-3 resize-none outline-none"
+            style="max-height:120px;overflow-y:auto"></textarea>
+          <button id="mic-btn" class="p-3 text-gray-400 hover:text-blue-500 transition" title="Microfone">
+            <i class="fas fa-microphone"></i>
+          </button>
+          <button id="send-btn" onclick="handleSendMessage()" class="p-3 bg-blue-600 rounded-xl hover:bg-blue-700 glow-button transition min-w-[44px] flex items-center justify-center">
+            <i class="fas fa-paper-plane" id="send-icon"></i>
+          </button>
+        </div>
+      </div>
+      <p class="text-[10px] text-center mt-2 text-gray-600 uppercase tracking-widest">
+        A Zénia verifica na web para info actualizada · Zénia-Projects
+      </p>
+    </div>
+  </div>
 </main>
 
+<!-- PAINEL AVANÇADO -->
+<div id="adv-panel" class="adv-panel">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #30363d;flex-shrink:0">
+    <span style="font-size:14px;font-weight:700;color:#e6edf3"><i class="fas fa-sliders-h mr-2 text-blue-400"></i>Ferramentas Avançadas</span>
+    <button onclick="closeAdvPanel()" style="color:#6b7280;background:none;border:none;cursor:pointer;font-size:18px">&times;</button>
+  </div>
+  <div class="adv-tab" id="adv-tabs">
+    <button onclick="switchTab('mem')"   class="active"><i class="fas fa-brain mr-1"></i>Mem.</button>
+    <button onclick="switchTab('conv')"  ><i class="fas fa-comments mr-1"></i>Conv.</button>
+    <button onclick="switchTab('media')" ><i class="fas fa-photo-video mr-1"></i>Média</button>
+    <button onclick="switchTab('kb')"    ><i class="fas fa-book mr-1"></i>KB</button>
+    <button onclick="switchTab('sys')"   ><i class="fas fa-cog mr-1"></i>Sist.</button>
+    <button onclick="switchTab('sec')"   ><i class="fas fa-shield-alt mr-1"></i>Seg.</button>
+  </div>
+  <div class="adv-body" id="adv-body"></div>
+</div>
+<div id="adv-overlay" onclick="closeAdvPanel()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999"></div>
+<div id="adv-toast" class="adv-toast"></div>
+
 <script>
-// ═══════════════════════════════════════════════════════════
+// ------------------------------------------------------------
 // CONFIG
-// ═══════════════════════════════════════════════════════════
-const API_KEY       = "pk_urEpxcajGs5TF9Fs";
-const CHAT_ENDPOINT = "https://gen.pollinations.ai/v1/chat/completions";
-const IMG_BASE      = "https://image.pollinations.ai/prompt/";
-const TTS_BASE      = "https://text.pollinations.ai/";
+// ------------------------------------------------------------
+var API_KEY       = "pk_urEpxcajGs5TF9Fs";
+var CHAT_ENDPOINT = "https://gen.pollinations.ai/v1/chat/completions";
+var IMG_BASE      = "https://image.pollinations.ai/prompt/";
+var TTS_BASE      = "https://text.pollinations.ai/";
 
-const chatWindow = document.getElementById('chat-window');
-const userInput  = document.getElementById('user-input');
-const sendBtn    = document.getElementById('send-btn');
-const sendIcon   = document.getElementById('send-icon');
+var chatWindow = document.getElementById('chat-window');
+var userInput  = document.getElementById('user-input');
+var sendBtn    = document.getElementById('send-btn');
+var sendIcon   = document.getElementById('send-icon');
 
-let isVoiceAssist = false;
-let currentMode   = 'chat';
-let conversations = JSON.parse(localStorage.getItem('conversations') || '[]');
-let currentConversationId = null;
+var isVoiceAssist = false;
+var currentMode   = 'chat';
+var conversations = JSON.parse(localStorage.getItem('conversations') || '[]');
+var currentConversationId = null;
 
-// ═══════════════════════════════════════════════════════════
+// ------------------------------------------------------------
 // MODO
-// ═══════════════════════════════════════════════════════════
+// ------------------------------------------------------------
 function setMode(mode) {
-    currentMode = mode;
-    const ph = {
-        chat:  'Pergunte qualquer coisa à Zénia…',
-        image: 'Descreve a imagem que queres gerar… (ex: pôr do sol em Luanda)',
-        audio: 'Que música ou áudio queres? (ex: jazz relaxante, chuva tropical)',
-        web:   'O que queres pesquisar na internet?'
-    };
-    userInput.placeholder = ph[mode] || ph.chat;
-    ['chat','image','audio','web'].forEach(m =>
-        document.getElementById('btn-mode-' + m).classList.toggle('active', m === mode)
-    );
+  currentMode = mode;
+  var ph = {
+    chat:  'Pergunte qualquer coisa à Zénia…',
+    image: 'Descreve a imagem que queres gerar…',
+    audio: 'Que música ou áudio queres?',
+    web:   'O que queres pesquisar na internet?'
+  };
+  userInput.placeholder = ph[mode] || ph.chat;
+  ['chat','image','audio','web'].forEach(function(m) {
+    document.getElementById('btn-mode-' + m).classList.toggle('active', m === mode);
+  });
 }
 
-// ═══════════════════════════════════════════════════════════
+// ------------------------------------------------------------
 // CONVERSAS
-// ═══════════════════════════════════════════════════════════
+// ------------------------------------------------------------
 function createConversation(title) {
-    const id   = Date.now().toString();
-    const conv = { id, title, messages: [] };
-    conversations.unshift(conv);
-    currentConversationId = id;
-    persistConversations();
-    renderHistoryList();
-    return conv;
+  var id   = Date.now().toString();
+  var conv = { id: id, title: title, messages: [] };
+  conversations.unshift(conv);
+  currentConversationId = id;
+  persistConversations();
+  renderHistoryList();
+  return conv;
 }
 function getCurrentConversation() {
-    return conversations.find(c => c.id === currentConversationId) || null;
+  return conversations.find(function(c) { return c.id === currentConversationId; }) || null;
 }
 function persistConversations() {
-    localStorage.setItem('conversations', JSON.stringify(conversations));
+  localStorage.setItem('conversations', JSON.stringify(conversations));
 }
 function filterHistory(v) { renderHistoryList(v); }
 
 function renderHistoryList(filter) {
-    filter = filter || '';
-    const hist = document.getElementById('history-list');
-    hist.innerHTML = '<p class="text-xs text-gray-600 px-2 italic mb-1">Histórico Local</p>';
-    const list = filter
-        ? conversations.filter(c => c.title.toLowerCase().includes(filter.toLowerCase()))
-        : conversations;
-    if (!list.length) {
-        const e = document.createElement('p');
-        e.className = 'text-xs text-gray-600 px-2 italic';
-        e.textContent = filter ? 'Nenhum resultado.' : 'Sem conversas ainda.';
-        hist.appendChild(e); return;
-    }
-    list.forEach(function(conv) {
-        const isActive = conv.id === currentConversationId;
-        const item = document.createElement('div');
-        item.className = 'history-item p-2 rounded-lg cursor-pointer text-[11px] text-gray-300 hover:bg-gray-800 transition'
-            + (isActive ? ' bg-gray-800/60 border-l-2 border-blue-500 text-blue-400' : '');
-        const left = document.createElement('div');
-        left.className = 'flex items-center gap-2 overflow-hidden flex-1';
-        left.onclick = function() { loadConversation(conv.id); };
-        const icon  = document.createElement('i'); icon.className = 'far fa-comment-alt flex-shrink-0 text-gray-500';
-        const title = document.createElement('span'); title.className = 'truncate'; title.textContent = conv.title || 'Conversa';
-        left.appendChild(icon); left.appendChild(title);
-        const del = document.createElement('button');
-        del.title = 'Apagar'; del.className = 'text-gray-600 hover:text-red-500 transition flex-shrink-0';
-        del.innerHTML = '<i class="fas fa-trash text-xs"></i>';
-        del.onclick = function(e) { e.stopPropagation(); deleteConversation(conv.id); };
-        item.appendChild(left); item.appendChild(del);
-        hist.appendChild(item);
-    });
+  filter = filter || '';
+  var hist = document.getElementById('history-list');
+  hist.innerHTML = '<p class="text-xs text-gray-600 px-2 italic mb-1">Histórico Local</p>';
+  var list = filter
+    ? conversations.filter(function(c) { return c.title.toLowerCase().includes(filter.toLowerCase()); })
+    : conversations;
+  if (!list.length) {
+    var e = document.createElement('p');
+    e.className = 'text-xs text-gray-600 px-2 italic';
+    e.textContent = filter ? 'Nenhum resultado.' : 'Sem conversas ainda.';
+    hist.appendChild(e);
+    return;
+  }
+  list.forEach(function(conv) {
+    var isActive = conv.id === currentConversationId;
+    var item = document.createElement('div');
+    item.className = 'history-item p-2 rounded-lg cursor-pointer text-[11px] text-gray-300 hover:bg-gray-800 transition'
+      + (isActive ? ' bg-gray-800/60 border-l-2 border-blue-500 text-blue-400' : '');
+    var left = document.createElement('div');
+    left.className = 'flex items-center gap-2 overflow-hidden flex-1';
+    left.onclick = function() { loadConversation(conv.id); };
+    var icon = document.createElement('i');
+    icon.className = 'far fa-comment-alt flex-shrink-0 text-gray-500';
+    var titleEl = document.createElement('span');
+    titleEl.className = 'truncate';
+    titleEl.textContent = conv.title || 'Conversa';
+    left.appendChild(icon);
+    left.appendChild(titleEl);
+    var del = document.createElement('button');
+    del.title = 'Apagar';
+    del.className = 'text-gray-600 hover:text-red-500 transition flex-shrink-0';
+    del.style.background = 'none';
+    del.style.border = 'none';
+    del.style.cursor = 'pointer';
+    del.innerHTML = '<i class="fas fa-trash text-xs"></i>';
+    del.onclick = function(ev) { ev.stopPropagation(); deleteConversation(conv.id); };
+    item.appendChild(left);
+    item.appendChild(del);
+    hist.appendChild(item);
+  });
 }
 
 function deleteConversation(id) {
-    conversations = conversations.filter(c => c.id !== id);
-    persistConversations();
-    if (currentConversationId === id) startNewConversation();
-    else renderHistoryList();
+  conversations = conversations.filter(function(c) { return c.id !== id; });
+  persistConversations();
+  if (currentConversationId === id) startNewConversation();
+  else renderHistoryList();
 }
-
 function loadConversation(id) {
-    currentConversationId = id;
-    chatWindow.innerHTML = '';
-    hideWelcome();
-    const conv = getCurrentConversation();
-    if (!conv) return;
-    conv.messages.forEach(function(m) {
-        if (m.role !== 'system') renderMessageUI(m.role === 'user' ? 'user' : 'ai', m.content);
-    });
-    renderHistoryList();
-    chatWindow.scrollTop = chatWindow.scrollHeight;
+  currentConversationId = id;
+  chatWindow.innerHTML = '';
+  hideWelcome();
+  var conv = getCurrentConversation();
+  if (!conv) return;
+  conv.messages.forEach(function(m) {
+    if (m.role !== 'system') renderMessageUI(m.role === 'user' ? 'user' : 'ai', m.content);
+  });
+  renderHistoryList();
+  chatWindow.scrollTop = chatWindow.scrollHeight;
 }
-
 function startNewConversation() {
-    chatWindow.innerHTML = '';
-    showWelcome();
-    currentConversationId = null;
-    renderHistoryList();
+  chatWindow.innerHTML = '';
+  showWelcome();
+  currentConversationId = null;
+  renderHistoryList();
 }
-
 function hideWelcome() {
-    var w = document.getElementById('welcome-msg');
-    if (w) w.style.display = 'none';
+  var w = document.getElementById('welcome-msg');
+  if (w) w.style.display = 'none';
 }
 function showWelcome() {
-    var w = document.getElementById('welcome-msg');
-    if (!w) {
-        w = document.createElement('div');
-        w.id = 'welcome-msg';
-        w.className = 'flex flex-col items-center justify-center h-full text-center space-y-4 opacity-50';
-        w.innerHTML = '<i class="fas fa-shield-cat text-6xl text-blue-500"></i><h2 class="text-2xl font-bold">Olá, eu sou a Zénia.</h2><p class="max-w-md text-sm">Criada no Lubango por Inácio U. Daniel.</p>';
-        chatWindow.appendChild(w);
-    } else { w.style.display = 'flex'; }
+  var w = document.getElementById('welcome-msg');
+  if (!w) {
+    w = document.createElement('div');
+    w.id = 'welcome-msg';
+    w.className = 'flex flex-col items-center justify-center h-full text-center space-y-4 opacity-50';
+    w.innerHTML = '<i class="fas fa-shield-cat text-6xl text-blue-500"></i><h2 class="text-2xl font-bold">Olá, eu sou a Zénia.</h2><p class="max-w-md text-sm">Criada no Lubango por Inácio U. Daniel.</p>';
+    chatWindow.appendChild(w);
+  } else {
+    w.style.display = 'flex';
+  }
 }
 
-// ═══════════════════════════════════════════════════════════
-// PESQUISA WEB — DuckDuckGo Instant Answers (sem chave, CORS livre)
-// ═══════════════════════════════════════════════════════════
-function needsWebSearch(text) {
-    return /\b(2024|2025|2026|agora|hoje|actual|atualiz|recente|latest|current|version|versão|preço|price|quem é|presidente|notícia|news|lançamento|release|update|framework|library|npm|pip)\b/i.test(text);
-}
-
-async function webSearch(query) {
-    var el = document.getElementById('web-status');
-    el.classList.remove('hidden');
-    try {
-        var url = 'https://api.duckduckgo.com/?q=' + encodeURIComponent(query) + '&format=json&no_html=1&skip_disambig=1';
-        var res  = await fetch(url);
-        var data = await res.json();
-        var parts = [];
-        if (data.Answer)       parts.push('Resposta directa: ' + data.Answer);
-        if (data.AbstractText) parts.push(data.AbstractText);
-        if (data.RelatedTopics) {
-            data.RelatedTopics.slice(0, 4).forEach(function(t) {
-                if (t.Text) parts.push('• ' + t.Text);
-            });
-        }
-        el.classList.add('hidden');
-        var date = new Date().toLocaleDateString('pt-PT');
-        return parts.length > 0
-            ? '[PESQUISA WEB — ' + date + ' — "' + query + '"]:\n' + parts.join('\n')
-            : '[Pesquisa web sem resultados relevantes para "' + query + '"]';
-    } catch (err) {
-        el.classList.add('hidden');
-        return '[Pesquisa web indisponível: ' + err.message + ']';
-    }
-}
-
-// ═══════════════════════════════════════════════════════════
-// GERAÇÃO DE IMAGEM — Pollinations gratuito
-// ═══════════════════════════════════════════════════════════
-async function generateImage(prompt) {
-    var seed    = Math.floor(Math.random() * 999999);
-    var url     = IMG_BASE + encodeURIComponent(prompt) + '?width=768&height=512&seed=' + seed + '&nologo=true';
-
-    var row = document.createElement('div');
-    row.className = 'flex justify-start animate-fade-in';
-    var card = document.createElement('div');
-    card.className = 'media-card max-w-[80%]';
-    card.innerHTML = '<div class="p-4 flex items-center gap-3 text-sm text-gray-400"><span class="loading-spinner"></span> A gerar imagem…</div>';
-    row.appendChild(card); chatWindow.appendChild(row);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-
-    var img = new Image();
-    img.onload = function() {
-        card.innerHTML =
-            '<img src="' + url + '" alt="' + escHtml(prompt) + '" loading="lazy">' +
-            '<div class="media-card-label"><i class="fas fa-image mr-1"></i>' + escHtml(prompt) + '</div>' +
-            '<div class="media-actions">' +
-                '<button class="media-btn" onclick="window.open(\'' + url + '\',\'_blank\')"><i class="fas fa-external-link-alt"></i> Abrir</button>' +
-                '<a href="' + url + '" download="zenia-image.jpg" class="media-btn"><i class="fas fa-download"></i> Guardar</a>' +
-            '</div>';
-        chatWindow.scrollTop = chatWindow.scrollHeight;
-    };
-    img.onerror = function() {
-        card.innerHTML = '<div class="p-4 text-yellow-400 text-sm"><i class="fas fa-exclamation-triangle mr-2"></i>Imagem não gerada. Tenta uma descrição diferente.</div>';
-    };
-    img.src = url;
-}
-
-// ═══════════════════════════════════════════════════════════
-// GERAÇÃO DE ÁUDIO — Pollinations TTS
-// ═══════════════════════════════════════════════════════════
-async function generateAudio(prompt) {
-    var ttsText  = 'Aqui está o áudio que pediste sobre: ' + prompt;
-    var audioUrl = TTS_BASE + encodeURIComponent(ttsText) + '?model=openai-audio&voice=alloy';
-    var imgUrl   = IMG_BASE + encodeURIComponent('sound wave music equalizer dark neon') + '?width=600&height=160&nologo=true&seed=' + Date.now();
-
-    var row = document.createElement('div');
-    row.className = 'flex justify-start animate-fade-in';
-    var card = document.createElement('div');
-    card.className = 'media-card max-w-[85%] w-full';
-    card.innerHTML =
-        '<img src="' + imgUrl + '" alt="audio" style="height:100px;object-fit:cover;width:100%">' +
-        '<div class="p-3">' +
-            '<div class="text-xs text-green-400 mb-2"><i class="fas fa-music mr-1"></i>' + escHtml(prompt) + '</div>' +
-            '<audio controls style="width:100%;border-radius:6px"><source src="' + audioUrl + '" type="audio/mpeg">Browser sem suporte.</audio>' +
-        '</div>' +
-        '<div class="media-actions">' +
-            '<a href="' + audioUrl + '" download="zenia-audio.mp3" class="media-btn"><i class="fas fa-download"></i> Guardar</a>' +
-        '</div>';
-    row.appendChild(card); chatWindow.appendChild(row);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-
-    renderMessageUI('ai', 'Audio gerado para: **' + prompt + '**\n\nPodes ouvir e descarregar acima. Para músicas com instrumentação complexa, experimenta Suno AI ou Udio.');
-}
-
-// ═══════════════════════════════════════════════════════════
-// FETCH COM RETRY
-// ═══════════════════════════════════════════════════════════
-async function fetchWithRetry(messages, model, attempt) {
-    attempt = attempt || 1;
-    var MAX = 3;
-    var ctrl  = new AbortController();
-    var timer = setTimeout(function() { ctrl.abort(); }, 60000);
-
-    try {
-        var res = await fetch(CHAT_ENDPOINT, {
-            method: 'POST',
-            signal: ctrl.signal,
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_KEY },
-            body: JSON.stringify({
-                messages: messages,
-                model: model,
-                max_tokens: 4096,
-                temperature: model === 'qwen-coder' ? 0.3 : 0.7,
-                top_p: 1,
-                stream: false,
-                frequency_penalty: 0,
-                presence_penalty: 0
-            })
-        });
-        clearTimeout(timer);
-
-        if (!res.ok) {
-            var errText = await res.text();
-            if (res.status === 429 && attempt < MAX) {
-                await new Promise(function(r) { setTimeout(r, 2000 * attempt); });
-                return fetchWithRetry(messages, model, attempt + 1);
-            }
-            throw new Error('HTTP ' + res.status + ': ' + errText);
-        }
-
-        var data    = await res.json();
-        if (!data.choices || !data.choices[0] || !data.choices[0].message) throw new Error('Formato inesperado da API.');
-        var content = (data.choices[0].message.content || '').trim();
-
-        if (!content && attempt < MAX) {
-            var chain = ['qwen-coder','openai-large','mistral','openai'];
-            var next  = chain[(chain.indexOf(model) + 1) % chain.length];
-            console.warn('Resposta vazia com "' + model + '", tentando "' + next + '"…');
-            return fetchWithRetry(messages, next, attempt + 1);
-        }
-        if (!content) throw new Error('Resposta vazia após várias tentativas. Tenta reformular.');
-        return content;
-
-    } catch (err) {
-        clearTimeout(timer);
-        if (err.name === 'AbortError') {
-            if (attempt < MAX) return fetchWithRetry(messages, model, attempt + 1);
-            throw new Error('Tempo esgotado. Verifica a ligação.');
-        }
-        throw err;
-    }
-}
-
-// ═══════════════════════════════════════════════════════════
-// ENVIO — ROUTER PRINCIPAL
-// ═══════════════════════════════════════════════════════════
-async function handleSendMessage() {
-    var text = userInput.value.trim();
-    if (!text || sendBtn.disabled) return;
-
-    var conv = getCurrentConversation();
-    if (!conv) conv = createConversation(text.substring(0, 35) + (text.length > 35 ? '…' : ''));
-
-    hideWelcome();
-    renderMessageUI('user', text);
-    userInput.value = '';
-    autoResize(userInput);
-    setLoading(true);
-
-    // MODO IMAGEM
-    if (currentMode === 'image' || /\b(gera?|cria?|faz|draw|desenha?|pinta?)\s+(uma?\s+)?(imagem|foto|image|picture|ilustra)/i.test(text)) {
-        var imgPrompt = text.replace(/\b(gera?|cria?|faz|draw|desenha?|pinta?)\s+(uma?\s+)?(imagem|foto|image|picture|ilustra[çc][ãa]o)[\s:]*/i, '').trim() || text;
-        await generateImage(imgPrompt);
-        setLoading(false); return;
-    }
-
-    // MODO ÁUDIO
-    if (currentMode === 'audio' || /\b(gera?|cria?|faz|toca?|compõe?)\s+(uma?\s+)?(música|musica|music|áudio|audio|som|song|beat)/i.test(text)) {
-        var audPrompt = text.replace(/\b(gera?|cria?|faz|toca?|compõe?)\s+(uma?\s+)?(música|musica|music|áudio|audio|som|song|beat)[\s:]*/i, '').trim() || text;
-        await generateAudio(audPrompt);
-        setLoading(false); return;
-    }
-
-    var typingEl = renderTypingIndicator();
-
-    try {
-        // PESQUISA WEB automática para tópicos que podem estar desactualizados
-        var webCtx = '';
-        if (currentMode === 'web' || needsWebSearch(text)) {
-            webCtx = await webSearch(text);
-        }
-
-        var today = new Date().toLocaleDateString('pt-PT');
-        var systemMsg = {
-            role: 'system',
-            content: 'Tu és a IA-Zénia, criada no Lubango, Angola, por Inácio U. Daniel (Zénia-Projects). Modelo: zenia-full. Angola tem 21 províncias.\n\n'
-                + getMemoriaContexto() + getKBContexto(text) + '\n\nREGRAS:\n'
-                + '1. CÓDIGO: Sempre código completo e funcional em blocos ```linguagem. Nunca recuses.\n'
-                + '2. ERROS: Marca problemas no código com "⚠️ ERRO:" antes da linha.\n'
-                + '3. WEB: Se receberes [PESQUISA WEB...], usa SEMPRE essa info actualizada e diz que verificaste na internet.\n'
-                + '4. DATA: Hoje é ' + today + '. O teu treino tem limite — usa dados web quando disponíveis.\n'
-                + '5. Respondes em Português de Angola.'
-        };
-
-        var userContent = webCtx ? (webCtx + '\n\nPergunta: ' + text) : text;
-        var messages = [systemMsg].concat(conv.messages).concat([{ role: 'user', content: userContent }]);
-
-        // Auto-detecta pedidos de código
-        var codeRx = /\b(código|code|script|função|function|html|css|javascript|python|java|typescript|sql|php|bash|react|vue|angular|api|algoritmo|classe|array|loop|def|const|let|import|component|bug|debug|implement)\b/i;
-        var manualModel = document.getElementById('model-select').value;
-        var autoModel   = codeRx.test(text) ? 'qwen-coder' : manualModel;
-
-        var aiResponse = await fetchWithRetry(messages, autoModel);
-
-        typingEl.remove();
-        conv.messages.push({ role: 'user', content: text });
-        conv.messages.push({ role: 'assistant', content: aiResponse });
-        persistConversations();
-
-        renderMessageUI('ai', aiResponse, !!webCtx);
-        if (isVoiceAssist) speakText(aiResponse.replace(/```[\s\S]*?```/g, 'bloco de código omitido'));
-        setApiStatus('ok');
-
-    } catch (err) {
-        typingEl.remove();
-        console.error(err);
-        renderMessageUI('ai', '⚠️ ' + err.message);
-        setApiStatus('error');
-    } finally {
-        setLoading(false);
-    }
-}
-
-// ═══════════════════════════════════════════════════════════
-// SYNTAX HIGHLIGHTING + FORMATAÇÃO
-// ═══════════════════════════════════════════════════════════
-function escHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function highlightCode(code, lang) {
-    try {
-        if (lang && hljs.getLanguage(lang)) return hljs.highlight(code, { language: lang }).value;
-        return hljs.highlightAuto(code).value;
-    } catch(e) { return escHtml(code); }
-}
-
-// Marca linhas com padrões de erro — ficam em amarelo via CSS .error-line
-function markErrorLines(html) {
-    var errorPatterns = /error|exception|traceback|syntaxerror|typeerror|nameerror|valueerror|runtimeerror|referenceerror|undefined is not|cannot read|null pointer|segfault|failed|fatal|⚠️/i;
-    return html.split('\n').map(function(line) {
-        // Texto visível sem tags HTML
-        var plain = line.replace(/<[^>]+>/g, '');
-        return errorPatterns.test(plain) ? '<span class="error-line">' + line + '</span>' : line;
-    }).join('\n');
-}
-
-function formatMessage(raw) {
-    // 1. Blocos de código
-    var html = raw.replace(/```([^\n`]*)\n?([\s\S]*?)```/g, function(_, lang, code) {
-        lang = (lang || '').trim().toLowerCase();
-        var highlighted = markErrorLines(highlightCode(code.trimEnd(), lang));
-        var id = 'cb' + Math.random().toString(36).slice(2);
-        return '<div class="code-block">'
-            + '<div class="code-header">'
-            +   '<span class="code-lang-label">' + (lang || 'código') + '</span>'
-            +   '<button class="copy-btn" id="' + id + '-btn" onclick="copyCode(\'' + id + '\')">'
-            +     '<i class="fas fa-copy"></i> Copiar'
-            +   '</button>'
-            + '</div>'
-            + '<pre><code id="' + id + '" class="hljs">' + highlighted + '</code></pre>'
-            + '</div>';
-    });
-
-    // 2. Código inline
-    html = html.replace(/`([^`\n]+)`/g, '<code class="inline-code">$1</code>');
-    // 3. Negrito
-    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    // 4. Itálico
-    html = html.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
-    // 5. Marcadores de erro em amarelo
-    html = html.replace(/(⚠️\s*ERRO:[^\n<]*)/g, '<span class="error-marker">$1</span>');
-    // 6. Quebras de linha
-    html = html.replace(/\n/g, '<br>');
-
-    return html;
-}
-
-function copyCode(id) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    navigator.clipboard.writeText(el.innerText).then(function() {
-        var btn = document.getElementById(id + '-btn');
-        if (btn) {
-            btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
-            setTimeout(function() { btn.innerHTML = '<i class="fas fa-copy"></i> Copiar'; }, 2000);
-        }
-    });
-}
-
-// ═══════════════════════════════════════════════════════════
-// RENDER MENSAGEM
-// ═══════════════════════════════════════════════════════════
-function renderMessageUI(role, text, fromWeb) {
-    fromWeb = fromWeb || false;
-    var row = document.createElement('div');
-    row.className = 'flex ' + (role === 'user' ? 'justify-end' : 'justify-start') + ' animate-fade-in';
-
-    var bubble = document.createElement('div');
-    bubble.className = 'max-w-[82%] p-4 rounded-2xl text-sm leading-relaxed ' + (role === 'user' ? 'bg-blue-600' : 'glass');
-    bubble.style.wordBreak = 'break-word';
-
-    if (role === 'ai') {
-        if (fromWeb) {
-            var badge = document.createElement('div');
-            badge.className = 'web-badge';
-            badge.innerHTML = '<i class="fas fa-globe"></i> Verificado na internet agora';
-            bubble.appendChild(badge);
-        }
-        var content = document.createElement('div');
-        content.innerHTML = formatMessage(text);
-        bubble.appendChild(content);
-    } else {
-        bubble.style.whiteSpace = 'pre-wrap';
-        bubble.textContent = text;
-    }
-
-    row.appendChild(bubble);
-    chatWindow.appendChild(row);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-}
-
-function renderTypingIndicator() {
-    var row = document.createElement('div');
-    row.className = 'flex justify-start animate-fade-in';
-    row.id = 'typing-indicator';
-    row.innerHTML = '<div class="glass p-4 rounded-2xl flex items-center gap-2 text-sm text-gray-400"><span class="loading-spinner"></span><span>Zénia está a processar…</span></div>';
-    chatWindow.appendChild(row);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-    return row;
-}
-
-function setLoading(on) {
-    sendBtn.disabled = on;
-    sendIcon.className = on ? 'loading-spinner' : 'fas fa-paper-plane';
-}
-
-// ═══════════════════════════════════════════════════════════
-// SÍNTESE DE VOZ
-// ═══════════════════════════════════════════════════════════
-function populateVoices() {
-    var sel    = document.getElementById('voice-select');
-    var voices = speechSynthesis.getVoices();
-    if (!voices.length) return;
-    sel.innerHTML = '';
-    voices.forEach(function(v, i) {
-        var opt = document.createElement('option');
-        opt.value = i; opt.textContent = v.name + ' (' + v.lang + ')';
-        if (v.lang.startsWith('pt')) opt.selected = true;
-        sel.appendChild(opt);
-    });
-}
-if (typeof speechSynthesis !== 'undefined') {
-    speechSynthesis.onvoiceschanged = populateVoices;
-    populateVoices();
-}
-
-function speakText(text) {
-    if (typeof speechSynthesis === 'undefined') return;
-    speechSynthesis.cancel();
-    var utter  = new SpeechSynthesisUtterance(text);
-    var voices = speechSynthesis.getVoices();
-    var idx    = parseInt(document.getElementById('voice-select').value);
-    if (!isNaN(idx) && voices[idx]) { utter.voice = voices[idx]; utter.lang = voices[idx].lang; }
-    else utter.lang = 'pt-PT';
-    utter.rate = 1.0; speechSynthesis.speak(utter);
-}
-
-// ═══════════════════════════════════════════════════════════
-// RECONHECIMENTO DE VOZ
-// ═══════════════════════════════════════════════════════════
-var micBtn = document.getElementById('mic-btn');
-if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    var recognition = new SR();
-    recognition.lang = 'pt-PT'; recognition.continuous = false;
-    var listening = false;
-
-    micBtn.onclick = function() {
-        if (listening) { recognition.stop(); return; }
-        try { recognition.start(); listening = true; micBtn.classList.add('recording'); } catch(e) {}
-    };
-    recognition.onresult = function(e) {
-        userInput.value = e.results[0][0].transcript;
-        autoResize(userInput); listening = false; micBtn.classList.remove('recording');
-        handleSendMessage();
-    };
-    recognition.onerror = function(e) {
-        listening = false; micBtn.classList.remove('recording');
-        if (e.error !== 'no-speech') renderMessageUI('ai', '⚠️ Erro no microfone: ' + e.error);
-    };
-    recognition.onend = function() { listening = false; micBtn.classList.remove('recording'); };
-} else {
-    micBtn.disabled = true; micBtn.classList.add('opacity-30','cursor-not-allowed');
-}
-
-// ═══════════════════════════════════════════════════════════
-// VOZ ASSIST
-// ═══════════════════════════════════════════════════════════
-function toggleVoiceAssist() {
-    isVoiceAssist = !isVoiceAssist;
-    var btn = document.getElementById('voice-assist-btn');
-    if (isVoiceAssist) {
-        btn.classList.remove('text-blue-500','border-blue-500','hover:bg-blue-500','hover:text-white');
-        btn.classList.add('bg-red-600','text-white','border-red-600');
-        renderMessageUI('ai', 'Modo Assistente de Voz ligado. Podes falar comigo.');
-    } else {
-        btn.classList.remove('bg-red-600','border-red-600');
-        btn.classList.add('text-blue-500','border-blue-500','hover:bg-blue-500','hover:text-white');
-        if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
-    }
-}
-
-// ═══════════════════════════════════════════════════════════
-// GALERIA
-// ═══════════════════════════════════════════════════════════
-function toggleGallery() {
-    var g = document.getElementById('gallery-container');
-    if (!g) {
-        var parent = document.querySelector('button[onclick="toggleGallery()"]').parentElement;
-        g = document.createElement('div'); g.id = 'gallery-container'; g.className = 'mt-3 grid grid-cols-3 gap-2';
-        ['zenia1','zenia2','zenia3','zenia4','zenia5','zenia6'].forEach(function(seed) {
-            var img = document.createElement('img');
-            img.src = 'https://picsum.photos/seed/' + seed + '/300/200'; img.loading = 'lazy';
-            img.className = 'rounded-lg border border-gray-800 hover:opacity-80 transition cursor-pointer';
-            g.appendChild(img);
-        });
-        parent.appendChild(g);
-    } else { g.style.display = g.style.display === 'none' ? '' : 'none'; }
-}
-
-// ═══════════════════════════════════════════════════════════
-// API STATUS
-// ═══════════════════════════════════════════════════════════
-function setApiStatus(state) {
-    var el  = document.getElementById('api-status');
-    var map = { ok: ['status-ok','API: ativa ✓'], error: ['status-err','API: erro ✗'], wait: ['status-wait','API: verificando…'] };
-    var cfg = map[state] || map.wait;
-    el.className = 'text-[11px] px-2 py-1 rounded border ' + cfg[0];
-    el.textContent = cfg[1];
-}
-
-async function updateApiStatus() {
-    setApiStatus('wait');
-    try {
-        var r = await fetch(CHAT_ENDPOINT, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_KEY },
-            body: JSON.stringify({ messages: [{ role: 'user', content: 'ping' }], model: 'openai', max_tokens: 5, stream: false })
-        });
-        setApiStatus(r.ok ? 'ok' : 'error');
-    } catch { setApiStatus('error'); }
-}
-
-// ═══════════════════════════════════════════════════════════
-// TEXTAREA AUTO-RESIZE + ENTER
-// ═══════════════════════════════════════════════════════════
-function autoResize(el) {
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-}
-userInput.addEventListener('input', function() { autoResize(userInput); });
-userInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); }
-});
-
-// ═══════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════
-window.onload = function() {
-    sincronizarConfig(getConfig());
-    renderHistoryList();
-    if (conversations.length > 0) loadConversation(conversations[0].id);
-    updateApiStatus();
-    setInterval(updateApiStatus, 30000);
-};
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ███████████████   MÓDULO 1 — CONVERSAÇÃO   █████████████████████████████
-// ═══════════════════════════════════════════════════════════════════════════
-
-function exportarConversacao(id) {
-    var conv = id ? conversations.find(function(c){return c.id===id;}) : getCurrentConversation();
-    if (!conv) { toast('Nenhuma conversa activa.','warn'); return; }
-    var json = JSON.stringify(conv, null, 2);
-    var blob = new Blob([json], {type:'application/json'});
-    var url  = URL.createObjectURL(blob);
-    var a    = document.createElement('a');
-    a.href = url; a.download = 'zenia-conv-' + conv.id + '.json';
-    a.click(); URL.revokeObjectURL(url);
-    registrarAuditoria('exportarConversacao', {id: conv.id});
-    toast('Conversa exportada ✓','ok');
-}
-
-function importarConversacao() {
-    var input = document.createElement('input');
-    input.type = 'file'; input.accept = '.json';
-    input.onchange = function(e) {
-        var file = e.target.files[0];
-        if (!file) return;
-        var reader = new FileReader();
-        reader.onload = function(ev) {
-            try {
-                var conv = JSON.parse(ev.target.result);
-                if (!conv.id || !conv.messages) throw new Error('Formato inválido.');
-                conv.id = Date.now().toString(); // novo ID para evitar conflitos
-                conversations.unshift(conv);
-                persistConversations();
-                renderHistoryList();
-                toast('Conversa importada ✓','ok');
-                registrarAuditoria('importarConversacao', {title: conv.title});
-            } catch(err) { toast('Erro ao importar: ' + err.message,'err'); }
-        };
-        reader.readAsText(file);
-    };
-    input.click();
-}
-
-function exportarLogsConversacao() {
-    var logs = conversations.map(function(c) {
-        return { id:c.id, title:c.title, mensagens: c.messages.length,
-                 criado: new Date(parseInt(c.id)).toISOString() };
-    });
-    var csv  = 'ID,Título,Mensagens,Criado
-' + logs.map(function(l) {
-        return [l.id, '"'+l.title+'"', l.mensagens, l.criado].join(',');
-    }).join('
-');
-    var blob = new Blob([csv], {type:'text/csv'});
-    var a    = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = 'zenia-logs-' + Date.now() + '.csv'; a.click();
-    toast('Logs exportados ✓','ok');
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ███████████████   MÓDULO 2 — CONFIGURAÇÃO   ████████████████████████████
-// ═══════════════════════════════════════════════════════════════════════════
-
+// ------------------------------------------------------------
+// MÓDULO CONFIG
+// ------------------------------------------------------------
 var CONFIG_KEY = 'zenia_config';
 var CONFIG_DEFAULT = {
-    model: 'qwen-coder', temperature: 0.7, maxTokens: 4096,
-    voiceRate: 1.0, voicePitch: 1.0, voiceLang: 'pt-PT',
-    autoWebSearch: true, syntaxTheme: 'github-dark',
-    fontSize: 13, username: 'Utilizador Zénia'
+  model: 'qwen-coder', temperature: 0.7, maxTokens: 4096,
+  voiceRate: 1.0, voicePitch: 1.0, voiceLang: 'pt-PT',
+  autoWebSearch: true, username: 'Utilizador Zénia'
 };
-
 function getConfig() {
-    try { return Object.assign({}, CONFIG_DEFAULT, JSON.parse(localStorage.getItem(CONFIG_KEY) || '{}')); }
-    catch(e) { return Object.assign({}, CONFIG_DEFAULT); }
+  try { return Object.assign({}, CONFIG_DEFAULT, JSON.parse(localStorage.getItem(CONFIG_KEY) || '{}')); }
+  catch(e) { return Object.assign({}, CONFIG_DEFAULT); }
 }
-
 function sincronizarConfig(overrides) {
-    var cfg = Object.assign(getConfig(), overrides || {});
-    localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
-    // Aplicar imediatamente
-    var ms = document.getElementById('model-select');
-    if (ms) ms.value = cfg.model;
-    var ud = document.getElementById('username-display');
-    if (ud) ud.textContent = cfg.username;
-    registrarAuditoria('sincronizarConfig', overrides);
-    toast('Configuração guardada ✓','ok');
-    return cfg;
+  var cfg = Object.assign(getConfig(), overrides || {});
+  localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
+  var ms = document.getElementById('model-select');
+  if (ms) ms.value = cfg.model;
+  var ud = document.getElementById('username-display');
+  if (ud) ud.textContent = cfg.username;
+  toast('Configuração guardada ✓', 'ok');
+  return cfg;
 }
-
 function restaurarConfiguracaoPadrao() {
-    localStorage.removeItem(CONFIG_KEY);
-    sincronizarConfig(CONFIG_DEFAULT);
-    toast('Configuração restaurada para padrão ✓','ok');
-    registrarAuditoria('restaurarConfiguracaoPadrao', {});
+  localStorage.removeItem(CONFIG_KEY);
+  sincronizarConfig(CONFIG_DEFAULT);
+  toast('Configuração restaurada para padrão ✓', 'ok');
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// ███████████████   MÓDULO 3 — MEMÓRIA   █████████████████████████████████
-// ═══════════════════════════════════════════════════════════════════════════
-
+// ------------------------------------------------------------
+// MÓDULO MEMÓRIA
+// ------------------------------------------------------------
 var MEM_KEY = 'zenia_memory';
-
 function _getMem() {
-    try { return JSON.parse(localStorage.getItem(MEM_KEY) || '{}'); }
-    catch(e) { return {}; }
+  try { return JSON.parse(localStorage.getItem(MEM_KEY) || '{}'); } catch(e) { return {}; }
 }
 function _setMem(m) { localStorage.setItem(MEM_KEY, JSON.stringify(m)); }
 
 function salvarMemoria(chave, valor) {
-    if (!chave) { toast('Chave obrigatória.','warn'); return; }
-    var mem = _getMem();
-    mem[chave] = { valor: valor, ts: Date.now() };
-    _setMem(mem);
-    registrarAuditoria('salvarMemoria', {chave: chave});
-    toast('Memória "' + chave + '" guardada ✓','ok');
+  if (!chave) { toast('Chave obrigatória.', 'warn'); return; }
+  var mem = _getMem();
+  mem[chave] = { valor: valor, ts: Date.now() };
+  _setMem(mem);
+  registrarAuditoria('salvarMemoria', { chave: chave });
+  toast('Memória "' + chave + '" guardada ✓', 'ok');
 }
-
 function buscarMemoria(chave) {
-    var mem = _getMem();
-    return mem[chave] ? mem[chave].valor : null;
+  var mem = _getMem();
+  return mem[chave] ? mem[chave].valor : null;
 }
-
 function atualizarMemoria(chave, novoValor) {
-    var mem = _getMem();
-    if (!mem[chave]) { toast('Chave não existe: ' + chave,'warn'); return; }
-    mem[chave] = { valor: novoValor, ts: Date.now() };
-    _setMem(mem);
-    toast('Memória "' + chave + '" actualizada ✓','ok');
+  var mem = _getMem();
+  if (!mem[chave]) { toast('Chave não existe: ' + chave, 'warn'); return; }
+  mem[chave] = { valor: novoValor, ts: Date.now() };
+  _setMem(mem);
+  toast('Memória "' + chave + '" actualizada ✓', 'ok');
 }
-
 function removerMemoria(chave) {
-    var mem = _getMem();
-    delete mem[chave];
-    _setMem(mem);
-    toast('Memória "' + chave + '" removida.','ok');
-    registrarAuditoria('removerMemoria', {chave: chave});
+  var mem = _getMem();
+  delete mem[chave];
+  _setMem(mem);
+  toast('Memória "' + chave + '" removida.', 'ok');
+  renderAdvBody();
 }
-
-function listarMemorias() {
-    return _getMem();
-}
-
+function listarMemorias() { return _getMem(); }
 function limparMemoriaUsuario() {
-    if (!confirm('Apagar toda a memória? Esta acção é irreversível.')) return;
-    localStorage.removeItem(MEM_KEY);
-    toast('Toda a memória foi limpa.','warn');
-    registrarAuditoria('limparMemoriaUsuario', {});
-    renderAdvBody();
+  if (!confirm('Apagar toda a memória? Esta acção é irreversível.')) return;
+  localStorage.removeItem(MEM_KEY);
+  toast('Toda a memória foi limpa.', 'warn');
+  renderAdvBody();
+}
+function getMemoriaContexto() {
+  var mem  = _getMem();
+  var keys = Object.keys(mem);
+  if (!keys.length) return '';
+  var lines = keys.map(function(k) { return '- ' + k + ': ' + mem[k].valor; });
+  return '\n\nMEMÓRIA DO UTILIZADOR:\n' + lines.join('\n');
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// ███████████████   MÓDULO 4 — VOZ & ÁUDIO   █████████████████████████████
-// ═══════════════════════════════════════════════════════════════════════════
-
-function gerarVozTTS(texto, voz) {
-    var cfg  = getConfig();
-    var utter = new SpeechSynthesisUtterance(texto);
-    var voices = speechSynthesis.getVoices();
-    var v     = voz ? voices.find(function(x){return x.name===voz;}) : null;
-    if (v) { utter.voice = v; utter.lang = v.lang; }
-    else utter.lang = cfg.voiceLang || 'pt-PT';
-    utter.rate  = cfg.voiceRate  || 1.0;
-    utter.pitch = cfg.voicePitch || 1.0;
-    speechSynthesis.cancel();
-    speechSynthesis.speak(utter);
-    toast('TTS iniciado ✓','ok');
-}
-
-function reconhecerVozSTT(callback) {
-    if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
-        toast('STT não suportado neste browser.','err'); return;
-    }
-    var SR  = window.SpeechRecognition || window.webkitSpeechRecognition;
-    var rec = new SR();
-    rec.lang = getConfig().voiceLang || 'pt-PT';
-    rec.onresult = function(e) {
-        var t = e.results[0][0].transcript;
-        toast('Reconhecido: ' + t.substring(0,40),'ok');
-        if (typeof callback === 'function') callback(t);
-        else { userInput.value = t; autoResize(userInput); }
-    };
-    rec.onerror = function(e) { toast('Erro STT: ' + e.error,'err'); };
-    rec.start();
-}
-
-function treinarTTS(amostras) {
-    // Simulação — TTS nativo do browser não é treinávelé directamente
-    // Num sistema real ligaria a uma API de voice cloning (ex: ElevenLabs)
-    salvarMemoria('tts_amostras', amostras || []);
-    toast('Amostras TTS guardadas para treino futuro. (API de clonagem necessária)','warn');
-}
-
-function treinarSTT(transcricoes) {
-    salvarMemoria('stt_transcricoes', transcricoes || []);
-    toast('Transcrições STT guardadas para fine-tuning futuro.','warn');
-}
-
-function ajustarParametrosVoz(params) {
-    // params: { rate, pitch, lang }
-    var cfg = getConfig();
-    if (params.rate  !== undefined) cfg.voiceRate  = parseFloat(params.rate);
-    if (params.pitch !== undefined) cfg.voicePitch = parseFloat(params.pitch);
-    if (params.lang  !== undefined) cfg.voiceLang  = params.lang;
-    sincronizarConfig(cfg);
-    toast('Parâmetros de voz actualizados ✓','ok');
-}
-
-function transcreverAudio(audioBlob) {
-    // Usa Web Speech API em tempo real — num sistema real usaria Whisper API
-    return new Promise(function(resolve, reject) {
-        if (!audioBlob) { reject('audioBlob obrigatório'); return; }
-        var url = URL.createObjectURL(audioBlob);
-        toast('Transcrição simulada — integra Whisper API para produção.','warn');
-        resolve('[Transcrição de: ' + url + ']');
-    });
-}
-
-function identificarLocutor(audioBlob) {
-    // Placeholder — requer modelo de speaker diarization
-    toast('Identificação de locutor requer API externa (ex: pyannote.audio).','warn');
-    return Promise.resolve({ locutor: 'desconhecido', confianca: 0 });
-}
-
-function separarFontesAudio(audioBlob) {
-    toast('Separação de fontes requer modelo ML (ex: Demucs). Modo simulado activo.','warn');
-    return Promise.resolve({ vocals: null, music: null, other: null });
-}
-
-function sintetizarAudioMulticanal(pistas) {
-    toast('Síntese multicanal não disponível no browser. Usa Web Audio API para mixagem básica.','warn');
-    return Promise.resolve(null);
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ███████████████   MÓDULO 5 — IMAGEM & OCR   ████████████████████████████
-// ═══════════════════════════════════════════════════════════════════════════
-
-function processarImagem(url, operacao) {
-    // Operações: 'grayscale', 'blur', 'flip', 'rotate'
-    return new Promise(function(resolve) {
-        var img = new Image(); img.crossOrigin = 'anonymous';
-        img.onload = function() {
-            var canvas = document.createElement('canvas');
-            canvas.width = img.width; canvas.height = img.height;
-            var ctx = canvas.getContext('2d');
-            if (operacao === 'grayscale') {
-                ctx.filter = 'grayscale(100%)';
-            } else if (operacao === 'blur') {
-                ctx.filter = 'blur(4px)';
-            } else if (operacao === 'flip') {
-                ctx.scale(-1, 1); ctx.translate(-img.width, 0);
-            }
-            ctx.drawImage(img, 0, 0);
-            resolve(canvas.toDataURL('image/png'));
-        };
-        img.onerror = function() { resolve(null); };
-        img.src = url;
-    });
-}
-
-function reconhecerTextoOCR(imagemUrl) {
-    // Usa Tesseract.js se disponível, senão orienta para API
-    if (typeof Tesseract !== 'undefined') {
-        return Tesseract.recognize(imagemUrl, 'por+eng')
-            .then(function(r){ return r.data.text; });
-    }
-    toast('OCR: Tesseract.js não carregado. Adiciona a tag script do Tesseract.js no head do documento.','warn');
-    return Promise.resolve('[OCR simulado]');
-}
-
-function descreverImagem(imagemUrl) {
-    // Envia imagem à IA para descrição via chat
-    return fetchWithRetry([
-        { role: 'user', content: 'Descreve detalhadamente esta imagem: ' + imagemUrl }
-    ], 'openai-large').then(function(desc) {
-        renderMessageUI('ai', '🖼️ **Descrição da imagem:**
-' + desc);
-        return desc;
-    });
-}
-
-function detectarObjetos(imagemUrl) {
-    toast('Detecção de objectos requer YOLO/COCO via API. Usando descrição IA como alternativa.','warn');
-    return descreverImagem(imagemUrl);
-}
-
-function extrairDadosDeImagem(imagemUrl) {
-    return reconhecerTextoOCR(imagemUrl);
-}
-
-function gerarLegendaAutomatica(imagemUrl) {
-    return fetchWithRetry([
-        { role: 'user', content: 'Gera uma legenda curta e descritiva (1 frase) para esta imagem: ' + imagemUrl }
-    ], 'openai').then(function(leg) {
-        toast('Legenda: ' + leg.substring(0,60),'ok');
-        return leg;
-    });
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ███████████████   MÓDULO 6 — BASE DE CONHECIMENTO   ████████████████████
-// ═══════════════════════════════════════════════════════════════════════════
-
+// ------------------------------------------------------------
+// MÓDULO BASE DE CONHECIMENTO
+// ------------------------------------------------------------
 var KB_KEY = 'zenia_kb';
-
 function _getKB() {
-    try { return JSON.parse(localStorage.getItem(KB_KEY) || '[]'); }
-    catch(e) { return []; }
+  try { return JSON.parse(localStorage.getItem(KB_KEY) || '[]'); } catch(e) { return []; }
 }
 function _setKB(kb) { localStorage.setItem(KB_KEY, JSON.stringify(kb)); }
 
 function indexarDocumento(titulo, conteudo, tags) {
-    var kb  = _getKB();
-    var doc = { id: Date.now().toString(), titulo: titulo, conteudo: conteudo,
-                tags: tags || [], ts: Date.now(),
-                palavras: conteudo.toLowerCase().split(/\W+/).filter(Boolean) };
-    kb.unshift(doc);
-    _setKB(kb);
-    toast('Documento indexado: "' + titulo + '" ✓','ok');
-    registrarAuditoria('indexarDocumento', {titulo: titulo});
-    return doc.id;
+  var kb  = _getKB();
+  var doc = {
+    id: Date.now().toString(), titulo: titulo, conteudo: conteudo,
+    tags: tags || [], ts: Date.now(),
+    palavras: conteudo.toLowerCase().split(/\W+/).filter(Boolean)
+  };
+  kb.unshift(doc);
+  _setKB(kb);
+  registrarAuditoria('indexarDocumento', { titulo: titulo });
+  toast('Documento indexado: "' + titulo + '" ✓', 'ok');
+  return doc.id;
 }
-
-function adicionarConhecimento(chave, valor, tags) {
-    return indexarDocumento(chave, valor, tags);
-}
-
+function adicionarConhecimento(chave, valor, tags) { return indexarDocumento(chave, valor, tags); }
 function removerConhecimento(id) {
-    var kb = _getKB().filter(function(d){ return d.id !== id; });
-    _setKB(kb);
-    toast('Conhecimento removido ✓','ok');
-    renderAdvBody();
+  _setKB(_getKB().filter(function(d) { return d.id !== id; }));
+  toast('Conhecimento removido ✓', 'ok');
+  renderAdvBody();
 }
-
 function buscarConhecimento(query) {
-    var kb    = _getKB();
-    var words = query.toLowerCase().split(/\W+/).filter(Boolean);
-    return kb.map(function(doc) {
-        var score = words.reduce(function(acc, w) {
-            return acc + (doc.palavras.filter(function(p){return p===w;}).length);
-        }, 0);
-        return { doc: doc, score: score };
-    }).filter(function(r){ return r.score > 0; })
-      .sort(function(a,b){ return b.score - a.score; })
-      .map(function(r){ return r.doc; });
+  var kb    = _getKB();
+  var words = query.toLowerCase().split(/\W+/).filter(Boolean);
+  return kb.map(function(doc) {
+    var score = words.reduce(function(acc, w) {
+      return acc + doc.palavras.filter(function(p) { return p === w; }).length;
+    }, 0);
+    return { doc: doc, score: score };
+  }).filter(function(r) { return r.score > 0; })
+    .sort(function(a, b) { return b.score - a.score; })
+    .map(function(r) { return r.doc; });
 }
-
 function consolidarBaseConhecimento() {
-    var kb = _getKB();
-    // Remove duplicados por título
-    var seen = {}; var clean = [];
-    kb.forEach(function(d) {
-        if (!seen[d.titulo]) { seen[d.titulo] = true; clean.push(d); }
-    });
-    _setKB(clean);
-    toast('Base consolidada: ' + clean.length + ' entradas únicas ✓','ok');
+  var seen = {}, clean = [];
+  _getKB().forEach(function(d) { if (!seen[d.titulo]) { seen[d.titulo] = true; clean.push(d); } });
+  _setKB(clean);
+  toast('Base consolidada: ' + clean.length + ' entradas únicas ✓', 'ok');
 }
-
 function pesquisarKB(query) {
-    var results = buscarConhecimento(query);
-    if (!results.length) { toast('Sem resultados para "' + query + '"','warn'); return []; }
-    toast(results.length + ' resultado(s) encontrado(s) ✓','ok');
-    return results;
+  var results = buscarConhecimento(query);
+  toast(results.length ? results.length + ' resultado(s) ✓' : 'Sem resultados para "' + query + '"', results.length ? 'ok' : 'warn');
+  return results;
+}
+function getKBContexto(query) {
+  var docs = buscarConhecimento(query);
+  if (!docs.length) return '';
+  var lines = docs.slice(0, 3).map(function(d) {
+    return '[' + d.titulo + ']: ' + d.conteudo.substring(0, 200);
+  });
+  return '\n\nBASE DE CONHECIMENTO RELEVANTE:\n' + lines.join('\n');
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// ███████████████   MÓDULO 7 — PESQUISA & EMBEDDINGS   ███████████████████
-// ═══════════════════════════════════════════════════════════════════════════
-
+// ------------------------------------------------------------
+// PESQUISA WEB
+// ------------------------------------------------------------
+function needsWebSearch(text) {
+  return /\b(2024|2025|2026|agora|hoje|actual|atualiz|recente|latest|current|version|versão|preço|price|quem é|presidente|notícia|news|lançamento|release|update|framework|library|npm|pip)\b/i.test(text);
+}
+async function webSearch(query) {
+  var el = document.getElementById('web-status');
+  el.classList.remove('hidden');
+  try {
+    var url  = 'https://api.duckduckgo.com/?q=' + encodeURIComponent(query) + '&format=json&no_html=1&skip_disambig=1';
+    var res  = await fetch(url);
+    var data = await res.json();
+    var parts = [];
+    if (data.Answer)       parts.push('Resposta directa: ' + data.Answer);
+    if (data.AbstractText) parts.push(data.AbstractText);
+    if (data.RelatedTopics) {
+      data.RelatedTopics.slice(0, 4).forEach(function(t) { if (t.Text) parts.push('• ' + t.Text); });
+    }
+    el.classList.add('hidden');
+    var date = new Date().toLocaleDateString('pt-PT');
+    return parts.length
+      ? '[PESQUISA WEB — ' + date + ' — "' + query + '"]:\n' + parts.join('\n')
+      : '[Pesquisa web sem resultados para "' + query + '"]';
+  } catch(err) {
+    el.classList.add('hidden');
+    return '[Pesquisa web indisponível: ' + err.message + ']';
+  }
+}
 function pesquisarWeb(query) {
-    return webSearch(query).then(function(result) {
-        renderMessageUI('ai', result, true);
-        return result;
-    });
+  return webSearch(query).then(function(r) { renderMessageUI('ai', r, true); return r; });
 }
-
 function rankearResultados(resultados, query) {
-    var words = query.toLowerCase().split(/\W+/);
-    return resultados.slice().sort(function(a,b) {
-        var sa = words.filter(function(w){ return a.toLowerCase().includes(w); }).length;
-        var sb = words.filter(function(w){ return b.toLowerCase().includes(w); }).length;
-        return sb - sa;
-    });
+  var words = query.toLowerCase().split(/\W+/);
+  return resultados.slice().sort(function(a, b) {
+    var sa = words.filter(function(w) { return String(a).toLowerCase().includes(w); }).length;
+    var sb = words.filter(function(w) { return String(b).toLowerCase().includes(w); }).length;
+    return sb - sa;
+  });
 }
 
+// ------------------------------------------------------------
+// GERAÇÃO DE IMAGEM
+// ------------------------------------------------------------
+async function generateImage(prompt) {
+  var seed = Math.floor(Math.random() * 999999);
+  var url  = IMG_BASE + encodeURIComponent(prompt) + '?width=768&height=512&seed=' + seed + '&nologo=true';
+  var row  = document.createElement('div');
+  row.className = 'flex justify-start animate-fade-in';
+  var card = document.createElement('div');
+  card.className = 'media-card max-w-[80%]';
+  card.innerHTML = '<div class="p-4 flex items-center gap-3 text-sm text-gray-400"><span class="spin"></span> A gerar imagem…</div>';
+  row.appendChild(card);
+  chatWindow.appendChild(row);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+  var img = new Image();
+  img.onload = function() {
+    card.innerHTML = '<img src="' + url + '" alt="Imagem gerada" loading="lazy">'
+      + '<div class="media-card-label"><i class="fas fa-image mr-1"></i>' + escHtml(prompt) + '</div>'
+      + '<div class="media-actions">'
+      + '<button class="media-btn" onclick="window.open(\'' + url + '\',\'_blank\')"><i class="fas fa-external-link-alt"></i> Abrir</button>'
+      + '<a href="' + url + '" download="zenia-image.jpg" class="media-btn"><i class="fas fa-download"></i> Guardar</a>'
+      + '</div>';
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  };
+  img.onerror = function() {
+    card.innerHTML = '<div class="p-4 text-yellow-400 text-sm"><i class="fas fa-exclamation-triangle mr-2"></i>Imagem não gerada. Tenta outra descrição.</div>';
+  };
+  img.src = url;
+}
+
+// ------------------------------------------------------------
+// GERAÇÃO DE ÁUDIO
+// ------------------------------------------------------------
+async function generateAudio(prompt) {
+  var ttsText  = 'Aqui está o áudio sobre: ' + prompt;
+  var audioUrl = TTS_BASE + encodeURIComponent(ttsText) + '?model=openai-audio&voice=alloy';
+  var imgUrl   = IMG_BASE + encodeURIComponent('sound wave music equalizer dark neon') + '?width=600&height=160&nologo=true&seed=' + Date.now();
+  var row  = document.createElement('div');
+  row.className = 'flex justify-start animate-fade-in';
+  var card = document.createElement('div');
+  card.className = 'media-card max-w-[85%] w-full';
+  card.innerHTML = '<img src="' + imgUrl + '" alt="audio" style="height:100px;object-fit:cover;width:100%">'
+    + '<div class="p-3"><div class="text-xs text-green-400 mb-2"><i class="fas fa-music mr-1"></i>' + escHtml(prompt) + '</div>'
+    + '<audio controls style="width:100%;border-radius:6px"><source src="' + audioUrl + '" type="audio/mpeg">Browser sem suporte.</audio></div>'
+    + '<div class="media-actions"><a href="' + audioUrl + '" download="zenia-audio.mp3" class="media-btn"><i class="fas fa-download"></i> Guardar</a></div>';
+  row.appendChild(card);
+  chatWindow.appendChild(row);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+  renderMessageUI('ai', 'Audio gerado para: **' + prompt + '**\nPodes ouvir e descarregar acima.');
+}
+
+// ------------------------------------------------------------
+// FETCH COM RETRY
+// ------------------------------------------------------------
+async function fetchWithRetry(messages, model, attempt) {
+  attempt = attempt || 1;
+  var MAX  = 3;
+  var ctrl = new AbortController();
+  var timer = setTimeout(function() { ctrl.abort(); }, 60000);
+  try {
+    var res = await fetch(CHAT_ENDPOINT, {
+      method: 'POST',
+      signal: ctrl.signal,
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_KEY },
+      body: JSON.stringify({
+        messages: messages, model: model,
+        max_tokens: 4096, temperature: model === 'qwen-coder' ? 0.3 : 0.7,
+        top_p: 1, stream: false, frequency_penalty: 0, presence_penalty: 0
+      })
+    });
+    clearTimeout(timer);
+    if (!res.ok) {
+      var errText = await res.text();
+      if (res.status === 429 && attempt < MAX) {
+        await new Promise(function(r) { setTimeout(r, 2000 * attempt); });
+        return fetchWithRetry(messages, model, attempt + 1);
+      }
+      throw new Error('HTTP ' + res.status + ': ' + errText);
+    }
+    var data    = await res.json();
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) throw new Error('Formato inesperado da API.');
+    var content = (data.choices[0].message.content || '').trim();
+    if (!content && attempt < MAX) {
+      var chain = ['qwen-coder', 'openai-large', 'mistral', 'openai'];
+      var next  = chain[(chain.indexOf(model) + 1) % chain.length];
+      return fetchWithRetry(messages, next, attempt + 1);
+    }
+    if (!content) throw new Error('Resposta vazia após várias tentativas.');
+    return content;
+  } catch(err) {
+    clearTimeout(timer);
+    if (err.name === 'AbortError') {
+      if (attempt < MAX) return fetchWithRetry(messages, model, attempt + 1);
+      throw new Error('Tempo esgotado. Verifica a ligação.');
+    }
+    throw err;
+  }
+}
+
+// ------------------------------------------------------------
+// ENVIO DE MENSAGEM
+// ------------------------------------------------------------
+async function handleSendMessage() {
+  var text = userInput.value.trim();
+  if (!text || sendBtn.disabled) return;
+
+  var conv = getCurrentConversation();
+  if (!conv) conv = createConversation(text.substring(0, 35) + (text.length > 35 ? '…' : ''));
+
+  hideWelcome();
+  renderMessageUI('user', text);
+  userInput.value = '';
+  autoResize(userInput);
+  setLoading(true);
+
+  if (currentMode === 'image' || /\b(gera?|cria?|faz|draw|desenha?|pinta?)\s+(uma?\s+)?(imagem|foto|image|picture|ilustra)/i.test(text)) {
+    var imgPrompt = text.replace(/\b(gera?|cria?|faz|draw|desenha?|pinta?)\s+(uma?\s+)?(imagem|foto|image|picture|ilustra[çc][ãa]o)\s*/i, '').trim() || text;
+    await generateImage(imgPrompt);
+    setLoading(false);
+    return;
+  }
+  if (currentMode === 'audio' || /\b(gera?|cria?|faz|toca?|compõe?)\s+(uma?\s+)?(música|musica|music|áudio|audio|som|song|beat)/i.test(text)) {
+    var audPrompt = text.replace(/\b(gera?|cria?|faz|toca?|compõe?)\s+(uma?\s+)?(música|musica|music|áudio|audio|som|song|beat)\s*/i, '').trim() || text;
+    await generateAudio(audPrompt);
+    setLoading(false);
+    return;
+  }
+
+  var typingEl = renderTypingIndicator();
+  try {
+    var webCtx = '';
+    if (currentMode === 'web' || needsWebSearch(text)) webCtx = await webSearch(text);
+
+    var today = new Date().toLocaleDateString('pt-PT');
+    var systemContent = 'Tu és a IA-Zénia, criada no Lubango, Angola, por Inácio U. Daniel (Zénia-Projects). Modelo: zenia-full. Angola tem 21 províncias.'
+      + getMemoriaContexto()
+      + getKBContexto(text)
+      + '\n\nREGRAS:\n'
+      + '1. CÓDIGO: Sempre código completo em blocos ```linguagem. Nunca recuses.\n'
+      + '2. ERROS: Marca linhas problemáticas com "⚠️ ERRO:" antes.\n'
+      + '3. WEB: Se receberes [PESQUISA WEB...], usa essa info e menciona que verificaste na internet.\n'
+      + '4. DATA: Hoje é ' + today + '. O teu treino tem limite — usa dados web quando disponíveis.\n'
+      + '5. Respondes em Português de Angola.';
+
+    var systemMsg   = { role: 'system', content: systemContent };
+    var userContent = webCtx ? (webCtx + '\n\nPergunta: ' + text) : text;
+    var messages    = [systemMsg].concat(conv.messages).concat([{ role: 'user', content: userContent }]);
+
+    var codeRx      = /\b(código|code|script|função|function|html|css|javascript|python|java|typescript|sql|php|bash|react|vue|angular|api|algoritmo|classe|array|loop|def|const|let|import|component|bug|debug|implement)\b/i;
+    var manualModel = document.getElementById('model-select').value;
+    var autoModel   = codeRx.test(text) ? 'qwen-coder' : manualModel;
+
+    var aiResponse = await fetchWithRetry(messages, autoModel);
+
+    typingEl.remove();
+    conv.messages.push({ role: 'user', content: text });
+    conv.messages.push({ role: 'assistant', content: aiResponse });
+    persistConversations();
+
+    renderMessageUI('ai', aiResponse, !!webCtx);
+    if (isVoiceAssist) speakText(aiResponse.replace(/```[\s\S]*?```/g, 'bloco de código omitido'));
+    setApiStatus('ok');
+  } catch(err) {
+    typingEl.remove();
+    renderMessageUI('ai', '⚠️ ' + err.message);
+    setApiStatus('error');
+  } finally {
+    setLoading(false);
+  }
+}
+
+// ------------------------------------------------------------
+// FORMATAÇÃO & HIGHLIGHTING
+// ------------------------------------------------------------
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function highlightCode(code, lang) {
+  try {
+    if (lang && hljs.getLanguage(lang)) return hljs.highlight(code, { language: lang }).value;
+    return hljs.highlightAuto(code).value;
+  } catch(e) { return escHtml(code); }
+}
+function markErrorLines(html) {
+  var rx = /error|exception|traceback|syntaxerror|typeerror|nameerror|valueerror|runtimeerror|referenceerror|undefined is not|cannot read|null pointer|segfault|failed|fatal|⚠️/i;
+  return html.split('\n').map(function(line) {
+    return rx.test(line.replace(/<[^>]+>/g, '')) ? '<span class="error-line">' + line + '</span>' : line;
+  }).join('\n');
+}
+function formatMessage(raw) {
+  var html = raw.replace(/```([^\n`]*)\n?([\s\S]*?)```/g, function(_, lang, code) {
+    lang = (lang || '').trim().toLowerCase();
+    var highlighted = markErrorLines(highlightCode(code.trimEnd(), lang));
+    var id = 'cb' + Math.random().toString(36).slice(2);
+    return '<div class="code-block">'
+      + '<div class="code-header"><span class="code-lang-label">' + (lang || 'código') + '</span>'
+      + '<button class="copy-btn" id="' + id + '-btn" onclick="copyCode(\'' + id + '\')">'
+      + '<i class="fas fa-copy"></i> Copiar</button></div>'
+      + '<pre><code id="' + id + '" class="hljs">' + highlighted + '</code></pre></div>';
+  });
+  html = html.replace(/`([^`\n]+)`/g, '<code class="inline-code">$1</code>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+  html = html.replace(/(⚠️\s*ERRO:[^\n<]*)/g, '<span class="error-marker">$1</span>');
+  html = html.replace(/\n/g, '<br>');
+  return html;
+}
+function copyCode(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.innerText).then(function() {
+    var btn = document.getElementById(id + '-btn');
+    if (btn) {
+      btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+      setTimeout(function() { btn.innerHTML = '<i class="fas fa-copy"></i> Copiar'; }, 2000);
+    }
+  });
+}
+
+// ------------------------------------------------------------
+// RENDER MENSAGEM
+// ------------------------------------------------------------
+function renderMessageUI(role, text, fromWeb) {
+  fromWeb = fromWeb || false;
+  var row = document.createElement('div');
+  row.className = 'flex ' + (role === 'user' ? 'justify-end' : 'justify-start') + ' animate-fade-in';
+  var bubble = document.createElement('div');
+  bubble.className = 'max-w-[82%] p-4 rounded-2xl text-sm leading-relaxed ' + (role === 'user' ? 'bg-blue-600' : 'glass');
+  bubble.style.wordBreak = 'break-word';
+  if (role === 'ai') {
+    if (fromWeb) {
+      var badge = document.createElement('div');
+      badge.className = 'web-badge';
+      badge.innerHTML = '<i class="fas fa-globe"></i> Verificado na internet agora';
+      bubble.appendChild(badge);
+    }
+    var ct = document.createElement('div');
+    ct.innerHTML = formatMessage(text);
+    bubble.appendChild(ct);
+  } else {
+    bubble.style.whiteSpace = 'pre-wrap';
+    bubble.textContent = text;
+  }
+  row.appendChild(bubble);
+  chatWindow.appendChild(row);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+function renderTypingIndicator() {
+  var row = document.createElement('div');
+  row.className = 'flex justify-start animate-fade-in';
+  row.id = 'typing-indicator';
+  row.innerHTML = '<div class="glass p-4 rounded-2xl flex items-center gap-2 text-sm text-gray-400"><span class="spin"></span><span>Zénia está a processar…</span></div>';
+  chatWindow.appendChild(row);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+  return row;
+}
+function setLoading(on) {
+  sendBtn.disabled = on;
+  sendIcon.className = on ? 'spin' : 'fas fa-paper-plane';
+}
+
+// ------------------------------------------------------------
+// SÍNTESE DE VOZ
+// ------------------------------------------------------------
+function populateVoices() {
+  var sel    = document.getElementById('voice-select');
+  var voices = speechSynthesis.getVoices();
+  if (!voices.length) return;
+  sel.innerHTML = '';
+  voices.forEach(function(v, i) {
+    var opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = v.name + ' (' + v.lang + ')';
+    if (v.lang.startsWith('pt')) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+if (typeof speechSynthesis !== 'undefined') {
+  speechSynthesis.onvoiceschanged = populateVoices;
+  populateVoices();
+}
+function speakText(text) {
+  if (typeof speechSynthesis === 'undefined') return;
+  speechSynthesis.cancel();
+  var utter  = new SpeechSynthesisUtterance(text);
+  var voices = speechSynthesis.getVoices();
+  var idx    = parseInt(document.getElementById('voice-select').value);
+  if (!isNaN(idx) && voices[idx]) { utter.voice = voices[idx]; utter.lang = voices[idx].lang; }
+  else utter.lang = 'pt-PT';
+  utter.rate = 1.0;
+  speechSynthesis.speak(utter);
+}
+function gerarVozTTS(texto, voz) {
+  var cfg    = getConfig();
+  var utter  = new SpeechSynthesisUtterance(texto);
+  var voices = speechSynthesis.getVoices();
+  var v      = voz ? voices.find(function(x) { return x.name === voz; }) : null;
+  if (v) { utter.voice = v; utter.lang = v.lang; } else utter.lang = cfg.voiceLang || 'pt-PT';
+  utter.rate  = cfg.voiceRate  || 1.0;
+  utter.pitch = cfg.voicePitch || 1.0;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utter);
+  toast('TTS iniciado ✓', 'ok');
+}
+function ajustarParametrosVoz(params) {
+  var cfg = getConfig();
+  if (params.rate  !== undefined) cfg.voiceRate  = parseFloat(params.rate);
+  if (params.pitch !== undefined) cfg.voicePitch = parseFloat(params.pitch);
+  if (params.lang  !== undefined) cfg.voiceLang  = params.lang;
+  sincronizarConfig(cfg);
+}
+
+// ------------------------------------------------------------
+// RECONHECIMENTO DE VOZ
+// ------------------------------------------------------------
+var micBtn = document.getElementById('mic-btn');
+if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+  var SR  = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var rec = new SR();
+  rec.lang = 'pt-PT';
+  rec.continuous = false;
+  var listening = false;
+  micBtn.onclick = function() {
+    if (listening) { rec.stop(); return; }
+    try { rec.start(); listening = true; micBtn.classList.add('recording'); } catch(e) {}
+  };
+  rec.onresult = function(e) {
+    userInput.value = e.results[0][0].transcript;
+    autoResize(userInput);
+    listening = false;
+    micBtn.classList.remove('recording');
+    handleSendMessage();
+  };
+  rec.onerror = function(e) {
+    listening = false;
+    micBtn.classList.remove('recording');
+    if (e.error !== 'no-speech') renderMessageUI('ai', '⚠️ Erro no microfone: ' + e.error);
+  };
+  rec.onend = function() { listening = false; micBtn.classList.remove('recording'); };
+} else {
+  micBtn.disabled = true;
+  micBtn.classList.add('opacity-30', 'cursor-not-allowed');
+}
+function reconhecerVozSTT(callback) {
+  if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+    toast('STT não suportado neste browser.', 'err'); return;
+  }
+  var SR2 = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var r   = new SR2();
+  r.lang  = getConfig().voiceLang || 'pt-PT';
+  r.onresult = function(e) {
+    var t = e.results[0][0].transcript;
+    toast('Reconhecido: ' + t.substring(0, 40), 'ok');
+    if (typeof callback === 'function') callback(t);
+    else { userInput.value = t; autoResize(userInput); }
+  };
+  r.onerror = function(e) { toast('Erro STT: ' + e.error, 'err'); };
+  r.start();
+}
+function treinarTTS(amostras)     { salvarMemoria('tts_amostras', amostras || []); toast('Amostras TTS guardadas.', 'warn'); }
+function treinarSTT(transcricoes) { salvarMemoria('stt_transcricoes', transcricoes || []); toast('Transcrições STT guardadas.', 'warn'); }
+function transcreverAudio(blob)   { toast('Transcrição requer Whisper API para produção.', 'warn'); return Promise.resolve('[Simulado]'); }
+function identificarLocutor()     { toast('Identificação de locutor requer modelo externo.', 'warn'); return Promise.resolve({ locutor: 'desconhecido' }); }
+function separarFontesAudio()     { toast('Separação de fontes requer Demucs/API externa.', 'warn'); return Promise.resolve(null); }
+function sintetizarAudioMulticanal() { toast('Multicanal requer Web Audio API avançada.', 'warn'); return Promise.resolve(null); }
+
+// ------------------------------------------------------------
+// VOZ ASSIST
+// ------------------------------------------------------------
+function toggleVoiceAssist() {
+  isVoiceAssist = !isVoiceAssist;
+  var btn = document.getElementById('voice-assist-btn');
+  if (isVoiceAssist) {
+    btn.classList.remove('text-blue-500','border-blue-500','hover:bg-blue-500','hover:text-white');
+    btn.classList.add('bg-red-600','text-white','border-red-600');
+    renderMessageUI('ai', 'Modo Assistente de Voz ligado. Podes falar comigo.');
+  } else {
+    btn.classList.remove('bg-red-600','border-red-600');
+    btn.classList.add('text-blue-500','border-blue-500','hover:bg-blue-500','hover:text-white');
+    if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
+  }
+}
+
+// ------------------------------------------------------------
+// IMAGEM & OCR
+// ------------------------------------------------------------
+function processarImagem(url, op) {
+  return new Promise(function(resolve) {
+    var img = new Image(); img.crossOrigin = 'anonymous';
+    img.onload = function() {
+      var c = document.createElement('canvas');
+      c.width = img.width; c.height = img.height;
+      var ctx = c.getContext('2d');
+      if (op === 'grayscale') ctx.filter = 'grayscale(100%)';
+      else if (op === 'blur') ctx.filter = 'blur(4px)';
+      else if (op === 'flip') { ctx.scale(-1,1); ctx.translate(-img.width,0); }
+      ctx.drawImage(img, 0, 0);
+      resolve(c.toDataURL('image/png'));
+    };
+    img.onerror = function() { resolve(null); };
+    img.src = url;
+  });
+}
+function reconhecerTextoOCR(imagemUrl) {
+  if (typeof Tesseract !== 'undefined') return Tesseract.recognize(imagemUrl, 'por+eng').then(function(r) { return r.data.text; });
+  toast('OCR: adiciona Tesseract.js no head para activar.', 'warn');
+  return Promise.resolve('[OCR simulado]');
+}
+function descreverImagem(imagemUrl) {
+  return fetchWithRetry([{ role: 'user', content: 'Descreve detalhadamente esta imagem: ' + imagemUrl }], 'openai-large')
+    .then(function(desc) { renderMessageUI('ai', '🖼️ **Descrição:** ' + desc); return desc; });
+}
+function detectarObjetos(imagemUrl) { toast('Detecção requer YOLO/API externa.', 'warn'); return descreverImagem(imagemUrl); }
+function extrairDadosDeImagem(imagemUrl) { return reconhecerTextoOCR(imagemUrl); }
+function gerarLegendaAutomatica(imagemUrl) {
+  return fetchWithRetry([{ role: 'user', content: 'Gera uma legenda curta (1 frase) para: ' + imagemUrl }], 'openai')
+    .then(function(l) { toast('Legenda: ' + l.substring(0, 60), 'ok'); return l; });
+}
+
+// ------------------------------------------------------------
+// EMBEDDINGS & VECTORES
+// ------------------------------------------------------------
 function gerarEmbeddings(texto) {
-    // Embedding local simplificado — bag-of-words normalizado
-    var words  = texto.toLowerCase().split(/\W+/).filter(Boolean);
-    var freq   = {};
-    words.forEach(function(w){ freq[w] = (freq[w] || 0) + 1; });
-    var total  = words.length || 1;
-    Object.keys(freq).forEach(function(k){ freq[k] /= total; });
-    return freq;
+  var words = texto.toLowerCase().split(/\W+/).filter(Boolean);
+  var freq  = {};
+  words.forEach(function(w) { freq[w] = (freq[w] || 0) + 1; });
+  var total = words.length || 1;
+  Object.keys(freq).forEach(function(k) { freq[k] /= total; });
+  return freq;
 }
-
 function buscarPorSimilaridade(query, corpus) {
-    var qEmb = gerarEmbeddings(query);
-    return corpus.map(function(item) {
-        var iEmb  = gerarEmbeddings(item.texto || item);
-        var keys  = Object.keys(qEmb);
-        var score = keys.reduce(function(s,k){ return s + (qEmb[k] * (iEmb[k]||0)); }, 0);
-        return { item: item, score: score };
-    }).sort(function(a,b){ return b.score - a.score; });
+  var qEmb = gerarEmbeddings(query);
+  return corpus.map(function(item) {
+    var iEmb  = gerarEmbeddings(item.texto || item);
+    var score = Object.keys(qEmb).reduce(function(s, k) { return s + qEmb[k] * (iEmb[k] || 0); }, 0);
+    return { item: item, score: score };
+  }).sort(function(a, b) { return b.score - a.score; });
 }
-
 function atualizarIndiceVetorial() {
-    var kb = _getKB();
-    kb.forEach(function(doc) {
-        doc.embedding = gerarEmbeddings(doc.conteudo);
-    });
-    _setKB(kb);
-    toast('Índice vetorial actualizado ✓ (' + kb.length + ' docs)','ok');
+  var kb = _getKB();
+  kb.forEach(function(d) { d.embedding = gerarEmbeddings(d.conteudo); });
+  _setKB(kb);
+  toast('Índice vetorial actualizado ✓ (' + kb.length + ' docs)', 'ok');
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// ███████████████   MÓDULO 8 — EXECUÇÃO & PLUGINS   ██████████████████████
-// ═══════════════════════════════════════════════════════════════════════════
-
+// ------------------------------------------------------------
+// PLUGINS
+// ------------------------------------------------------------
 var PLUGINS_KEY = 'zenia_plugins';
 var PLUGINS_DEFAULT = [
-    { id:'code-runner',  nome:'Executor de Código',    activo:true,  desc:'Executa snippets seguros' },
-    { id:'web-search',   nome:'Pesquisa Web',           activo:true,  desc:'DuckDuckGo automático' },
-    { id:'image-gen',    nome:'Geração de Imagem',      activo:true,  desc:'Pollinations.ai' },
-    { id:'audio-gen',    nome:'Geração de Áudio',       activo:true,  desc:'TTS Pollinations' },
-    { id:'kb-indexer',   nome:'Indexador KB',           activo:false, desc:'Base de conhecimento local' },
-    { id:'ocr',          nome:'OCR (Leitura de Texto)', activo:false, desc:'Tesseract.js' }
+  { id:'code-runner', nome:'Executor de Código',    activo:true,  desc:'Executa JS seguro' },
+  { id:'web-search',  nome:'Pesquisa Web',           activo:true,  desc:'DuckDuckGo auto' },
+  { id:'image-gen',   nome:'Geração de Imagem',      activo:true,  desc:'Pollinations.ai' },
+  { id:'audio-gen',   nome:'Geração de Áudio',       activo:true,  desc:'TTS Pollinations' },
+  { id:'kb-indexer',  nome:'Indexador KB',           activo:false, desc:'Base de conhecimento' },
+  { id:'ocr',         nome:'OCR',                    activo:false, desc:'Tesseract.js' }
 ];
-
 function _getPlugins() {
-    try { return JSON.parse(localStorage.getItem(PLUGINS_KEY) || 'null') || PLUGINS_DEFAULT; }
-    catch(e) { return PLUGINS_DEFAULT; }
+  try { return JSON.parse(localStorage.getItem(PLUGINS_KEY) || 'null') || PLUGINS_DEFAULT; } catch(e) { return PLUGINS_DEFAULT; }
 }
 function _setPlugins(p) { localStorage.setItem(PLUGINS_KEY, JSON.stringify(p)); }
-
-function listarPlugins() { return _getPlugins(); }
-
-function ativarPlugin(id) {
-    var plugins = _getPlugins();
-    plugins.forEach(function(p){ if (p.id===id) p.activo=true; });
-    _setPlugins(plugins);
-    toast('Plugin "' + id + '" activado ✓','ok');
-    renderAdvBody();
-}
-
-function desativarPlugin(id) {
-    var plugins = _getPlugins();
-    plugins.forEach(function(p){ if (p.id===id) p.activo=false; });
-    _setPlugins(plugins);
-    toast('Plugin "' + id + '" desactivado.','warn');
-    renderAdvBody();
-}
-
-function configurarPlugin(id, opcoes) {
-    var plugins = _getPlugins();
-    plugins.forEach(function(p){ if (p.id===id) Object.assign(p, opcoes); });
-    _setPlugins(plugins);
-    toast('Plugin configurado ✓','ok');
-}
+function listarPlugins()       { return _getPlugins(); }
+function ativarPlugin(id)      { var ps = _getPlugins(); ps.forEach(function(p) { if (p.id===id) p.activo=true; }); _setPlugins(ps); toast('Plugin activado ✓','ok'); renderAdvBody(); }
+function desativarPlugin(id)   { var ps = _getPlugins(); ps.forEach(function(p) { if (p.id===id) p.activo=false; }); _setPlugins(ps); toast('Plugin desactivado.','warn'); renderAdvBody(); }
+function configurarPlugin(id, op) { var ps = _getPlugins(); ps.forEach(function(p) { if (p.id===id) Object.assign(p,op); }); _setPlugins(ps); toast('Plugin configurado ✓','ok'); }
 
 function executarCodigoSegurado(codigo, linguagem) {
-    linguagem = (linguagem || 'javascript').toLowerCase();
-    if (linguagem === 'javascript') {
-        try {
-            var resultado = new Function('"use strict"; return (function(){' + codigo + '})()')();
-            renderMessageUI('ai', '```javascript
-// RESULTADO:
-' + JSON.stringify(resultado, null, 2) + '
-```');
-            return resultado;
-        } catch(err) {
-            renderMessageUI('ai', '```javascript
-⚠️ ERRO: ' + err.message + '
-```');
-            return null;
-        }
+  linguagem = (linguagem || 'javascript').toLowerCase();
+  if (linguagem === 'javascript') {
+    try {
+      var resultado = new Function('"use strict"; return (function(){' + codigo + '})()')();
+      renderMessageUI('ai', '```javascript\n// RESULTADO:\n' + JSON.stringify(resultado, null, 2) + '\n```');
+      return resultado;
+    } catch(err) {
+      renderMessageUI('ai', '```javascript\n⚠️ ERRO: ' + err.message + '\n```');
+      return null;
     }
-    toast('Execução de "' + linguagem + '" requer backend sandbox (ex: Pyodide para Python).','warn');
-    return null;
+  }
+  toast('Execução de "' + linguagem + '" requer backend sandbox.', 'warn');
+  return null;
 }
-
 function simularExecucao(codigo) {
-    // Análise estática leve
-    var problemas = [];
-    if (codigo.includes('eval('))      problemas.push('⚠️ ERRO: eval() é inseguro.');
-    if (codigo.includes('document.write')) problemas.push('⚠️ ERRO: document.write deprecado.');
-    if (codigo.includes('innerHTML'))  problemas.push('⚠️ AVISO: innerHTML pode ser vector XSS.');
-    var msg = problemas.length ? problemas.join('
-') : '✅ Análise estática sem problemas detectados.';
-    renderMessageUI('ai', '```
-' + msg + '
-```');
-    return problemas;
+  var problemas = [];
+  if (/eval\(/.test(codigo))           problemas.push('⚠️ ERRO: eval() é inseguro.');
+  if (/document\.write/.test(codigo))  problemas.push('⚠️ ERRO: document.write deprecado.');
+  if (/innerHTML/.test(codigo))        problemas.push('⚠️ AVISO: innerHTML pode ser vector XSS.');
+  renderMessageUI('ai', '```\n' + (problemas.length ? problemas.join('\n') : '✅ Análise estática OK.') + '\n```');
+  return problemas;
 }
-
-function chamarAPIExterna(url, opcoes) {
-    opcoes = opcoes || {};
-    return fetch(url, {
-        method:  opcoes.method  || 'GET',
-        headers: opcoes.headers || { 'Content-Type': 'application/json' },
-        body:    opcoes.body ? JSON.stringify(opcoes.body) : undefined
-    }).then(function(r){ return r.json(); })
-      .catch(function(e){ toast('Erro API externa: ' + e.message,'err'); return null; });
+function chamarAPIExterna(url, op) {
+  op = op || {};
+  return fetch(url, { method: op.method||'GET', headers: op.headers||{'Content-Type':'application/json'}, body: op.body ? JSON.stringify(op.body) : undefined })
+    .then(function(r) { return r.json(); })
+    .catch(function(e) { toast('Erro API externa: ' + e.message, 'err'); return null; });
 }
-
 var _webhooks = {};
-function registrarWebhook(evento, urlCallback) {
-    _webhooks[evento] = urlCallback;
-    toast('Webhook registado para "' + evento + '" ✓','ok');
-}
+function registrarWebhook(evento, url) { _webhooks[evento] = url; toast('Webhook registado para "' + evento + '" ✓', 'ok'); }
+function autenticarAPI(tipo, cred)     { salvarMemoria('auth_' + tipo, cred); toast('Credenciais "' + tipo + '" guardadas ✓', 'ok'); }
+function renovarToken(tipo)            { var t = buscarMemoria('auth_' + tipo); if (!t) { toast('Sem token.', 'warn'); return; } toast('Renovação requer endpoint OAuth.', 'warn'); }
 
-function autenticarAPI(tipo, credenciais) {
-    // tipo: 'bearer' | 'apikey' | 'basic'
-    salvarMemoria('auth_' + tipo, credenciais);
-    toast('Credenciais "' + tipo + '" guardadas (encriptadas no localStorage).','ok');
-}
-
-function renovarToken(tipo) {
-    var token = buscarMemoria('auth_' + tipo);
-    if (!token) { toast('Sem token para renovar.','warn'); return; }
-    toast('Renovação de token requer endpoint OAuth. Token actual mantido.','warn');
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ███████████████   MÓDULO 9 — AGENDA & COMUNICAÇÃO   ████████████████████
-// ═══════════════════════════════════════════════════════════════════════════
-
+// ------------------------------------------------------------
+// AGENDA & COMUNICAÇÃO
+// ------------------------------------------------------------
 var EVENTOS_KEY = 'zenia_eventos';
-
-function _getEventos() {
-    try { return JSON.parse(localStorage.getItem(EVENTOS_KEY) || '[]'); } catch(e) { return []; }
-}
+function _getEventos() { try { return JSON.parse(localStorage.getItem(EVENTOS_KEY) || '[]'); } catch(e) { return []; } }
 function _setEventos(e) { localStorage.setItem(EVENTOS_KEY, JSON.stringify(e)); }
 
-function agendarEvento(titulo, data, descricao) {
-    var eventos = _getEventos();
-    var ev = { id: Date.now().toString(), titulo: titulo, data: data, descricao: descricao||'' };
-    eventos.push(ev);
-    _setEventos(eventos);
-    toast('Evento "' + titulo + '" agendado ✓','ok');
-    registrarAuditoria('agendarEvento', {titulo: titulo, data: data});
-    return ev;
+function agendarEvento(titulo, data, desc) {
+  var ev = { id: Date.now().toString(), titulo: titulo, data: data, descricao: desc || '' };
+  var es = _getEventos(); es.push(ev); _setEventos(es);
+  registrarAuditoria('agendarEvento', { titulo: titulo });
+  toast('Evento "' + titulo + '" agendado ✓', 'ok');
+  return ev;
 }
-
-function cancelarEvento(id) {
-    var eventos = _getEventos().filter(function(e){ return e.id !== id; });
-    _setEventos(eventos);
-    toast('Evento cancelado ✓','ok');
-}
-
-function sincronizarCalendario() {
-    var eventos = _getEventos();
-    toast('Sincronização com Google Calendar requer OAuth2. ' + eventos.length + ' evento(s) local(is).','warn');
-    return eventos;
-}
-
+function cancelarEvento(id)      { _setEventos(_getEventos().filter(function(e) { return e.id !== id; })); toast('Evento cancelado ✓', 'ok'); }
+function sincronizarCalendario() { toast('Sincronização requer OAuth2. ' + _getEventos().length + ' evento(s) local(is).', 'warn'); return _getEventos(); }
 function enviarEmail(para, assunto, corpo) {
-    var mailto = 'mailto:' + encodeURIComponent(para) + '?subject=' + encodeURIComponent(assunto) + '&body=' + encodeURIComponent(corpo);
-    window.open(mailto);
-    toast('Rascunho de email aberto no cliente de correio ✓','ok');
+  window.open('mailto:' + encodeURIComponent(para) + '?subject=' + encodeURIComponent(assunto) + '&body=' + encodeURIComponent(corpo));
+  toast('Rascunho de email aberto ✓', 'ok');
 }
-
-function enviarNotificacao(titulo, mensagem) {
-    if (!('Notification' in window)) { toast('Notificações não suportadas.','warn'); return; }
-    Notification.requestPermission().then(function(perm) {
-        if (perm === 'granted') {
-            new Notification(titulo, { body: mensagem, icon: '' });
-            toast('Notificação enviada ✓','ok');
-        } else { toast('Permissão de notificação negada.','err'); }
-    });
+function enviarNotificacao(titulo, msg) {
+  if (!('Notification' in window)) { toast('Notificações não suportadas.', 'warn'); return; }
+  Notification.requestPermission().then(function(p) {
+    if (p === 'granted') new Notification(titulo, { body: msg });
+    else toast('Permissão negada.', 'err');
+  });
 }
+function sincronizarContactos() { toast('Sincronização de contactos requer API Contacts.', 'warn'); }
 
-function sincronizarContactos() {
-    toast('Sincronização de contactos requer API Contacts (suporte limitado) ou integração manual.','warn');
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ███████████████   MÓDULO 10 — SEGURANÇA & PRIVACIDADE   ████████████████
-// ═══════════════════════════════════════════════════════════════════════════
-
+// ------------------------------------------------------------
+// SEGURANÇA & PRIVACIDADE
+// ------------------------------------------------------------
 function autenticarUsuario(user, pass) {
-    var hash = btoa(user + ':' + pass); // Base64 simples — produção requer bcrypt
-    salvarMemoria('auth_user', { user: user, hash: hash, ts: Date.now() });
-    toast('Utilizador autenticado (sessão local) ✓','ok');
-    return { token: hash, user: user };
+  var hash = btoa(user + ':' + pass);
+  salvarMemoria('auth_user', { user: user, hash: hash, ts: Date.now() });
+  toast('Utilizador autenticado (sessão local) ✓', 'ok');
+  return { token: hash, user: user };
 }
-
 function autorizarRoleBased(role) {
-    var auth = buscarMemoria('auth_user');
-    if (!auth) { toast('Sem sessão activa.','err'); return false; }
-    var roles = { admin: ['*'], editor: ['ler','escrever'], viewer: ['ler'] };
-    var permitido = roles[role] || [];
-    toast('Role "' + role + '": ' + (permitido.join(', ') || 'sem permissões'),'ok');
-    return permitido;
+  var roles = { admin: ['*'], editor: ['ler','escrever'], viewer: ['ler'] };
+  var p = roles[role] || [];
+  toast('Role "' + role + '": ' + (p.join(', ') || 'sem permissões'), 'ok');
+  return p;
 }
-
 function gerarChaveCriptografica(bits) {
-    bits = bits || 256;
-    var arr = new Uint8Array(bits / 8);
-    crypto.getRandomValues(arr);
-    var hex = Array.from(arr).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
-    toast('Chave gerada (' + bits + 'bit): ' + hex.substring(0,20) + '…','ok');
-    return hex;
+  bits = bits || 256;
+  var arr = new Uint8Array(bits / 8);
+  crypto.getRandomValues(arr);
+  var hex = Array.from(arr).map(function(b) { return b.toString(16).padStart(2,'0'); }).join('');
+  toast('Chave ' + bits + '-bit gerada ✓', 'ok');
+  return hex;
 }
-
-function criptografarDados(dados) {
-    // XOR com chave do utilizador (simples — produção: SubtleCrypto AES-GCM)
-    var key = gerarChaveCriptografica(128);
-    var enc = btoa(unescape(encodeURIComponent(JSON.stringify(dados))));
-    return { cifrado: enc, chave: key };
-}
-
-function descriptografarDados(cifrado) {
-    try { return JSON.parse(decodeURIComponent(escape(atob(cifrado)))); }
-    catch(e) { toast('Erro ao descriptografar: ' + e.message,'err'); return null; }
-}
-
+function criptografarDados(dados)   { return { cifrado: btoa(unescape(encodeURIComponent(JSON.stringify(dados)))), chave: gerarChaveCriptografica(128) }; }
+function descriptografarDados(cif) { try { return JSON.parse(decodeURIComponent(escape(atob(cif)))); } catch(e) { toast('Erro ao descriptografar.', 'err'); return null; } }
 function anonimizarDados(texto) {
-    return texto
-        .replace(/[A-Z][a-z]+ [A-Z][a-z]+/g, '[NOME]')
-        .replace(/\d{9}/g, '[BI]')
-        .replace(/[\w.-]+@[\w.-]+\.\w+/g, '[EMAIL]')
-        .replace(/\+?\d[\d\s()-]{8,}/g, '[TELEFONE]');
+  return texto
+    .replace(/\b[A-Z][a-z]+ [A-Z][a-z]+\b/g, '[NOME]')
+    .replace(/\b\d{9}\b/g, '[BI]')
+    .replace(/\b[\w.-]+@[\w.-]+\.\w+\b/g, '[EMAIL]')
+    .replace(/\b\+?\d[\d\s()-]{8,}\b/g, '[TELEFONE]');
 }
-
-function definirLimitesSeguranca(limites) {
-    sincronizarConfig({ limites_seguranca: limites });
-    toast('Limites de segurança definidos ✓','ok');
-}
-
+function definirLimitesSeguranca(limites) { sincronizarConfig({ limites_seguranca: limites }); toast('Limites de segurança definidos ✓', 'ok'); }
 function avaliarRiscoPrivacidade(texto) {
-    var riscos = [];
-    if (/[\w.-]+@[\w.-]+\.\w+/.test(texto))  riscos.push('Email detectado');
-    if (/\d{9}/.test(texto))                   riscos.push('Possível BI/NIF');
-    if (/\+?\d[\d\s()-]{8,}/.test(texto))      riscos.push('Número de telefone detectado');
-    if (/senha|password|token|secret/i.test(texto)) riscos.push('Dado sensível (credencial)');
-    var nivel = riscos.length === 0 ? 'Baixo' : riscos.length < 3 ? 'Médio' : 'Alto';
-    toast('Risco privacidade: ' + nivel + ' — ' + (riscos.join(', ') || 'sem dados sensíveis'),'ok');
-    return { nivel: nivel, riscos: riscos };
+  var riscos = [];
+  if (/\b[\w.-]+@[\w.-]+\.\w+\b/.test(texto))  riscos.push('Email');
+  if (/\b\d{9}\b/.test(texto))                   riscos.push('Possível BI/NIF');
+  if (/\b\+?\d[\d\s()-]{8,}\b/.test(texto))      riscos.push('Telefone');
+  if (/senha|password|token|secret/i.test(texto)) riscos.push('Credencial');
+  var nivel = riscos.length === 0 ? 'Baixo' : riscos.length < 3 ? 'Médio' : 'Alto';
+  toast('Risco: ' + nivel + (riscos.length ? ' — ' + riscos.join(', ') : ''), 'ok');
+  return { nivel: nivel, riscos: riscos };
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// ███████████████   MÓDULO 11 — MODERAÇÃO & CONTEÚDO   ███████████████████
-// ═══════════════════════════════════════════════════════════════════════════
-
+// ------------------------------------------------------------
+// MODERAÇÃO
+// ------------------------------------------------------------
 var FILTER_WORDS = ['spam','phishing','malware','exploit','trojan'];
-
 function filtrarConteudo(texto) {
-    var found = FILTER_WORDS.filter(function(w){ return texto.toLowerCase().includes(w); });
-    if (found.length) { toast('Conteúdo filtrado: ' + found.join(', '),'warn'); return null; }
-    return texto;
+  var found = FILTER_WORDS.filter(function(w) { return texto.toLowerCase().includes(w); });
+  if (found.length) { toast('Conteúdo filtrado: ' + found.join(', '), 'warn'); return null; }
+  return texto;
 }
-
 function moderacaoAutomatica(texto) {
-    var avaliacao = avaliarRiscoPrivacidade(texto);
-    var limpo     = filtrarConteudo(texto);
-    return { aprovado: !!limpo, riscos: avaliacao.riscos, textoBloqueado: !limpo };
+  var av = avaliarRiscoPrivacidade(texto);
+  var limpo = filtrarConteudo(texto);
+  return { aprovado: !!limpo, riscos: av.riscos, textoBloqueado: !limpo };
+}
+function sinalizarConteudo(msg, motivo) {
+  registrarAuditoria('sinalizarConteudo', { msg: msg.substring(0,50), motivo: motivo });
+  toast('Conteúdo sinalizado: ' + motivo, 'warn');
 }
 
-function sinalizarConteudo(mensagem, motivo) {
-    registrarAuditoria('sinalizarConteudo', { mensagem: mensagem.substring(0,50), motivo: motivo });
-    toast('Conteúdo sinalizado: ' + motivo,'warn');
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ███████████████   MÓDULO 12 — SISTEMA, MÉTRICAS & MANUTENÇÃO   █████████
-// ═══════════════════════════════════════════════════════════════════════════
-
+// ------------------------------------------------------------
+// SISTEMA, MÉTRICAS & MANUTENÇÃO
+// ------------------------------------------------------------
 var AUDIT_KEY   = 'zenia_audit';
 var METRICS_KEY = 'zenia_metrics';
 
 function registrarAuditoria(acao, detalhes) {
-    var logs = JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]');
-    logs.unshift({ acao: acao, detalhes: detalhes, ts: new Date().toISOString() });
-    if (logs.length > 500) logs = logs.slice(0, 500); // máx 500 entradas
-    localStorage.setItem(AUDIT_KEY, JSON.stringify(logs));
+  var logs = JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]');
+  logs.unshift({ acao: acao, detalhes: detalhes, ts: new Date().toISOString() });
+  if (logs.length > 500) logs = logs.slice(0, 500);
+  localStorage.setItem(AUDIT_KEY, JSON.stringify(logs));
 }
-
-function logErro(erro, contexto) {
-    registrarAuditoria('logErro', { erro: String(erro), contexto: contexto || '' });
-    console.error('[Zénia]', erro, contexto);
-    toast('Erro registado: ' + String(erro).substring(0,50),'err');
+function logErro(erro, ctx) {
+  registrarAuditoria('logErro', { erro: String(erro), ctx: ctx || '' });
+  console.error('[Zénia]', erro, ctx);
+  toast('Erro registado: ' + String(erro).substring(0,50), 'err');
 }
-
-function reportarBug(descricao) {
-    var payload = { descricao: descricao, ua: navigator.userAgent,
-                    ts: new Date().toISOString(), versao: 'zenia-full' };
-    registrarAuditoria('reportarBug', payload);
-    var mailto = 'mailto:<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2f5c5a5f405d5b4a6f554a41464e025f5d40454a4c5b5c014e40">[email&#160;protected]</a>?subject=Bug+IA-Zénia&body=' + encodeURIComponent(JSON.stringify(payload, null, 2));
-    window.open(mailto);
-    toast('Relatório de bug enviado ✓','ok');
+function reportarBug(desc) {
+  if (!desc) return;
+  var payload = { desc: desc, ua: navigator.userAgent, ts: new Date().toISOString() };
+  registrarAuditoria('reportarBug', payload);
+  window.open('mailto:suporte@zenia-projects.ao?subject=Bug+IA-Zenia&body=' + encodeURIComponent(JSON.stringify(payload, null, 2)));
+  toast('Relatório enviado ✓', 'ok');
 }
-
 function coletarMetricas() {
-    var m = JSON.parse(localStorage.getItem(METRICS_KEY) || '{}');
-    m.totalConversas    = conversations.length;
-    m.totalMensagens    = conversations.reduce(function(s,c){ return s+c.messages.length; }, 0);
-    m.memoriasGravadas  = Object.keys(_getMem()).length;
-    m.kbDocumentos      = _getKB().length;
-    m.pluginsActivos    = _getPlugins().filter(function(p){ return p.activo; }).length;
-    m.auditEntradas     = JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]').length;
-    m.ultimaActualizacao = new Date().toISOString();
-    localStorage.setItem(METRICS_KEY, JSON.stringify(m));
-    return m;
+  var m = {
+    totalConversas:   conversations.length,
+    totalMensagens:   conversations.reduce(function(s,c) { return s+c.messages.length; }, 0),
+    memoriasGravadas: Object.keys(_getMem()).length,
+    kbDocumentos:     _getKB().length,
+    pluginsActivos:   _getPlugins().filter(function(p) { return p.activo; }).length,
+    auditEntradas:    JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]').length,
+    ultima:           new Date().toISOString()
+  };
+  localStorage.setItem(METRICS_KEY, JSON.stringify(m));
+  return m;
 }
-
-function monitorarPerformance() {
-    var m = coletarMetricas();
-    var ls = 0;
-    try { ls = JSON.stringify(localStorage).length; } catch(e){}
-    m.localStorageKB = (ls / 1024).toFixed(1);
-    toast('Métricas actualizadas ✓','ok');
-    return m;
-}
-
+function monitorarPerformance() { var m = coletarMetricas(); toast('Métricas actualizadas ✓', 'ok'); return m; }
 function gerarRelatorioUso() {
-    var m = coletarMetricas();
-    var rel = '# Relatório de Uso — IA-Zénia
-'
-        + 'Data: ' + new Date().toLocaleString('pt-PT') + '
-
-'
-        + '- Conversas: ' + m.totalConversas + '
-'
-        + '- Mensagens: ' + m.totalMensagens + '
-'
-        + '- Memórias: '  + m.memoriasGravadas + '
-'
-        + '- Documentos KB: ' + m.kbDocumentos + '
-'
-        + '- Plugins activos: ' + m.pluginsActivos + '
-'
-        + '- Entradas de auditoria: ' + m.auditEntradas + '
-';
-    var blob = new Blob([rel], {type:'text/markdown'});
-    var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = 'zenia-relatorio-' + Date.now() + '.md'; a.click();
-    toast('Relatório exportado ✓','ok');
+  var m   = coletarMetricas();
+  var rel = '# Relatório IA-Zénia\nData: ' + new Date().toLocaleString('pt-PT') + '\n\n'
+    + '- Conversas: '       + m.totalConversas   + '\n'
+    + '- Mensagens: '       + m.totalMensagens   + '\n'
+    + '- Memórias: '        + m.memoriasGravadas + '\n'
+    + '- Docs KB: '         + m.kbDocumentos     + '\n'
+    + '- Plugins activos: ' + m.pluginsActivos   + '\n';
+  var a   = document.createElement('a');
+  a.href  = URL.createObjectURL(new Blob([rel], { type: 'text/markdown' }));
+  a.download = 'zenia-relatorio-' + Date.now() + '.md';
+  a.click();
+  toast('Relatório exportado ✓', 'ok');
 }
-
-function iniciarTesteAB(varianteA, varianteB) {
-    var variante = Math.random() > 0.5 ? 'A' : 'B';
-    salvarMemoria('ab_variante', variante);
-    toast('Teste A/B iniciado — Variante activa: ' + variante,'ok');
-    return variante === 'A' ? varianteA : varianteB;
-}
-
-function aplicarAtualizacao(versao, changelog) {
-    salvarMemoria('versao_atual', versao);
-    toast('Actualização "' + versao + '" aplicada (reload para efeito completo).','ok');
-    registrarAuditoria('aplicarAtualizacao', {versao: versao, changelog: changelog});
-}
-
-function backupDados() {
-    var payload = {
-        conversas:   conversations,
-        memoria:     _getMem(),
-        kb:          _getKB(),
-        config:      getConfig(),
-        plugins:     _getPlugins(),
-        auditoria:   JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]'),
-        exportado:   new Date().toISOString()
-    };
-    var blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
-    var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = 'zenia-backup-' + Date.now() + '.json'; a.click();
-    toast('Backup completo exportado ✓','ok');
-    registrarAuditoria('backupDados', { ts: new Date().toISOString() });
-}
-
-function restaurarDados(file) {
-    if (file) { _restaurarFromFile(file); return; }
-    var input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
-    input.onchange = function(e) { _restaurarFromFile(e.target.files[0]); };
-    input.click();
-}
-function _restaurarFromFile(file) {
-    var reader = new FileReader();
-    reader.onload = function(ev) {
-        try {
-            var data = JSON.parse(ev.target.result);
-            if (data.conversas)  { conversations = data.conversas; persistConversations(); }
-            if (data.memoria)    localStorage.setItem(MEM_KEY, JSON.stringify(data.memoria));
-            if (data.kb)         localStorage.setItem(KB_KEY,  JSON.stringify(data.kb));
-            if (data.config)     localStorage.setItem(CONFIG_KEY, JSON.stringify(data.config));
-            if (data.plugins)    localStorage.setItem(PLUGINS_KEY, JSON.stringify(data.plugins));
-            renderHistoryList();
-            toast('Dados restaurados com sucesso ✓','ok');
-            registrarAuditoria('restaurarDados', { ts: new Date().toISOString() });
-        } catch(err) { toast('Erro ao restaurar: ' + err.message,'err'); }
-    };
-    reader.readAsText(file);
-}
-
+function iniciarTesteAB(vA, vB)   { var v = Math.random()>.5?'A':'B'; salvarMemoria('ab_variante',v); toast('Teste A/B — Variante: '+v,'ok'); return v==='A'?vA:vB; }
+function aplicarAtualizacao(v, c) { salvarMemoria('versao',v); registrarAuditoria('aplicarAtualizacao',{v:v,c:c}); toast('Actualização "'+v+'" aplicada ✓','ok'); }
 function limparCache() {
-    // Remove apenas caches temporários, não dados do utilizador
-    ['zenia_metrics','zenia_audit'].forEach(function(k){
-        var items = JSON.parse(localStorage.getItem(k) || '[]');
-        if (Array.isArray(items) && items.length > 100)
-            localStorage.setItem(k, JSON.stringify(items.slice(0,100)));
-    });
-    toast('Cache optimizado ✓','ok');
+  [METRICS_KEY, AUDIT_KEY].forEach(function(k) {
+    var items = JSON.parse(localStorage.getItem(k) || '[]');
+    if (Array.isArray(items) && items.length > 100) localStorage.setItem(k, JSON.stringify(items.slice(0,100)));
+  });
+  toast('Cache optimizado ✓', 'ok');
 }
-
-function agendarManutencao(dataHora, descricao) {
-    return agendarEvento('🔧 Manutenção: ' + descricao, dataHora, descricao);
+function agendarManutencao(dt, desc) { return agendarEvento('🔧 Manutenção: ' + desc, dt, desc); }
+function migrarDados(de, para) { registrarAuditoria('migrarDados',{de:de,para:para}); toast('Migração '+de+' → '+para+' registada ✓','ok'); }
+function fallbackResposta(msg) {
+  var rs = ['Não consegui processar. Podes reformular?','Ocorreu um problema. Tenta novamente.','Serviço temporariamente indisponível.'];
+  var r  = rs[Math.floor(Math.random()*rs.length)];
+  renderMessageUI('ai', r);
+  registrarAuditoria('fallbackResposta', { original: msg });
+  return r;
 }
-
-function migrarDados(versaoOrigem, versaoDestino) {
-    registrarAuditoria('migrarDados', { de: versaoOrigem, para: versaoDestino });
-    toast('Migração ' + versaoOrigem + '→' + versaoDestino + ' registada. Schema actual compatível.','ok');
-}
-
-function fallbackResposta(mensagem) {
-    var respostas = [
-        'Não consegui processar o pedido. Podes reformular?',
-        'Ocorreu um problema. Tenta novamente ou escolhe outro modelo.',
-        'O serviço está temporariamente indisponível. Voltarei em breve.'
-    ];
-    var r = respostas[Math.floor(Math.random() * respostas.length)];
-    renderMessageUI('ai', r);
-    registrarAuditoria('fallbackResposta', { original: mensagem });
-    return r;
-}
-
-async function reintentarOperacao(fn, maxTentativas, delay) {
-    maxTentativas = maxTentativas || 3; delay = delay || 1000;
-    for (var i = 0; i < maxTentativas; i++) {
-        try { return await fn(); }
-        catch(err) {
-            if (i < maxTentativas - 1) {
-                toast('Tentativa ' + (i+1) + '/' + maxTentativas + ' falhou. A reintentar…','warn');
-                await new Promise(function(r){ setTimeout(r, delay * (i+1)); });
-            } else { logErro(err, 'reintentarOperacao'); throw err; }
-        }
-    }
-}
-
-function degradarGracefully(funcaoPrincipal, funcaoFallback) {
-    try { return funcaoPrincipal(); }
+async function reintentarOperacao(fn, max, delay) {
+  max = max||3; delay = delay||1000;
+  for (var i=0; i<max; i++) {
+    try { return await fn(); }
     catch(err) {
-        logErro(err, 'degradarGracefully');
-        toast('Modo degradado activo.','warn');
-        return typeof funcaoFallback === 'function' ? funcaoFallback() : null;
+      if (i < max-1) { toast('Tentativa '+(i+1)+'/'+max+' falhou. A reintentar…','warn'); await new Promise(function(r){setTimeout(r,delay*(i+1));}); }
+      else { logErro(err,'reintentarOperacao'); throw err; }
     }
+  }
+}
+function degradarGracefully(fn, fb) { try { return fn(); } catch(err) { logErro(err,'degradar'); toast('Modo degradado activo.','warn'); return typeof fb==='function'?fb():null; } }
+function notificarErroCritico(err, ctx) { logErro(err,ctx); enviarNotificacao('Erro Crítico — IA-Zénia', String(err)); }
+function rastrearProveniencia(dado, fonte, ops) { return { dado:dado, fonte:fonte, operacoes:ops||[], ts:new Date().toISOString() }; }
+
+// ------------------------------------------------------------
+// CONVERSAÇÃO: EXPORTAR / IMPORTAR
+// ------------------------------------------------------------
+function exportarConversacao(id) {
+  var conv = id ? conversations.find(function(c){return c.id===id;}) : getCurrentConversation();
+  if (!conv) { toast('Nenhuma conversa activa.','warn'); return; }
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(conv, null, 2)], {type:'application/json'}));
+  a.download = 'zenia-conv-' + conv.id + '.json';
+  a.click();
+  registrarAuditoria('exportarConversacao', {id:conv.id});
+  toast('Conversa exportada ✓','ok');
+}
+function importarConversacao() {
+  var input = document.createElement('input'); input.type='file'; input.accept='.json';
+  input.onchange = function(e) {
+    var file = e.target.files[0]; if (!file) return;
+    var r = new FileReader();
+    r.onload = function(ev) {
+      try {
+        var conv = JSON.parse(ev.target.result);
+        if (!conv.id || !conv.messages) throw new Error('Formato inválido.');
+        conv.id = Date.now().toString();
+        conversations.unshift(conv); persistConversations(); renderHistoryList();
+        toast('Conversa importada ✓','ok');
+      } catch(err) { toast('Erro ao importar: ' + err.message,'err'); }
+    };
+    r.readAsText(file);
+  };
+  input.click();
+}
+function exportarLogsConversacao() {
+  var rows = conversations.map(function(c) {
+    return [c.id, '"' + c.title.replace(/"/g,'""') + '"', c.messages.length, new Date(parseInt(c.id)).toISOString()].join(',');
+  });
+  var csv = 'ID,Titulo,Mensagens,Criado\n' + rows.join('\n');
+  var a   = document.createElement('a');
+  a.href  = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.download = 'zenia-logs-' + Date.now() + '.csv';
+  a.click();
+  toast('Logs exportados ✓','ok');
+}
+function backupDados() {
+  var payload = {
+    conversas: conversations, memoria: _getMem(), kb: _getKB(),
+    config: getConfig(), plugins: _getPlugins(),
+    auditoria: JSON.parse(localStorage.getItem(AUDIT_KEY)||'[]'),
+    exportado: new Date().toISOString()
+  };
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'}));
+  a.download = 'zenia-backup-' + Date.now() + '.json';
+  a.click();
+  registrarAuditoria('backupDados', {ts: new Date().toISOString()});
+  toast('Backup completo exportado ✓','ok');
+}
+function restaurarDados(file) {
+  if (file) { _restoreFile(file); return; }
+  var input = document.createElement('input'); input.type='file'; input.accept='.json';
+  input.onchange = function(e) { _restoreFile(e.target.files[0]); };
+  input.click();
+}
+function _restoreFile(file) {
+  var r = new FileReader();
+  r.onload = function(ev) {
+    try {
+      var d = JSON.parse(ev.target.result);
+      if (d.conversas) { conversations = d.conversas; persistConversations(); }
+      if (d.memoria)   localStorage.setItem(MEM_KEY,     JSON.stringify(d.memoria));
+      if (d.kb)        localStorage.setItem(KB_KEY,      JSON.stringify(d.kb));
+      if (d.config)    localStorage.setItem(CONFIG_KEY,  JSON.stringify(d.config));
+      if (d.plugins)   localStorage.setItem(PLUGINS_KEY, JSON.stringify(d.plugins));
+      renderHistoryList();
+      toast('Dados restaurados ✓','ok');
+    } catch(err) { toast('Erro ao restaurar: ' + err.message,'err'); }
+  };
+  r.readAsText(file);
 }
 
-function notificarErroCritico(erro, contexto) {
-    logErro(erro, contexto);
-    enviarNotificacao('❌ Erro Crítico — IA-Zénia', String(erro));
-}
-
-function rastrearProveniencia(dado, fonte, operacoes) {
-    return { dado: dado, fonte: fonte, operacoes: operacoes || [], ts: new Date().toISOString() };
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ███████████████   UI DO PAINEL AVANÇADO   ██████████████████████████████
-// ═══════════════════════════════════════════════════════════════════════════
-
-var currentTab = 'mem';
-
-function openAdvPanel() {
-    document.getElementById('adv-panel').classList.add('open');
-    document.getElementById('adv-overlay').style.display = 'block';
-    renderAdvBody();
-}
-function closeAdvPanel() {
-    document.getElementById('adv-panel').classList.remove('open');
-    document.getElementById('adv-overlay').style.display = 'none';
-}
-
-function switchTab(tab) {
-    currentTab = tab;
-    document.querySelectorAll('#adv-tabs button').forEach(function(b,i){
-        var tabs = ['mem','conv','media','kb','sys','sec'];
-        b.classList.toggle('active', tabs[i] === tab);
+// ------------------------------------------------------------
+// GALERIA
+// ------------------------------------------------------------
+function toggleGallery() {
+  var g = document.getElementById('gallery-container');
+  if (!g) {
+    var parent = document.querySelector('button[onclick="toggleGallery()"]').parentElement;
+    g = document.createElement('div'); g.id='gallery-container'; g.className='mt-3 grid grid-cols-3 gap-2';
+    ['zenia1','zenia2','zenia3','zenia4','zenia5','zenia6'].forEach(function(seed) {
+      var img = document.createElement('img');
+      img.src = 'https://picsum.photos/seed/' + seed + '/300/200';
+      img.loading = 'lazy';
+      img.className = 'rounded-lg border border-gray-800 hover:opacity-80 transition cursor-pointer';
+      g.appendChild(img);
     });
-    renderAdvBody();
+    parent.appendChild(g);
+  } else { g.style.display = g.style.display==='none' ? '' : 'none'; }
 }
 
-function renderAdvBody() {
-    var body = document.getElementById('adv-body');
-    if (!body) return;
-    var html = '';
-
-    if (currentTab === 'mem') {
-        var mem   = listarMemorias();
-        var keys  = Object.keys(mem);
-        html += '<div class="adv-section"><h4>Guardar Memória</h4>';
-        html += '<input class="adv-input" id="mem-key-in" placeholder="Chave (ex: nome_utilizador)">';
-        html += '<input class="adv-input" id="mem-val-in" placeholder="Valor">';
-        html += '<button class="adv-btn" onclick="salvarMemoria(document.getElementById('mem-key-in').value, document.getElementById('mem-val-in').value); renderAdvBody()"><span class="icon"><i class='fas fa-save text-blue-400'></i></span>Guardar<span class="desc">Persiste localmente</span></button></div>';
-        html += '<div class="adv-section"><h4>Memórias (' + keys.length + ')</h4>';
-        if (!keys.length) html += '<p style="color:#6b7280;font-size:12px;text-align:center;padding:12px">Sem memórias guardadas.</p>';
-        keys.forEach(function(k) {
-            var v = typeof mem[k].valor === 'object' ? JSON.stringify(mem[k].valor) : String(mem[k].valor);
-            html += '<div class="mem-item"><span class="mem-key">' + escHtml(k) + '</span><span class="mem-val">' + escHtml(v.substring(0,60)) + (v.length>60?'…':'') + '</span><span class="mem-del" onclick="removerMemoria(''+escHtml(k)+'');renderAdvBody()"><i class="fas fa-times"></i></span></div>';
-        });
-        html += '</div>';
-        html += '<button class="adv-btn" style="border-color:#ef444440;color:#ef4444" onclick="limparMemoriaUsuario()"><span class="icon"><i class="fas fa-trash text-red-500"></i></span>Limpar toda a memória<span class="desc">Irreversível</span></button>';
-
-    } else if (currentTab === 'conv') {
-        html += '<div class="adv-section"><h4>Importar / Exportar</h4>';
-        html += '<button class="adv-btn" onclick="exportarConversacao()"><span class="icon"><i class="fas fa-file-export text-blue-400"></i></span>Exportar conversa actual<span class="desc">Guarda como .json</span></button>';
-        html += '<button class="adv-btn" onclick="importarConversacao()"><span class="icon"><i class="fas fa-file-import text-green-400"></i></span>Importar conversa<span class="desc">Carrega .json</span></button>';
-        html += '<button class="adv-btn" onclick="exportarLogsConversacao()"><span class="icon"><i class="fas fa-table text-yellow-400"></i></span>Exportar logs (CSV)<span class="desc">Sumário de todas as conversas</span></button></div>';
-        html += '<div class="adv-section"><h4>Backup Completo</h4>';
-        html += '<button class="adv-btn" onclick="backupDados()"><span class="icon"><i class="fas fa-download text-purple-400"></i></span>Backup total<span class="desc">Inclui memória, KB e config</span></button>';
-        html += '<button class="adv-btn" onclick="restaurarDados()"><span class="icon"><i class="fas fa-upload text-orange-400"></i></span>Restaurar backup<span class="desc">Carrega ficheiro .json</span></button>';
-        html += '<button class="adv-btn" onclick="gerarRelatorioUso()"><span class="icon"><i class="fas fa-chart-bar text-teal-400"></i></span>Relatório de uso<span class="desc">Exporta métricas .md</span></button></div>';
-
-    } else if (currentTab === 'media') {
-        html += '<div class="adv-section"><h4>Voz</h4>';
-        html += '<button class="adv-btn" onclick="reconhecerVozSTT(null)"><span class="icon"><i class="fas fa-microphone text-blue-400"></i></span>Reconhecimento STT<span class="desc">Voz → Texto agora</span></button>';
-        html += '<div style="display:flex;gap:8px;margin-bottom:8px"><div style="flex:1"><label style="font-size:11px;color:#8b949e">Velocidade</label><input class="adv-input" type="range" min="0.5" max="2" step="0.1" value="' + (getConfig().voiceRate||1) + '" oninput="ajustarParametrosVoz({rate:this.value})"></div><div style="flex:1"><label style="font-size:11px;color:#8b949e">Tom</label><input class="adv-input" type="range" min="0.5" max="2" step="0.1" value="' + (getConfig().voicePitch||1) + '" oninput="ajustarParametrosVoz({pitch:this.value})"></div></div>';
-        html += '</div><div class="adv-section"><h4>Plugins</h4>';
-        var plugins = listarPlugins();
-        plugins.forEach(function(p) {
-            html += '<div class="plugin-item"><div><span class="plugin-name">' + p.nome + '</span><span style="display:block;font-size:10px;color:#6b7280">' + p.desc + '</span></div><button class="plugin-toggle' + (p.activo?' on':'') + '" onclick="' + (p.activo ? 'desativarPlugin' : 'ativarPlugin') + '('' + p.id + '')" title="' + (p.activo?'Desactivar':'Activar') + '"></button></div>';
-        });
-        html += '</div>';
-
-    } else if (currentTab === 'kb') {
-        var kb = _getKB();
-        html += '<div class="adv-section"><h4>Adicionar Conhecimento</h4>';
-        html += '<input class="adv-input" id="kb-title" placeholder="Título">';
-        html += '<textarea class="adv-input" id="kb-body" rows="3" placeholder="Conteúdo…" style="resize:none"></textarea>';
-        html += '<input class="adv-input" id="kb-tags" placeholder="Tags (separadas por vírgula)">';
-        html += '<button class="adv-btn" onclick="var t=document.getElementById('kb-title').value,b=document.getElementById('kb-body').value,g=document.getElementById('kb-tags').value.split(',');if(t&&b){adicionarConhecimento(t,b,g);renderAdvBody();}else{toast('Título e conteúdo obrigatórios','warn')}"><span class="icon"><i class="fas fa-plus-circle text-green-400"></i></span>Adicionar<span class="desc">Indexa na base local</span></button></div>';
-        html += '<div class="adv-section"><h4>Base (' + kb.length + ' docs)</h4>';
-        html += '<input class="adv-input" id="kb-search" placeholder="Pesquisar KB…" oninput="renderKBResults(this.value)">';
-        html += '<div id="kb-results">';
-        kb.slice(0,8).forEach(function(d) {
-            html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px;background:#161b22;border:1px solid #21262d;border-radius:6px;margin-bottom:4px;font-size:12px"><span style="color:#c9d1d9">' + escHtml(d.titulo) + '</span><button onclick="removerConhecimento('" + d.id + "')" style="color:#6b7280;background:none;border:none;cursor:pointer;font-size:11px">✕</button></div>';
-        });
-        if (kb.length > 8) html += '<p style="color:#6b7280;font-size:11px;text-align:center">+ ' + (kb.length-8) + ' mais</p>';
-        html += '</div></div>';
-        html += '<button class="adv-btn" onclick="consolidarBaseConhecimento();renderAdvBody()"><span class="icon"><i class="fas fa-compress-arrows-alt text-yellow-400"></i></span>Consolidar KB<span class="desc">Remove duplicados</span></button>';
-        html += '<button class="adv-btn" onclick="atualizarIndiceVetorial()"><span class="icon"><i class="fas fa-project-diagram text-blue-400"></i></span>Actualizar índice vetorial<span class="desc">Gera embeddings locais</span></button>';
-
-    } else if (currentTab === 'sys') {
-        var m = coletarMetricas();
-        html += '<div class="adv-section"><h4>Métricas</h4>';
-        html += '<div class="metric-row"><span class="metric-label">Conversas</span><span class="metric-val">' + m.totalConversas + '</span></div>';
-        html += '<div class="metric-row"><span class="metric-label">Mensagens</span><span class="metric-val">' + m.totalMensagens + '</span></div>';
-        html += '<div class="metric-row"><span class="metric-label">Memórias</span><span class="metric-val">' + m.memoriasGravadas + '</span></div>';
-        html += '<div class="metric-row"><span class="metric-label">Documentos KB</span><span class="metric-val">' + m.kbDocumentos + '</span></div>';
-        html += '<div class="metric-row"><span class="metric-label">Plugins activos</span><span class="metric-val">' + m.pluginsActivos + '</span></div>';
-        html += '<div class="metric-row"><span class="metric-label">Entradas auditoria</span><span class="metric-val">' + m.auditEntradas + '</span></div></div>';
-        html += '<div class="adv-section"><h4>Configuração</h4>';
-        var cfg = getConfig();
-        html += '<label style="font-size:11px;color:#8b949e">Temperatura (' + cfg.temperature + ')</label><input class="adv-input" type="range" min="0" max="2" step="0.05" value="' + cfg.temperature + '" oninput="sincronizarConfig({temperature:parseFloat(this.value)})">';
-        html += '<label style="font-size:11px;color:#8b949e">Max Tokens</label><input class="adv-input" type="number" value="' + cfg.maxTokens + '" min="256" max="8192" step="256" onchange="sincronizarConfig({maxTokens:parseInt(this.value)})">';
-        html += '<label style="font-size:11px;color:#8b949e">Nome de utilizador</label><input class="adv-input" value="' + escHtml(cfg.username) + '" onchange="sincronizarConfig({username:this.value})">';
-        html += '</div>';
-        html += '<button class="adv-btn" onclick="restaurarConfiguracaoPadrao()"><span class="icon"><i class="fas fa-undo text-orange-400"></i></span>Restaurar padrão<span class="desc">Reset completo de configuração</span></button>';
-        html += '<button class="adv-btn" onclick="limparCache()"><span class="icon"><i class="fas fa-broom text-teal-400"></i></span>Optimizar cache<span class="desc">Remove logs antigos</span></button>';
-        html += '<button class="adv-btn" onclick="reportarBug(prompt('Descreve o bug:'))"><span class="icon"><i class="fas fa-bug text-red-400"></i></span>Reportar bug<span class="desc">Abre cliente de email</span></button>';
-
-    } else if (currentTab === 'sec') {
-        html += '<div class="adv-section"><h4>Privacidade</h4>';
-        html += '<button class="adv-btn" onclick="var t=getCurrentConversation();if(t&&t.messages.length){var last=t.messages[t.messages.length-1].content;var r=avaliarRiscoPrivacidade(last);renderMessageUI('ai','Risco: '+r.nivel+' — '+JSON.stringify(r.riscos))}else{toast('Sem mensagens para avaliar','warn')}"><span class="icon"><i class="fas fa-eye text-yellow-400"></i></span>Avaliar risco da última msg<span class="desc">Detecta dados sensíveis</span></button>';
-        html += '<button class="adv-btn" onclick="var t=getCurrentConversation();if(t&&t.messages.length){var last=t.messages[t.messages.length-1].content;renderMessageUI('ai','Dados anonimizados:
-'+anonimizarDados(last))}"><span class="icon"><i class="fas fa-user-secret text-purple-400"></i></span>Anonimizar última msg<span class="desc">Remove PII visível</span></button></div>';
-        html += '<div class="adv-section"><h4>Criptografia</h4>';
-        html += '<button class="adv-btn" onclick="var k=gerarChaveCriptografica(256);renderMessageUI('ai','Chave gerada (256bit):
-`'+k+'`')"><span class="icon"><i class="fas fa-key text-green-400"></i></span>Gerar chave 256-bit<span class="desc">Criptografia local</span></button>';
-        html += '<button class="adv-btn" onclick="autorizarRoleBased(prompt('Role:')|| 'viewer')"><span class="icon"><i class="fas fa-user-shield text-blue-400"></i></span>Verificar permissões (RBAC)<span class="desc">admin / editor / viewer</span></button></div>';
-        html += '<div class="adv-section"><h4>Auditoria</h4>';
-        var audit = JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]').slice(0,5);
-        if (!audit.length) html += '<p style="color:#6b7280;font-size:12px">Sem entradas ainda.</p>';
-        audit.forEach(function(a) {
-            html += '<div style="padding:6px;background:#161b22;border-radius:6px;margin-bottom:4px;font-size:11px"><span style="color:#58a6ff">' + a.acao + '</span><span style="color:#6b7280;float:right">' + a.ts.substring(0,16).replace('T',' ') + '</span></div>';
-        });
-        html += '</div>';
-    }
-
-    body.innerHTML = html;
+// ------------------------------------------------------------
+// API STATUS
+// ------------------------------------------------------------
+function setApiStatus(state) {
+  var el  = document.getElementById('api-status');
+  var map = { ok:['status-ok','API: ativa ✓'], error:['status-err','API: erro ✗'], wait:['status-wait','API: verificando…'] };
+  var cfg = map[state] || map.wait;
+  el.className = 'text-[11px] px-2 py-1 rounded border ' + cfg[0];
+  el.textContent = cfg[1];
+}
+async function updateApiStatus() {
+  setApiStatus('wait');
+  try {
+    var r = await fetch(CHAT_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+API_KEY },
+      body: JSON.stringify({ messages:[{role:'user',content:'ping'}], model:'openai', max_tokens:5, stream:false })
+    });
+    setApiStatus(r.ok ? 'ok' : 'error');
+  } catch(e) { setApiStatus('error'); }
 }
 
-function renderKBResults(query) {
-    var container = document.getElementById('kb-results');
-    if (!container) return;
-    var results = query ? buscarConhecimento(query) : _getKB().slice(0,8);
-    container.innerHTML = results.map(function(d) {
-        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px;background:#161b22;border:1px solid #21262d;border-radius:6px;margin-bottom:4px;font-size:12px"><span style="color:#c9d1d9">' + escHtml(d.titulo) + '</span><button onclick="removerConhecimento('" + d.id + "')" style="color:#6b7280;background:none;border:none;cursor:pointer">✕</button></div>';
-    }).join('') || '<p style="color:#6b7280;font-size:12px;text-align:center">Sem resultados.</p>';
+// ------------------------------------------------------------
+// TEXTAREA AUTO-RESIZE + ENTER
+// ------------------------------------------------------------
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
 }
+userInput.addEventListener('input', function() { autoResize(userInput); });
+userInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); }
+});
 
-// ── TOAST ───────────────────────────────────────────────────────────────────
+// ------------------------------------------------------------
+// PAINEL AVANÇADO UI
+// ------------------------------------------------------------
+var currentTab = 'mem';
+function openAdvPanel()  { document.getElementById('adv-panel').classList.add('open'); document.getElementById('adv-overlay').style.display='block'; renderAdvBody(); }
+function closeAdvPanel() { document.getElementById('adv-panel').classList.remove('open'); document.getElementById('adv-overlay').style.display='none'; }
+function switchTab(tab) {
+  currentTab = tab;
+  var tabs = ['mem','conv','media','kb','sys','sec'];
+  document.querySelectorAll('#adv-tabs button').forEach(function(b, i) { b.classList.toggle('active', tabs[i]===tab); });
+  renderAdvBody();
+}
 function toast(msg, type) {
-    var el = document.getElementById('adv-toast');
-    if (!el) return;
-    el.textContent = msg;
-    el.className   = 'adv-toast show ' + (type||'ok');
-    clearTimeout(el._t);
-    el._t = setTimeout(function(){ el.classList.remove('show'); }, 3500);
+  var el = document.getElementById('adv-toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.className   = 'adv-toast show ' + (type||'ok');
+  clearTimeout(el._t);
+  el._t = setTimeout(function() { el.classList.remove('show'); }, 3500);
+}
+function renderAdvBody() {
+  var body = document.getElementById('adv-body');
+  if (!body) return;
+  var html = '';
+  if (currentTab === 'mem') {
+    var mem  = listarMemorias();
+    var keys = Object.keys(mem);
+    html += '<div class="adv-section"><h4>Guardar Memória</h4>'
+      + '<input class="adv-input" id="mem-key-in" placeholder="Chave">'
+      + '<input class="adv-input" id="mem-val-in" placeholder="Valor">'
+      + '<button class="adv-btn" onclick="var k=document.getElementById(\'mem-key-in\').value,v=document.getElementById(\'mem-val-in\').value;salvarMemoria(k,v);renderAdvBody()">'
+      + '<span class="icon"><i class="fas fa-save text-blue-400"></i></span>Guardar<span class="desc">Persiste localmente</span></button></div>'
+      + '<div class="adv-section"><h4>Memórias (' + keys.length + ')</h4>';
+    if (!keys.length) html += '<p style="color:#6b7280;font-size:12px;text-align:center;padding:12px">Sem memórias.</p>';
+    keys.forEach(function(k) {
+      var v = typeof mem[k].valor==='object' ? JSON.stringify(mem[k].valor) : String(mem[k].valor);
+      html += '<div class="mem-item"><span class="mem-key">' + escHtml(k) + '</span><span class="mem-val">' + escHtml(v.substring(0,60)) + (v.length>60?'…':'') + '</span>'
+        + '<button class="mem-del" onclick="removerMemoria(\'' + escHtml(k) + '\')"><i class="fas fa-times"></i></button></div>';
+    });
+    html += '</div><button class="adv-btn" style="border-color:#ef444440;color:#ef4444" onclick="limparMemoriaUsuario()">'
+      + '<span class="icon"><i class="fas fa-trash text-red-500"></i></span>Limpar toda a memória</button>';
+
+  } else if (currentTab === 'conv') {
+    html += '<div class="adv-section"><h4>Importar / Exportar</h4>'
+      + '<button class="adv-btn" onclick="exportarConversacao()"><span class="icon"><i class="fas fa-file-export text-blue-400"></i></span>Exportar conversa<span class="desc">.json</span></button>'
+      + '<button class="adv-btn" onclick="importarConversacao()"><span class="icon"><i class="fas fa-file-import text-green-400"></i></span>Importar conversa<span class="desc">.json</span></button>'
+      + '<button class="adv-btn" onclick="exportarLogsConversacao()"><span class="icon"><i class="fas fa-table text-yellow-400"></i></span>Exportar logs<span class="desc">.csv</span></button></div>'
+      + '<div class="adv-section"><h4>Backup Completo</h4>'
+      + '<button class="adv-btn" onclick="backupDados()"><span class="icon"><i class="fas fa-download text-purple-400"></i></span>Backup total<span class="desc">Inclui memória, KB e config</span></button>'
+      + '<button class="adv-btn" onclick="restaurarDados()"><span class="icon"><i class="fas fa-upload text-orange-400"></i></span>Restaurar backup<span class="desc">.json</span></button>'
+      + '<button class="adv-btn" onclick="gerarRelatorioUso()"><span class="icon"><i class="fas fa-chart-bar text-teal-400"></i></span>Relatório de uso<span class="desc">.md</span></button></div>';
+
+  } else if (currentTab === 'media') {
+    var cfg = getConfig();
+    html += '<div class="adv-section"><h4>Voz</h4>'
+      + '<button class="adv-btn" onclick="reconhecerVozSTT(null)"><span class="icon"><i class="fas fa-microphone text-blue-400"></i></span>Reconhecimento STT<span class="desc">Voz para texto agora</span></button>'
+      + '<label style="font-size:11px;color:#8b949e">Velocidade (' + (cfg.voiceRate||1) + ')</label>'
+      + '<input class="adv-input" type="range" min="0.5" max="2" step="0.1" value="' + (cfg.voiceRate||1) + '" oninput="ajustarParametrosVoz({rate:this.value})">'
+      + '<label style="font-size:11px;color:#8b949e">Tom (' + (cfg.voicePitch||1) + ')</label>'
+      + '<input class="adv-input" type="range" min="0.5" max="2" step="0.1" value="' + (cfg.voicePitch||1) + '" oninput="ajustarParametrosVoz({pitch:this.value})">'
+      + '</div><div class="adv-section"><h4>Plugins</h4>';
+    listarPlugins().forEach(function(p) {
+      html += '<div class="plugin-item"><div><span style="font-size:12px;color:#c9d1d9">' + escHtml(p.nome) + '</span>'
+        + '<span style="display:block;font-size:10px;color:#6b7280">' + escHtml(p.desc) + '</span></div>'
+        + '<button class="plugin-toggle' + (p.activo?' on':'') + '" onclick="' + (p.activo?'desativarPlugin':'ativarPlugin') + '(\'' + p.id + '\')"></button></div>';
+    });
+    html += '</div>';
+
+  } else if (currentTab === 'kb') {
+    var kb = _getKB();
+    html += '<div class="adv-section"><h4>Adicionar Conhecimento</h4>'
+      + '<input class="adv-input" id="kb-title" placeholder="Título">'
+      + '<textarea class="adv-input" id="kb-body" rows="3" placeholder="Conteúdo…" style="resize:none"></textarea>'
+      + '<input class="adv-input" id="kb-tags" placeholder="Tags (vírgula)">'
+      + '<button class="adv-btn" onclick="var t=document.getElementById(\'kb-title\').value,b=document.getElementById(\'kb-body\').value,g=document.getElementById(\'kb-tags\').value.split(\',\');if(t&amp;&amp;b){adicionarConhecimento(t,b,g);renderAdvBody();}else{toast(\'Título e conteúdo obrigatórios\',\'warn\')}">'
+      + '<span class="icon"><i class="fas fa-plus-circle text-green-400"></i></span>Adicionar</button></div>'
+      + '<div class="adv-section"><h4>Base (' + kb.length + ' docs)</h4>'
+      + '<input class="adv-input" placeholder="Pesquisar KB…" oninput="renderKBResults(this.value,this.closest(\'.adv-body\').querySelector(\'#kb-results\')">'
+      + '<div id="kb-results">';
+    kb.slice(0,8).forEach(function(d) {
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px;background:#161b22;border:1px solid #21262d;border-radius:6px;margin-bottom:4px;font-size:12px">'
+        + '<span style="color:#c9d1d9">' + escHtml(d.titulo) + '</span>'
+        + '<button onclick="removerConhecimento(\'' + d.id + '\')" style="color:#6b7280;background:none;border:none;cursor:pointer">✕</button></div>';
+    });
+    if (kb.length > 8) html += '<p style="color:#6b7280;font-size:11px;text-align:center">+ ' + (kb.length-8) + ' mais</p>';
+    html += '</div></div>'
+      + '<button class="adv-btn" onclick="consolidarBaseConhecimento();renderAdvBody()"><span class="icon"><i class="fas fa-compress-arrows-alt text-yellow-400"></i></span>Consolidar KB</button>'
+      + '<button class="adv-btn" onclick="atualizarIndiceVetorial()"><span class="icon"><i class="fas fa-project-diagram text-blue-400"></i></span>Actualizar índice vetorial</button>';
+
+  } else if (currentTab === 'sys') {
+    var m   = coletarMetricas();
+    var cfg2 = getConfig();
+    html += '<div class="adv-section"><h4>Métricas</h4>'
+      + '<div class="metric-row"><span class="metric-label">Conversas</span><span class="metric-val">' + m.totalConversas + '</span></div>'
+      + '<div class="metric-row"><span class="metric-label">Mensagens</span><span class="metric-val">' + m.totalMensagens + '</span></div>'
+      + '<div class="metric-row"><span class="metric-label">Memórias</span><span class="metric-val">' + m.memoriasGravadas + '</span></div>'
+      + '<div class="metric-row"><span class="metric-label">Docs KB</span><span class="metric-val">' + m.kbDocumentos + '</span></div>'
+      + '<div class="metric-row"><span class="metric-label">Plugins activos</span><span class="metric-val">' + m.pluginsActivos + '</span></div>'
+      + '<div class="metric-row"><span class="metric-label">Auditoria</span><span class="metric-val">' + m.auditEntradas + '</span></div></div>'
+      + '<div class="adv-section"><h4>Configuração</h4>'
+      + '<label style="font-size:11px;color:#8b949e">Temperatura (' + cfg2.temperature + ')</label>'
+      + '<input class="adv-input" type="range" min="0" max="2" step="0.05" value="' + cfg2.temperature + '" oninput="sincronizarConfig({temperature:parseFloat(this.value)})">'
+      + '<label style="font-size:11px;color:#8b949e">Max Tokens</label>'
+      + '<input class="adv-input" type="number" value="' + cfg2.maxTokens + '" min="256" max="8192" step="256" onchange="sincronizarConfig({maxTokens:parseInt(this.value)})">'
+      + '<label style="font-size:11px;color:#8b949e">Nome</label>'
+      + '<input class="adv-input" value="' + escHtml(cfg2.username) + '" onchange="sincronizarConfig({username:this.value})">'
+      + '</div>'
+      + '<button class="adv-btn" onclick="restaurarConfiguracaoPadrao()"><span class="icon"><i class="fas fa-undo text-orange-400"></i></span>Restaurar padrão</button>'
+      + '<button class="adv-btn" onclick="limparCache()"><span class="icon"><i class="fas fa-broom text-teal-400"></i></span>Optimizar cache</button>'
+      + '<button class="adv-btn" onclick="var d=prompt(\'Descreve o bug:\');if(d)reportarBug(d)"><span class="icon"><i class="fas fa-bug text-red-400"></i></span>Reportar bug</button>';
+
+  } else if (currentTab === 'sec') {
+    var audit = JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]').slice(0, 5);
+    html += '<div class="adv-section"><h4>Privacidade</h4>'
+      + '<button class="adv-btn" onclick="var c=getCurrentConversation();if(c&amp;&amp;c.messages.length){avaliarRiscoPrivacidade(c.messages[c.messages.length-1].content);}else{toast(\'Sem mensagens.\',\'warn\')}"><span class="icon"><i class="fas fa-eye text-yellow-400"></i></span>Avaliar risco da última msg</button>'
+      + '<button class="adv-btn" onclick="var c=getCurrentConversation();if(c&amp;&amp;c.messages.length){var t=c.messages[c.messages.length-1].content;renderMessageUI(\'ai\',\'Anonimizado:\\n\'+anonimizarDados(t));}"><span class="icon"><i class="fas fa-user-secret text-purple-400"></i></span>Anonimizar última msg</button></div>'
+      + '<div class="adv-section"><h4>Criptografia</h4>'
+      + '<button class="adv-btn" onclick="var k=gerarChaveCriptografica(256);renderMessageUI(\'ai\',\'Chave 256-bit: \`\'+k+\'\`\')"><span class="icon"><i class="fas fa-key text-green-400"></i></span>Gerar chave 256-bit</button>'
+      + '<button class="adv-btn" onclick="var r=prompt(\'Role (admin/editor/viewer):\');if(r)autorizarRoleBased(r)"><span class="icon"><i class="fas fa-user-shield text-blue-400"></i></span>Verificar permissões RBAC</button></div>'
+      + '<div class="adv-section"><h4>Auditoria (últimas 5)</h4>';
+    if (!audit.length) html += '<p style="color:#6b7280;font-size:12px">Sem entradas.</p>';
+    audit.forEach(function(a) {
+      html += '<div style="padding:6px;background:#161b22;border-radius:6px;margin-bottom:4px;font-size:11px">'
+        + '<span style="color:#58a6ff">' + escHtml(a.acao) + '</span>'
+        + '<span style="color:#6b7280;float:right">' + a.ts.substring(0,16).replace('T',' ') + '</span></div>';
+    });
+    html += '</div>';
+  }
+  body.innerHTML = html;
+}
+function renderKBResults(query, container) {
+  if (!container) return;
+  var results = query ? buscarConhecimento(query) : _getKB().slice(0, 8);
+  container.innerHTML = results.map(function(d) {
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px;background:#161b22;border:1px solid #21262d;border-radius:6px;margin-bottom:4px;font-size:12px">'
+      + '<span style="color:#c9d1d9">' + escHtml(d.titulo) + '</span>'
+      + '<button onclick="removerConhecimento(\'' + d.id + '\')" style="color:#6b7280;background:none;border:none;cursor:pointer">✕</button></div>';
+  }).join('') || '<p style="color:#6b7280;font-size:12px;text-align:center">Sem resultados.</p>';
 }
 
-// ── Integrar memória no system prompt ─────────────────────────────────────
-function getMemoriaContexto() {
-    var mem   = _getMem();
-    var keys  = Object.keys(mem);
-    if (!keys.length) return '';
-    return '\n\nMEMÓRIA DO UTILIZADOR:\n' + keys.map(function(k){
-        return '- ' + k + ': ' + mem[k].valor;
-    }).join('\n');
-}
-
-// Integrar KB no system prompt
-function getKBContexto(query) {
-    var docs = buscarConhecimento(query);
-    if (!docs.length) return '';
-    return '\n\nBASE DE CONHECIMENTO RELEVANTE:\n' + docs.slice(0,3).map(function(d){
-        return '['+ d.titulo +']: ' + d.conteudo.substring(0,200);
-    }).join('\n');
-}
-
+// ------------------------------------------------------------
+// INIT
+// ------------------------------------------------------------
+window.onload = function() {
+  sincronizarConfig(getConfig());
+  renderHistoryList();
+  if (conversations.length > 0) loadConversation(conversations[0].id);
+  updateApiStatus();
+  setInterval(updateApiStatus, 30000);
+};
 </script>
-
-<!-- PAINEL AVANÇADO -->
-<div id="adv-panel" class="adv-panel">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #30363d;flex-shrink:0;">
-        <span style="font-size:14px;font-weight:700;color:#e6edf3;"><i class="fas fa-sliders-h mr-2 text-blue-400"></i>Ferramentas Avançadas</span>
-        <button onclick="closeAdvPanel()" style="color:#6b7280;background:none;border:none;cursor:pointer;font-size:16px;">&times;</button>
-    </div>
-    <div class="adv-tab" id="adv-tabs">
-        <button onclick="switchTab('mem')"     class="active"><i class="fas fa-brain mr-1"></i>Memória</button>
-        <button onclick="switchTab('conv')"    ><i class="fas fa-comments mr-1"></i>Conv.</button>
-        <button onclick="switchTab('media')"   ><i class="fas fa-photo-video mr-1"></i>Média</button>
-        <button onclick="switchTab('kb')"      ><i class="fas fa-book mr-1"></i>KB</button>
-        <button onclick="switchTab('sys')"     ><i class="fas fa-cog mr-1"></i>Sistema</button>
-        <button onclick="switchTab('sec')"     ><i class="fas fa-shield-alt mr-1"></i>Seg.</button>
-    </div>
-    <div class="adv-body" id="adv-body"><!-- preenchido por JS --></div>
-</div>
-<div id="adv-overlay" onclick="closeAdvPanel()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;"></div>
-<div id="adv-toast" class="adv-toast"></div>
 </body>
 </html>
