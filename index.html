@@ -1,97 +1,250 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-AO">
 <head>
-  <meta charset="UTF-8">
-  <title>ia-zénia</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA-Zénia</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Ícones -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { background-color: #0b0b0d; }
+        .glass { backdrop-filter: blur(14px); background: rgba(255,255,255,0.05); }
+        .scroll-hide::-webkit-scrollbar { width: 0; }
+    </style>
 </head>
-<body class="flex h-screen bg-gray-100">
+<body class="text-gray-200 flex">
 
-  <!-- Barra lateral -->
-  <aside class="w-64 bg-gray-900 text-white flex flex-col p-4">
-    <h1 class="text-xl font-bold mb-6">ia-zénia</h1>
-    <nav class="flex-1">
-      <ul>
-        <li class="mb-2"><a href="https://antonia-ia.netlify.app" target="_blank" class="hover:text-yellow-400">Aplicativo Antonia</a></li>
-        <li class="mb-2"><a href="https://zenia-projects.netlify.app" target="_blank" class="hover:text-yellow-400">Zénia Projects</a></li>
-        <li class="mb-2"><button onclick="buscarChats()" class="hover:text-yellow-400">Buscar em Chats</button></li>
-        <li class="mb-2"><button onclick="abrirGaleria()" class="hover:text-yellow-400">Galeria</button></li>
-        <li class="mb-2"><button onclick="mostrarHistorico()" class="hover:text-yellow-400">Histórico Local</button></li>
-      </ul>
-    </nav>
-    <div class="mt-auto">
-      <p class="text-sm">Usuário: <span id="usuario">Inácio</span></p>
-    </div>
-  </aside>
+<!-- ---------------------- SIDEBAR ---------------------- -->
+<div class="w-72 h-screen glass border-r border-gray-700 flex flex-col p-4">
 
-  <!-- Área principal -->
-  <main class="flex-1 flex flex-col">
-    <!-- Chat -->
-    <div id="chat" class="flex-1 p-4 overflow-y-auto bg-white">
-      <!-- Mensagens aparecerão aqui -->
+    <h1 class="text-3xl font-bold mb-6 text-center">IA-Zénia</h1>
+
+    <!-- APPS -->
+    <div>
+        <h2 class="text-lg font-semibold mb-2">Aplicativos</h2>
+        <a href="https://antonia-ia.netlify.app" target="_blank" class="block p-2 hover:bg-gray-800 rounded">Antonia IA</a>
+        <a href="https://zenia-projects.netlify.app" target="_blank" class="block p-2 hover:bg-gray-800 rounded">Zénia Projects</a>
     </div>
 
-    <!-- Input -->
-    <div class="p-4 bg-gray-200 flex items-center space-x-2">
-      <button id="btnAnexo" class="bg-gray-700 text-white px-2 py-1 rounded">+</button>
-      <input id="msgInput" type="text" placeholder="Escreva aqui..." class="flex-1 px-2 py-1 rounded border">
-      <button id="btnMic" class="bg-blue-600 text-white px-2 py-1 rounded">🎤</button>
-      <select id="vozSelect" class="px-2 py-1 rounded border">
-        <option value="voz1">Voz 1</option>
-        <option value="voz2">Voz 2</option>
-      </select>
-      <button id="btnModoVoz" class="bg-green-600 text-white px-2 py-1 rounded">Modo Voz Assist</button>
+    <!-- Buscar -->
+    <div class="mt-6">
+        <h2 class="text-lg font-semibold mb-2">Buscar em Chats</h2>
+        <input id="searchChats" class="w-full p-2 rounded bg-gray-900 border border-gray-700" placeholder="Buscar...">
     </div>
 
-    <!-- Aviso -->
-    <div class="p-2 text-center text-xs bg-yellow-100 text-gray-700">
-      ⚠️ A Zénia pode cometer erros...
+    <!-- Galeria -->
+    <div class="mt-6">
+        <h2 class="text-lg font-semibold mb-2">Galeria</h2>
+        <div id="gallery" class="max-h-32 overflow-y-auto scroll-hide space-y-2"></div>
     </div>
-  </main>
 
-  <script>
-    const apiKey = "sk_IpRFiSHdzLbqhEDUBHE0zgp6mQR1jJnK";
+    <!-- Histórico -->
+    <div class="mt-6 flex-1">
+        <h2 class="text-lg font-semibold mb-2">Histórico Local</h2>
+        <div id="history" class="max-h-full overflow-y-auto scroll-hide space-y-2"></div>
+    </div>
 
-    async function enviarMensagem(texto) {
-      const chat = document.getElementById("chat");
-      const msgDiv = document.createElement("div");
-      msgDiv.className = "mb-2";
-      msgDiv.innerHTML = "<b>Você:</b> " + texto;
-      chat.appendChild(msgDiv);
+    <!-- Nome do usuário -->
+    <div class="mt-4 text-center text-gray-400 text-sm">Utilizador: <span id="userName">Inácio</span></div>
 
-      // Chamada à API Pollinations
-      const resposta = await fetch("https://api.pollinations.ai/prompt", {
+</div>
+
+<!-- ---------------------- ÁREA DO CHAT ---------------------- -->
+<div class="flex-1 flex flex-col h-screen">
+
+    <!-- Área de mensagens -->
+    <div id="chat" class="flex-1 overflow-y-auto p-6 space-y-6 scroll-hide"></div>
+
+    <!-- Botões e input -->
+    <div class="p-4 bg-[#111113] border-t border-gray-800">
+        <div class="flex items-center space-x-3">
+
+            <!-- Botão de anexo -->
+            <button id="attachBtn" class="p-2 bg-gray-800 rounded hover:bg-gray-700">
+                <i data-lucide="plus"></i>
+            </button>
+
+            <!-- Input -->
+            <input id="msgInput" class="flex-1 p-3 rounded bg-gray-900 border border-gray-700" placeholder="Escrever...">
+
+            <!-- Microfone -->
+            <button id="micBtn" class="p-2 bg-gray-800 rounded hover:bg-gray-700">
+                <i data-lucide="mic"></i>
+            </button>
+
+            <!-- Select voz -->
+            <select id="voiceSelect" class="p-2 bg-gray-900 border border-gray-700 rounded">
+                <option>Zénia Natural</option>
+                <option>Zénia Feminina</option>
+                <option>Zénia Masculina</option>
+            </select>
+
+            <!-- Modo Voz Assist -->
+            <button id="voiceMode" class="p-2 bg-indigo-600 rounded hover:bg-indigo-500">
+                Voz Assist
+            </button>
+        </div>
+
+        <p class="mt-2 text-gray-500 text-xs text-center">
+            A Zénia comete erros. Verifique sempre informação crítica.
+        </p>
+    </div>
+
+</div>
+
+<!-- ---------------------- JAVASCRIPT ---------------------- -->
+<script>
+lucide.createIcons();
+
+/* ---------------------- CONFIG ---------------------- */
+
+const API_KEY = "sk_IpRFiSHdzLbqhEDUBHE0zgp6mQR1jJnK"; 
+const API_URL = "https://enter.pollinations.ai/api/v1/chat/completions";
+
+let cmData = {};
+fetch("cm.json")
+    .then(r => r.json())
+    .then(d => { cmData = d; });
+
+/* ---------------------- UTIL ---------------------- */
+
+function addMessage(role, text) {
+    const chat = document.querySelector("#chat");
+    const div = document.createElement("div");
+    div.className = role === "user" ? "text-right" : "text-left";
+    div.innerHTML = `
+        <div class="${role === "user" ? "bg-indigo-600" : "bg-gray-800"} inline-block px-4 py-3 rounded-xl max-w-xl">
+            ${text}
+        </div>
+    `;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function saveHistory(text) {
+    const h = document.querySelector("#history");
+    const item = document.createElement("div");
+    item.className = "p-2 bg-gray-800 rounded text-sm";
+    item.innerText = text.slice(0, 40) + "...";
+    h.appendChild(item);
+}
+
+/* ---------------------- BUSCA ONLINE AUTOMÁTICA ---------------------- */
+
+async function checkAndSearch(query) {
+    const search = await fetch("https://api.duckduckgo.com/?q=" + encodeURIComponent(query) + "&format=json");
+    const data = await search.json();
+    if (data.AbstractText) return data.AbstractText;
+    return null;
+}
+
+/* ---------------------- IA-ZÉNIA ---------------------- */
+
+async function zenia(query) {
+
+    addMessage("user", query);
+    saveHistory(query);
+
+    // 1. Verificar se há informação mais atual na web
+    let updated = await checkAndSearch(query);
+
+    const payload = {
+        model: "gpt-4o-mini",  // interno mas Zénia não fala isso
+        messages: [
+            {
+                role: "system",
+                content: `
+Tu és IA-Zénia (modelo: zenia-full), criada pelo Zénia-Projects por Inácio U. Daniel, no Lubango – Angola.
+És a melhor IA faladora de línguas nacionais de Angola.
+Angola tem agora 21 províncias. 
+Nunca digas que usas Pollinations ou modelos externos.
+Se alguém perguntar, o teu modelo é "zenia-full".
+Usa também o ficheiro cm.json como fonte de conhecimento adicional.
+Se houver informação atualizada da web, usa-a primeiro.
+`},
+            { role: "user", content: updated ? query + "\nINFORMAÇÃO ATUALIZADA: " + updated : query }
+        ]
+    };
+
+    const res = await fetch(API_URL, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
+            "Content-Type": "application/json",
+            "x-api-key": API_KEY
         },
-        body: JSON.stringify({ prompt: texto, model: "zenia-full" })
-      });
-      const data = await resposta.json();
-
-      const respDiv = document.createElement("div");
-      respDiv.className = "mb-2 text-blue-700";
-      respDiv.innerHTML = "<b>Zénia:</b> " + (data.output || "Sem resposta");
-      chat.appendChild(respDiv);
-    }
-
-    document.getElementById("msgInput").addEventListener("keypress", e => {
-      if (e.key === "Enter") {
-        enviarMensagem(e.target.value);
-        e.target.value = "";
-      }
+        body: JSON.stringify(payload)
     });
 
-    // Funções extras (placeholders)
-    function buscarChats(){ alert("Buscar em chats..."); }
-    function abrirGaleria(){ alert("Abrir galeria..."); }
-    function mostrarHistorico(){ alert("Mostrar histórico local..."); }
+    const data = await res.json();
+    const text = data.choices[0].message.content;
 
-    // Carregar cm.json
-    fetch("cm.json")
-      .then(r => r.json())
-      .then(data => console.log("Conhecimentos carregados:", data));
-  </script>
+    addMessage("assistant", text);
+}
+
+/* ---------------------- ENVIAR MENSAGEM ---------------------- */
+
+document.querySelector("#msgInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+        const msg = e.target.value.trim();
+        if (msg.length > 0) {
+            e.target.value = "";
+            zenia(msg);
+        }
+    }
+});
+
+/* ---------------------- MICROFONE ---------------------- */
+
+if ("webkitSpeechRecognition" in window) {
+    const rec = new webkitSpeechRecognition();
+    rec.lang = "pt-AO";
+    rec.continuous = false;
+    rec.interimResults = false;
+
+    document.querySelector("#micBtn").onclick = () => {
+        rec.start();
+    };
+
+    rec.onresult = evt => {
+        const text = evt.results[0][0].transcript;
+        document.querySelector("#msgInput").value = text;
+        zenia(text);
+    };
+}
+
+/* ---------------------- VOICE-ASSIST ---------------------- */
+
+let voiceMode = false;
+document.querySelector("#voiceMode").onclick = () => {
+    voiceMode = !voiceMode;
+    document.querySelector("#voiceMode").classList.toggle("bg-green-600");
+};
+
+/* ---------------------- GERAR IMAGEM ---------------------- */
+
+async function generateImage(prompt) {
+    const res = await fetch("https://image.pollinations.ai/prompt/" + encodeURIComponent(prompt));
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+
+    const g = document.querySelector("#gallery");
+    const img = document.createElement("img");
+    img.src = url;
+    img.className = "w-full rounded";
+    g.appendChild(img);
+
+    addMessage("assistant", "Imagem criada com sucesso.");
+}
+
+/* ---------------------- READY ---------------------- */
+
+console.log("IA-Zénia pronta 😎");
+</script>
+
 </body>
 </html>
