@@ -122,6 +122,8 @@
         let isVoiceAssist = false;
         let conversations = JSON.parse(localStorage.getItem('conversations') || '[]');
         let currentConversationId = null;
+        const USE_PROXY = location.hostname.endsWith('netlify.app');
+        const TEXT_ENDPOINT = USE_PROXY ? '/.netlify/functions/pollinations-proxy' : 'https://text.pollinations.ai/';
 
         // Carregar CM.JSON simulação (conhecimento personalizado)
         async function loadCustomKnowledge() {
@@ -245,7 +247,7 @@
             // Gerar Resposta via Pollinations
             try {
                 const messages = [{ role: "system", content: context }, ...conv.messages, { role: "user", content: text }];
-                const response = await fetch(`https://text.pollinations.ai/`, {
+                const response = await fetch(TEXT_ENDPOINT, {
                     method: 'POST',
                     mode: 'cors',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'text/plain' },
