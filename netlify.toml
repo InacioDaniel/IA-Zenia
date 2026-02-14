@@ -7,3 +7,16 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Headers = "Content-Type, Accept"
     Access-Control-Allow-Methods = "POST, OPTIONS"
+
+[[redirects]]
+  from = "/api/text"
+  to = "https://text.pollinations.ai/"
+  status = 200
+  force = true
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type, Accept"
+    Access-Control-Allow-Methods = "POST, OPTIONS"

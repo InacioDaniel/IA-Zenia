@@ -80,6 +80,7 @@
                 <button id="new-chat-btn" title="Nova conversa" class="text-xs px-3 py-1 rounded-full border border-gray-700 text-gray-300 hover:bg-gray-800 transition">
                     <i class="fas fa-comments mr-2"></i>Novo Chat
                 </button>
+                <span id="api-status" class="text-[11px] px-2 py-1 rounded border border-gray-700 text-gray-400">API: verificando…</span>
             </div>
             <div class="text-xs text-gray-500">Modelo: <span class="text-blue-400">Zenia-Full</span></div>
         </header>
@@ -123,7 +124,7 @@
         let conversations = JSON.parse(localStorage.getItem('conversations') || '[]');
         let currentConversationId = null;
         const USE_PROXY = location.hostname.endsWith('netlify.app');
-        const TEXT_ENDPOINT = USE_PROXY ? '/.netlify/functions/pollinations-proxy' : 'https://text.pollinations.ai/';
+        const TEXT_ENDPOINT = USE_PROXY ? '/api/text' : 'https://text.pollinations.ai/';
 
         // Carregar CM.JSON simulação (conhecimento personalizado)
         async function loadCustomKnowledge() {
@@ -247,7 +248,7 @@
             // Gerar Resposta via Pollinations
             try {
                 const messages = [{ role: "system", content: context }, ...conv.messages, { role: "user", content: text }];
-                const response = await fetch(TEXT_ENDPOINT, {
+                const response = await tryFetchWithBackoff(TEXT_ENDPOINT, {
                     method: 'POST',
                     mode: 'cors',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'text/plain' },
@@ -276,6 +277,41 @@
                 // Fallback: tentar um resumo via busca simulada ou mensagem clara
                 const fallback = await webSearch(text);
                 appendMessage('ai', fallback || "Desculpa, tive um problema na minha rede do Lubango. Podes repetir?");
+            }
+        }
+
+        async function tryFetchWithBackoff(url, init, retries = 2) {
+            let lastErr;
+            for (let i = 0; i <= retries; i++) {
+                try {
+                    const resp = await fetch(url, init);
+                    if (resp.ok) return resp;
+                    lastErr = new Error('HTTP ' + resp.status);
+                } catch (e) { lastErr = e; }
+                await new Promise(r => setTimeout(r, 600 * (i + 1)));
+            }
+            throw lastErr;
+        }
+
+        async function updateApiStatus() {
+            const el = document.getElementById('api-status');
+            try {
+                const resp = await fetch(TEXT_ENDPOINT, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'text/plain' },
+                    body: JSON.stringify({ ping: true })
+                });
+                if (resp.ok) {
+                    el.textContent = 'API: online';
+                    el.className = 'text-[11px] px-2 py-1 rounded border border-green-700 text-green-400';
+                } else {
+                    el.textContent = 'API: instável (' + resp.status + ')';
+                    el.className = 'text-[11px] px-2 py-1 rounded border border-yellow-700 text-yellow-400';
+                }
+            } catch {
+                el.textContent = 'API: offline';
+                el.className = 'text-[11px] px-2 py-1 rounded border border-red-700 text-red-400';
             }
         }
 
@@ -392,6 +428,7 @@
             loadCustomKnowledge();
             renderHistoryList();
             document.getElementById('new-chat-btn').onclick = startNewConversation;
+            updateApiStatus();
         };
     </script>
 </body>
