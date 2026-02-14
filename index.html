@@ -18,6 +18,17 @@
         .recording { animation: pulse-red 1.5s infinite; }
         @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fade-in 200ms ease-out; }
+        
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -25,6 +36,12 @@
     <aside class="sidebar w-72 flex flex-col border-r border-gray-800">
         <div class="p-6 text-2xl font-bold tracking-tight text-blue-500">
             IA-Zénia <span class="text-xs font-light text-gray-500 block">by Zénia-Projects</span>
+        </div>
+
+        <div class="px-4 mb-4">
+            <button onclick="startNewConversation()" class="w-full bg-blue-600/10 hover:bg-blue-600/20 text-blue-500 border border-blue-500/30 rounded-lg py-2 text-sm font-medium transition flex items-center justify-center gap-2">
+                <i class="fas fa-plus"></i> Novo Chat
+            </button>
         </div>
 
         <div class="px-4 mb-4">
@@ -54,7 +71,7 @@
                 </button>
                 <div id="history-list" class="mt-4 space-y-2">
                     <p class="text-xs text-gray-600 px-2 italic">Histórico Local</p>
-                    </div>
+                </div>
             </div>
         </nav>
 
@@ -76,9 +93,6 @@
                 </select>
                 <button id="voice-assist-btn" onclick="toggleVoiceAssist()" class="text-xs px-3 py-1 rounded-full border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition">
                     <i class="fas fa-headset mr-2"></i>Modo Voz Assist.
-                </button>
-                <button id="new-chat-btn" title="Nova conversa" class="text-xs px-3 py-1 rounded-full border border-gray-700 text-gray-300 hover:bg-gray-800 transition">
-                    <i class="fas fa-comments mr-2"></i>Novo Chat
                 </button>
                 <span id="api-status" class="text-[11px] px-2 py-1 rounded border border-gray-700 text-gray-400">API: verificando…</span>
             </div>
@@ -104,8 +118,8 @@
                     <button id="mic-btn" class="p-3 text-gray-400 hover:text-blue-500 transition">
                         <i class="fas fa-microphone"></i>
                     </button>
-                    <button onclick="handleSendMessage()" class="p-3 bg-blue-600 rounded-xl hover:bg-blue-700 glow-button transition">
-                        <i class="fas fa-paper-plane"></i>
+                    <button id="send-btn" onclick="handleSendMessage()" class="p-3 bg-blue-600 rounded-xl hover:bg-blue-700 glow-button transition min-w-[44px] flex items-center justify-center">
+                        <i class="fas fa-paper-plane" id="send-icon"></i>
                     </button>
                 </div>
             </div>
@@ -116,37 +130,17 @@
     </main>
 
     <script>
-        const API_KEY_PUBLIC = "pk_urEpxcajGs5TF9Fs";
+        const API_KEY = "pk_urEpxcajGs5TF9Fs";
+        const CHAT_ENDPOINT = "https://gen.pollinations.ai/v1/chat/completions";
         const chatWindow = document.getElementById('chat-window');
         const userInput = document.getElementById('user-input');
-        let cmData = {};
+        const sendBtn = document.getElementById('send-btn');
+        const sendIcon = document.getElementById('send-icon');
         let isVoiceAssist = false;
         let conversations = JSON.parse(localStorage.getItem('conversations') || '[]');
         let currentConversationId = null;
-        const TEXT_ENDPOINT = 'https://text.pollinations.ai/';
 
-        // Carregar CM.JSON simulação (conhecimento personalizado)
-        async function loadCustomKnowledge() {
-            try {
-                // Aqui você carregaria o arquivo real. Exemplo de estrutura:
-                cmData = {
-                    "origem": "Lubango, Angola",
-                    "criador": "Inácio U. Daniel",
-                    "provincias": 21,
-                    "modelo": "Zenia-Full"
-                };
-                console.log("Conhecimento local carregado.");
-            } catch (e) { console.error("Erro ao carregar cm.json"); }
-        }
-
-        // Sistema de busca simulado (Web Search Logic)
-        async function webSearch(query) {
-            console.log("Buscando na web por:", query);
-            // Simulação de navegação e extração
-            return `[Informação atualizada de 2026: Angola agora possui oficialmente 21 províncias após a nova divisão político-administrativa.]`;
-        }
-
-        // Utilitários de Conversa
+        // Gestão de Conversas
         function createConversation(title) {
             const id = Date.now().toString();
             const conv = { id, title, messages: [] };
@@ -170,31 +164,29 @@
             hist.innerHTML = '<p class="text-xs text-gray-600 px-2 italic">Histórico Local</p>';
             conversations.forEach(conv => {
                 const item = document.createElement('div');
-                item.className = "p-2 hover:bg-gray-800 rounded text-[11px] text-gray-300 truncate cursor-pointer flex items-center justify-between";
+                item.className = `p-2 hover:bg-gray-800 rounded text-[11px] text-gray-300 truncate cursor-pointer flex items-center justify-between ${conv.id === currentConversationId ? 'bg-gray-800/50 border-l-2 border-blue-500 text-blue-400' : ''}`;
+                
                 const left = document.createElement('div');
-                left.className = "flex items-center gap-2";
+                left.className = "flex items-center gap-2 overflow-hidden flex-1";
+                left.onclick = () => loadConversation(conv.id);
+                
                 const icon = document.createElement('i');
-                icon.className = "far fa-comment-alt";
+                icon.className = "far fa-comment-alt flex-shrink-0";
                 const title = document.createElement('span');
+                title.className = "truncate";
                 title.textContent = conv.title || 'Conversa';
+                
                 left.appendChild(icon);
                 left.appendChild(title);
-                const actions = document.createElement('div');
-                actions.className = "flex items-center gap-2";
-                const openBtn = document.createElement('button');
-                openBtn.title = "Abrir conversa";
-                openBtn.className = "text-gray-400 hover:text-white";
-                openBtn.innerHTML = '<i class="fas fa-folder-open"></i>';
-                openBtn.onclick = () => loadConversation(conv.id);
+                
                 const delBtn = document.createElement('button');
                 delBtn.title = "Apagar conversa";
-                delBtn.className = "text-gray-400 hover:text-red-500";
+                delBtn.className = "text-gray-500 hover:text-red-500 ml-2";
                 delBtn.innerHTML = '<i class="fas fa-trash"></i>';
                 delBtn.onclick = (e) => { e.stopPropagation(); deleteConversation(conv.id); };
-                actions.appendChild(openBtn);
-                actions.appendChild(delBtn);
+                
                 item.appendChild(left);
-                item.appendChild(actions);
+                item.appendChild(delBtn);
                 hist.appendChild(item);
             });
         }
@@ -202,12 +194,11 @@
         function deleteConversation(id) {
             conversations = conversations.filter(c => c.id !== id);
             if (currentConversationId === id) {
-                currentConversationId = null;
-                chatWindow.innerHTML = '';
-                document.getElementById('welcome-msg').style.display = '';
+                startNewConversation();
+            } else {
+                persistConversations();
+                renderHistoryList();
             }
-            persistConversations();
-            renderHistoryList();
         }
 
         function loadConversation(id) {
@@ -216,69 +207,32 @@
             document.getElementById('welcome-msg').style.display = 'none';
             const conv = getCurrentConversation();
             if (!conv) return;
-            conv.messages.forEach(m => appendMessage(m.role, m.content, m.img || null, false));
+            conv.messages.forEach(m => {
+                if(m.role !== 'system') {
+                    renderMessageUI(m.role === 'user' ? 'user' : 'ai', m.content, m.img || null);
+                }
+            });
+            renderHistoryList();
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
         function startNewConversation() {
             chatWindow.innerHTML = '';
-            document.getElementById('welcome-msg').style.display = '';
+            document.getElementById('welcome-msg').style.display = 'flex';
             currentConversationId = null;
+            renderHistoryList();
         }
 
-        // Envio de Mensagem
-        async function handleSendMessage() {
-            const text = userInput.value.trim();
-            if(!text) return;
-
-            const title = text.substring(0, 50);
-            const conv = getCurrentConversation() || createConversation(title + '...');
-
-            appendMessage('user', text);
-            userInput.value = '';
-            document.getElementById('welcome-msg').style.display = 'none';
-
-            // Lógica de "Pensamento" da Zénia
-            let context = `Tu és a IA-Zénia, uma inteligência avançada feita no Lubango, Angola, pelo Inácio U. Daniel (Zénia-Projects). 
-            Teu modelo é o zenia-full. Tu nunca dizes que és da Pollinations ou GPT.
-            Angola tem 21 províncias. Se te perguntarem algo desatualizado, busca na web. 
-            És a melhor em línguas nacionais (Umbundu, Kimbundu, etc).`;
-
-            // Gerar Resposta via Pollinations
-            try {
-                const messages = [{ role: "system", content: context }, ...conv.messages, { role: "user", content: text }];
-                const prompt = buildPrompt(getCurrentConversation(), text, context);
-                const seed = Math.floor(Math.random() * 1000);
-                const url = `${TEXT_ENDPOINT}${encodeURIComponent(prompt)}?model=openai&seed=${seed}&temperature=0.8`;
-                const response = await tryFetchWithBackoff(url, { mode: 'cors' });
-                
-                let data;
-                if (response.ok) {
-                    data = await response.text();
-                } else {
-                    throw new Error('Pollinations text API falhou');
-                }
-                
-                // Lógica para detectar comando de imagem
-                if(text.toLowerCase().includes("gera uma imagem") || text.toLowerCase().includes("desenha")) {
-                    const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?nologo=true&enhance=true`;
-                    appendMessage('ai', `Aqui está a imagem que criei para ti:`, imgUrl);
-                } else {
-                    appendMessage('ai', data);
-                    if (isVoiceAssist) speakText(data);
-                }
-            } catch (error) {
-                // Fallback: tentar um resumo via busca simulada ou mensagem clara
-                const fallback = await webSearch(text);
-                appendMessage('ai', fallback || "Desculpa, tive um problema na minha rede do Lubango. Podes repetir?");
-            }
+        // Sistema de Busca e API
+        async function webSearch(query) {
+            return `[IA-Zénia: Ocorreu um problema de ligação ao Lubango. Angola tem 21 províncias.]`;
         }
 
-        async function tryFetchWithBackoff(url, init, retries = 2) {
+        async function tryFetchWithBackoff(url, options, retries = 2) {
             let lastErr;
             for (let i = 0; i <= retries; i++) {
                 try {
-                    const resp = await fetch(url, init);
+                    const resp = await fetch(url, options);
                     if (resp.ok) return resp;
                     lastErr = new Error('HTTP ' + resp.status);
                 } catch (e) { lastErr = e; }
@@ -287,25 +241,15 @@
             throw lastErr;
         }
 
-        function buildPrompt(conv, userText, systemContext) {
-            const header = systemContext.replace(/\s+/g, ' ').trim();
-            const history = (conv?.messages || []).slice(-6).map(m => {
-                const role = m.role === 'user' ? 'User' : (m.role === 'ai' ? 'Assistant' : 'System');
-                return `${role}: ${m.content}`;
-            }).join('\n');
-            const combined = `${header}\n${history ? history + '\n' : ''}User: ${userText}\nAssistant:`;
-            return combined.length > 4000 ? combined.slice(-4000) : combined;
-        }
-
         async function updateApiStatus() {
             const el = document.getElementById('api-status');
             try {
-                const resp = await fetch(`${TEXT_ENDPOINT}${encodeURIComponent('ping')}?model=openai`, { mode: 'cors' });
+                const resp = await fetch('https://gen.pollinations.ai/models');
                 if (resp.ok) {
                     el.textContent = 'API: online';
                     el.className = 'text-[11px] px-2 py-1 rounded border border-green-700 text-green-400';
                 } else {
-                    el.textContent = 'API: instável (' + resp.status + ')';
+                    el.textContent = 'API: instável';
                     el.className = 'text-[11px] px-2 py-1 rounded border border-yellow-700 text-yellow-400';
                 }
             } catch {
@@ -314,7 +258,82 @@
             }
         }
 
-        function appendMessage(role, text, img = null, persist = true) {
+        // Envio de Mensagem
+        async function handleSendMessage() {
+            const text = userInput.value.trim();
+            if(!text || sendBtn.disabled) return;
+
+            let conv = getCurrentConversation();
+            if (!conv) {
+                conv = createConversation(text.substring(0, 30) + (text.length > 30 ? '...' : ''));
+            }
+
+            renderMessageUI('user', text);
+            userInput.value = '';
+            document.getElementById('welcome-msg').style.display = 'none';
+            setLoading(true);
+
+            // Contexto do Sistema
+            const systemMsg = { 
+                role: "system", 
+                content: "Tu és a IA-Zénia, uma inteligência avançada feita no Lubango, Angola, pelo Inácio U. Daniel (Zénia-Projects). Teu modelo é o zenia-full. Angola tem 21 províncias. És especialista em línguas nacionais angolanas." 
+            };
+
+            // Preparar mensagens para a API
+            const messages = [systemMsg, ...conv.messages, { role: "user", content: text }];
+
+            try {
+                const response = await tryFetchWithBackoff(CHAT_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'openai',
+                        messages: messages,
+                        max_tokens: 1200,
+                        seed: Math.floor(Math.random() * 1000)
+                    })
+                });
+                
+                const data = await response.json();
+                const aiResponse = data.choices[0].message.content;
+                
+                // Salvar no histórico
+                conv.messages.push({ role: "user", content: text });
+                conv.messages.push({ role: "assistant", content: aiResponse });
+                persistConversations();
+
+                // UI
+                if(text.toLowerCase().includes("gera uma imagem") || text.toLowerCase().includes("desenha")) {
+                    const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?nologo=true&enhance=true`;
+                    renderMessageUI('ai', `Aqui está a imagem que criei para ti:`, imgUrl);
+                } else {
+                    renderMessageUI('ai', aiResponse);
+                    if (isVoiceAssist) speakText(aiResponse);
+                }
+                updateApiStatus();
+            } catch (error) {
+                console.error("API Error:", error);
+                const fallback = await webSearch(text);
+                renderMessageUI('ai', fallback);
+                updateApiStatus();
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function setLoading(isLoading) {
+            sendBtn.disabled = isLoading;
+            if (isLoading) {
+                sendIcon.className = "loading-spinner";
+            } else {
+                sendIcon.className = "fas fa-paper-plane";
+            }
+        }
+
+        function renderMessageUI(role, text, img = null) {
             const row = document.createElement('div');
             row.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`;
 
@@ -338,13 +357,6 @@
             row.appendChild(bubble);
             chatWindow.appendChild(row);
             chatWindow.scrollTop = chatWindow.scrollHeight;
-
-            const conv = getCurrentConversation();
-            if (persist && conv) {
-                conv.messages.push({ role, content: text, img: img || null });
-                persistConversations();
-                renderHistoryList();
-            }
         }
 
         // Síntese de Voz
@@ -356,7 +368,7 @@
             synth.speak(utter);
         }
 
-        // Reconhecimento de Voz (Microfone)
+        // Reconhecimento de Voz
         const micBtn = document.getElementById('mic-btn');
         if ('webkitSpeechRecognition' in window) {
             const recognition = new webkitSpeechRecognition();
@@ -382,16 +394,11 @@
             if(isVoiceAssist) {
                 btn.classList.replace('text-blue-500', 'bg-red-500');
                 btn.classList.add('text-white');
-                appendMessage('ai', "Modo Assistente de Voz ligado. Podes falar comigo naturalmente.");
+                renderMessageUI('ai', "Modo Assistente de Voz ligado. Podes falar comigo naturalmente.");
             } else {
                 btn.classList.replace('bg-red-500', 'text-blue-500');
                 btn.classList.remove('text-white');
             }
-        }
-
-        function saveHistory(title) {
-            // Mantido por compatibilidade, agora não usado; renderHistoryList cuida do histórico
-            renderHistoryList();
         }
 
         function toggleGallery() {
@@ -424,10 +431,12 @@
         }
 
         window.onload = () => {
-            loadCustomKnowledge();
             renderHistoryList();
-            document.getElementById('new-chat-btn').onclick = startNewConversation;
+            if (conversations.length > 0) {
+                loadConversation(conversations[0].id);
+            }
             updateApiStatus();
+            setInterval(updateApiStatus, 30000);
         };
     </script>
 </body>
