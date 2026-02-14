@@ -38,6 +38,59 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* Blocos de código */
+        .code-block {
+            position: relative;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .code-block pre {
+            padding: 14px 16px;
+            overflow-x: auto;
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+            font-size: 12.5px;
+            line-height: 1.6;
+            color: #e6edf3;
+            margin: 0;
+            white-space: pre;
+        }
+        .code-lang {
+            display: block;
+            background: #161b22;
+            color: #8b949e;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-bottom: 1px solid #30363d;
+            font-family: monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #8b949e;
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: #30363d; color: #e6edf3; }
+        .inline-code {
+            background: rgba(110,118,129,0.2);
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #e6edf3;
+        }
+
         /* ADICIONADO: item do histórico com layout flex correto */
         .history-item {
             display: flex;
@@ -349,8 +402,8 @@
                     body: JSON.stringify({
                         messages,
                         model: "openai",
-                        max_tokens: 1200,
-                        temperature: 1,
+                        max_tokens: 4096,
+                        temperature: 0.7,
                         top_p: 1,
                         stream: false,
                         frequency_penalty: 0,
@@ -370,7 +423,12 @@
                     throw new Error("Resposta da API em formato inesperado.");
                 }
 
-                const aiResponse = data.choices[0].message.content;
+                const aiResponse = (data.choices[0].message.content || '').trim();
+
+                // Resposta vazia — avisa o utilizador
+                if (!aiResponse) {
+                    throw new Error("A API devolveu uma resposta vazia. Tente reformular a pergunta ou reduza o tamanho do pedido.");
+                }
 
                 conv.messages.push({ role: "user", content: text });
                 conv.messages.push({ role: "assistant", content: aiResponse });
@@ -400,16 +458,54 @@
             }
         }
 
+        // Formata texto: converte blocos ```code``` em <pre><code> e preserva quebras de linha
+        function formatMessage(text) {
+            const escaped = text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+
+            // Blocos de código com linguagem: ```lang\ncode```
+            const withCodeBlocks = escaped.replace(
+                /```([\w-]*)\n([\s\S]*?)```/g,
+                (_, lang, code) => {
+                    const label = lang ? `<span class="code-lang">${lang}</span>` : '';
+                    return `<div class="code-block">${label}<pre><code>${code.trimEnd()}</code></pre><button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copiar</button></div>`;
+                }
+            );
+
+            // Código inline: `code`
+            const withInline = withCodeBlocks.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+
+            // Negrito: **text**
+            const withBold = withInline.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+            // Quebras de linha normais
+            return withBold.replace(/\n/g, '<br>');
+        }
+
+        function copyCode(btn) {
+            const code = btn.previousElementSibling.textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+                setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i> Copiar'; }, 2000);
+            });
+        }
+
         function renderMessageUI(role, text, img = null) {
             const row = document.createElement('div');
             row.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`;
 
             const bubble = document.createElement('div');
             bubble.className = `max-w-[80%] p-4 rounded-2xl text-sm leading-relaxed ${role === 'user' ? 'bg-blue-600' : 'glass'}`;
-            // CORRIGIDO: preserva quebras de linha nas mensagens
-            bubble.style.whiteSpace = 'pre-wrap';
             bubble.style.wordBreak = 'break-word';
-            bubble.textContent = text;
+
+            if (role === 'ai') {
+                bubble.innerHTML = formatMessage(text);
+            } else {
+                bubble.style.whiteSpace = 'pre-wrap';
+                bubble.textContent = text;
+            }
 
             if (img) {
                 const image = document.createElement('img');
