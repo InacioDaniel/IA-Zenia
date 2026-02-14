@@ -1103,7 +1103,7 @@ function reconhecerTextoOCR(imagemUrl) {
         return Tesseract.recognize(imagemUrl, 'por+eng')
             .then(function(r){ return r.data.text; });
     }
-    toast('OCR: Tesseract.js não carregado. Para OCR real, carrega <script src="https://cdn.jsdelivr.net/npm/tesseract.js"></script>','warn');
+    toast('OCR: Tesseract.js não carregado. Adiciona a tag script do Tesseract.js no head do documento.','warn');
     return Promise.resolve('[OCR simulado]');
 }
 
@@ -1524,7 +1524,7 @@ function reportarBug(descricao) {
     var payload = { descricao: descricao, ua: navigator.userAgent,
                     ts: new Date().toISOString(), versao: 'zenia-full' };
     registrarAuditoria('reportarBug', payload);
-    var mailto = 'mailto:suporte@zenia-projects.ao?subject=Bug+IA-Zénia&body=' + encodeURIComponent(JSON.stringify(payload, null, 2));
+    var mailto = 'mailto:<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2f5c5a5f405d5b4a6f554a41464e025f5d40454a4c5b5c014e40">[email&#160;protected]</a>?subject=Bug+IA-Zénia&body=' + encodeURIComponent(JSON.stringify(payload, null, 2));
     window.open(mailto);
     toast('Relatório de bug enviado ✓','ok');
 }
@@ -1770,7 +1770,7 @@ function renderAdvBody() {
         html += '<input class="adv-input" id="kb-search" placeholder="Pesquisar KB…" oninput="renderKBResults(this.value)">';
         html += '<div id="kb-results">';
         kb.slice(0,8).forEach(function(d) {
-            html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px;background:#161b22;border:1px solid #21262d;border-radius:6px;margin-bottom:4px;font-size:12px"><span style="color:#c9d1d9">' + escHtml(d.titulo) + '</span><button onclick="removerConhecimento('' + d.id + '')" style="color:#6b7280;background:none;border:none;cursor:pointer;font-size:11px">✕</button></div>';
+            html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px;background:#161b22;border:1px solid #21262d;border-radius:6px;margin-bottom:4px;font-size:12px"><span style="color:#c9d1d9">' + escHtml(d.titulo) + '</span><button onclick="removerConhecimento('" + d.id + "')" style="color:#6b7280;background:none;border:none;cursor:pointer;font-size:11px">✕</button></div>';
         });
         if (kb.length > 8) html += '<p style="color:#6b7280;font-size:11px;text-align:center">+ ' + (kb.length-8) + ' mais</p>';
         html += '</div></div>';
@@ -1822,7 +1822,7 @@ function renderKBResults(query) {
     if (!container) return;
     var results = query ? buscarConhecimento(query) : _getKB().slice(0,8);
     container.innerHTML = results.map(function(d) {
-        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px;background:#161b22;border:1px solid #21262d;border-radius:6px;margin-bottom:4px;font-size:12px"><span style="color:#c9d1d9">' + escHtml(d.titulo) + '</span><button onclick="removerConhecimento('' + d.id + '')" style="color:#6b7280;background:none;border:none;cursor:pointer">✕</button></div>';
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px;background:#161b22;border:1px solid #21262d;border-radius:6px;margin-bottom:4px;font-size:12px"><span style="color:#c9d1d9">' + escHtml(d.titulo) + '</span><button onclick="removerConhecimento('" + d.id + "')" style="color:#6b7280;background:none;border:none;cursor:pointer">✕</button></div>';
     }).join('') || '<p style="color:#6b7280;font-size:12px;text-align:center">Sem resultados.</p>';
 }
 
@@ -1841,26 +1841,18 @@ function getMemoriaContexto() {
     var mem   = _getMem();
     var keys  = Object.keys(mem);
     if (!keys.length) return '';
-    return '
-
-MEMÓRIA DO UTILIZADOR:
-' + keys.map(function(k){
+    return '\n\nMEMÓRIA DO UTILIZADOR:\n' + keys.map(function(k){
         return '- ' + k + ': ' + mem[k].valor;
-    }).join('
-');
+    }).join('\n');
 }
 
 // Integrar KB no system prompt
 function getKBContexto(query) {
     var docs = buscarConhecimento(query);
     if (!docs.length) return '';
-    return '
-
-BASE DE CONHECIMENTO RELEVANTE:
-' + docs.slice(0,3).map(function(d){
+    return '\n\nBASE DE CONHECIMENTO RELEVANTE:\n' + docs.slice(0,3).map(function(d){
         return '['+ d.titulo +']: ' + d.conteudo.substring(0,200);
-    }).join('
-');
+    }).join('\n');
 }
 
 </script>
@@ -1883,6 +1875,5 @@ BASE DE CONHECIMENTO RELEVANTE:
 </div>
 <div id="adv-overlay" onclick="closeAdvPanel()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;"></div>
 <div id="adv-toast" class="adv-toast"></div>
-
 </body>
 </html>
