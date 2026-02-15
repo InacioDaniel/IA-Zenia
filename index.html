@@ -282,9 +282,13 @@ var advTab      = 'mem'; // Aba ativa no painel avançado
 var sbColl      = false;
 var sbMobOpen   = false;
 
-// Regex para detecção de intenção
+// Regex para detecção de intenção (SEM BOTÕES)
+// Detecta Vídeo
+var VID_RX  = /\b(gera|cria|faz|mostra|quero\s+ver).{0,35}\b(video|filme|clip|animacao|gif|cena|movie)\b/i;
+// Detecta Imagem
 var IMG_RX  = /\b(gera|cria|faz|desenha|pinta|mostra|quero\s+ver|faz-me).{0,35}\b(imagem|foto|image|picture|ilustra|wallpaper|arte|avatar|paisagem|retrato|fotografia|desenho)\b/i;
-var AUD_RX  = /\b(gera|cria|faz|toca|compoe|quero\s+ouvir|faz-me).{0,35}\b(musica|audio|som|song|beat|trilha|melodia|faixa|track|instrumental)\b/i;
+// Detecta Áudio/Música
+var AUD_RX  = /\b(gera|cria|faz|toca|compoe|quero\s+ouvir|faz-me|sintetiza|narra|fala).{0,35}\b(musica|audio|som|song|beat|trilha|melodia|faixa|track|instrumental|voz|discurso)\b/i;
 // Regex para decidir se usamos o modelo Coder ou o normal
 var CODE_RX = /\b(codigo|code|script|funcao|function|html|css|javascript|python|java|typescript|sql|php|bash|react|vue|angular|api|algoritmo|classe|array|loop|def|const|let|import|component|bug|debug)\b/i;
 
@@ -392,8 +396,49 @@ function renderHist(filter) {
 }
 
 // ==========================================
-// GERAÇÃO DE IMAGEM & ÁUDIO
+// GERAÇÃO DE MEDIA (VID, IMG, AUD)
 // ==========================================
+
+// 1. VÍDEO (Simulação Cinematográfica)
+async function genVid(prompt) {
+    var ep = encodeURIComponent("cinematic movie scene, 8k resolution, photorealistic, action shot: " + prompt);
+    var seed = Math.floor(Math.random()*999999);
+    // Usa aspect ratio 16:9 (1280x720) para parecer vídeo
+    var url = IMG_EP + ep + '?key=' + API_KEY + '&model=flux&seed=' + seed + '&width=1280&height=720&nologo=true&enhance=true';
+
+    var row  = document.createElement('div'); row.className = 'msg-row';
+    var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
+    var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '520px'; // Ligeiramente maior para vídeo
+    
+    card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A criar cena de vídeo...</div>';
+    row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
+
+    var img = new Image();
+    img.onload = function() {
+        var safe = escHtml(prompt.substring(0,50));
+        // Adiciona um botão de "Play" falso sobre a imagem para dar a sensação de vídeo
+        card.innerHTML = `<div style="position:relative;cursor:pointer">
+            <img src="${url}" style="width:100%;display:block;opacity:0.8">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:50px;height:50px;background:rgba(0,0,0,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #fff">
+                    <i class="fas fa-play" style="color:#fff;margin-left:4px;font-size:20px"></i>
+                </div>
+            </div>
+            <div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.7);color:#fff;font-size:10px;padding:2px 6px;border-radius:4px">00:05</div>
+        </div>
+        <div class="media-foot">
+            <span class="media-lbl"><i class="fas fa-video" style="color:#ef4444"></i> Cena: ${safe}</span>
+            <div style="display:flex;gap:5px"><a href="${url}" download="zenia-cine.jpg" class="mbtn"><i class="fas fa-download"></i> Frame</a></div>
+        </div>`;
+        chatEl.scrollTop = chatEl.scrollHeight;
+    };
+    img.onerror = function() {
+        card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px">Falha ao criar vídeo.</div>';
+    };
+    img.src = url;
+}
+
+// 2. IMAGEM
 async function genImg(prompt) {
     var ep   = encodeURIComponent(prompt);
     var seed = Math.floor(Math.random()*999999);
@@ -438,24 +483,27 @@ async function genImg(prompt) {
     });
 }
 
+// 3. ÁUDIO/MÚSICA
 async function genAud(prompt) {
-    var txt  = 'Audio sobre: ' + prompt;
+    // Distingue musica de fala na prompt visualmente, mas usa o mesmo endpoint TTS
+    var isMusic = /\b(musica|beat|som|song|melodia)\b/i.test(prompt);
+    var txt  = prompt; // Envia o prompt direto para o TTS
     var aUrl = TTS_EP + encodeURIComponent(txt) + '?model=openai-audio&voice=alloy';
-    var wUrl = IMG_EP2 + encodeURIComponent('sound wave music equalizer dark blue neon') + '?width=580&height=100&nologo=true&seed=' + Date.now();
+    var wUrl = IMG_EP2 + encodeURIComponent(isMusic ? 'music equalizer neon' : 'sound wave visualization') + '?width=580&height=100&nologo=true&seed=' + Date.now();
 
     var row  = document.createElement('div'); row.className = 'msg-row';
     var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
     var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '480px';
     
-    card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A gerar audio...</div>';
+    card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A criar '+(isMusic?'música':'áudio')+'...</div>';
     row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
 
     setTimeout(function() {
         card.innerHTML = '<img src="' + wUrl + '" style="width:100%;height:70px;object-fit:cover;display:block">'
-          + '<div style="padding:9px"><div style="font-size:11px;color:#22c55e;margin-bottom:5px"><i class="fas fa-music"></i> ' + escHtml(prompt.substring(0,50)) + '</div>'
-          + '<audio controls style="width:100%;border-radius:6px;height:34px"><source src="' + aUrl + '" type="audio/mpeg"></audio></div>'
-          + '<div class="media-foot"><span class="media-lbl">Audio TTS</span>'
-          + '<a href="' + aUrl + '" download="zenia-audio.mp3" class="mbtn"><i class="fas fa-download"></i> Guardar</a></div>';
+          + '<div style="padding:9px"><div style="font-size:11px;color:#22c55e;margin-bottom:5px"><i class="fas fa-'+(isMusic?'music':'volume-up')+'"></i> ' + escHtml(prompt.substring(0,50)) + '</div>'
+          + '<audio controls autoplay style="width:100%;border-radius:6px;height:34px"><source src="' + aUrl + '" type="audio/mpeg"></audio></div>'
+          + '<div class="media-foot"><span class="media-lbl">Gerado por Zenia</span>'
+          + '<a href="' + aUrl + '" download="zenia-audio.mp3" class="mbtn"><i class="fas fa-download"></i> Baixar</a></div>';
         chatEl.scrollTop = chatEl.scrollHeight;
     }, 1500);
 }
@@ -563,7 +611,16 @@ async function handleSend() {
     // MODO CRIADOR: Detectar comando de guardar
     if (creatorMode && /\b(aprender|guarda isso|anota|lembra-te|sabes que)\b/i.test(text)) saveToCM(text);
 
-    // 1. IMAGEM (Pára aqui se for imagem)
+    // 1. VÍDEO (NOVO! Prioridade Máxima)
+    if (VID_RX.test(text)) {
+        var vp = text.replace(VID_RX, '').trim() || text;
+        await genVid(vp);
+        conv.messages.push({role:'user',content:text}); 
+        conv.messages.push({role:'assistant',content:'[Video: '+vp+']'}); 
+        saveConvs(); setLoading(false); return;
+    }
+
+    // 2. IMAGEM
     if (IMG_RX.test(text)) {
         var ip = text.replace(IMG_RX, '').trim() || text;
         await genImg(ip);
@@ -572,7 +629,7 @@ async function handleSend() {
         saveConvs(); setLoading(false); return;
     }
     
-    // 2. AUDIO (Pára aqui se for áudio)
+    // 3. AUDIO / MÚSICA
     if (AUD_RX.test(text)) {
         var ap = text.replace(AUD_RX, '').trim() || text;
         await genAud(ap);
@@ -589,7 +646,7 @@ async function handleSend() {
         var sysMSG   = { role:'system', content: buildSystem(text) };
         var userCont = webCtx ? (webCtx + '\n\nPergunta: ' + text) : text;
         
-        // 3. SELEÇÃO INTELIGENTE DE MODELO
+        // 4. SELEÇÃO INTELIGENTE DE MODELO (TEXTO)
         var selM = document.getElementById('model-sel').value;
         var useM = selM;
         
@@ -864,4 +921,3 @@ window.addEventListener('load',function(){
 </script>
 </body>
 </html>
-
