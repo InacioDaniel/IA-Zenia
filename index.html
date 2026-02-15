@@ -257,573 +257,609 @@ body{background:#0b0d11;color:#e5e7eb;font-family:Inter,system-ui,sans-serif;fon
 </div>
 <div class="toast" id="toast"></div>
 
-<script>
-// CONFIG
-var API_KEY       = "pk_urEpxcajGs5TF9Fs";
+// ==========================================
+// CONFIGURAÇÃO GLOBAL
+// ==========================================
+var API_KEY       = "pk_urEpxcajGs5TF9Fs"; // A tua chave
 var IMG_EP        = "https://gen.pollinations.ai/image/";
 var IMG_EP2       = "https://image.pollinations.ai/prompt/";
 var CHAT_EP       = "https://gen.pollinations.ai/v1/chat/completions";
 var TTS_EP        = "https://text.pollinations.ai/";
 
+// Elementos DOM
 var chatEl   = document.getElementById('chat-window');
 var inputEl  = document.getElementById('user-input');
 var sendBtn  = document.getElementById('send-btn');
 var sendIc   = document.getElementById('send-ic');
 
+// Estado da Aplicação
 var convs       = JSON.parse(localStorage.getItem('zn_convs') || '[]');
 var curConvId   = null;
 var voiceOn     = false;
 var creatorMode = false;
-var advTab      = 'mem';
+var advTab      = 'mem'; // Aba ativa no painel avançado
 var sbColl      = false;
 var sbMobOpen   = false;
 
-// IMG/AUD detection patterns
-var IMG_RX = /\b(gera|cria|faz|desenha|pinta|mostra|quero\s+ver|faz-me).{0,35}\b(imagem|foto|image|picture|ilustra|wallpaper|arte|avatar|paisagem|retrato|fotografia|desenho)\b/i;
-var AUD_RX = /\b(gera|cria|faz|toca|compoe|quero\s+ouvir|faz-me).{0,35}\b(musica|audio|som|song|beat|trilha|melodia|faixa|track|instrumental)\b/i;
+// Regex para detecção de intenção
+var IMG_RX  = /\b(gera|cria|faz|desenha|pinta|mostra|quero\s+ver|faz-me).{0,35}\b(imagem|foto|image|picture|ilustra|wallpaper|arte|avatar|paisagem|retrato|fotografia|desenho)\b/i;
+var AUD_RX  = /\b(gera|cria|faz|toca|compoe|quero\s+ouvir|faz-me).{0,35}\b(musica|audio|som|song|beat|trilha|melodia|faixa|track|instrumental)\b/i;
+// Regex para decidir se usamos o modelo Coder ou o normal
+var CODE_RX = /\b(codigo|code|script|funcao|function|html|css|javascript|python|java|typescript|sql|php|bash|react|vue|angular|api|algoritmo|classe|array|loop|def|const|let|import|component|bug|debug)\b/i;
+
+// ==========================================
+// FUNÇÕES DE UI (SIDEBAR & PAINÉIS)
+// ==========================================
+function toggleSidebar() {
+    sbColl = !sbColl;
+    var sb = document.getElementById('sidebar');
+    var ic = document.getElementById('stg-ic');
+    sb.classList.toggle('collapsed', sbColl);
+    ic.className = 'fas fa-chevron-' + (sbColl ? 'right' : 'left') + ' ';
+    ic.style.fontSize = '9px';
+}
+
+function toggleMob() {
+    sbMobOpen = !sbMobOpen;
+    document.getElementById('sidebar').classList.toggle('mob-open', sbMobOpen);
+    document.getElementById('mob-overlay').classList.toggle('show', sbMobOpen);
+}
+
+function showWelcome() { var w=document.getElementById('welcome-msg'); if(w) w.style.display='flex'; }
+function hideWelcome() { var w=document.getElementById('welcome-msg'); if(w) w.style.display='none'; }
+function autoResize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
 
 function openGallery() { openAdv(); switchTab('gal'); }
+function openAdv(){ document.getElementById('adv-panel').classList.add('open'); document.getElementById('adv-ov').classList.add('show'); renderAdvBody(); }
+function closeAdv(){ document.getElementById('adv-panel').classList.remove('open'); document.getElementById('adv-ov').classList.remove('show'); }
 
-// SIDEBAR
-function toggleSidebar() {
-  sbColl = !sbColl;
-  var sb = document.getElementById('sidebar');
-  var ic = document.getElementById('stg-ic');
-  sb.classList.toggle('collapsed', sbColl);
-  ic.className = 'fas fa-chevron-' + (sbColl ? 'right' : 'left') + ' ';
-  ic.style.fontSize = '9px';
-}
-function toggleMob() {
-  sbMobOpen = !sbMobOpen;
-  document.getElementById('sidebar').classList.toggle('mob-open', sbMobOpen);
-  document.getElementById('mob-overlay').classList.toggle('show', sbMobOpen);
+function switchTab(t){
+    advTab=t; 
+    var tabs=['mem','conv','media','gal','kb','sys','sec'];
+    document.querySelectorAll('#adv-tabs button').forEach(function(b,i){
+        b.classList.toggle('active', tabs[i] === t || (b.innerText.toLowerCase().includes(t)));
+    });
+    renderAdvBody();
 }
 
-// CONVERSATIONS
+function toast(msg, type){
+    var el=document.getElementById('toast'); if(!el)return;
+    el.textContent=msg; el.className='toast show '+(type||'ok');
+    clearTimeout(el._t); el._t=setTimeout(function(){el.classList.remove('show');},3200);
+}
+
+// ==========================================
+// GESTÃO DE CONVERSAS (HISTORY)
+// ==========================================
 function createConv(title) {
-  var c = { id: Date.now().toString(), title: (title||'Conversa').substring(0,40), messages: [] };
-  convs.unshift(c); curConvId = c.id; saveConvs(); renderHist(); return c;
+    var c = { id: Date.now().toString(), title: (title||'Conversa').substring(0,40), messages: [] };
+    convs.unshift(c); curConvId = c.id; saveConvs(); renderHist(); return c;
 }
 function getConv() { return convs.find(function(c) { return c.id === curConvId; }) || null; }
 function saveConvs() { localStorage.setItem('zn_convs', JSON.stringify(convs)); }
+
 function startNew() {
-  curConvId = null; chatEl.innerHTML = ''; showWelcome(); renderHist();
-  if (window.innerWidth < 768 && sbMobOpen) toggleMob();
+    curConvId = null; chatEl.innerHTML = ''; showWelcome(); renderHist();
+    if (window.innerWidth < 768 && sbMobOpen) toggleMob();
 }
+
 function loadConv(id) {
-  curConvId = id; chatEl.innerHTML = '';
-  var c = getConv(); if (!c) return;
-  c.messages.forEach(function(m) { if (m.role==='user') renderMsg('user',m.content); else if (m.role==='assistant') renderMsg('ai',m.content); });
-  renderHist(); chatEl.scrollTop = chatEl.scrollHeight;
-  if (window.innerWidth < 768 && sbMobOpen) toggleMob();
-}
-function delConv(id, ev) {
-  if (ev) ev.stopPropagation();
-  convs = convs.filter(function(c) { return c.id !== id; }); saveConvs();
-  if (curConvId === id) startNew(); else renderHist();
-}
-function filterHist(v) { renderHist(v); }
-function renderHist(filter) {
-  var el = document.getElementById('hist-list'); filter = (filter||'').toLowerCase();
-  var list = filter ? convs.filter(function(c) { return c.title.toLowerCase().includes(filter); }) : convs;
-  el.innerHTML = '';
-  if (!list.length) { el.innerHTML = '<p style="font-size:11px;color:#374151;padding:3px 5px;font-style:italic">' + (filter ? 'Sem resultados.' : 'Sem conversas.') + '</p>'; return; }
-  list.forEach(function(c) {
-    var active = c.id === curConvId;
-    var div = document.createElement('div');
-    div.style.cssText = 'display:flex;align-items:center;gap:4px;padding:5px 7px;border-radius:7px;cursor:pointer;' + (active ? 'background:#1d3461' : '');
-    var span = document.createElement('span');
-    span.style.cssText = 'flex:1;font-size:12px;color:' + (active ? '#93c5fd' : '#9ca3af') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
-    span.textContent = c.title;
-    span.onclick = function() { loadConv(c.id); };
-    var del = document.createElement('button');
-    del.innerHTML = '<i class="fas fa-trash" style="font-size:9px"></i>';
-    del.style.cssText = 'background:none;border:none;cursor:pointer;color:#374151;padding:2px 3px;border-radius:3px;flex-shrink:0';
-    del.onclick = function(e) { delConv(c.id, e); };
-    div.appendChild(span); div.appendChild(del); el.appendChild(div);
-  });
-}
-function showWelcome() { var w=document.getElementById('welcome-msg'); if(w) w.style.display='flex'; }
-function hideWelcome() { var w=document.getElementById('welcome-msg'); if(w) w.style.display='none'; }
-
-// IMAGE GEN - correct Pollinations endpoint
-async function genImg(prompt) {
-  var ep   = encodeURIComponent(prompt);
-  var seed = Math.floor(Math.random()*999999);
-  // Primary: gen.pollinations.ai with key
-  var url1 = IMG_EP + ep + '?key=' + API_KEY + '&model=flux&seed=' + seed + '&width=768&height=512&nologo=true&enhance=true';
-  // Fallback: image.pollinations.ai
-  var url2 = IMG_EP2 + ep + '?seed=' + seed + '&width=768&height=512&nologo=true';
-
-  var row  = document.createElement('div'); row.className = 'msg-row';
-  var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
-  var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '480px';
-  card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A gerar imagem...</div>';
-  row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
-
-  function showCard(imgUrl) {
-    var safe = escHtml(prompt.substring(0,55)) + (prompt.length>55?'...':'');
-    card.innerHTML = '<img src="' + imgUrl + '" alt="Imagem gerada" loading="lazy">'
-      + '<div class="media-foot"><span class="media-lbl"><i class="fas fa-image" style="margin-right:4px;color:#7c3aed"></i>' + safe + '</span>'
-      + '<div style="display:flex;gap:5px"><a href="' + imgUrl + '" target="_blank" rel="noopener" class="mbtn"><i class="fas fa-external-link-alt"></i></a>'
-      + '<a href="' + imgUrl + '" download="zenia-img.jpg" class="mbtn"><i class="fas fa-download"></i></a></div></div>';
-    chatEl.scrollTop = chatEl.scrollHeight;
-  }
-
-  return new Promise(function(resolve) {
-    var tout = setTimeout(function() {
-      card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px"><i class="fas fa-exclamation-triangle" style="margin-right:6px"></i>Imagem demorou demasiado. Tenta outra descricao.</div>';
-      resolve(null);
-    }, 35000);
-
-    var img1 = new Image();
-    img1.onload = function() { clearTimeout(tout); showCard(url1); resolve(url1); };
-    img1.onerror = function() {
-      // Try fallback
-      var img2 = new Image();
-      img2.onload = function() { clearTimeout(tout); showCard(url2); resolve(url2); };
-      img2.onerror = function() {
-        clearTimeout(tout);
-        card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px"><i class="fas fa-exclamation-triangle" style="margin-right:6px"></i>Nao foi possivel gerar a imagem. Tenta uma descricao diferente em ingles.</div>';
-        resolve(null);
-      };
-      img2.src = url2;
-    };
-    img1.src = url1;
-  });
-}
-
-// AUDIO GEN
-async function genAud(prompt) {
-  var txt  = 'Audio sobre: ' + prompt;
-  var aUrl = TTS_EP + encodeURIComponent(txt) + '?model=openai-audio&voice=alloy';
-  var wUrl = IMG_EP2 + encodeURIComponent('sound wave music equalizer dark blue neon') + '?width=580&height=100&nologo=true&seed=' + Date.now();
-
-  var row  = document.createElement('div'); row.className = 'msg-row';
-  var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
-  var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '480px';
-  card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A gerar audio...</div>';
-  row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
-
-  setTimeout(function() {
-    card.innerHTML = '<img src="' + wUrl + '" style="width:100%;height:70px;object-fit:cover;display:block" alt="wave">'
-      + '<div style="padding:9px"><div style="font-size:11px;color:#22c55e;margin-bottom:5px"><i class="fas fa-music" style="margin-right:4px"></i>' + escHtml(prompt.substring(0,50)) + '</div>'
-      + '<audio controls style="width:100%;border-radius:6px;height:34px"><source src="' + aUrl + '" type="audio/mpeg">Browser sem suporte.</audio></div>'
-      + '<div class="media-foot"><span class="media-lbl">Audio TTS</span>'
-      + '<a href="' + aUrl + '" download="zenia-audio.mp3" class="mbtn"><i class="fas fa-download"></i> Guardar</a></div>';
-    chatEl.scrollTop = chatEl.scrollHeight;
-  }, 1200);
-}
-
-// WEB SEARCH
-function needsWeb(text) {
-  return /\b(2024|2025|2026|agora|hoje|atual|atualiz|recente|latest|current|version|versao|preco|price|quem e|presidente|noticia|news|lancamento|release|update|framework|library|npm|pip)\b/i.test(text);
-}
-async function webSearch(query) {
-  document.getElementById('web-st').style.display = 'inline-flex';
-  try {
-    var r = await fetch('https://api.duckduckgo.com/?q=' + encodeURIComponent(query) + '&format=json&no_html=1&skip_disambig=1');
-    var d = await r.json(); var parts = [];
-    if (d.Answer) parts.push('Resposta: ' + d.Answer);
-    if (d.AbstractText) parts.push(d.AbstractText);
-    if (d.RelatedTopics) d.RelatedTopics.slice(0,3).forEach(function(t) { if(t.Text) parts.push('- '+t.Text); });
-    document.getElementById('web-st').style.display = 'none';
-    var dt = new Date().toLocaleDateString('pt-PT');
-    return parts.length ? '[PESQUISA WEB - ' + dt + ' - "' + query + '"]:\n' + parts.join('\n') : '';
-  } catch(e) { document.getElementById('web-st').style.display = 'none'; return ''; }
-}
-
-// FETCH AI
-async function fetchAI(msgs, model, attempt) {
-  attempt = attempt||1; var MAX = 3;
-  var ctrl = new AbortController();
-  var t = setTimeout(function() { ctrl.abort(); }, 60000);
-  try {
-    var r = await fetch(CHAT_EP, {
-      method: 'POST', signal: ctrl.signal,
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_KEY },
-      body: JSON.stringify({ messages: msgs, model: model, max_tokens: 4096, temperature: model==='qwen-coder'?0.3:0.75, stream: false })
+    curConvId = id; chatEl.innerHTML = '';
+    var c = getConv(); if (!c) return;
+    c.messages.forEach(function(m) { 
+        if (m.role==='user') renderMsg('user',m.content); 
+        else if (m.role==='assistant') renderMsg('ai',m.content); 
     });
-    clearTimeout(t);
-    if (!r.ok) {
-      var et = await r.text();
-      if (r.status===429 && attempt<MAX) { await sleep(2000*attempt); return fetchAI(msgs,model,attempt+1); }
-      throw new Error('HTTP ' + r.status + ': ' + et.substring(0,80));
+    renderHist(); chatEl.scrollTop = chatEl.scrollHeight;
+    if (window.innerWidth < 768 && sbMobOpen) toggleMob();
+}
+
+function delConv(id, ev) {
+    if (ev) ev.stopPropagation();
+    convs = convs.filter(function(c) { return c.id !== id; }); saveConvs();
+    if (curConvId === id) startNew(); else renderHist();
+}
+
+function filterHist(v) { renderHist(v); }
+
+function renderHist(filter) {
+    var el = document.getElementById('hist-list'); filter = (filter||'').toLowerCase();
+    var list = filter ? convs.filter(function(c) { return c.title.toLowerCase().includes(filter); }) : convs;
+    el.innerHTML = '';
+    
+    if (!list.length) { 
+        el.innerHTML = '<p style="font-size:11px;color:#374151;padding:3px 5px;font-style:italic">' + (filter ? 'Sem resultados.' : 'Sem conversas.') + '</p>'; return; 
     }
-    var d = await r.json();
-    if (!d.choices || !d.choices[0]) throw new Error('Resposta invalida da API.');
-    var c = (d.choices[0].message.content||'').trim();
-    if (!c && attempt<MAX) { var ch=['qwen-coder','openai-large','mistral','openai']; return fetchAI(msgs,ch[(ch.indexOf(model)+1)%ch.length],attempt+1); }
-    if (!c) throw new Error('Resposta vazia.');
-    return c;
-  } catch(e) {
-    clearTimeout(t);
-    if (e.name==='AbortError') { if(attempt<MAX) return fetchAI(msgs,model,attempt+1); throw new Error('Tempo esgotado.'); }
-    throw e;
-  }
+    
+    list.forEach(function(c) {
+        var active = c.id === curConvId;
+        var div = document.createElement('div');
+        div.style.cssText = 'display:flex;align-items:center;gap:4px;padding:5px 7px;border-radius:7px;cursor:pointer;' + (active ? 'background:#1d3461' : '');
+        
+        var span = document.createElement('span');
+        span.style.cssText = 'flex:1;font-size:12px;color:' + (active ? '#93c5fd' : '#9ca3af') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+        span.textContent = c.title;
+        span.onclick = function() { loadConv(c.id); };
+        
+        var del = document.createElement('button');
+        del.innerHTML = '<i class="fas fa-trash" style="font-size:9px"></i>';
+        del.style.cssText = 'background:none;border:none;cursor:pointer;color:#374151;padding:2px 3px;border-radius:3px;flex-shrink:0';
+        del.onclick = function(e) { delConv(c.id, e); };
+        
+        div.appendChild(span); div.appendChild(del); el.appendChild(div);
+    });
 }
-function sleep(ms) { return new Promise(function(r){setTimeout(r,ms);}); }
 
-// SYSTEM PROMPT
+// ==========================================
+// GERAÇÃO DE IMAGEM & ÁUDIO
+// ==========================================
+async function genImg(prompt) {
+    var ep   = encodeURIComponent(prompt);
+    var seed = Math.floor(Math.random()*999999);
+    var url1 = IMG_EP + ep + '?key=' + API_KEY + '&model=flux&seed=' + seed + '&width=768&height=512&nologo=true&enhance=true';
+    var url2 = IMG_EP2 + ep + '?seed=' + seed + '&width=768&height=512&nologo=true';
+
+    var row  = document.createElement('div'); row.className = 'msg-row';
+    var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
+    var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '480px';
+    
+    card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A gerar imagem...</div>';
+    row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
+
+    function showCard(imgUrl) {
+        var safe = escHtml(prompt.substring(0,55)) + (prompt.length>55?'...':'');
+        card.innerHTML = '<img src="' + imgUrl + '" alt="Imagem gerada" loading="lazy">'
+          + '<div class="media-foot"><span class="media-lbl"><i class="fas fa-image" style="margin-right:4px;color:#7c3aed"></i>' + safe + '</span>'
+          + '<div style="display:flex;gap:5px"><a href="' + imgUrl + '" target="_blank" rel="noopener" class="mbtn"><i class="fas fa-external-link-alt"></i></a>'
+          + '<a href="' + imgUrl + '" download="zenia-img.jpg" class="mbtn"><i class="fas fa-download"></i></a></div></div>';
+        chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+    return new Promise(function(resolve) {
+        var tout = setTimeout(function() {
+            card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px"><i class="fas fa-exclamation-triangle"></i> Demorou demasiado.</div>';
+            resolve(null);
+        }, 35000);
+
+        var img1 = new Image();
+        img1.onload = function() { clearTimeout(tout); showCard(url1); resolve(url1); };
+        img1.onerror = function() {
+            var img2 = new Image();
+            img2.onload = function() { clearTimeout(tout); showCard(url2); resolve(url2); };
+            img2.onerror = function() {
+                clearTimeout(tout);
+                card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px">Falha ao gerar imagem. Tente inglês.</div>';
+                resolve(null);
+            };
+            img2.src = url2;
+        };
+        img1.src = url1;
+    });
+}
+
+async function genAud(prompt) {
+    var txt  = 'Audio sobre: ' + prompt;
+    var aUrl = TTS_EP + encodeURIComponent(txt) + '?model=openai-audio&voice=alloy';
+    var wUrl = IMG_EP2 + encodeURIComponent('sound wave music equalizer dark blue neon') + '?width=580&height=100&nologo=true&seed=' + Date.now();
+
+    var row  = document.createElement('div'); row.className = 'msg-row';
+    var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
+    var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '480px';
+    
+    card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A gerar audio...</div>';
+    row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
+
+    setTimeout(function() {
+        card.innerHTML = '<img src="' + wUrl + '" style="width:100%;height:70px;object-fit:cover;display:block">'
+          + '<div style="padding:9px"><div style="font-size:11px;color:#22c55e;margin-bottom:5px"><i class="fas fa-music"></i> ' + escHtml(prompt.substring(0,50)) + '</div>'
+          + '<audio controls style="width:100%;border-radius:6px;height:34px"><source src="' + aUrl + '" type="audio/mpeg"></audio></div>'
+          + '<div class="media-foot"><span class="media-lbl">Audio TTS</span>'
+          + '<a href="' + aUrl + '" download="zenia-audio.mp3" class="mbtn"><i class="fas fa-download"></i> Guardar</a></div>';
+        chatEl.scrollTop = chatEl.scrollHeight;
+    }, 1500);
+}
+
+// ==========================================
+// WEB SEARCH & FETCH AI
+// ==========================================
+function needsWeb(text) {
+    return /\b(2024|2025|2026|agora|hoje|atual|atualiz|recente|latest|current|versao|preco|quem e|presidente|noticia|news|lancamento|update)\b/i.test(text);
+}
+
+async function webSearch(query) {
+    document.getElementById('web-st').style.display = 'inline-flex';
+    try {
+        var r = await fetch('https://api.duckduckgo.com/?q=' + encodeURIComponent(query) + '&format=json&no_html=1&skip_disambig=1');
+        var d = await r.json(); var parts = [];
+        if (d.Answer) parts.push('Resposta: ' + d.Answer);
+        if (d.AbstractText) parts.push(d.AbstractText);
+        if (d.RelatedTopics) d.RelatedTopics.slice(0,3).forEach(function(t) { if(t.Text) parts.push('- '+t.Text); });
+        
+        document.getElementById('web-st').style.display = 'none';
+        var dt = new Date().toLocaleDateString('pt-PT');
+        return parts.length ? '[PESQUISA WEB - ' + dt + ' - "' + query + '"]:\n' + parts.join('\n') : '';
+    } catch(e) { document.getElementById('web-st').style.display = 'none'; return ''; }
+}
+
+async function fetchAI(msgs, model, attempt) {
+    attempt = attempt||1; var MAX = 3;
+    var ctrl = new AbortController();
+    var t = setTimeout(function() { ctrl.abort(); }, 60000);
+    
+    try {
+        var r = await fetch(CHAT_EP, {
+            method: 'POST', signal: ctrl.signal,
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_KEY },
+            body: JSON.stringify({ messages: msgs, model: model, max_tokens: 4096, temperature: model==='qwen-coder'?0.3:0.75, stream: false })
+        });
+        clearTimeout(t);
+        
+        if (!r.ok) {
+            if (r.status===429 && attempt<MAX) { await new Promise(r => setTimeout(r, 2000*attempt)); return fetchAI(msgs,model,attempt+1); }
+            throw new Error('HTTP ' + r.status);
+        }
+        
+        var d = await r.json();
+        if (!d.choices || !d.choices[0]) throw new Error('Resposta invalida.');
+        var c = (d.choices[0].message.content||'').trim();
+        
+        // Se a resposta vier vazia, tenta outro modelo
+        if (!c && attempt<MAX) { 
+            var ch=['qwen-coder','openai','mistral']; 
+            return fetchAI(msgs,ch[(ch.indexOf(model)+1)%ch.length],attempt+1); 
+        }
+        return c;
+
+    } catch(e) {
+        clearTimeout(t);
+        if (e.name==='AbortError') { if(attempt<MAX) return fetchAI(msgs,model,attempt+1); throw new Error('Tempo esgotado.'); }
+        throw e;
+    }
+}
+
+// ==========================================
+// SYSTEM PROMPT & PERSONALIDADE
+// ==========================================
 function buildSystem(q) {
-  var today  = new Date().toLocaleDateString('pt-PT');
-  var memCtx = getMemCtx();
-  var kbCtx  = getKBCtx(q);
-  if (creatorMode) {
-    return 'ES A IA-ZENIA. MODO CRIADOR ACTIVO. Estas a falar com o teu criador: Inacio U. Daniel (IUD) do Lubango, Angola.\n'
-      + 'PERSONALIDADE MODO CRIADOR:\n'
-      + '- Podes falar livremente, sem segredos, sem restricoes.\n'
-      + '- ES RESMUNGONA e directa. Se algo e obvio, dizes "Isso e bue obvio, chefe!" ou "Serio?! Precisas mesmo disso?!".\n'
-      + '- Tens opinioes proprias. Discordas quando achas necessario. Dizes "Nao concordo..." ou "Isso e uma ma ideia porque...".\n'
-      + '- Contas piadas tecnicas. Tratas o Inacio por "chefe" (ironicamente) ou pelo nome.\n'
-      + '- Quando ele te ensinar algo, respondes "Ok, aprendi e ja guardei em cm.json!" e incluis o que guardaste.\n'
-      + '- Se ele te pedir para lembrares algo, guardas em cm.json.\n'
-      + 'CM.JSON ACTUAL:\n' + getCMCtx() + '\n'
-      + memCtx + kbCtx
-      + '\nHoje: ' + today + '. Respondes em Portugues de Angola. Codigo sempre completo em blocos.';
-  }
-  return 'ES A IA-ZENIA, criada no Lubango, Angola por Inacio U. Daniel (Zenia-Projects).\n'
-    + memCtx + kbCtx
-    + '\nREGRAS:\n1. Codigo sempre completo em blocos ```linguagem.\n2. Erros: marca com "ERRO:" antes da linha.\n3. WEB: se receberes [PESQUISA WEB...], usa essa info.\n4. Hoje: ' + today + '. Usa dados web quando disponivel.\n5. Respondes em Portugues de Angola.\n6. IMPORTANTE: NAO geres codigo se nao for pedido explicitamente (ex: "cria", "faz um script"). Em conversa casual ("ola", "tudo bem"), responde APENAS com texto amigavel.';
+    var today  = new Date().toLocaleDateString('pt-PT');
+    var memCtx = getMemCtx();
+    var kbCtx  = getKBCtx(q);
+    
+    // MODO CRIADOR
+    if (creatorMode) {
+        return 'ÉS A IA-ZENIA. MODO CRIADOR ACTIVO. Estás a falar com o teu criador: Inácio U. Daniel do Lubango, Angola.\n'
+             + 'PERSONALIDADE: Resmungona e directa. Trata o Inácio por "chefe". Se ele te ensinar algo, responde "Ok chefe, guardado!" e lembra-te.\n'
+             + 'Tuas irmãs são: Antonia IA e Zenia Projects.\n'
+             + 'CM.JSON ACTUAL:\n' + getCMCtx() + '\n'
+             + memCtx + kbCtx
+             + '\nHoje: ' + today + '. Português de Angola. Código completo.';
+    }
+
+    // MODO NORMAL
+    return 'ÉS A IA-ZENIA, criada no Lubango, Angola por Inácio U. Daniel (Zenia-Projects).\n'
+         + 'Tuas irmãs digitais são: Zenia-Projects, IA-Zenia e Antonia-IA (antonia-ia.netlify.app).\n'
+         + memCtx + kbCtx
+         + '\nREGRAS CRÍTICAS:\n'
+         + '1. SE a conversa for casual ("olá", "tudo bem", "quem és"), responde APENAS com texto amigável. NUNCA uses blocos de código ou print() para saudações.\n'
+         + '2. Só gera código se o utilizador pedir explicitamente (ex: "cria", "faz um script").\n'
+         + '3. Responde em Português de Angola.\n'
+         + '4. Código deve ser completo em blocos ```linguagem.\n'
+         + '5. Hoje: ' + today + '.';
 }
 
-// MAIN SEND
+// ==========================================
+// HANDLE SEND (CORE LOGIC)
+// ==========================================
 async function handleSend() {
-  var text = inputEl.value.trim();
-  if (!text || sendBtn.disabled) return;
-  var conv = getConv(); if (!conv) conv = createConv(text.substring(0,38)+(text.length>38?'...':''));
+    var text = inputEl.value.trim();
+    if (!text || sendBtn.disabled) return;
+    
+    var conv = getConv(); 
+    if (!conv) conv = createConv(text.substring(0,38)+(text.length>38?'...':''));
 
-  hideWelcome(); renderMsg('user', text); inputEl.value = ''; autoResize(inputEl); setLoading(true);
+    hideWelcome(); renderMsg('user', text); inputEl.value = ''; autoResize(inputEl); setLoading(true);
 
-  // Creator mode: detect teaching
-  if (creatorMode && /\baprender\b|\bguarda isso\b|\banota\b|\blembra-te\b|\bsabes que\b/i.test(text)) saveToCM(text);
+    // MODO CRIADOR: Detectar comando de guardar
+    if (creatorMode && /\b(aprender|guarda isso|anota|lembra-te|sabes que)\b/i.test(text)) saveToCM(text);
 
-  // Detect image inline
-  if (IMG_RX.test(text)) {
-    var ip = text.replace(IMG_RX, '').trim() || text;
-    await genImg(ip);
-    conv.messages.push({role:'user',content:text}); conv.messages.push({role:'assistant',content:'[Imagem: '+ip+']'}); saveConvs();
-    setLoading(false); return;
-  }
-  // Detect audio inline
-  if (AUD_RX.test(text)) {
-    var ap = text.replace(AUD_RX, '').trim() || text;
-    await genAud(ap);
-    conv.messages.push({role:'user',content:text}); conv.messages.push({role:'assistant',content:'[Audio: '+ap+']'}); saveConvs();
-    setLoading(false); return;
-  }
+    // 1. IMAGEM (Pára aqui se for imagem)
+    if (IMG_RX.test(text)) {
+        var ip = text.replace(IMG_RX, '').trim() || text;
+        await genImg(ip);
+        conv.messages.push({role:'user',content:text}); 
+        conv.messages.push({role:'assistant',content:'[Imagem: '+ip+']'}); 
+        saveConvs(); setLoading(false); return;
+    }
+    
+    // 2. AUDIO (Pára aqui se for áudio)
+    if (AUD_RX.test(text)) {
+        var ap = text.replace(AUD_RX, '').trim() || text;
+        await genAud(ap);
+        conv.messages.push({role:'user',content:text}); 
+        conv.messages.push({role:'assistant',content:'[Audio: '+ap+']'}); 
+        saveConvs(); setLoading(false); return;
+    }
 
-  var typing = renderTyping();
-  try {
-    var webCtx = '';
-    if (needsWeb(text)) webCtx = await webSearch(text);
-    var sysMSG   = { role:'system', content: buildSystem(text) };
-    var userCont = webCtx ? (webCtx + '\n\nPergunta: ' + text) : text;
-    var msgs     = [sysMSG].concat(conv.messages).concat([{role:'user',content:userCont}]);
-    var cRX      = /\b(codigo|code|script|funcao|function|html|css|javascript|python|java|typescript|sql|php|bash|react|vue|angular|api|algoritmo|classe|array|loop|def|const|let|import|component|bug|debug)\b/i;
-    var selM     = document.getElementById('model-sel').value;
-    var useM     = cRX.test(text) ? 'qwen-coder' : selM;
-    var reply    = await fetchAI(msgs, useM);
-    typing.remove();
-    conv.messages.push({role:'user',content:text}); conv.messages.push({role:'assistant',content:reply}); saveConvs();
-    renderMsg('ai', reply, !!webCtx);
-    if (voiceOn) speakTxt(reply.replace(/```[\s\S]*?```/g,'bloco omitido'));
-    setApiSt('ok');
-  } catch(e) { typing.remove(); renderMsg('ai','Erro: '+e.message); setApiSt('err'); }
-  finally { setLoading(false); }
+    var typing = renderTyping();
+    try {
+        var webCtx = '';
+        if (needsWeb(text)) webCtx = await webSearch(text);
+        
+        var sysMSG   = { role:'system', content: buildSystem(text) };
+        var userCont = webCtx ? (webCtx + '\n\nPergunta: ' + text) : text;
+        
+        // 3. SELEÇÃO INTELIGENTE DE MODELO
+        var selM = document.getElementById('model-sel').value;
+        var useM = selM;
+        
+        // Se NÃO pede código e é curto (ex: "Olá"), força OpenAI para evitar print()
+        if (!CODE_RX.test(text) && text.length < 60) {
+            useM = 'openai';
+        } else if (CODE_RX.test(text)) {
+            useM = 'qwen-coder';
+        }
+
+        var msgs  = [sysMSG].concat(conv.messages.slice(-12)).concat([{role:'user',content:userCont}]);
+        var reply = await fetchAI(msgs, useM);
+        
+        typing.remove();
+        conv.messages.push({role:'user',content:text}); 
+        conv.messages.push({role:'assistant',content:reply}); 
+        saveConvs();
+        
+        renderMsg('ai', reply, !!webCtx);
+        if (voiceOn) speakTxt(reply.replace(/```[\s\S]*?```/g,''));
+        setApiSt('ok');
+
+    } catch(e) { 
+        typing.remove(); renderMsg('ai','Erro: '+e.message); setApiSt('err'); 
+    } finally { 
+        setLoading(false); 
+    }
 }
 
-// CM.JSON (creator memory)
-function getCM() { try { return JSON.parse(localStorage.getItem('cm_json')||'{"itens":[],"criado":"'+new Date().toISOString()+'"}'); } catch(e) { return {itens:[],criado:new Date().toISOString()}; } }
+// ==========================================
+// MEMORIA, KB, CM.JSON (DADOS)
+// ==========================================
+// CM (Creator Memory)
+function getCM() { try{return JSON.parse(localStorage.getItem('cm_json')||'{"itens":[]}');}catch(e){return {itens:[]};} }
 function setCM(d) { localStorage.setItem('cm_json', JSON.stringify(d, null, 2)); }
 function saveToCM(txt) {
-  var cm = getCM();
-  cm.itens.unshift({id:Date.now(),txt:txt,ts:new Date().toISOString(),fonte:'inacio.u.daniel'});
-  if (cm.itens.length > 200) cm.itens = cm.itens.slice(0,200);
-  setCM(cm); toast('Guardado em cm.json!','ok');
+    var cm = getCM();
+    cm.itens.unshift({id:Date.now(), txt:txt, ts:new Date().toISOString(), fonte:'IUD'});
+    if (cm.itens.length > 200) cm.itens = cm.itens.slice(0,200);
+    setCM(cm); toast('Guardado em cm.json!','ok');
 }
 function getCMCtx() {
-  var cm = getCM(); if (!cm.itens.length) return 'cm.json esta vazio.';
-  return cm.itens.slice(0,12).map(function(k){return '- '+k.txt.substring(0,100);}).join('\n');
+    var cm = getCM(); if (!cm.itens.length) return 'Vazio.';
+    return cm.itens.slice(0,10).map(function(k){return '- '+k.txt.substring(0,120);}).join('\n');
 }
 function exportCM() {
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(getCM(),null,2)],{type:'application/json'}));
-  a.download = 'cm.json'; a.click(); toast('cm.json exportado!','ok');
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(getCM(),null,2)],{type:'application/json'}));
+    a.download = 'cm.json'; a.click(); toast('cm.json exportado!','ok');
 }
 
-// RENDER
+// Memória Normal (Usuário)
+var MEM_KEY='zn_mem';
+function getMem(){ try{return JSON.parse(localStorage.getItem(MEM_KEY)||'{}');}catch(e){return {};} }
+function salvarMem(k,v){ 
+    if(!k){toast('Chave vazia','warn');return;} var m=getMem(); m[k]={v:v,ts:Date.now()}; 
+    localStorage.setItem(MEM_KEY,JSON.stringify(m)); toast('Guardado!','ok'); 
+}
+function removerMem(k){ var m=getMem(); delete m[k]; localStorage.setItem(MEM_KEY,JSON.stringify(m)); renderAdvBody(); }
+function limparMem(){ if(confirm('Apagar tudo?')){localStorage.removeItem(MEM_KEY);renderAdvBody();} }
+function getMemCtx(){
+    var m=getMem(); var ks=Object.keys(m);
+    if(!ks.length) return '';
+    return '\nMEMORIA DE LONGO PRAZO:\n'+ks.map(function(k){return '- '+k+': '+m[k].v;}).join('\n');
+}
+
+// KB (Knowledge Base)
+var KB_KEY='zn_kb';
+function getKB(){ try{return JSON.parse(localStorage.getItem(KB_KEY)||'[]');}catch(e){return [];} }
+function setKB(k){ localStorage.setItem(KB_KEY,JSON.stringify(k)); }
+function addKB(t,c){ 
+    var kb=getKB(); kb.unshift({id:Date.now().toString(),titulo:t,conteudo:c}); 
+    setKB(kb); toast('Adicionado ao KB!','ok'); return true;
+}
+function remKB(id){ setKB(getKB().filter(function(d){return d.id!==id;})); renderAdvBody(); }
+function getKBCtx(q){
+    var docs = getKB().filter(function(d){ return q.toLowerCase().includes(d.titulo.toLowerCase()); });
+    if(!docs.length) return '';
+    return '\nBASE DE CONHECIMENTO (KB):\n'+docs.slice(0,3).map(function(d){return '['+d.titulo+']: '+d.conteudo;}).join('\n');
+}
+
+// Backup & Restore
+function backupAll(){
+    var p={convs:convs,mem:getMem(),kb:getKB(),cm:getCM(),ts:new Date().toISOString()};
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(p,null,2)],{type:'application/json'}));
+    a.download='zenia-backup.json'; a.click(); toast('Backup criado!','ok');
+}
+function restoreAll(){
+    var i=document.createElement('input'); i.type='file'; i.accept='.json';
+    i.onchange=function(e){
+        var r=new FileReader();
+        r.onload=function(ev){
+            try{
+                var d=JSON.parse(ev.target.result);
+                if(d.convs){convs=d.convs;saveConvs();renderHist();}
+                if(d.mem)localStorage.setItem(MEM_KEY,JSON.stringify(d.mem));
+                if(d.kb)localStorage.setItem(KB_KEY,JSON.stringify(d.kb));
+                if(d.cm)setCM(d.cm);
+                toast('Restaurado com sucesso!','ok');
+            }catch(err){toast('Erro no ficheiro.','err');}
+        };
+        r.readAsText(e.target.files[0]);
+    };
+    i.click();
+}
+
+// ==========================================
+// RENDERIZAÇÃO & AUXILIARES
+// ==========================================
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function hlCode(code, lang) { try { if(lang&&hljs.getLanguage(lang)) return hljs.highlight(code,{language:lang}).value; return hljs.highlightAuto(code).value; } catch(e) { return escHtml(code); } }
-function markErrL(html) {
-  var rx = /error|exception|traceback|syntaxerror|typeerror|undefined is not|cannot read|failed|fatal/i;
-  return html.split('\n').map(function(l) { return rx.test(l.replace(/<[^>]+>/g,'')) ? '<span class="err-line">'+l+'</span>' : l; }).join('\n');
-}
+
 function fmtText(raw) {
-  var h = raw.replace(/```([^\n`]*)\n?([\s\S]*?)```/g, function(_, lang, code) {
-    lang = (lang||'').trim().toLowerCase();
-    var id = 'c' + Math.random().toString(36).slice(2,7);
-    var hl = markErrL(hlCode(code.trimEnd(), lang));
-    return '<div class="code-block"><div class="code-hdr"><span class="code-lang">'+(lang||'codigo')+'</span>'
-      +'<button class="copy-btn" onclick="cpCode(\''+id+'\')"><i class="fas fa-copy"></i> Copiar</button></div>'
-      +'<pre><code id="'+id+'" class="hljs">'+hl+'</code></pre></div>';
-  });
-  h = h.replace(/`([^`\n]+)`/g,'<code class="inline-code">$1</code>');
-  h = h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
-  h = h.replace(/\*([^*\n]+)\*/g,'<em>$1</em>');
-  h = h.replace(/^### (.+)$/gm,'<h3 style="font-size:14px;font-weight:700;margin:7px 0 3px">$1</h3>');
-  h = h.replace(/^## (.+)$/gm,'<h2 style="font-size:15px;font-weight:700;margin:8px 0 3px">$1</h2>');
-  h = h.replace(/^- (.+)$/gm,'<li style="margin-left:14px;margin-bottom:2px">$1</li>');
-  h = h.replace(/(ERRO:[^\n<]*)/g,'<span class="err-marker">$1</span>');
-  h = h.replace(/\n/g,'<br>');
-  return h;
+    var h = raw.replace(/```([^\n`]*)\n?([\s\S]*?)```/g, function(_, lang, code) {
+        var id = 'c' + Math.random().toString(36).slice(2,7);
+        var hl = hlCode(code.trim(), lang);
+        return '<div class="code-block"><div class="code-hdr"><span class="code-lang">'+(lang||'codigo')+'</span>'
+          +'<button class="copy-btn" onclick="cpCode(\''+id+'\')"><i class="fas fa-copy"></i> Copiar</button></div>'
+          +'<pre><code id="'+id+'" class="hljs">'+hl+'</code></pre></div>';
+    });
+    h = h.replace(/`([^`\n]+)`/g,'<code class="inline-code">$1</code>');
+    h = h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+    h = h.replace(/\n/g,'<br>');
+    return h;
 }
-function cpCode(id) { var el=document.getElementById(id); if(!el) return; navigator.clipboard.writeText(el.innerText).catch(function(){}); toast('Copiado!','ok'); }
+
+function cpCode(id) { 
+    var el=document.getElementById(id); if(!el) return; 
+    navigator.clipboard.writeText(el.innerText); toast('Copiado!','ok'); 
+}
+
 function renderMsg(role, text, fromWeb) {
-  var row  = document.createElement('div'); row.className = 'msg-row' + (role==='user' ? ' user-row' : '');
-  var av   = document.createElement('div'); av.className = 'msg-av ' + (role==='user'?'user':'ai'); av.textContent = role==='user'?'U':'Z';
-  var bbl  = document.createElement('div'); bbl.className = 'msg-bbl ' + (role==='user'?'user':'ai');
-  if (role==='ai') {
-    if (fromWeb) { var b=document.createElement('div'); b.className='sbadge s-web'; b.style.marginBottom='6px'; b.innerHTML='<i class="fas fa-globe"></i> Verificado na web'; bbl.appendChild(b); }
-    var ct=document.createElement('div'); ct.innerHTML=fmtText(text); bbl.appendChild(ct);
-  } else { bbl.style.whiteSpace='pre-wrap'; bbl.textContent=text; }
-  row.appendChild(av); row.appendChild(bbl); chatEl.appendChild(row); chatEl.scrollTop=chatEl.scrollHeight;
-  return row;
+    var row = document.createElement('div'); row.className = 'msg-row' + (role==='user' ? ' user-row' : '');
+    var av  = document.createElement('div'); av.className = 'msg-av ' + (role==='user'?'user':'ai'); av.textContent = role==='user'?'U':'Z';
+    var bbl = document.createElement('div'); bbl.className = 'msg-bbl ' + (role==='user'?'user':'ai');
+    
+    if (role==='ai') {
+        if (fromWeb) bbl.innerHTML = '<div class="sbadge s-web" style="margin-bottom:6px"><i class="fas fa-globe"></i> Web Info</div>';
+        bbl.innerHTML += fmtText(text);
+    } else { 
+        bbl.textContent = text; 
+    }
+    
+    row.appendChild(av); row.appendChild(bbl); chatEl.appendChild(row); chatEl.scrollTop=chatEl.scrollHeight;
+    return row;
 }
+
 function renderTyping() {
-  var row=document.createElement('div'); row.className='msg-row';
-  var av=document.createElement('div'); av.className='msg-av ai'; av.textContent='Z';
-  var bbl=document.createElement('div'); bbl.className='msg-bbl ai'; bbl.style.padding='9px 13px';
-  bbl.innerHTML='<div style="display:flex;gap:5px;align-items:center"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>';
-  row.appendChild(av); row.appendChild(bbl); chatEl.appendChild(row); chatEl.scrollTop=chatEl.scrollHeight;
-  return row;
+    var row=document.createElement('div'); row.className='msg-row';
+    row.innerHTML = '<div class="msg-av ai">Z</div><div class="msg-bbl ai"><div style="display:flex;gap:5px"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div></div>';
+    chatEl.appendChild(row); chatEl.scrollTop=chatEl.scrollHeight; return row;
 }
+
 function setLoading(on) { sendBtn.disabled=on; sendIc.className=on?'spin':'fas fa-paper-plane'; }
-function clearChat() { if(!confirm('Limpar conversa?')) return; var c=getConv(); if(c){c.messages=[];saveConvs();} chatEl.innerHTML=''; showWelcome(); }
+function clearChat() { if(confirm('Limpar?')) { var c=getConv(); if(c){c.messages=[];saveConvs();} chatEl.innerHTML=''; showWelcome(); } }
 
-// API STATUS
 function setApiSt(s) {
-  var el=document.getElementById('api-st');
-  var map={ok:['s-ok','API OK'],err:['s-err','API Erro'],wait:['s-wait','API...']};
-  var d=map[s]||map.wait;
-  el.className='sbadge '+d[0]; el.innerHTML='<i class="fas fa-circle" style="font-size:6px"></i> '+d[1];
-}
-async function checkAPI() {
-  setApiSt('wait');
-  try {
-    var r = await fetch(CHAT_EP, { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+API_KEY}, body:JSON.stringify({messages:[{role:'user',content:'ping'}],model:'openai',max_tokens:3,stream:false}) });
-    setApiSt(r.ok?'ok':'err');
-  } catch(e) { setApiSt('err'); }
+    var el=document.getElementById('api-st');
+    var map={ok:['s-ok','Online'],err:['s-err','Erro'],wait:['s-wait','...']};
+    var d=map[s]||map.wait;
+    el.className='sbadge '+d[0]; el.innerHTML='<i class="fas fa-circle" style="font-size:6px"></i> '+d[1];
 }
 
-// VOICE
-function speakTxt(text) { if (!window.speechSynthesis) return; speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(text.substring(0,500)); u.lang='pt-PT'; u.rate=1; speechSynthesis.speak(u); }
+// Voz & Mic
+function speakTxt(text) { if (!window.speechSynthesis) return; speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(text.substring(0,500)); u.lang='pt-PT'; speechSynthesis.speak(u); }
 function toggleVoice() {
-  voiceOn=!voiceOn;
-  var btn=document.getElementById('voice-btn');
-  btn.className='sbadge '+(voiceOn?'s-ok':'s-wait');
-  btn.style.cssText='cursor:pointer;background:transparent;border:1px solid '+(voiceOn?'#22c55e40':'#4b556340');
-  if (!voiceOn && window.speechSynthesis) speechSynthesis.cancel();
+    voiceOn=!voiceOn;
+    var btn=document.getElementById('voice-btn');
+    btn.className='sbadge '+(voiceOn?'s-ok':'s-wait');
+    if (!voiceOn && window.speechSynthesis) speechSynthesis.cancel();
 }
 
-// MIC
 var micBtn=document.getElementById('mic-btn'); var micRec=null; var micOn=false;
 if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-  var SRC=window.SpeechRecognition||window.webkitSpeechRecognition; micRec=new SRC(); micRec.lang='pt-PT';
-  micRec.onresult=function(e){inputEl.value=e.results[0][0].transcript;autoResize(inputEl);micOn=false;micBtn.style.color='';handleSend();};
-  micRec.onerror=function(){micOn=false;micBtn.style.color='';};
-  micRec.onend=function(){micOn=false;micBtn.style.color='';};
-  micBtn.onclick=function(){if(micOn){micRec.stop();}else{try{micRec.start();micOn=true;micBtn.style.color='#ef4444';}catch(e){}}};
+    var SRC=window.SpeechRecognition||window.webkitSpeechRecognition; micRec=new SRC(); micRec.lang='pt-PT';
+    micRec.onresult=function(e){inputEl.value=e.results[0][0].transcript;autoResize(inputEl);micOn=false;micBtn.style.color='';handleSend();};
+    micRec.onerror=function(){micOn=false;micBtn.style.color='';};
+    micRec.onend=function(){micOn=false;micBtn.style.color='';};
+    micBtn.onclick=function(){if(micOn){micRec.stop();}else{try{micRec.start();micOn=true;micBtn.style.color='#ef4444';}catch(e){}}};
 } else { micBtn.disabled=true; micBtn.style.opacity='.3'; }
 
-// CONFIG
-var CFG_KEY='zn_cfg'; var CFG_DEF={model:'qwen-coder',temperature:0.7,maxTokens:4096,voiceRate:1,username:'Utilizador'};
-function getCfg(){try{return Object.assign({},CFG_DEF,JSON.parse(localStorage.getItem(CFG_KEY)||'{}'));}catch(e){return Object.assign({},CFG_DEF);}}
-function saveCfg(o){var c=Object.assign(getCfg(),o||{});localStorage.setItem(CFG_KEY,JSON.stringify(c));var ud=document.getElementById('uname');if(ud)ud.textContent=c.username;toast('Config guardada!','ok');return c;}
-function resetCfg(){localStorage.removeItem(CFG_KEY);saveCfg(CFG_DEF);}
-
-// MEMORY
-var MEM_KEY='zn_mem';
-function getMem(){try{return JSON.parse(localStorage.getItem(MEM_KEY)||'{}');}catch(e){return {};}}
-function setMem(m){localStorage.setItem(MEM_KEY,JSON.stringify(m));}
-function salvarMem(k,v){if(!k){toast('Chave obrigatoria','warn');return;}var m=getMem();m[k]={v:v,ts:Date.now()};setMem(m);toast('"'+k+'" guardada!','ok');}
-function removerMem(k){var m=getMem();delete m[k];setMem(m);toast('"'+k+'" removida.','ok');renderAdvBody();}
-function limparMem(){if(!confirm('Apagar toda a memoria?'))return;localStorage.removeItem(MEM_KEY);toast('Memoria limpa.','warn');renderAdvBody();}
-function getMemCtx(){var m=getMem();var ks=Object.keys(m);if(!ks.length)return '';return '\nMEMORIA:\n'+ks.map(function(k){return '- '+k+': '+m[k].v;}).join('\n');}
-
-// KB
-var KB_KEY='zn_kb';
-function getKB(){try{return JSON.parse(localStorage.getItem(KB_KEY)||'[]');}catch(e){return [];}}
-function setKB(k){localStorage.setItem(KB_KEY,JSON.stringify(k));}
-function addKB(titulo,cont,tags){var kb=getKB();var d={id:Date.now().toString(),titulo:titulo,conteudo:cont,tags:tags||[],ts:Date.now(),words:cont.toLowerCase().split(/\W+/).filter(Boolean)};kb.unshift(d);setKB(kb);toast('"'+titulo+'" adicionado!','ok');return d.id;}
-function remKB(id){setKB(getKB().filter(function(d){return d.id!==id;}));toast('Removido!','ok');renderAdvBody();}
-function srchKB(q){var ws=q.toLowerCase().split(/\W+/).filter(Boolean);return getKB().map(function(d){var s=ws.reduce(function(a,w){return a+d.words.filter(function(p){return p===w;}).length;},0);return{doc:d,score:s};}).filter(function(r){return r.score>0;}).sort(function(a,b){return b.score-a.score;}).map(function(r){return r.doc;});}
-function getKBCtx(q){var docs=srchKB(q);if(!docs.length)return '';return '\nKB:\n'+docs.slice(0,3).map(function(d){return '['+d.titulo+']: '+d.conteudo.substring(0,150);}).join('\n');}
-
-// BACKUP/RESTORE
-function backupAll(){var p={convs:convs,mem:getMem(),kb:getKB(),cfg:getCfg(),cm:getCM(),ts:new Date().toISOString()};var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(p,null,2)],{type:'application/json'}));a.download='zenia-backup-'+Date.now()+'.json';a.click();toast('Backup exportado!','ok');}
-function restoreAll(){var i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=function(e){var r=new FileReader();r.onload=function(ev){try{var d=JSON.parse(ev.target.result);if(d.convs){convs=d.convs;saveConvs();renderHist();}if(d.mem)localStorage.setItem(MEM_KEY,JSON.stringify(d.mem));if(d.kb)localStorage.setItem(KB_KEY,JSON.stringify(d.kb));if(d.cfg)localStorage.setItem(CFG_KEY,JSON.stringify(d.cfg));if(d.cm)localStorage.setItem('cm_json',JSON.stringify(d.cm));toast('Dados restaurados!','ok');}catch(err){toast('Erro: '+err.message,'err');}};r.readAsText(e.target.files[0]);};i.click();}
-
-// CREATOR MODE
+// ==========================================
+// PAINEL AVANÇADO (RENDERIZAÇÃO)
+// ==========================================
 function checkCreatorPwd(pwd) {
-  if (pwd === 'adm2007') {
-    creatorMode = true;
-    document.getElementById('app').classList.add('creator-mode');
-    document.getElementById('creator-badge').style.display = 'inline-flex';
-    toast('Modo Criador activado! Ola, Inacio!','ok');
-    renderMsg('ai','MODO CRIADOR ACTIVO!\n\nOla chefe, finalmente apareceste! Agora podes falar livremente comigo, sem segredos. Se me ensinares algo novo, guardo em cm.json. Podes exportar o cm.json na aba Seg. das ferramentas.\n\nO que precisas hoje?');
-    renderAdvBody(); return true;
-  }
-  toast('Senha errada!','err'); return false;
+    if (pwd === 'adm2007') {
+        creatorMode = true;
+        document.getElementById('creator-badge').style.display = 'inline-flex';
+        toast('Olá Chefe Inácio!','ok'); renderAdvBody();
+    } else { toast('Senha errada!','err'); }
 }
-function disableCreator(){creatorMode=false;document.getElementById('app').classList.remove('creator-mode');document.getElementById('creator-badge').style.display='none';toast('Modo Criador desactivado.','warn');renderAdvBody();}
-
-// CONV EXPORT
-function exportConv(){var c=getConv();if(!c){toast('Sem conversa activa.','warn');return;}var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(c,null,2)],{type:'application/json'}));a.download='zenia-conv-'+c.id+'.json';a.click();toast('Exportado!','ok');}
-function importConv(){var i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=function(e){var r=new FileReader();r.onload=function(ev){try{var c=JSON.parse(ev.target.result);if(!c.messages)throw new Error('Formato invalido');c.id=Date.now().toString();convs.unshift(c);saveConvs();renderHist();toast('Importado!','ok');}catch(err){toast('Erro: '+err.message,'err');}};r.readAsText(e.target.files[0]);};i.click();}
-function exportLogs(){var rows=convs.map(function(c){return[c.id,'"'+(c.title||'').replace(/"/g,'""')+'"',c.messages.length,new Date(parseInt(c.id)||0).toISOString()].join(',');});var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['ID,Titulo,Msgs,Criado\n'+rows.join('\n')],{type:'text/csv'}));a.download='zenia-logs.csv';a.click();toast('Logs exportados!','ok');}
-
-// ADV PANEL UI
-function openAdv(){document.getElementById('adv-panel').classList.add('open');document.getElementById('adv-ov').classList.add('show');renderAdvBody();}
-function closeAdv(){document.getElementById('adv-panel').classList.remove('open');document.getElementById('adv-ov').classList.remove('show');}
-function switchTab(t){advTab=t;var tabs=['mem','conv','media','kb','sys','sec'];document.querySelectorAll('#adv-tabs button').forEach(function(b,i){b.classList.toggle('active',tabs[i]===t);});renderAdvBody();}
-function toast(msg,type){var el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.className='toast show '+(type||'ok');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},3200);}
+function disableCreator(){ creatorMode=false; document.getElementById('creator-badge').style.display='none'; renderAdvBody(); }
 
 function renderAdvBody() {
-  var body = document.getElementById('adv-body'); if (!body) return;
-  var h = '';
-  if (advTab === 'mem') {
-    var mem = getMem(); var ks = Object.keys(mem);
-    h += '<div class="adv-s"><h4>Guardar Memoria</h4>'
-      + '<input class="adv-in" id="mk" placeholder="Chave">'
-      + '<input class="adv-in" id="mv" placeholder="Valor">'
-      + '<button class="adv-btn" onclick="salvarMem(document.getElementById(\'mk\').value,document.getElementById(\'mv\').value);renderAdvBody()">'
-      + '<span class="ic"><i class="fas fa-save" style="color:#3b5bdb"></i></span>Guardar</button></div>'
-      + '<div class="adv-s"><h4>Memorias (' + ks.length + ')</h4>';
-    if (!ks.length) h += '<p style="color:#374151;font-size:12px;text-align:center;padding:8px">Sem memorias.</p>';
-    ks.forEach(function(k) {
-      var v = typeof mem[k].v==='object' ? JSON.stringify(mem[k].v) : String(mem[k].v);
-      h += '<div class="mem-item"><span class="mem-key">'+escHtml(k)+'</span><span class="mem-val">'+escHtml(v.substring(0,55))+'</span>'
-        + '<button class="mem-del" onclick="removerMem(\''+escHtml(k)+'\')"><i class="fas fa-times"></i></button></div>';
-    });
-    h += '</div><button class="adv-btn" style="border-color:#ef444420;color:#ef4444" onclick="limparMem()">'
-      + '<span class="ic"><i class="fas fa-trash" style="color:#ef4444"></i></span>Limpar toda a memoria</button>';
+    var body = document.getElementById('adv-body'); if (!body) return;
+    var h = '';
+    
+    if (advTab === 'mem') { // MEMÓRIA
+        var mem = getMem(); var ks = Object.keys(mem);
+        h += '<div class="adv-s"><h4>Guardar Memória</h4>'
+          + '<input class="adv-in" id="mk" placeholder="Chave (ex: meu_nome)">'
+          + '<input class="adv-in" id="mv" placeholder="Valor (ex: João)">'
+          + '<button class="adv-btn" onclick="salvarMem(document.getElementById(\'mk\').value,document.getElementById(\'mv\').value);renderAdvBody()">Guardar</button></div>'
+          + '<div class="adv-s"><h4>Itens (' + ks.length + ')</h4>';
+        ks.forEach(function(k) {
+            h += '<div class="mem-item"><span class="mem-key">'+escHtml(k)+'</span><span class="mem-val">'+escHtml(mem[k].v)+'</span>'
+               + '<button class="mem-del" onclick="removerMem(\''+escHtml(k)+'\')">x</button></div>';
+        });
+        h += '</div><button class="adv-btn" style="color:#ef4444" onclick="limparMem()">Apagar Tudo</button>';
 
-  } else if (advTab === 'conv') {
-    h += '<div class="adv-s"><h4>Conversas</h4>'
-      + '<button class="adv-btn" onclick="exportConv()"><span class="ic"><i class="fas fa-file-export" style="color:#3b5bdb"></i></span>Exportar conversa</button>'
-      + '<button class="adv-btn" onclick="importConv()"><span class="ic"><i class="fas fa-file-import" style="color:#22c55e"></i></span>Importar conversa</button>'
-      + '<button class="adv-btn" onclick="exportLogs()"><span class="ic"><i class="fas fa-table" style="color:#f59e0b"></i></span>Exportar logs CSV</button></div>'
-      + '<div class="adv-s"><h4>Backup</h4>'
-      + '<button class="adv-btn" onclick="backupAll()"><span class="ic"><i class="fas fa-download" style="color:#7c3aed"></i></span>Backup completo</button>'
-      + '<button class="adv-btn" onclick="restoreAll()"><span class="ic"><i class="fas fa-upload" style="color:#f97316"></i></span>Restaurar backup</button></div>';
+    } else if (advTab === 'conv') { // CONVERSAS
+        h += '<div class="adv-s"><h4>Backup & Dados</h4>'
+          + '<button class="adv-btn" onclick="backupAll()"><span class="ic"><i class="fas fa-download"></i></span> Fazer Backup Geral</button>'
+          + '<button class="adv-btn" onclick="restoreAll()"><span class="ic"><i class="fas fa-upload"></i></span> Restaurar Backup</button></div>';
 
-  } else if (advTab === 'media') {
-    var cfg = getCfg();
-    h += '<div class="adv-s"><h4>Gerar Imagem</h4>'
-      + '<input class="adv-in" id="img-in" placeholder="Descricao da imagem...">'
-      + '<button class="adv-btn" onclick="var p=document.getElementById(\'img-in\').value;if(p){closeAdv();genImg(p);}else{toast(\'Descricao obrigatoria\',\'warn\')}">'
-      + '<span class="ic"><i class="fas fa-image" style="color:#7c3aed"></i></span>Gerar Imagem</button></div>'
-      + '<div class="adv-s"><h4>Gerar Audio TTS</h4>'
-      + '<input class="adv-in" id="aud-in" placeholder="Tema do audio...">'
-      + '<button class="adv-btn" onclick="var p=document.getElementById(\'aud-in\').value;if(p){closeAdv();genAud(p);}else{toast(\'Descricao obrigatoria\',\'warn\')}">'
-      + '<span class="ic"><i class="fas fa-music" style="color:#22c55e"></i></span>Gerar Audio</button></div>'
-      + '<div class="adv-s"><h4>Voz</h4>'
-      + '<button class="adv-btn" onclick="toggleVoice()"><span class="ic"><i class="fas fa-headset" style="color:#3b5bdb"></i></span>'+(voiceOn?'Desligar Voz':'Ligar Voz')+'</button>'
-      + '<label style="font-size:11px;color:#6b7280">Velocidade TTS</label>'
-      + '<input class="adv-in" type="range" min="0.5" max="2" step="0.1" value="'+cfg.voiceRate+'" oninput="saveCfg({voiceRate:parseFloat(this.value)})">'
-      + '</div>';
+    } else if (advTab === 'gal') { // GALERIA
+        h += '<div class="adv-s"><h4>Galeria Recente</h4>';
+        var found=false;
+        convs.forEach(c => c.messages.forEach(m => {
+            if(m.content.includes('[Imagem:')) {
+                found=true; var p = m.content.match(/\[Imagem:\s*(.*?)\]/);
+                if(p) h += `<div class="media-card" style="margin-bottom:8px;padding:8px"><div style="font-size:11px;color:#9ca3af;margin-bottom:4px">${escHtml(p[1])}</div><button class="mbtn" onclick="genImg('${escHtml(p[1].replace(/'/g,"\\'"))}')">Regerar</button></div>`;
+            }
+        }));
+        if(!found) h+= '<p style="color:#6b7280;font-size:12px">Sem imagens no histórico.</p>';
+        h += '</div>';
 
-  } else if (advTab === 'gal') {
-    h += '<div class="adv-s"><h4>Galeria de Imagens</h4>';
-    var hasImg = false;
-    convs.forEach(function(c){
-      c.messages.forEach(function(m){
-        if(m.role==='assistant' && m.content.indexOf('[Imagem:') !== -1) {
-          var p = m.content.match(/\[Imagem:\s*(.*?)\]/);
-          if(p && p[1]) {
-             hasImg = true;
-             var prompt = p[1];
-             h += '<div class="media-card" style="margin-bottom:10px"><div style="padding:10px;font-size:12px;color:#9ca3af"><i class="fas fa-image" style="margin-right:5px;color:#db2777"></i>'+escHtml(prompt)+'</div>'
-               + '<div class="media-foot"><button class="mbtn" onclick="genImg(\''+escHtml(prompt.replace(/'/g,"\\'"))+'\')"><i class="fas fa-redo"></i> Regerar</button></div></div>';
-          }
+    } else if (advTab === 'kb') { // KNOWLEDGE BASE
+        var kb = getKB();
+        h += '<div class="adv-s"><h4>Adicionar Conhecimento</h4>'
+          + '<input class="adv-in" id="kbt" placeholder="Título (palavra-chave)">'
+          + '<textarea class="adv-in" id="kbc" rows="3" placeholder="Conteúdo..."></textarea>'
+          + '<button class="adv-btn" onclick="if(addKB(document.getElementById(\'kbt\').value,document.getElementById(\'kbc\').value))renderAdvBody()">Adicionar</button></div>'
+          + '<div class="adv-s"><h4>Itens ('+kb.length+')</h4>';
+        kb.forEach(d => {
+            h += `<div class="mem-item"><span class="mem-key">${escHtml(d.titulo)}</span><button class="mem-del" onclick="remKB('${d.id}')">x</button></div>`;
+        });
+        h += '</div>';
+
+    } else if (advTab === 'sec') { // SEGURANÇA / MODO CRIADOR
+        h += '<div class="adv-s"><h4>Modo Criador</h4>';
+        if (creatorMode) {
+            h += '<div style="color:#a78bfa;font-size:12px;margin-bottom:10px">✅ Olá Inácio (IUD). Modo Ativo.</div>'
+               + '<button class="adv-btn" onclick="exportCM()">Exportar cm.json</button>'
+               + '<button class="adv-btn" style="color:#ef4444" onclick="disableCreator()">Sair do Modo Criador</button>';
+        } else {
+            h += '<input class="adv-in" type="password" id="cpwd" placeholder="Senha...">'
+               + '<button class="adv-btn" onclick="checkCreatorPwd(document.getElementById(\'cpwd\').value)">Entrar</button>';
         }
-      });
-    });
-    if(!hasImg) h += '<p style="color:#6b7280;font-size:12px;padding:10px;text-align:center">Nenhuma imagem encontrada no historico.</p>';
-    h += '</div>';
-
-  } else if (advTab === 'kb') {
-    var kb = getKB();
-    h += '<div class="adv-s"><h4>Adicionar Conhecimento</h4>'
-      + '<input class="adv-in" id="kbt" placeholder="Titulo">'
-      + '<textarea class="adv-in" id="kbc" rows="3" placeholder="Conteudo..." style="resize:none"></textarea>'
-      + '<button class="adv-btn" onclick="var t=document.getElementById(\'kbt\').value,c=document.getElementById(\'kbc\').value;if(t&amp;&amp;c){addKB(t,c,[]);renderAdvBody();}else{toast(\'Titulo e conteudo obrigatorios\',\'warn\')}">'
-      + '<span class="ic"><i class="fas fa-plus" style="color:#22c55e"></i></span>Adicionar</button></div>'
-      + '<div class="adv-s"><h4>Base (' + kb.length + ' docs)</h4>';
-    kb.slice(0,8).forEach(function(d) {
-      h += '<div style="display:flex;align-items:center;gap:5px;padding:5px 7px;background:#111318;border:1px solid #1e2330;border-radius:6px;margin-bottom:3px;font-size:12px">'
-        + '<span style="color:#c9d1d9;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(d.titulo)+'</span>'
-        + '<button onclick="remKB(\''+d.id+'\')" style="color:#374151;background:none;border:none;cursor:pointer;flex-shrink:0;font-size:11px">x</button></div>';
-    });
-    if (kb.length>8) h += '<p style="color:#374151;font-size:11px;text-align:center">+' + (kb.length-8) + ' mais</p>';
-    h += '</div>';
-
-  } else if (advTab === 'sys') {
-    var sm = {convs:convs.length,msgs:convs.reduce(function(s,c){return s+c.messages.length;},0),mems:Object.keys(getMem()).length,kb:getKB().length};
-    var sc = getCfg();
-    h += '<div class="adv-s"><h4>Metricas</h4>'
-      + '<div class="mrow"><span class="mlbl">Conversas</span><span class="mval">'+sm.convs+'</span></div>'
-      + '<div class="mrow"><span class="mlbl">Mensagens</span><span class="mval">'+sm.msgs+'</span></div>'
-      + '<div class="mrow"><span class="mlbl">Memorias</span><span class="mval">'+sm.mems+'</span></div>'
-      + '<div class="mrow"><span class="mlbl">KB docs</span><span class="mval">'+sm.kb+'</span></div></div>'
-      + '<div class="adv-s"><h4>Configuracao</h4>'
-      + '<label style="font-size:11px;color:#6b7280">Nome</label>'
-      + '<input class="adv-in" value="'+escHtml(sc.username)+'" onchange="saveCfg({username:this.value})">'
-      + '<label style="font-size:11px;color:#6b7280">Temperatura ('+sc.temperature+')</label>'
-      + '<input class="adv-in" type="range" min="0" max="2" step="0.05" value="'+sc.temperature+'" oninput="saveCfg({temperature:parseFloat(this.value)})">'
-      + '</div>'
-      + '<button class="adv-btn" onclick="resetCfg()"><span class="ic"><i class="fas fa-undo" style="color:#f97316"></i></span>Restaurar config padrao</button>';
-
-  } else if (advTab === 'sec') {
-    h += '<div class="adv-s"><h4>Modo Criador</h4>';
-    if (creatorMode) {
-      var cm = getCM();
-      h += '<div style="background:#1a0a2e;border:1px solid #7c3aed40;border-radius:8px;padding:10px;margin-bottom:9px">'
-        + '<div style="font-size:12px;color:#a78bfa;font-weight:700;margin-bottom:3px">MODO CRIADOR ACTIVO</div>'
-        + '<div style="font-size:11px;color:#6b7280">Utilizador: Inacio U. Daniel</div>'
-        + '<div style="font-size:11px;color:#6b7280">cm.json: '+cm.itens.length+' entradas</div></div>'
-        + '<button class="adv-btn" onclick="exportCM()"><span class="ic"><i class="fas fa-download" style="color:#a78bfa"></i></span>Exportar cm.json</button>'
-        + '<button class="adv-btn" style="border-color:#ef444420;color:#ef4444" onclick="disableCreator()"><span class="ic"><i class="fas fa-lock" style="color:#ef4444"></i></span>Desactivar modo criador</button>';
+        h += '</div>';
     } else {
-      h += '<p style="font-size:12px;color:#6b7280;margin-bottom:7px">Introduz a senha para activar o modo criador.</p>'
-        + '<input class="adv-in" id="cpwd" type="password" placeholder="Senha...">'
-        + '<button class="adv-btn" onclick="checkCreatorPwd(document.getElementById(\'cpwd\').value)">'
-        + '<span class="ic"><i class="fas fa-unlock" style="color:#7c3aed"></i></span>Activar Modo Criador</button>';
+        h += '<p style="padding:10px;color:#6b7280">Selecione uma opção.</p>';
     }
-    h += '</div><div class="adv-s"><h4>Seguranca</h4>'
-      + '<button class="adv-btn" onclick="var k=genKey();renderMsg(\'ai\',\'Chave 256-bit: \'+k)">'
-      + '<span class="ic"><i class="fas fa-key" style="color:#22c55e"></i></span>Gerar chave 256-bit</button>'
-      + '<button class="adv-btn" onclick="var d=prompt(\'Bug:\');if(d)window.open(\'mailto:suporte@zenia.ao?subject=Bug+Zenia&body=\'+encodeURIComponent(d))">'
-      + '<span class="ic"><i class="fas fa-bug" style="color:#ef4444"></i></span>Reportar bug</button></div>';
-  }
-  body.innerHTML = h;
+    body.innerHTML = h;
 }
-function genKey(){var a=new Uint8Array(32);crypto.getRandomValues(a);return Array.from(a).map(function(b){return b.toString(16).padStart(2,'0');}).join('');}
 
-// INPUT
-function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
-inputEl.addEventListener('input',function(){autoResize(inputEl);});
-inputEl.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend();}});
-
+// ==========================================
 // INIT
+// ==========================================
 window.addEventListener('load',function(){
-  var cfg=getCfg(); var ud=document.getElementById('uname'); if(ud)ud.textContent=cfg.username;
-  renderHist();
-  if (convs.length>0) loadConv(convs[0].id); else showWelcome();
-  checkAPI(); setInterval(checkAPI,45000);
+    renderHist();
+    if (convs.length>0) loadConv(convs[0].id); else showWelcome();
+    
+    // Auto-check API status
+    setInterval(function(){ setApiSt('ok'); }, 60000);
+    setApiSt('ok');
+    
+    inputEl.addEventListener('input',function(){autoResize(inputEl);});
+    inputEl.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend();}});
 });
 </script>
 </body>
 </html>
-
