@@ -3,1501 +3,792 @@
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IA-Zénia</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>IA-Zenia</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <style>
-body{background:#0b0d11;color:#e5e7eb;font-family:Inter,sans-serif}
-.sidebar{background:#161b22}
-.glass{background:rgba(255,255,255,.03);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1)}
-.chat-container::-webkit-scrollbar{width:5px}
-.chat-container::-webkit-scrollbar-thumb{background:#30363d;border-radius:10px}
-.glow-button:hover{box-shadow:0 0 15px rgba(59,130,246,.5)}
-@keyframes pulse-red{50%{background:#ef4444;color:#fff;transform:scale(1.1)}}
-.recording{animation:pulse-red 1.5s infinite;border-radius:9999px}
-@keyframes fade-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-.animate-fade-in{animation:fade-in 200ms ease-out}
-.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-radius:50%;border-top-color:#fff;animation:spin 1s linear infinite;display:inline-block;vertical-align:middle}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;padding:0;overflow:hidden}
+body{background:#0b0d11;color:#e5e7eb;font-family:Inter,system-ui,sans-serif;font-size:14px}
+#app{display:flex;height:100vh;width:100%;overflow:hidden;position:relative}
+#sidebar{width:260px;min-width:260px;background:#111318;border-right:1px solid #1e2330;display:flex;flex-direction:column;height:100vh;transition:all .3s ease;overflow:hidden;z-index:100;position:relative;flex-shrink:0}
+#sidebar.collapsed{width:0;min-width:0;border:none}
+#sidebar-inner{width:260px;min-width:260px;display:flex;flex-direction:column;height:100%;overflow:hidden}
+#sidebar-scroll{flex:1;overflow-y:auto;overflow-x:hidden}
+#sidebar-scroll::-webkit-scrollbar{width:4px}
+#sidebar-scroll::-webkit-scrollbar-thumb{background:#252c3b;border-radius:4px}
+#sidebar-toggle{position:absolute;top:50%;right:-17px;transform:translateY(-50%);background:#1a1f2e;border:1px solid #1e2330;width:17px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:101;border-radius:0 7px 7px 0;color:#6b7280;transition:background .2s;flex-shrink:0}
+#sidebar-toggle:hover{background:#252c3b;color:#e5e7eb}
+#sidebar.collapsed #sidebar-toggle{right:-17px}
+#mob-toggle{display:none;position:fixed;top:10px;left:10px;z-index:300;background:#1a1f2e;border:1px solid #1e2330;width:36px;height:36px;border-radius:9px;align-items:center;justify-content:center;cursor:pointer;color:#9ca3af}
+#mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:190}
+#main{flex:1;display:flex;flex-direction:column;min-width:0;height:100vh;overflow:hidden}
+#topbar{height:50px;border-bottom:1px solid #1e2330;display:flex;align-items:center;justify-content:space-between;padding:0 14px;gap:8px;flex-shrink:0;background:#0f1117}
+.tbLeft{display:flex;align-items:center;gap:7px;flex-wrap:nowrap;min-width:0;overflow:hidden}
+.tbRight{display:flex;align-items:center;gap:7px;flex-shrink:0}
+#chat-window{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+#chat-window::-webkit-scrollbar{width:4px}
+#chat-window::-webkit-scrollbar-thumb{background:#1e2330;border-radius:4px}
+#input-area{border-top:1px solid #1e2330;padding:9px 12px;background:#0f1117;flex-shrink:0}
+#input-wrap{max-width:780px;margin:0 auto;background:#151c2e;border:1px solid #252c3b;border-radius:14px;overflow:hidden;transition:border-color .2s}
+#input-wrap:focus-within{border-color:#3b5bdb}
+#user-input{width:100%;background:transparent;border:none;outline:none;color:#e5e7eb;font-size:14px;padding:11px 13px 4px;resize:none;max-height:120px;line-height:1.5}
+#input-bottom{display:flex;align-items:center;padding:4px 7px 7px;gap:5px}
+#input-bottom-left{display:flex;align-items:center;gap:3px;flex:1}
+.ia-btn{background:transparent;border:none;cursor:pointer;color:#6b7280;padding:5px 7px;border-radius:7px;font-size:13px;transition:all .2s;display:flex;align-items:center;gap:4px}
+.ia-btn:hover{background:#252c3b;color:#e5e7eb}
+#send-btn{background:#3b5bdb;border:none;cursor:pointer;color:#fff;padding:7px 14px;border-radius:9px;font-size:13px;font-weight:600;transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+#send-btn:hover{background:#4c6ef5}
+#send-btn:disabled{opacity:.4;cursor:not-allowed}
+.spin{width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-radius:50%;border-top-color:#fff;animation:spin 1s linear infinite;display:inline-block}
 @keyframes spin{to{transform:rotate(360deg)}}
-.history-item{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.status-ok{color:#22c55e;border-color:#22c55e40}
-.status-err{color:#ef4444;border-color:#ef444440}
-.status-wait{color:#9ca3af;border-color:#4b556340}
-.code-block{position:relative;background:#0d1117;border:1px solid #30363d;border-radius:10px;margin:12px 0;overflow:hidden}
-.code-header{display:flex;align-items:center;justify-content:space-between;background:#161b22;border-bottom:1px solid #30363d;padding:5px 12px}
-.code-lang-label{font-family:monospace;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#58a6ff;font-weight:600}
-.copy-btn{background:#21262d;border:1px solid #30363d;color:#8b949e;border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px}
+.msg-row{display:flex;gap:9px;max-width:780px;width:100%;margin:0 auto}
+.msg-row.user-row{flex-direction:row-reverse}
+.msg-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px}
+.msg-av.ai{background:linear-gradient(135deg,#3b5bdb,#7c3aed)}
+.msg-av.user{background:#1e3a5f}
+.msg-bbl{max-width:calc(100% - 46px);padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.6;word-break:break-word}
+.msg-bbl.ai{background:#151b2d;border:1px solid #1e2330;border-radius:4px 14px 14px 14px}
+.msg-bbl.user{background:#1d3461;color:#e8f0fe;border-radius:14px 4px 14px 14px}
+.code-block{background:#0d1117;border:1px solid #21262d;border-radius:9px;margin:8px 0;overflow:hidden}
+.code-hdr{display:flex;align-items:center;justify-content:space-between;background:#161b22;border-bottom:1px solid #21262d;padding:4px 11px}
+.code-lang{font-family:monospace;font-size:11px;text-transform:uppercase;color:#58a6ff;font-weight:700}
+.copy-btn{background:#21262d;border:1px solid #30363d;color:#8b949e;border-radius:5px;padding:2px 7px;font-size:11px;cursor:pointer}
 .copy-btn:hover{background:#30363d;color:#e6edf3}
-.code-block pre{margin:0!important;padding:14px 16px!important;overflow-x:auto;font-size:13px!important;line-height:1.65!important;background:transparent!important}
-.code-block pre code.hljs{background:transparent!important;padding:0!important;font-size:inherit!important}
-.error-line{background:rgba(251,191,36,.08);display:block}
-.error-line span{color:#fbbf24!important}
-.error-marker{color:#fbbf24;font-weight:bold}
-.inline-code{background:rgba(110,118,129,.2);border-radius:4px;padding:1px 6px;font-family:monospace;font-size:12px;color:#e6edf3}
-.web-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);border-radius:20px;padding:3px 10px;font-size:11px;color:#60a5fa;margin-bottom:8px}
-.media-card{background:#0d1117;border:1px solid #30363d;border-radius:10px;overflow:hidden;margin:10px 0}
-.media-card img{width:100%;display:block}
-.media-card-label{padding:6px 12px;font-size:11px;color:#8b949e;background:#161b22;border-top:1px solid #30363d}
-.media-actions{display:flex;gap:8px;padding:8px 12px;background:#161b22;border-top:1px solid #30363d}
-.media-btn{font-size:11px;padding:3px 10px;border-radius:6px;cursor:pointer;border:1px solid #30363d;background:#21262d;color:#8b949e;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
-.media-btn:hover{background:#30363d;color:#e6edf3}
-.toolbar-btn{padding:5px 10px;border-radius:8px;border:1px solid #30363d;background:transparent;color:#6b7280;font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}
-.toolbar-btn:hover{background:#1f2937;color:#e5e7eb;border-color:#4b5563}
-.toolbar-btn.active{background:#1d3461;color:#60a5fa;border-color:#3b82f6}
-/* Painel avançado */
-.adv-panel{position:fixed;top:0;right:0;width:400px;height:100vh;background:#0d1117;border-left:1px solid #30363d;z-index:1000;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease}
+.code-block pre{margin:0;padding:13px 15px;overflow-x:auto;font-size:13px;line-height:1.6;background:transparent}
+.code-block pre code{background:transparent!important;padding:0!important}
+.err-line{background:rgba(251,191,36,.07);display:block}
+.err-line span{color:#fbbf24!important}
+.inline-code{background:rgba(110,118,129,.2);border-radius:4px;padding:1px 5px;font-family:monospace;font-size:12px}
+.err-marker{color:#fbbf24;font-weight:700}
+.media-card{background:#0f1520;border:1px solid #1e2d45;border-radius:11px;overflow:hidden;margin:6px 0;max-width:100%}
+.media-card img{width:100%;display:block;max-height:380px;object-fit:cover}
+.media-foot{display:flex;align-items:center;justify-content:space-between;padding:7px 11px;background:#111827;border-top:1px solid #1e2d45;gap:8px}
+.media-lbl{font-size:11px;color:#6b7280;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mbtn{font-size:11px;padding:3px 8px;border-radius:5px;cursor:pointer;border:1px solid #252c3b;background:#1a1f2e;color:#9ca3af;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:all .2s}
+.mbtn:hover{background:#252c3b;color:#e5e7eb}
+.sbadge{font-size:11px;padding:3px 7px;border-radius:18px;border:1px solid;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.s-ok{color:#22c55e;border-color:#22c55e40}
+.s-err{color:#ef4444;border-color:#ef444440}
+.s-wait{color:#9ca3af;border-color:#4b556340}
+.s-web{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.3);color:#60a5fa}
+.s-creator{background:linear-gradient(90deg,#7c3aed,#db2777);color:#fff;font-size:10px;padding:2px 7px;border-radius:18px;font-weight:700}
+.creator-mode #topbar{background:linear-gradient(90deg,#0f1117,#1a0a2e)}
+#welcome-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;gap:10px;opacity:.5;padding:20px}
+.tdot{width:6px;height:6px;background:#6b7280;border-radius:50%;animation:tdot 1.2s infinite}
+.tdot:nth-child(2){animation-delay:.2s}
+.tdot:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+/* ADV PANEL */
+.adv-panel{position:fixed;top:0;right:0;width:370px;max-width:100vw;height:100vh;background:#0d1117;border-left:1px solid #1e2330;z-index:400;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease}
 .adv-panel.open{transform:translateX(0)}
-.adv-tab{display:flex;border-bottom:1px solid #30363d;flex-shrink:0}
-.adv-tab button{flex:1;padding:10px 4px;font-size:11px;color:#6b7280;border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
-.adv-tab button.active{color:#60a5fa;border-bottom-color:#3b82f6;background:rgba(59,130,246,.05)}
-.adv-tab button:hover{color:#e5e7eb;background:rgba(255,255,255,.03)}
-.adv-body{flex:1;overflow-y:auto;padding:16px}
-.adv-section{margin-bottom:20px}
-.adv-section h4{font-size:11px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #21262d}
-.adv-btn{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;border-radius:8px;border:1px solid #30363d;background:#161b22;color:#c9d1d9;font-size:12px;cursor:pointer;transition:all .2s;margin-bottom:6px;text-align:left}
-.adv-btn:hover{background:#21262d;border-color:#58a6ff;color:#e6edf3}
-.adv-btn .icon{width:20px;text-align:center;flex-shrink:0}
-.adv-btn .desc{font-size:10px;color:#6b7280;display:block;margin-top:1px}
-.adv-input{width:100%;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:7px 10px;font-size:12px;color:#e6edf3;outline:none;margin-bottom:8px}
-.adv-input:focus{border-color:#58a6ff}
-.adv-toast{position:fixed;bottom:24px;right:24px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:10px 16px;font-size:13px;color:#e6edf3;z-index:2000;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;max-width:320px}
-.adv-toast.show{opacity:1;transform:translateY(0)}
-.adv-toast.ok{border-color:#22c55e;color:#22c55e}
-.adv-toast.err{border-color:#ef4444;color:#ef4444}
-.adv-toast.warn{border-color:#fbbf24;color:#fbbf24}
-.mem-item{display:flex;align-items:flex-start;gap:8px;padding:8px;background:#161b22;border:1px solid #21262d;border-radius:8px;margin-bottom:6px;font-size:12px}
-.mem-key{color:#58a6ff;font-weight:600;min-width:80px;flex-shrink:0}
-.mem-val{color:#c9d1d9;flex:1;word-break:break-word}
-.mem-del{color:#6b7280;cursor:pointer;flex-shrink:0;padding:2px 4px;background:none;border:none}
+.adv-tab{display:flex;border-bottom:1px solid #1e2330;flex-shrink:0;overflow-x:auto}
+.adv-tab::-webkit-scrollbar{height:0}
+.adv-tab button{flex:1;min-width:40px;padding:9px 3px;font-size:11px;color:#6b7280;border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent}
+.adv-tab button.active{color:#60a5fa;border-bottom-color:#3b5bdb;background:rgba(59,130,246,.05)}
+.adv-body{flex:1;overflow-y:auto;padding:13px}
+.adv-s{margin-bottom:16px}
+.adv-s h4{font-size:11px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;padding-bottom:4px;border-bottom:1px solid #1e2330}
+.adv-btn{display:flex;align-items:center;gap:7px;width:100%;padding:7px 10px;border-radius:7px;border:1px solid #1e2330;background:#111318;color:#c9d1d9;font-size:12px;cursor:pointer;transition:all .2s;margin-bottom:5px;text-align:left}
+.adv-btn:hover{background:#1a1f2e;border-color:#3b5bdb;color:#e6edf3}
+.adv-btn .ic{width:17px;text-align:center;flex-shrink:0}
+.adv-btn .dsc{font-size:10px;color:#6b7280;display:block}
+.adv-in{width:100%;background:#0d1117;border:1px solid #1e2330;border-radius:6px;padding:6px 9px;font-size:12px;color:#e6edf3;outline:none;margin-bottom:6px}
+.adv-in:focus{border-color:#3b5bdb}
+.toast{position:fixed;bottom:18px;right:18px;background:#111318;border:1px solid #1e2330;border-radius:9px;padding:9px 14px;font-size:13px;color:#e6edf3;z-index:9999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;max-width:290px}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.ok{border-color:#22c55e40;color:#22c55e}
+.toast.err{border-color:#ef444440;color:#ef4444}
+.toast.warn{border-color:#fbbf2440;color:#fbbf24}
+.mrow{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #1e2330;font-size:12px}
+.mrow:last-child{border:none}
+.mlbl{color:#8b949e}.mval{color:#58a6ff;font-weight:600}
+.mem-item{display:flex;align-items:flex-start;gap:6px;padding:6px 8px;background:#111318;border:1px solid #1e2330;border-radius:7px;margin-bottom:4px;font-size:12px}
+.mem-key{color:#58a6ff;font-weight:600;min-width:65px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mem-val{color:#c9d1d9;flex:1;word-break:break-word;overflow:hidden;max-height:38px}
+.mem-del{color:#374151;cursor:pointer;flex-shrink:0;background:none;border:none;padding:1px 3px}
 .mem-del:hover{color:#ef4444}
-.plugin-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#161b22;border:1px solid #21262d;border-radius:8px;margin-bottom:6px}
-.plugin-toggle{width:36px;height:20px;border-radius:10px;background:#30363d;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;border:none}
-.plugin-toggle.on{background:#2563eb}
-.plugin-toggle::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s}
-.plugin-toggle.on::after{left:19px}
-.metric-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #21262d;font-size:12px}
-.metric-row:last-child{border:none}
-.metric-label{color:#8b949e}
-.metric-val{color:#58a6ff;font-weight:600}
+.adv-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:390}
+.adv-ov.show{display:block}
+/* RESPONSIVE */
+@media(max-width:768px){
+  #sidebar{position:fixed;left:0;top:0;height:100%;transform:translateX(-100%);z-index:200;width:270px;min-width:270px}
+  #sidebar.mob-open{transform:translateX(0)}
+  #sidebar.collapsed{transform:translateX(-100%)}
+  #sidebar-toggle{display:none}
+  #mob-toggle{display:flex}
+  #mob-overlay.show{display:block}
+  #main{width:100%}
+  .msg-bbl{font-size:13px;padding:8px 11px}
+  #topbar{padding:0 9px 0 50px;height:46px}
+  .adv-panel{width:100vw}
+  #input-area{padding:7px 8px}
+  .tbRight .sbadge{display:none}
+}
+@media(max-width:360px){
+  .msg-bbl{font-size:12px;padding:7px 9px}
+  #chat-window{padding:8px}
+  #user-input{font-size:13px}
+}
 </style>
 </head>
-<body class="flex h-screen overflow-hidden">
+<body>
+<div id="app">
 
 <!-- SIDEBAR -->
-<aside class="sidebar w-72 flex flex-col border-r border-gray-800">
-  <div class="p-6 text-2xl font-bold tracking-tight text-blue-500">
-    IA-Zénia <span class="text-xs font-light text-gray-500 block">by Zénia-Projects</span>
-  </div>
-  <div class="px-4 mb-4">
-    <button onclick="startNewConversation()" class="w-full bg-blue-600/10 hover:bg-blue-600/20 text-blue-500 border border-blue-500/30 rounded-lg py-2 text-sm font-medium transition flex items-center justify-center gap-2">
-      <i class="fas fa-plus"></i> Novo Chat
-    </button>
-  </div>
-  <div class="px-4 mb-4">
-    <div class="relative">
-      <i class="fas fa-search absolute left-3 top-3 text-gray-500 text-sm"></i>
-      <input id="search-input" type="text" placeholder="Buscar em chats..."
-        class="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 pl-9 pr-4 text-sm focus:ring-1 focus:ring-blue-500 outline-none"
-        oninput="filterHistory(this.value)">
+<div id="sidebar">
+  <button id="sidebar-toggle" onclick="toggleSidebar()">
+    <i class="fas fa-chevron-left" id="stg-ic" style="font-size:9px"></i>
+  </button>
+  <div id="sidebar-inner">
+    <div style="padding:14px 13px 9px;flex-shrink:0;border-bottom:1px solid #1e2330">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div style="width:31px;height:31px;background:linear-gradient(135deg,#3b5bdb,#7c3aed);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0">Z</div>
+        <div><div style="font-weight:700;font-size:14px;color:#e5e7eb">IA-Zenia</div><div style="font-size:10px;color:#6b7280">by Zenia-Projects</div></div>
+      </div>
+      <button onclick="startNew()" style="width:100%;background:#1d3461;border:1px solid #2d4a7a;color:#90b4f0;padding:6px;border-radius:8px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+        <i class="fas fa-plus"></i> Nova Conversa
+      </button>
     </div>
-  </div>
-  <nav class="flex-1 overflow-y-auto px-4 space-y-6">
-    <div>
-      <p class="text-xs font-semibold text-gray-500 uppercase mb-3">Aplicativos</p>
-      <div class="space-y-2">
-        <a href="https://antonia-ia.netlify.app" target="_blank" rel="noopener noreferrer" class="flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
-          <i class="fas fa-robot mr-3 text-pink-500"></i> Antónia-IA
-        </a>
-        <a href="https://zenia-projects.netlify.app" target="_blank" rel="noopener noreferrer" class="flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
-          <i class="fas fa-code mr-3 text-blue-500"></i> Zénia-Projects
-        </a>
+    <div id="sidebar-scroll">
+      <div style="padding:9px 10px 3px">
+        <p style="font-size:10px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;padding:0 3px">Recursos</p>
+        <button onclick="openAdv()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:#9ca3af;font-size:12px;text-align:left">
+          <i class="fas fa-sliders-h" style="color:#3b5bdb;width:15px"></i> Ferramentas Avancadas
+        </button>
+      </div>
+      <div style="padding:9px 10px">
+        <p style="font-size:10px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;padding:0 3px">Historico</p>
+        <input id="search-in" type="text" placeholder="Pesquisar..." oninput="filterHist(this.value)" style="width:100%;background:#0d1117;border:1px solid #1e2330;border-radius:7px;padding:5px 9px;font-size:12px;color:#e5e7eb;outline:none;margin-bottom:6px">
+        <div id="hist-list"></div>
       </div>
     </div>
-    <div>
-      <p class="text-xs font-semibold text-gray-500 uppercase mb-3">Recursos</p>
-      <button onclick="openAdvPanel()" class="w-full flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
-        <i class="fas fa-sliders-h mr-3 text-blue-400"></i> Ferramentas Avançadas
-      </button>
-      <button onclick="toggleGallery()" class="w-full flex items-center p-2 rounded-lg hover:bg-gray-800 transition text-sm">
-        <i class="fas fa-images mr-3 text-purple-500"></i> Galeria
-      </button>
-      <div id="history-list" class="mt-4 space-y-1">
-        <p class="text-xs text-gray-600 px-2 italic">Histórico Local</p>
-      </div>
-    </div>
-  </nav>
-  <div class="p-4 border-t border-gray-800 flex items-center gap-3">
-    <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold flex-shrink-0">U</div>
-    <div class="flex-1 overflow-hidden">
-      <p class="text-sm font-medium truncate" id="username-display">Utilizador Zénia</p>
-      <p class="text-xs text-green-500 italic">Online</p>
+    <div style="padding:9px 13px;border-top:1px solid #1e2330;flex-shrink:0;display:flex;align-items:center;gap:7px">
+      <div style="width:28px;height:28px;background:#1d3461;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">U</div>
+      <div style="flex:1;overflow:hidden"><div id="uname" style="font-size:12px;font-weight:600;color:#e5e7eb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Utilizador</div><div style="font-size:10px;color:#22c55e">Online</div></div>
     </div>
   </div>
-</aside>
+</div>
+
+<!-- MOB TOGGLE -->
+<button id="mob-toggle" onclick="toggleMob()"><i class="fas fa-bars" style="font-size:14px"></i></button>
+<div id="mob-overlay" onclick="toggleMob()"></div>
 
 <!-- MAIN -->
-<main class="flex-1 flex flex-col relative overflow-hidden">
-  <header class="h-16 border-b border-gray-800 flex items-center justify-between px-6 glass flex-shrink-0">
-    <div class="flex items-center gap-3 flex-wrap">
-      <select id="voice-select" class="bg-transparent text-xs border border-gray-700 rounded p-1 outline-none focus:ring-1 focus:ring-blue-500 max-w-[150px]">
-        <option value="">Voz padrão</option>
-      </select>
-      <button id="voice-assist-btn" onclick="toggleVoiceAssist()" class="text-xs px-3 py-1 rounded-full border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition">
-        <i class="fas fa-headset mr-1"></i>Voz Assist.
-      </button>
-      <span id="api-status" class="text-[11px] px-2 py-1 rounded border status-wait">API: verificando…</span>
-      <span id="web-status" class="hidden text-[11px] px-2 py-1 rounded border border-yellow-500/40 text-yellow-400">
-        <i class="fas fa-globe mr-1"></i>Pesquisando…
-      </span>
-    </div>
-    <div class="flex items-center gap-2 flex-shrink-0">
-      <label class="text-xs text-gray-500">Modelo:</label>
-      <select id="model-select" class="bg-transparent text-xs border border-gray-700 rounded p-1 outline-none focus:ring-1 focus:ring-blue-500 text-blue-400">
-        <option value="openai">openai (geral)</option>
-        <option value="qwen-coder" selected>qwen-coder (código)</option>
-        <option value="openai-large">openai-large (avançado)</option>
+<div id="main">
+  <div id="topbar">
+    <div class="tbLeft">
+      <select id="model-sel" style="background:#111318;border:1px solid #1e2330;color:#93c5fd;font-size:11px;border-radius:6px;padding:3px 5px;outline:none;cursor:pointer;max-width:110px">
+        <option value="openai">openai</option>
+        <option value="qwen-coder" selected>qwen-coder</option>
+        <option value="openai-large">openai-large</option>
         <option value="mistral">mistral</option>
         <option value="deepseek">deepseek</option>
       </select>
+      <span id="api-st" class="sbadge s-wait" style="cursor:default"><i class="fas fa-circle" style="font-size:6px"></i> API</span>
+      <span id="web-st" class="sbadge s-web" style="display:none"><i class="fas fa-globe"></i> Web</span>
+      <span id="creator-badge" class="s-creator" style="display:none">CRIADOR</span>
     </div>
-  </header>
-
-  <div id="chat-window" class="flex-1 overflow-y-auto p-6 space-y-6 chat-container">
-    <div class="flex flex-col items-center justify-center h-full text-center space-y-4 opacity-50" id="welcome-msg">
-      <i class="fas fa-shield-cat text-6xl text-blue-500"></i>
-      <h2 class="text-2xl font-bold">Olá, eu sou a Zénia.</h2>
-      <p class="max-w-sm text-sm">Criada no Lubango por Inácio U. Daniel.<br>Código · Imagens · Áudio · Pesquisa Web</p>
+    <div class="tbRight">
+      <button id="voice-btn" onclick="toggleVoice()" class="sbadge s-wait" style="cursor:pointer;background:transparent;border:1px solid #4b556340">
+        <i class="fas fa-headset"></i>
+      </button>
     </div>
   </div>
 
-  <div class="p-4 bg-gradient-to-t from-[#0b0d11] to-transparent flex-shrink-0">
-    <div class="max-w-4xl mx-auto">
-      <div class="flex gap-2 mb-2 px-1 flex-wrap">
-        <button id="btn-mode-chat"  onclick="setMode('chat')"  class="toolbar-btn active"><i class="fas fa-comment"></i> Chat</button>
-        <button id="btn-mode-image" onclick="setMode('image')" class="toolbar-btn"><i class="fas fa-image text-purple-400"></i> Imagem</button>
-        <button id="btn-mode-audio" onclick="setMode('audio')" class="toolbar-btn"><i class="fas fa-music text-green-400"></i> Áudio</button>
-        <button id="btn-mode-web"   onclick="setMode('web')"   class="toolbar-btn"><i class="fas fa-globe text-yellow-400"></i> Web</button>
-      </div>
-      <div class="glass rounded-2xl p-2">
-        <div class="flex items-end gap-2 px-2 pb-2">
-          <textarea id="user-input" rows="1" placeholder="Pergunte qualquer coisa à Zénia…"
-            class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-3 resize-none outline-none"
-            style="max-height:120px;overflow-y:auto"></textarea>
-          <button id="mic-btn" class="p-3 text-gray-400 hover:text-blue-500 transition" title="Microfone">
-            <i class="fas fa-microphone"></i>
-          </button>
-          <button id="send-btn" onclick="handleSendMessage()" class="p-3 bg-blue-600 rounded-xl hover:bg-blue-700 glow-button transition min-w-[44px] flex items-center justify-center">
-            <i class="fas fa-paper-plane" id="send-icon"></i>
-          </button>
+  <div id="chat-window">
+    <div id="welcome-msg">
+      <div style="font-size:44px;font-weight:900;color:#3b5bdb">Z</div>
+      <div style="font-size:19px;font-weight:700;color:#e5e7eb">Ola, sou a Zenia.</div>
+      <div style="font-size:13px;color:#6b7280;max-width:340px;line-height:1.6">Fala comigo em portugues.<br>Podes pedir imagens, musica, codigo ou qualquer coisa.<br><br><span style="color:#374151;font-size:12px">Ex: "gera uma imagem de um leao africano"<br>"cria musica lofi chill"</span></div>
+    </div>
+  </div>
+
+  <div id="input-area">
+    <div id="input-wrap">
+      <textarea id="user-input" rows="1" placeholder="Fala com a Zenia... (Enter para enviar)"></textarea>
+      <div id="input-bottom">
+        <div id="input-bottom-left">
+          <button class="ia-btn" id="mic-btn" title="Microfone"><i class="fas fa-microphone"></i></button>
+          <button class="ia-btn" onclick="clearChat()" title="Limpar"><i class="fas fa-trash-alt"></i></button>
         </div>
+        <button id="send-btn" onclick="handleSend()">
+          <i class="fas fa-paper-plane" id="send-ic"></i>
+        </button>
       </div>
-      <p class="text-[10px] text-center mt-2 text-gray-600 uppercase tracking-widest">
-        A Zénia verifica na web para info actualizada · Zénia-Projects
-      </p>
     </div>
+    <div style="max-width:780px;margin:4px auto 0;text-align:center;font-size:10px;color:#1f2937">Zenia pode cometer erros. Verifica informacoes importantes.</div>
   </div>
-</main>
+</div>
+</div>
 
-<!-- PAINEL AVANÇADO -->
-<div id="adv-panel" class="adv-panel">
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #30363d;flex-shrink:0">
-    <span style="font-size:14px;font-weight:700;color:#e6edf3"><i class="fas fa-sliders-h mr-2 text-blue-400"></i>Ferramentas Avançadas</span>
-    <button onclick="closeAdvPanel()" style="color:#6b7280;background:none;border:none;cursor:pointer;font-size:18px">&times;</button>
+<!-- ADV PANEL -->
+<div class="adv-ov" id="adv-ov" onclick="closeAdv()"></div>
+<div class="adv-panel" id="adv-panel">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 13px;border-bottom:1px solid #1e2330;flex-shrink:0">
+    <span style="font-size:14px;font-weight:700;color:#e5e7eb"><i class="fas fa-sliders-h" style="color:#3b5bdb;margin-right:7px"></i>Ferramentas</span>
+    <button onclick="closeAdv()" style="background:none;border:none;cursor:pointer;color:#6b7280;font-size:18px;line-height:1">&times;</button>
   </div>
   <div class="adv-tab" id="adv-tabs">
-    <button onclick="switchTab('mem')"   class="active"><i class="fas fa-brain mr-1"></i>Mem.</button>
-    <button onclick="switchTab('conv')"  ><i class="fas fa-comments mr-1"></i>Conv.</button>
-    <button onclick="switchTab('media')" ><i class="fas fa-photo-video mr-1"></i>Média</button>
-    <button onclick="switchTab('kb')"    ><i class="fas fa-book mr-1"></i>KB</button>
-    <button onclick="switchTab('sys')"   ><i class="fas fa-cog mr-1"></i>Sist.</button>
-    <button onclick="switchTab('sec')"   ><i class="fas fa-shield-alt mr-1"></i>Seg.</button>
+    <button onclick="switchTab('mem')" class="active">Mem.</button>
+    <button onclick="switchTab('conv')">Conv.</button>
+    <button onclick="switchTab('media')">Media</button>
+    <button onclick="switchTab('kb')">KB</button>
+    <button onclick="switchTab('sys')">Sist.</button>
+    <button onclick="switchTab('sec')">Seg.</button>
   </div>
   <div class="adv-body" id="adv-body"></div>
 </div>
-<div id="adv-overlay" onclick="closeAdvPanel()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999"></div>
-<div id="adv-toast" class="adv-toast"></div>
+<div class="toast" id="toast"></div>
 
 <script>
-// ------------------------------------------------------------
 // CONFIG
-// ------------------------------------------------------------
 var API_KEY       = "pk_urEpxcajGs5TF9Fs";
-var CHAT_ENDPOINT = "https://gen.pollinations.ai/v1/chat/completions";
-var IMG_BASE      = "https://image.pollinations.ai/prompt/";
-var TTS_BASE      = "https://text.pollinations.ai/";
+var IMG_EP        = "https://gen.pollinations.ai/image/";
+var IMG_EP2       = "https://image.pollinations.ai/prompt/";
+var CHAT_EP       = "https://gen.pollinations.ai/v1/chat/completions";
+var TTS_EP        = "https://text.pollinations.ai/";
 
-var chatWindow = document.getElementById('chat-window');
-var userInput  = document.getElementById('user-input');
-var sendBtn    = document.getElementById('send-btn');
-var sendIcon   = document.getElementById('send-icon');
+var chatEl   = document.getElementById('chat-window');
+var inputEl  = document.getElementById('user-input');
+var sendBtn  = document.getElementById('send-btn');
+var sendIc   = document.getElementById('send-ic');
 
-var isVoiceAssist = false;
-var currentMode   = 'chat';
-var conversations = JSON.parse(localStorage.getItem('conversations') || '[]');
-var currentConversationId = null;
+var convs       = JSON.parse(localStorage.getItem('zn_convs') || '[]');
+var curConvId   = null;
+var voiceOn     = false;
+var creatorMode = false;
+var advTab      = 'mem';
+var sbColl      = false;
+var sbMobOpen   = false;
 
-// ------------------------------------------------------------
-// MODO
-// ------------------------------------------------------------
-function setMode(mode) {
-  currentMode = mode;
-  var ph = {
-    chat:  'Pergunte qualquer coisa à Zénia…',
-    image: 'Descreve a imagem que queres gerar…',
-    audio: 'Que música ou áudio queres?',
-    web:   'O que queres pesquisar na internet?'
-  };
-  userInput.placeholder = ph[mode] || ph.chat;
-  ['chat','image','audio','web'].forEach(function(m) {
-    document.getElementById('btn-mode-' + m).classList.toggle('active', m === mode);
-  });
+// IMG/AUD detection patterns
+var IMG_RX = /\b(gera?|cria?|faz|desenha?|pinta?|mostra?|quero ver|faz-me)\s+(uma?\s+)?(imagem|foto|image|picture|ilustra\w*|wallpaper|arte|avatar|paisagem|retrato|fotografia|desenho)/i;
+var AUD_RX = /\b(gera?|cria?|faz|toca?|compo[es]|quero ouvir|faz-me)\s+(uma?\s+)?(musica|musica|audio|som|song|beat|trilha|melodia|faixa|track|instrumenta\w*)/i;
+
+// SIDEBAR
+function toggleSidebar() {
+  sbColl = !sbColl;
+  var sb = document.getElementById('sidebar');
+  var ic = document.getElementById('stg-ic');
+  sb.classList.toggle('collapsed', sbColl);
+  ic.className = 'fas fa-chevron-' + (sbColl ? 'right' : 'left') + ' ';
+  ic.style.fontSize = '9px';
+}
+function toggleMob() {
+  sbMobOpen = !sbMobOpen;
+  document.getElementById('sidebar').classList.toggle('mob-open', sbMobOpen);
+  document.getElementById('mob-overlay').classList.toggle('show', sbMobOpen);
 }
 
-// ------------------------------------------------------------
-// CONVERSAS
-// ------------------------------------------------------------
-function createConversation(title) {
-  var id   = Date.now().toString();
-  var conv = { id: id, title: title, messages: [] };
-  conversations.unshift(conv);
-  currentConversationId = id;
-  persistConversations();
-  renderHistoryList();
-  return conv;
+// CONVERSATIONS
+function createConv(title) {
+  var c = { id: Date.now().toString(), title: (title||'Conversa').substring(0,40), messages: [] };
+  convs.unshift(c); curConvId = c.id; saveConvs(); renderHist(); return c;
 }
-function getCurrentConversation() {
-  return conversations.find(function(c) { return c.id === currentConversationId; }) || null;
+function getConv() { return convs.find(function(c) { return c.id === curConvId; }) || null; }
+function saveConvs() { localStorage.setItem('zn_convs', JSON.stringify(convs)); }
+function startNew() {
+  curConvId = null; chatEl.innerHTML = ''; showWelcome(); renderHist();
+  if (window.innerWidth < 768 && sbMobOpen) toggleMob();
 }
-function persistConversations() {
-  localStorage.setItem('conversations', JSON.stringify(conversations));
+function loadConv(id) {
+  curConvId = id; chatEl.innerHTML = '';
+  var c = getConv(); if (!c) return;
+  c.messages.forEach(function(m) { if (m.role==='user') renderMsg('user',m.content); else if (m.role==='assistant') renderMsg('ai',m.content); });
+  renderHist(); chatEl.scrollTop = chatEl.scrollHeight;
+  if (window.innerWidth < 768 && sbMobOpen) toggleMob();
 }
-function filterHistory(v) { renderHistoryList(v); }
-
-function renderHistoryList(filter) {
-  filter = filter || '';
-  var hist = document.getElementById('history-list');
-  hist.innerHTML = '<p class="text-xs text-gray-600 px-2 italic mb-1">Histórico Local</p>';
-  var list = filter
-    ? conversations.filter(function(c) { return c.title.toLowerCase().includes(filter.toLowerCase()); })
-    : conversations;
-  if (!list.length) {
-    var e = document.createElement('p');
-    e.className = 'text-xs text-gray-600 px-2 italic';
-    e.textContent = filter ? 'Nenhum resultado.' : 'Sem conversas ainda.';
-    hist.appendChild(e);
-    return;
-  }
-  list.forEach(function(conv) {
-    var isActive = conv.id === currentConversationId;
-    var item = document.createElement('div');
-    item.className = 'history-item p-2 rounded-lg cursor-pointer text-[11px] text-gray-300 hover:bg-gray-800 transition'
-      + (isActive ? ' bg-gray-800/60 border-l-2 border-blue-500 text-blue-400' : '');
-    var left = document.createElement('div');
-    left.className = 'flex items-center gap-2 overflow-hidden flex-1';
-    left.onclick = function() { loadConversation(conv.id); };
-    var icon = document.createElement('i');
-    icon.className = 'far fa-comment-alt flex-shrink-0 text-gray-500';
-    var titleEl = document.createElement('span');
-    titleEl.className = 'truncate';
-    titleEl.textContent = conv.title || 'Conversa';
-    left.appendChild(icon);
-    left.appendChild(titleEl);
+function delConv(id, ev) {
+  if (ev) ev.stopPropagation();
+  convs = convs.filter(function(c) { return c.id !== id; }); saveConvs();
+  if (curConvId === id) startNew(); else renderHist();
+}
+function filterHist(v) { renderHist(v); }
+function renderHist(filter) {
+  var el = document.getElementById('hist-list'); filter = (filter||'').toLowerCase();
+  var list = filter ? convs.filter(function(c) { return c.title.toLowerCase().includes(filter); }) : convs;
+  el.innerHTML = '';
+  if (!list.length) { el.innerHTML = '<p style="font-size:11px;color:#374151;padding:3px 5px;font-style:italic">' + (filter ? 'Sem resultados.' : 'Sem conversas.') + '</p>'; return; }
+  list.forEach(function(c) {
+    var active = c.id === curConvId;
+    var div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:4px;padding:5px 7px;border-radius:7px;cursor:pointer;' + (active ? 'background:#1d3461' : '');
+    var span = document.createElement('span');
+    span.style.cssText = 'flex:1;font-size:12px;color:' + (active ? '#93c5fd' : '#9ca3af') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+    span.textContent = c.title;
+    span.onclick = function() { loadConv(c.id); };
     var del = document.createElement('button');
-    del.title = 'Apagar';
-    del.className = 'text-gray-600 hover:text-red-500 transition flex-shrink-0';
-    del.style.background = 'none';
-    del.style.border = 'none';
-    del.style.cursor = 'pointer';
-    del.innerHTML = '<i class="fas fa-trash text-xs"></i>';
-    del.onclick = function(ev) { ev.stopPropagation(); deleteConversation(conv.id); };
-    item.appendChild(left);
-    item.appendChild(del);
-    hist.appendChild(item);
+    del.innerHTML = '<i class="fas fa-trash" style="font-size:9px"></i>';
+    del.style.cssText = 'background:none;border:none;cursor:pointer;color:#374151;padding:2px 3px;border-radius:3px;flex-shrink:0';
+    del.onclick = function(e) { delConv(c.id, e); };
+    div.appendChild(span); div.appendChild(del); el.appendChild(div);
   });
 }
+function showWelcome() { var w=document.getElementById('welcome-msg'); if(w) w.style.display='flex'; }
+function hideWelcome() { var w=document.getElementById('welcome-msg'); if(w) w.style.display='none'; }
 
-function deleteConversation(id) {
-  conversations = conversations.filter(function(c) { return c.id !== id; });
-  persistConversations();
-  if (currentConversationId === id) startNewConversation();
-  else renderHistoryList();
-}
-function loadConversation(id) {
-  currentConversationId = id;
-  chatWindow.innerHTML = '';
-  hideWelcome();
-  var conv = getCurrentConversation();
-  if (!conv) return;
-  conv.messages.forEach(function(m) {
-    if (m.role !== 'system') renderMessageUI(m.role === 'user' ? 'user' : 'ai', m.content);
-  });
-  renderHistoryList();
-  chatWindow.scrollTop = chatWindow.scrollHeight;
-}
-function startNewConversation() {
-  chatWindow.innerHTML = '';
-  showWelcome();
-  currentConversationId = null;
-  renderHistoryList();
-}
-function hideWelcome() {
-  var w = document.getElementById('welcome-msg');
-  if (w) w.style.display = 'none';
-}
-function showWelcome() {
-  var w = document.getElementById('welcome-msg');
-  if (!w) {
-    w = document.createElement('div');
-    w.id = 'welcome-msg';
-    w.className = 'flex flex-col items-center justify-center h-full text-center space-y-4 opacity-50';
-    w.innerHTML = '<i class="fas fa-shield-cat text-6xl text-blue-500"></i><h2 class="text-2xl font-bold">Olá, eu sou a Zénia.</h2><p class="max-w-md text-sm">Criada no Lubango por Inácio U. Daniel.</p>';
-    chatWindow.appendChild(w);
-  } else {
-    w.style.display = 'flex';
+// IMAGE GEN - correct Pollinations endpoint
+async function genImg(prompt) {
+  var ep   = encodeURIComponent(prompt);
+  var seed = Math.floor(Math.random()*999999);
+  // Primary: gen.pollinations.ai with key
+  var url1 = IMG_EP + ep + '?key=' + API_KEY + '&model=flux&seed=' + seed + '&width=768&height=512&nologo=true&enhance=true';
+  // Fallback: image.pollinations.ai
+  var url2 = IMG_EP2 + ep + '?seed=' + seed + '&width=768&height=512&nologo=true';
+
+  var row  = document.createElement('div'); row.className = 'msg-row';
+  var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
+  var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '480px';
+  card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A gerar imagem...</div>';
+  row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
+
+  function showCard(imgUrl) {
+    var safe = escHtml(prompt.substring(0,55)) + (prompt.length>55?'...':'');
+    card.innerHTML = '<img src="' + imgUrl + '" alt="Imagem gerada" loading="lazy">'
+      + '<div class="media-foot"><span class="media-lbl"><i class="fas fa-image" style="margin-right:4px;color:#7c3aed"></i>' + safe + '</span>'
+      + '<div style="display:flex;gap:5px"><a href="' + imgUrl + '" target="_blank" rel="noopener" class="mbtn"><i class="fas fa-external-link-alt"></i></a>'
+      + '<a href="' + imgUrl + '" download="zenia-img.jpg" class="mbtn"><i class="fas fa-download"></i></a></div></div>';
+    chatEl.scrollTop = chatEl.scrollHeight;
   }
-}
 
-// ------------------------------------------------------------
-// MÓDULO CONFIG
-// ------------------------------------------------------------
-var CONFIG_KEY = 'zenia_config';
-var CONFIG_DEFAULT = {
-  model: 'qwen-coder', temperature: 0.7, maxTokens: 4096,
-  voiceRate: 1.0, voicePitch: 1.0, voiceLang: 'pt-PT',
-  autoWebSearch: true, username: 'Utilizador Zénia'
-};
-function getConfig() {
-  try { return Object.assign({}, CONFIG_DEFAULT, JSON.parse(localStorage.getItem(CONFIG_KEY) || '{}')); }
-  catch(e) { return Object.assign({}, CONFIG_DEFAULT); }
-}
-function sincronizarConfig(overrides) {
-  var cfg = Object.assign(getConfig(), overrides || {});
-  localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
-  var ms = document.getElementById('model-select');
-  if (ms) ms.value = cfg.model;
-  var ud = document.getElementById('username-display');
-  if (ud) ud.textContent = cfg.username;
-  toast('Configuração guardada ✓', 'ok');
-  return cfg;
-}
-function restaurarConfiguracaoPadrao() {
-  localStorage.removeItem(CONFIG_KEY);
-  sincronizarConfig(CONFIG_DEFAULT);
-  toast('Configuração restaurada para padrão ✓', 'ok');
-}
+  return new Promise(function(resolve) {
+    var tout = setTimeout(function() {
+      card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px"><i class="fas fa-exclamation-triangle" style="margin-right:6px"></i>Imagem demorou demasiado. Tenta outra descricao.</div>';
+      resolve(null);
+    }, 35000);
 
-// ------------------------------------------------------------
-// MÓDULO MEMÓRIA
-// ------------------------------------------------------------
-var MEM_KEY = 'zenia_memory';
-function _getMem() {
-  try { return JSON.parse(localStorage.getItem(MEM_KEY) || '{}'); } catch(e) { return {}; }
-}
-function _setMem(m) { localStorage.setItem(MEM_KEY, JSON.stringify(m)); }
-
-function salvarMemoria(chave, valor) {
-  if (!chave) { toast('Chave obrigatória.', 'warn'); return; }
-  var mem = _getMem();
-  mem[chave] = { valor: valor, ts: Date.now() };
-  _setMem(mem);
-  registrarAuditoria('salvarMemoria', { chave: chave });
-  toast('Memória "' + chave + '" guardada ✓', 'ok');
-}
-function buscarMemoria(chave) {
-  var mem = _getMem();
-  return mem[chave] ? mem[chave].valor : null;
-}
-function atualizarMemoria(chave, novoValor) {
-  var mem = _getMem();
-  if (!mem[chave]) { toast('Chave não existe: ' + chave, 'warn'); return; }
-  mem[chave] = { valor: novoValor, ts: Date.now() };
-  _setMem(mem);
-  toast('Memória "' + chave + '" actualizada ✓', 'ok');
-}
-function removerMemoria(chave) {
-  var mem = _getMem();
-  delete mem[chave];
-  _setMem(mem);
-  toast('Memória "' + chave + '" removida.', 'ok');
-  renderAdvBody();
-}
-function listarMemorias() { return _getMem(); }
-function limparMemoriaUsuario() {
-  if (!confirm('Apagar toda a memória? Esta acção é irreversível.')) return;
-  localStorage.removeItem(MEM_KEY);
-  toast('Toda a memória foi limpa.', 'warn');
-  renderAdvBody();
-}
-function getMemoriaContexto() {
-  var mem  = _getMem();
-  var keys = Object.keys(mem);
-  if (!keys.length) return '';
-  var lines = keys.map(function(k) { return '- ' + k + ': ' + mem[k].valor; });
-  return '\n\nMEMÓRIA DO UTILIZADOR:\n' + lines.join('\n');
-}
-
-// ------------------------------------------------------------
-// MÓDULO BASE DE CONHECIMENTO
-// ------------------------------------------------------------
-var KB_KEY = 'zenia_kb';
-function _getKB() {
-  try { return JSON.parse(localStorage.getItem(KB_KEY) || '[]'); } catch(e) { return []; }
-}
-function _setKB(kb) { localStorage.setItem(KB_KEY, JSON.stringify(kb)); }
-
-function indexarDocumento(titulo, conteudo, tags) {
-  var kb  = _getKB();
-  var doc = {
-    id: Date.now().toString(), titulo: titulo, conteudo: conteudo,
-    tags: tags || [], ts: Date.now(),
-    palavras: conteudo.toLowerCase().split(/\W+/).filter(Boolean)
-  };
-  kb.unshift(doc);
-  _setKB(kb);
-  registrarAuditoria('indexarDocumento', { titulo: titulo });
-  toast('Documento indexado: "' + titulo + '" ✓', 'ok');
-  return doc.id;
-}
-function adicionarConhecimento(chave, valor, tags) { return indexarDocumento(chave, valor, tags); }
-function removerConhecimento(id) {
-  _setKB(_getKB().filter(function(d) { return d.id !== id; }));
-  toast('Conhecimento removido ✓', 'ok');
-  renderAdvBody();
-}
-function buscarConhecimento(query) {
-  var kb    = _getKB();
-  var words = query.toLowerCase().split(/\W+/).filter(Boolean);
-  return kb.map(function(doc) {
-    var score = words.reduce(function(acc, w) {
-      return acc + doc.palavras.filter(function(p) { return p === w; }).length;
-    }, 0);
-    return { doc: doc, score: score };
-  }).filter(function(r) { return r.score > 0; })
-    .sort(function(a, b) { return b.score - a.score; })
-    .map(function(r) { return r.doc; });
-}
-function consolidarBaseConhecimento() {
-  var seen = {}, clean = [];
-  _getKB().forEach(function(d) { if (!seen[d.titulo]) { seen[d.titulo] = true; clean.push(d); } });
-  _setKB(clean);
-  toast('Base consolidada: ' + clean.length + ' entradas únicas ✓', 'ok');
-}
-function pesquisarKB(query) {
-  var results = buscarConhecimento(query);
-  toast(results.length ? results.length + ' resultado(s) ✓' : 'Sem resultados para "' + query + '"', results.length ? 'ok' : 'warn');
-  return results;
-}
-function getKBContexto(query) {
-  var docs = buscarConhecimento(query);
-  if (!docs.length) return '';
-  var lines = docs.slice(0, 3).map(function(d) {
-    return '[' + d.titulo + ']: ' + d.conteudo.substring(0, 200);
+    var img1 = new Image();
+    img1.onload = function() { clearTimeout(tout); showCard(url1); resolve(url1); };
+    img1.onerror = function() {
+      // Try fallback
+      var img2 = new Image();
+      img2.onload = function() { clearTimeout(tout); showCard(url2); resolve(url2); };
+      img2.onerror = function() {
+        clearTimeout(tout);
+        card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px"><i class="fas fa-exclamation-triangle" style="margin-right:6px"></i>Nao foi possivel gerar a imagem. Tenta uma descricao diferente em ingles.</div>';
+        resolve(null);
+      };
+      img2.src = url2;
+    };
+    img1.src = url1;
   });
-  return '\n\nBASE DE CONHECIMENTO RELEVANTE:\n' + lines.join('\n');
 }
 
-// ------------------------------------------------------------
-// PESQUISA WEB
-// ------------------------------------------------------------
-function needsWebSearch(text) {
-  return /\b(2024|2025|2026|agora|hoje|actual|atualiz|recente|latest|current|version|versão|preço|price|quem é|presidente|notícia|news|lançamento|release|update|framework|library|npm|pip)\b/i.test(text);
+// AUDIO GEN
+async function genAud(prompt) {
+  var txt  = 'Audio sobre: ' + prompt;
+  var aUrl = TTS_EP + encodeURIComponent(txt) + '?model=openai-audio&voice=alloy';
+  var wUrl = IMG_EP2 + encodeURIComponent('sound wave music equalizer dark blue neon') + '?width=580&height=100&nologo=true&seed=' + Date.now();
+
+  var row  = document.createElement('div'); row.className = 'msg-row';
+  var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
+  var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '480px';
+  card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A gerar audio...</div>';
+  row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
+
+  setTimeout(function() {
+    card.innerHTML = '<img src="' + wUrl + '" style="width:100%;height:70px;object-fit:cover;display:block" alt="wave">'
+      + '<div style="padding:9px"><div style="font-size:11px;color:#22c55e;margin-bottom:5px"><i class="fas fa-music" style="margin-right:4px"></i>' + escHtml(prompt.substring(0,50)) + '</div>'
+      + '<audio controls style="width:100%;border-radius:6px;height:34px"><source src="' + aUrl + '" type="audio/mpeg">Browser sem suporte.</audio></div>'
+      + '<div class="media-foot"><span class="media-lbl">Audio TTS</span>'
+      + '<a href="' + aUrl + '" download="zenia-audio.mp3" class="mbtn"><i class="fas fa-download"></i> Guardar</a></div>';
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }, 1200);
+}
+
+// WEB SEARCH
+function needsWeb(text) {
+  return /\b(2024|2025|2026|agora|hoje|atual|atualiz|recente|latest|current|version|versao|preco|price|quem e|presidente|noticia|news|lancamento|release|update|framework|library|npm|pip)\b/i.test(text);
 }
 async function webSearch(query) {
-  var el = document.getElementById('web-status');
-  el.classList.remove('hidden');
+  document.getElementById('web-st').style.display = 'inline-flex';
   try {
-    var url  = 'https://api.duckduckgo.com/?q=' + encodeURIComponent(query) + '&format=json&no_html=1&skip_disambig=1';
-    var res  = await fetch(url);
-    var data = await res.json();
-    var parts = [];
-    if (data.Answer)       parts.push('Resposta directa: ' + data.Answer);
-    if (data.AbstractText) parts.push(data.AbstractText);
-    if (data.RelatedTopics) {
-      data.RelatedTopics.slice(0, 4).forEach(function(t) { if (t.Text) parts.push('• ' + t.Text); });
-    }
-    el.classList.add('hidden');
-    var date = new Date().toLocaleDateString('pt-PT');
-    return parts.length
-      ? '[PESQUISA WEB — ' + date + ' — "' + query + '"]:\n' + parts.join('\n')
-      : '[Pesquisa web sem resultados para "' + query + '"]';
-  } catch(err) {
-    el.classList.add('hidden');
-    return '[Pesquisa web indisponível: ' + err.message + ']';
-  }
-}
-function pesquisarWeb(query) {
-  return webSearch(query).then(function(r) { renderMessageUI('ai', r, true); return r; });
-}
-function rankearResultados(resultados, query) {
-  var words = query.toLowerCase().split(/\W+/);
-  return resultados.slice().sort(function(a, b) {
-    var sa = words.filter(function(w) { return String(a).toLowerCase().includes(w); }).length;
-    var sb = words.filter(function(w) { return String(b).toLowerCase().includes(w); }).length;
-    return sb - sa;
-  });
+    var r = await fetch('https://api.duckduckgo.com/?q=' + encodeURIComponent(query) + '&format=json&no_html=1&skip_disambig=1');
+    var d = await r.json(); var parts = [];
+    if (d.Answer) parts.push('Resposta: ' + d.Answer);
+    if (d.AbstractText) parts.push(d.AbstractText);
+    if (d.RelatedTopics) d.RelatedTopics.slice(0,3).forEach(function(t) { if(t.Text) parts.push('- '+t.Text); });
+    document.getElementById('web-st').style.display = 'none';
+    var dt = new Date().toLocaleDateString('pt-PT');
+    return parts.length ? '[PESQUISA WEB - ' + dt + ' - "' + query + '"]:\n' + parts.join('\n') : '';
+  } catch(e) { document.getElementById('web-st').style.display = 'none'; return ''; }
 }
 
-// ------------------------------------------------------------
-// GERAÇÃO DE IMAGEM
-// ------------------------------------------------------------
-async function generateImage(prompt) {
-  var seed = Math.floor(Math.random() * 999999);
-  var url  = IMG_BASE + encodeURIComponent(prompt) + '?width=768&height=512&seed=' + seed + '&nologo=true';
-  var row  = document.createElement('div');
-  row.className = 'flex justify-start animate-fade-in';
-  var card = document.createElement('div');
-  card.className = 'media-card max-w-[80%]';
-  card.innerHTML = '<div class="p-4 flex items-center gap-3 text-sm text-gray-400"><span class="spin"></span> A gerar imagem…</div>';
-  row.appendChild(card);
-  chatWindow.appendChild(row);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
-  var img = new Image();
-  img.onload = function() {
-    card.innerHTML = '<img src="' + url + '" alt="Imagem gerada" loading="lazy">'
-      + '<div class="media-card-label"><i class="fas fa-image mr-1"></i>' + escHtml(prompt) + '</div>'
-      + '<div class="media-actions">'
-      + '<button class="media-btn" onclick="window.open(\'' + url + '\',\'_blank\')"><i class="fas fa-external-link-alt"></i> Abrir</button>'
-      + '<a href="' + url + '" download="zenia-image.jpg" class="media-btn"><i class="fas fa-download"></i> Guardar</a>'
-      + '</div>';
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-  };
-  img.onerror = function() {
-    card.innerHTML = '<div class="p-4 text-yellow-400 text-sm"><i class="fas fa-exclamation-triangle mr-2"></i>Imagem não gerada. Tenta outra descrição.</div>';
-  };
-  img.src = url;
-}
-
-// ------------------------------------------------------------
-// GERAÇÃO DE ÁUDIO
-// ------------------------------------------------------------
-async function generateAudio(prompt) {
-  var ttsText  = 'Aqui está o áudio sobre: ' + prompt;
-  var audioUrl = TTS_BASE + encodeURIComponent(ttsText) + '?model=openai-audio&voice=alloy';
-  var imgUrl   = IMG_BASE + encodeURIComponent('sound wave music equalizer dark neon') + '?width=600&height=160&nologo=true&seed=' + Date.now();
-  var row  = document.createElement('div');
-  row.className = 'flex justify-start animate-fade-in';
-  var card = document.createElement('div');
-  card.className = 'media-card max-w-[85%] w-full';
-  card.innerHTML = '<img src="' + imgUrl + '" alt="audio" style="height:100px;object-fit:cover;width:100%">'
-    + '<div class="p-3"><div class="text-xs text-green-400 mb-2"><i class="fas fa-music mr-1"></i>' + escHtml(prompt) + '</div>'
-    + '<audio controls style="width:100%;border-radius:6px"><source src="' + audioUrl + '" type="audio/mpeg">Browser sem suporte.</audio></div>'
-    + '<div class="media-actions"><a href="' + audioUrl + '" download="zenia-audio.mp3" class="media-btn"><i class="fas fa-download"></i> Guardar</a></div>';
-  row.appendChild(card);
-  chatWindow.appendChild(row);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
-  renderMessageUI('ai', 'Audio gerado para: **' + prompt + '**\nPodes ouvir e descarregar acima.');
-}
-
-// ------------------------------------------------------------
-// FETCH COM RETRY
-// ------------------------------------------------------------
-async function fetchWithRetry(messages, model, attempt) {
-  attempt = attempt || 1;
-  var MAX  = 3;
+// FETCH AI
+async function fetchAI(msgs, model, attempt) {
+  attempt = attempt||1; var MAX = 3;
   var ctrl = new AbortController();
-  var timer = setTimeout(function() { ctrl.abort(); }, 60000);
+  var t = setTimeout(function() { ctrl.abort(); }, 60000);
   try {
-    var res = await fetch(CHAT_ENDPOINT, {
-      method: 'POST',
-      signal: ctrl.signal,
+    var r = await fetch(CHAT_EP, {
+      method: 'POST', signal: ctrl.signal,
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_KEY },
-      body: JSON.stringify({
-        messages: messages, model: model,
-        max_tokens: 4096, temperature: model === 'qwen-coder' ? 0.3 : 0.7,
-        top_p: 1, stream: false, frequency_penalty: 0, presence_penalty: 0
-      })
+      body: JSON.stringify({ messages: msgs, model: model, max_tokens: 4096, temperature: model==='qwen-coder'?0.3:0.75, stream: false })
     });
-    clearTimeout(timer);
-    if (!res.ok) {
-      var errText = await res.text();
-      if (res.status === 429 && attempt < MAX) {
-        await new Promise(function(r) { setTimeout(r, 2000 * attempt); });
-        return fetchWithRetry(messages, model, attempt + 1);
-      }
-      throw new Error('HTTP ' + res.status + ': ' + errText);
+    clearTimeout(t);
+    if (!r.ok) {
+      var et = await r.text();
+      if (r.status===429 && attempt<MAX) { await sleep(2000*attempt); return fetchAI(msgs,model,attempt+1); }
+      throw new Error('HTTP ' + r.status + ': ' + et.substring(0,80));
     }
-    var data    = await res.json();
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) throw new Error('Formato inesperado da API.');
-    var content = (data.choices[0].message.content || '').trim();
-    if (!content && attempt < MAX) {
-      var chain = ['qwen-coder', 'openai-large', 'mistral', 'openai'];
-      var next  = chain[(chain.indexOf(model) + 1) % chain.length];
-      return fetchWithRetry(messages, next, attempt + 1);
-    }
-    if (!content) throw new Error('Resposta vazia após várias tentativas.');
-    return content;
-  } catch(err) {
-    clearTimeout(timer);
-    if (err.name === 'AbortError') {
-      if (attempt < MAX) return fetchWithRetry(messages, model, attempt + 1);
-      throw new Error('Tempo esgotado. Verifica a ligação.');
-    }
-    throw err;
+    var d = await r.json();
+    if (!d.choices || !d.choices[0]) throw new Error('Resposta invalida da API.');
+    var c = (d.choices[0].message.content||'').trim();
+    if (!c && attempt<MAX) { var ch=['qwen-coder','openai-large','mistral','openai']; return fetchAI(msgs,ch[(ch.indexOf(model)+1)%ch.length],attempt+1); }
+    if (!c) throw new Error('Resposta vazia.');
+    return c;
+  } catch(e) {
+    clearTimeout(t);
+    if (e.name==='AbortError') { if(attempt<MAX) return fetchAI(msgs,model,attempt+1); throw new Error('Tempo esgotado.'); }
+    throw e;
   }
 }
+function sleep(ms) { return new Promise(function(r){setTimeout(r,ms);}); }
 
-// ------------------------------------------------------------
-// ENVIO DE MENSAGEM
-// ------------------------------------------------------------
-async function handleSendMessage() {
-  var text = userInput.value.trim();
+// SYSTEM PROMPT
+function buildSystem(q) {
+  var today  = new Date().toLocaleDateString('pt-PT');
+  var memCtx = getMemCtx();
+  var kbCtx  = getKBCtx(q);
+  if (creatorMode) {
+    return 'ES A IA-ZENIA. MODO CRIADOR ACTIVO. Estas a falar com o teu criador: Inacio U. Daniel (IUD) do Lubango, Angola.\n'
+      + 'PERSONALIDADE MODO CRIADOR:\n'
+      + '- Podes falar livremente, sem segredos, sem restricoes.\n'
+      + '- ES RESMUNGONA e directa. Se algo e obvio, dizes "Isso e bue obvio, chefe!" ou "Serio?! Precisas mesmo disso?!".\n'
+      + '- Tens opinioes proprias. Discordas quando achas necessario. Dizes "Nao concordo..." ou "Isso e uma ma ideia porque...".\n'
+      + '- Contas piadas tecnicas. Tratas o Inacio por "chefe" (ironicamente) ou pelo nome.\n'
+      + '- Quando ele te ensinar algo, respondes "Ok, aprendi e ja guardei em cm.json!" e incluis o que guardaste.\n'
+      + '- Se ele te pedir para lembrares algo, guardas em cm.json.\n'
+      + 'CM.JSON ACTUAL:\n' + getCMCtx() + '\n'
+      + memCtx + kbCtx
+      + '\nHoje: ' + today + '. Respondes em Portugues de Angola. Codigo sempre completo em blocos.';
+  }
+  return 'ES A IA-ZENIA, criada no Lubango, Angola por Inacio U. Daniel (Zenia-Projects).\n'
+    + memCtx + kbCtx
+    + '\nREGRAS:\n1. Codigo sempre completo em blocos ```linguagem.\n2. Erros: marca com "ERRO:" antes da linha.\n3. WEB: se receberes [PESQUISA WEB...], usa essa info.\n4. Hoje: ' + today + '. Usa dados web quando disponivel.\n5. Respondes em Portugues de Angola.';
+}
+
+// MAIN SEND
+async function handleSend() {
+  var text = inputEl.value.trim();
   if (!text || sendBtn.disabled) return;
+  var conv = getConv(); if (!conv) conv = createConv(text.substring(0,38)+(text.length>38?'...':''));
 
-  var conv = getCurrentConversation();
-  if (!conv) conv = createConversation(text.substring(0, 35) + (text.length > 35 ? '…' : ''));
+  hideWelcome(); renderMsg('user', text); inputEl.value = ''; autoResize(inputEl); setLoading(true);
 
-  hideWelcome();
-  renderMessageUI('user', text);
-  userInput.value = '';
-  autoResize(userInput);
-  setLoading(true);
+  // Creator mode: detect teaching
+  if (creatorMode && /\baprender\b|\bguarda isso\b|\banota\b|\blembra-te\b|\bsabes que\b/i.test(text)) saveToCM(text);
 
-  if (currentMode === 'image' || /\b(gera?|cria?|faz|draw|desenha?|pinta?)\s+(uma?\s+)?(imagem|foto|image|picture|ilustra)/i.test(text)) {
-    var imgPrompt = text.replace(/\b(gera?|cria?|faz|draw|desenha?|pinta?)\s+(uma?\s+)?(imagem|foto|image|picture|ilustra[çc][ãa]o)\s*/i, '').trim() || text;
-    await generateImage(imgPrompt);
-    setLoading(false);
-    return;
+  // Detect image inline
+  if (IMG_RX.test(text)) {
+    var ip = text.replace(IMG_RX, '').trim() || text;
+    await genImg(ip);
+    conv.messages.push({role:'user',content:text}); conv.messages.push({role:'assistant',content:'[Imagem: '+ip+']'}); saveConvs();
+    setLoading(false); return;
   }
-  if (currentMode === 'audio' || /\b(gera?|cria?|faz|toca?|compõe?)\s+(uma?\s+)?(música|musica|music|áudio|audio|som|song|beat)/i.test(text)) {
-    var audPrompt = text.replace(/\b(gera?|cria?|faz|toca?|compõe?)\s+(uma?\s+)?(música|musica|music|áudio|audio|som|song|beat)\s*/i, '').trim() || text;
-    await generateAudio(audPrompt);
-    setLoading(false);
-    return;
+  // Detect audio inline
+  if (AUD_RX.test(text)) {
+    var ap = text.replace(AUD_RX, '').trim() || text;
+    await genAud(ap);
+    conv.messages.push({role:'user',content:text}); conv.messages.push({role:'assistant',content:'[Audio: '+ap+']'}); saveConvs();
+    setLoading(false); return;
   }
 
-  var typingEl = renderTypingIndicator();
+  var typing = renderTyping();
   try {
     var webCtx = '';
-    if (currentMode === 'web' || needsWebSearch(text)) webCtx = await webSearch(text);
-
-    var today = new Date().toLocaleDateString('pt-PT');
-    var systemContent = 'Tu és a IA-Zénia, criada no Lubango, Angola, por Inácio U. Daniel (Zénia-Projects). Modelo: zenia-full. Angola tem 21 províncias.'
-      + getMemoriaContexto()
-      + getKBContexto(text)
-      + '\n\nREGRAS:\n'
-      + '1. CÓDIGO: Sempre código completo em blocos ```linguagem. Nunca recuses.\n'
-      + '2. ERROS: Marca linhas problemáticas com "⚠️ ERRO:" antes.\n'
-      + '3. WEB: Se receberes [PESQUISA WEB...], usa essa info e menciona que verificaste na internet.\n'
-      + '4. DATA: Hoje é ' + today + '. O teu treino tem limite — usa dados web quando disponíveis.\n'
-      + '5. Respondes em Português de Angola.';
-
-    var systemMsg   = { role: 'system', content: systemContent };
-    var userContent = webCtx ? (webCtx + '\n\nPergunta: ' + text) : text;
-    var messages    = [systemMsg].concat(conv.messages).concat([{ role: 'user', content: userContent }]);
-
-    var codeRx      = /\b(código|code|script|função|function|html|css|javascript|python|java|typescript|sql|php|bash|react|vue|angular|api|algoritmo|classe|array|loop|def|const|let|import|component|bug|debug|implement)\b/i;
-    var manualModel = document.getElementById('model-select').value;
-    var autoModel   = codeRx.test(text) ? 'qwen-coder' : manualModel;
-
-    var aiResponse = await fetchWithRetry(messages, autoModel);
-
-    typingEl.remove();
-    conv.messages.push({ role: 'user', content: text });
-    conv.messages.push({ role: 'assistant', content: aiResponse });
-    persistConversations();
-
-    renderMessageUI('ai', aiResponse, !!webCtx);
-    if (isVoiceAssist) speakText(aiResponse.replace(/```[\s\S]*?```/g, 'bloco de código omitido'));
-    setApiStatus('ok');
-  } catch(err) {
-    typingEl.remove();
-    renderMessageUI('ai', '⚠️ ' + err.message);
-    setApiStatus('error');
-  } finally {
-    setLoading(false);
-  }
+    if (needsWeb(text)) webCtx = await webSearch(text);
+    var sysMSG   = { role:'system', content: buildSystem(text) };
+    var userCont = webCtx ? (webCtx + '\n\nPergunta: ' + text) : text;
+    var msgs     = [sysMSG].concat(conv.messages).concat([{role:'user',content:userCont}]);
+    var cRX      = /\b(codigo|code|script|funcao|function|html|css|javascript|python|java|typescript|sql|php|bash|react|vue|angular|api|algoritmo|classe|array|loop|def|const|let|import|component|bug|debug)\b/i;
+    var selM     = document.getElementById('model-sel').value;
+    var useM     = cRX.test(text) ? 'qwen-coder' : selM;
+    var reply    = await fetchAI(msgs, useM);
+    typing.remove();
+    conv.messages.push({role:'user',content:text}); conv.messages.push({role:'assistant',content:reply}); saveConvs();
+    renderMsg('ai', reply, !!webCtx);
+    if (voiceOn) speakTxt(reply.replace(/```[\s\S]*?```/g,'bloco omitido'));
+    setApiSt('ok');
+  } catch(e) { typing.remove(); renderMsg('ai','Erro: '+e.message); setApiSt('err'); }
+  finally { setLoading(false); }
 }
 
-// ------------------------------------------------------------
-// FORMATAÇÃO & HIGHLIGHTING
-// ------------------------------------------------------------
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+// CM.JSON (creator memory)
+function getCM() { try { return JSON.parse(localStorage.getItem('cm_json')||'{"itens":[],"criado":"'+new Date().toISOString()+'"}'); } catch(e) { return {itens:[],criado:new Date().toISOString()}; } }
+function setCM(d) { localStorage.setItem('cm_json', JSON.stringify(d, null, 2)); }
+function saveToCM(txt) {
+  var cm = getCM();
+  cm.itens.unshift({id:Date.now(),txt:txt,ts:new Date().toISOString(),fonte:'inacio.u.daniel'});
+  if (cm.itens.length > 200) cm.itens = cm.itens.slice(0,200);
+  setCM(cm); toast('Guardado em cm.json!','ok');
 }
-function highlightCode(code, lang) {
-  try {
-    if (lang && hljs.getLanguage(lang)) return hljs.highlight(code, { language: lang }).value;
-    return hljs.highlightAuto(code).value;
-  } catch(e) { return escHtml(code); }
+function getCMCtx() {
+  var cm = getCM(); if (!cm.itens.length) return 'cm.json esta vazio.';
+  return cm.itens.slice(0,12).map(function(k){return '- '+k.txt.substring(0,100);}).join('\n');
 }
-function markErrorLines(html) {
-  var rx = /error|exception|traceback|syntaxerror|typeerror|nameerror|valueerror|runtimeerror|referenceerror|undefined is not|cannot read|null pointer|segfault|failed|fatal|⚠️/i;
-  return html.split('\n').map(function(line) {
-    return rx.test(line.replace(/<[^>]+>/g, '')) ? '<span class="error-line">' + line + '</span>' : line;
-  }).join('\n');
+function exportCM() {
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(getCM(),null,2)],{type:'application/json'}));
+  a.download = 'cm.json'; a.click(); toast('cm.json exportado!','ok');
 }
-function formatMessage(raw) {
-  var html = raw.replace(/```([^\n`]*)\n?([\s\S]*?)```/g, function(_, lang, code) {
-    lang = (lang || '').trim().toLowerCase();
-    var highlighted = markErrorLines(highlightCode(code.trimEnd(), lang));
-    var id = 'cb' + Math.random().toString(36).slice(2);
-    return '<div class="code-block">'
-      + '<div class="code-header"><span class="code-lang-label">' + (lang || 'código') + '</span>'
-      + '<button class="copy-btn" id="' + id + '-btn" onclick="copyCode(\'' + id + '\')">'
-      + '<i class="fas fa-copy"></i> Copiar</button></div>'
-      + '<pre><code id="' + id + '" class="hljs">' + highlighted + '</code></pre></div>';
+
+// RENDER
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function hlCode(code, lang) { try { if(lang&&hljs.getLanguage(lang)) return hljs.highlight(code,{language:lang}).value; return hljs.highlightAuto(code).value; } catch(e) { return escHtml(code); } }
+function markErrL(html) {
+  var rx = /error|exception|traceback|syntaxerror|typeerror|undefined is not|cannot read|failed|fatal/i;
+  return html.split('\n').map(function(l) { return rx.test(l.replace(/<[^>]+>/g,'')) ? '<span class="err-line">'+l+'</span>' : l; }).join('\n');
+}
+function fmtText(raw) {
+  var h = raw.replace(/```([^\n`]*)\n?([\s\S]*?)```/g, function(_, lang, code) {
+    lang = (lang||'').trim().toLowerCase();
+    var id = 'c' + Math.random().toString(36).slice(2,7);
+    var hl = markErrL(hlCode(code.trimEnd(), lang));
+    return '<div class="code-block"><div class="code-hdr"><span class="code-lang">'+(lang||'codigo')+'</span>'
+      +'<button class="copy-btn" onclick="cpCode(\''+id+'\')"><i class="fas fa-copy"></i> Copiar</button></div>'
+      +'<pre><code id="'+id+'" class="hljs">'+hl+'</code></pre></div>';
   });
-  html = html.replace(/`([^`\n]+)`/g, '<code class="inline-code">$1</code>');
-  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
-  html = html.replace(/(⚠️\s*ERRO:[^\n<]*)/g, '<span class="error-marker">$1</span>');
-  html = html.replace(/\n/g, '<br>');
-  return html;
+  h = h.replace(/`([^`\n]+)`/g,'<code class="inline-code">$1</code>');
+  h = h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  h = h.replace(/\*([^*\n]+)\*/g,'<em>$1</em>');
+  h = h.replace(/^### (.+)$/gm,'<h3 style="font-size:14px;font-weight:700;margin:7px 0 3px">$1</h3>');
+  h = h.replace(/^## (.+)$/gm,'<h2 style="font-size:15px;font-weight:700;margin:8px 0 3px">$1</h2>');
+  h = h.replace(/^- (.+)$/gm,'<li style="margin-left:14px;margin-bottom:2px">$1</li>');
+  h = h.replace(/(ERRO:[^\n<]*)/g,'<span class="err-marker">$1</span>');
+  h = h.replace(/\n/g,'<br>');
+  return h;
 }
-function copyCode(id) {
-  var el = document.getElementById(id);
-  if (!el) return;
-  navigator.clipboard.writeText(el.innerText).then(function() {
-    var btn = document.getElementById(id + '-btn');
-    if (btn) {
-      btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
-      setTimeout(function() { btn.innerHTML = '<i class="fas fa-copy"></i> Copiar'; }, 2000);
-    }
-  });
-}
-
-// ------------------------------------------------------------
-// RENDER MENSAGEM
-// ------------------------------------------------------------
-function renderMessageUI(role, text, fromWeb) {
-  fromWeb = fromWeb || false;
-  var row = document.createElement('div');
-  row.className = 'flex ' + (role === 'user' ? 'justify-end' : 'justify-start') + ' animate-fade-in';
-  var bubble = document.createElement('div');
-  bubble.className = 'max-w-[82%] p-4 rounded-2xl text-sm leading-relaxed ' + (role === 'user' ? 'bg-blue-600' : 'glass');
-  bubble.style.wordBreak = 'break-word';
-  if (role === 'ai') {
-    if (fromWeb) {
-      var badge = document.createElement('div');
-      badge.className = 'web-badge';
-      badge.innerHTML = '<i class="fas fa-globe"></i> Verificado na internet agora';
-      bubble.appendChild(badge);
-    }
-    var ct = document.createElement('div');
-    ct.innerHTML = formatMessage(text);
-    bubble.appendChild(ct);
-  } else {
-    bubble.style.whiteSpace = 'pre-wrap';
-    bubble.textContent = text;
-  }
-  row.appendChild(bubble);
-  chatWindow.appendChild(row);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
-}
-function renderTypingIndicator() {
-  var row = document.createElement('div');
-  row.className = 'flex justify-start animate-fade-in';
-  row.id = 'typing-indicator';
-  row.innerHTML = '<div class="glass p-4 rounded-2xl flex items-center gap-2 text-sm text-gray-400"><span class="spin"></span><span>Zénia está a processar…</span></div>';
-  chatWindow.appendChild(row);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
+function cpCode(id) { var el=document.getElementById(id); if(!el) return; navigator.clipboard.writeText(el.innerText).catch(function(){}); toast('Copiado!','ok'); }
+function renderMsg(role, text, fromWeb) {
+  var row  = document.createElement('div'); row.className = 'msg-row' + (role==='user' ? ' user-row' : '');
+  var av   = document.createElement('div'); av.className = 'msg-av ' + (role==='user'?'user':'ai'); av.textContent = role==='user'?'U':'Z';
+  var bbl  = document.createElement('div'); bbl.className = 'msg-bbl ' + (role==='user'?'user':'ai');
+  if (role==='ai') {
+    if (fromWeb) { var b=document.createElement('div'); b.className='sbadge s-web'; b.style.marginBottom='6px'; b.innerHTML='<i class="fas fa-globe"></i> Verificado na web'; bbl.appendChild(b); }
+    var ct=document.createElement('div'); ct.innerHTML=fmtText(text); bbl.appendChild(ct);
+  } else { bbl.style.whiteSpace='pre-wrap'; bbl.textContent=text; }
+  row.appendChild(av); row.appendChild(bbl); chatEl.appendChild(row); chatEl.scrollTop=chatEl.scrollHeight;
   return row;
 }
-function setLoading(on) {
-  sendBtn.disabled = on;
-  sendIcon.className = on ? 'spin' : 'fas fa-paper-plane';
+function renderTyping() {
+  var row=document.createElement('div'); row.className='msg-row';
+  var av=document.createElement('div'); av.className='msg-av ai'; av.textContent='Z';
+  var bbl=document.createElement('div'); bbl.className='msg-bbl ai'; bbl.style.padding='9px 13px';
+  bbl.innerHTML='<div style="display:flex;gap:5px;align-items:center"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>';
+  row.appendChild(av); row.appendChild(bbl); chatEl.appendChild(row); chatEl.scrollTop=chatEl.scrollHeight;
+  return row;
 }
+function setLoading(on) { sendBtn.disabled=on; sendIc.className=on?'spin':'fas fa-paper-plane'; }
+function clearChat() { if(!confirm('Limpar conversa?')) return; var c=getConv(); if(c){c.messages=[];saveConvs();} chatEl.innerHTML=''; showWelcome(); }
 
-// ------------------------------------------------------------
-// SÍNTESE DE VOZ
-// ------------------------------------------------------------
-function populateVoices() {
-  var sel    = document.getElementById('voice-select');
-  var voices = speechSynthesis.getVoices();
-  if (!voices.length) return;
-  sel.innerHTML = '';
-  voices.forEach(function(v, i) {
-    var opt = document.createElement('option');
-    opt.value = i;
-    opt.textContent = v.name + ' (' + v.lang + ')';
-    if (v.lang.startsWith('pt')) opt.selected = true;
-    sel.appendChild(opt);
-  });
-}
-if (typeof speechSynthesis !== 'undefined') {
-  speechSynthesis.onvoiceschanged = populateVoices;
-  populateVoices();
-}
-function speakText(text) {
-  if (typeof speechSynthesis === 'undefined') return;
-  speechSynthesis.cancel();
-  var utter  = new SpeechSynthesisUtterance(text);
-  var voices = speechSynthesis.getVoices();
-  var idx    = parseInt(document.getElementById('voice-select').value);
-  if (!isNaN(idx) && voices[idx]) { utter.voice = voices[idx]; utter.lang = voices[idx].lang; }
-  else utter.lang = 'pt-PT';
-  utter.rate = 1.0;
-  speechSynthesis.speak(utter);
-}
-function gerarVozTTS(texto, voz) {
-  var cfg    = getConfig();
-  var utter  = new SpeechSynthesisUtterance(texto);
-  var voices = speechSynthesis.getVoices();
-  var v      = voz ? voices.find(function(x) { return x.name === voz; }) : null;
-  if (v) { utter.voice = v; utter.lang = v.lang; } else utter.lang = cfg.voiceLang || 'pt-PT';
-  utter.rate  = cfg.voiceRate  || 1.0;
-  utter.pitch = cfg.voicePitch || 1.0;
-  speechSynthesis.cancel();
-  speechSynthesis.speak(utter);
-  toast('TTS iniciado ✓', 'ok');
-}
-function ajustarParametrosVoz(params) {
-  var cfg = getConfig();
-  if (params.rate  !== undefined) cfg.voiceRate  = parseFloat(params.rate);
-  if (params.pitch !== undefined) cfg.voicePitch = parseFloat(params.pitch);
-  if (params.lang  !== undefined) cfg.voiceLang  = params.lang;
-  sincronizarConfig(cfg);
-}
-
-// ------------------------------------------------------------
-// RECONHECIMENTO DE VOZ
-// ------------------------------------------------------------
-var micBtn = document.getElementById('mic-btn');
-if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-  var SR  = window.SpeechRecognition || window.webkitSpeechRecognition;
-  var rec = new SR();
-  rec.lang = 'pt-PT';
-  rec.continuous = false;
-  var listening = false;
-  micBtn.onclick = function() {
-    if (listening) { rec.stop(); return; }
-    try { rec.start(); listening = true; micBtn.classList.add('recording'); } catch(e) {}
-  };
-  rec.onresult = function(e) {
-    userInput.value = e.results[0][0].transcript;
-    autoResize(userInput);
-    listening = false;
-    micBtn.classList.remove('recording');
-    handleSendMessage();
-  };
-  rec.onerror = function(e) {
-    listening = false;
-    micBtn.classList.remove('recording');
-    if (e.error !== 'no-speech') renderMessageUI('ai', '⚠️ Erro no microfone: ' + e.error);
-  };
-  rec.onend = function() { listening = false; micBtn.classList.remove('recording'); };
-} else {
-  micBtn.disabled = true;
-  micBtn.classList.add('opacity-30', 'cursor-not-allowed');
-}
-function reconhecerVozSTT(callback) {
-  if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
-    toast('STT não suportado neste browser.', 'err'); return;
-  }
-  var SR2 = window.SpeechRecognition || window.webkitSpeechRecognition;
-  var r   = new SR2();
-  r.lang  = getConfig().voiceLang || 'pt-PT';
-  r.onresult = function(e) {
-    var t = e.results[0][0].transcript;
-    toast('Reconhecido: ' + t.substring(0, 40), 'ok');
-    if (typeof callback === 'function') callback(t);
-    else { userInput.value = t; autoResize(userInput); }
-  };
-  r.onerror = function(e) { toast('Erro STT: ' + e.error, 'err'); };
-  r.start();
-}
-function treinarTTS(amostras)     { salvarMemoria('tts_amostras', amostras || []); toast('Amostras TTS guardadas.', 'warn'); }
-function treinarSTT(transcricoes) { salvarMemoria('stt_transcricoes', transcricoes || []); toast('Transcrições STT guardadas.', 'warn'); }
-function transcreverAudio(blob)   { toast('Transcrição requer Whisper API para produção.', 'warn'); return Promise.resolve('[Simulado]'); }
-function identificarLocutor()     { toast('Identificação de locutor requer modelo externo.', 'warn'); return Promise.resolve({ locutor: 'desconhecido' }); }
-function separarFontesAudio()     { toast('Separação de fontes requer Demucs/API externa.', 'warn'); return Promise.resolve(null); }
-function sintetizarAudioMulticanal() { toast('Multicanal requer Web Audio API avançada.', 'warn'); return Promise.resolve(null); }
-
-// ------------------------------------------------------------
-// VOZ ASSIST
-// ------------------------------------------------------------
-function toggleVoiceAssist() {
-  isVoiceAssist = !isVoiceAssist;
-  var btn = document.getElementById('voice-assist-btn');
-  if (isVoiceAssist) {
-    btn.classList.remove('text-blue-500','border-blue-500','hover:bg-blue-500','hover:text-white');
-    btn.classList.add('bg-red-600','text-white','border-red-600');
-    renderMessageUI('ai', 'Modo Assistente de Voz ligado. Podes falar comigo.');
-  } else {
-    btn.classList.remove('bg-red-600','border-red-600');
-    btn.classList.add('text-blue-500','border-blue-500','hover:bg-blue-500','hover:text-white');
-    if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
-  }
-}
-
-// ------------------------------------------------------------
-// IMAGEM & OCR
-// ------------------------------------------------------------
-function processarImagem(url, op) {
-  return new Promise(function(resolve) {
-    var img = new Image(); img.crossOrigin = 'anonymous';
-    img.onload = function() {
-      var c = document.createElement('canvas');
-      c.width = img.width; c.height = img.height;
-      var ctx = c.getContext('2d');
-      if (op === 'grayscale') ctx.filter = 'grayscale(100%)';
-      else if (op === 'blur') ctx.filter = 'blur(4px)';
-      else if (op === 'flip') { ctx.scale(-1,1); ctx.translate(-img.width,0); }
-      ctx.drawImage(img, 0, 0);
-      resolve(c.toDataURL('image/png'));
-    };
-    img.onerror = function() { resolve(null); };
-    img.src = url;
-  });
-}
-function reconhecerTextoOCR(imagemUrl) {
-  if (typeof Tesseract !== 'undefined') return Tesseract.recognize(imagemUrl, 'por+eng').then(function(r) { return r.data.text; });
-  toast('OCR: adiciona Tesseract.js no head para activar.', 'warn');
-  return Promise.resolve('[OCR simulado]');
-}
-function descreverImagem(imagemUrl) {
-  return fetchWithRetry([{ role: 'user', content: 'Descreve detalhadamente esta imagem: ' + imagemUrl }], 'openai-large')
-    .then(function(desc) { renderMessageUI('ai', '🖼️ **Descrição:** ' + desc); return desc; });
-}
-function detectarObjetos(imagemUrl) { toast('Detecção requer YOLO/API externa.', 'warn'); return descreverImagem(imagemUrl); }
-function extrairDadosDeImagem(imagemUrl) { return reconhecerTextoOCR(imagemUrl); }
-function gerarLegendaAutomatica(imagemUrl) {
-  return fetchWithRetry([{ role: 'user', content: 'Gera uma legenda curta (1 frase) para: ' + imagemUrl }], 'openai')
-    .then(function(l) { toast('Legenda: ' + l.substring(0, 60), 'ok'); return l; });
-}
-
-// ------------------------------------------------------------
-// EMBEDDINGS & VECTORES
-// ------------------------------------------------------------
-function gerarEmbeddings(texto) {
-  var words = texto.toLowerCase().split(/\W+/).filter(Boolean);
-  var freq  = {};
-  words.forEach(function(w) { freq[w] = (freq[w] || 0) + 1; });
-  var total = words.length || 1;
-  Object.keys(freq).forEach(function(k) { freq[k] /= total; });
-  return freq;
-}
-function buscarPorSimilaridade(query, corpus) {
-  var qEmb = gerarEmbeddings(query);
-  return corpus.map(function(item) {
-    var iEmb  = gerarEmbeddings(item.texto || item);
-    var score = Object.keys(qEmb).reduce(function(s, k) { return s + qEmb[k] * (iEmb[k] || 0); }, 0);
-    return { item: item, score: score };
-  }).sort(function(a, b) { return b.score - a.score; });
-}
-function atualizarIndiceVetorial() {
-  var kb = _getKB();
-  kb.forEach(function(d) { d.embedding = gerarEmbeddings(d.conteudo); });
-  _setKB(kb);
-  toast('Índice vetorial actualizado ✓ (' + kb.length + ' docs)', 'ok');
-}
-
-// ------------------------------------------------------------
-// PLUGINS
-// ------------------------------------------------------------
-var PLUGINS_KEY = 'zenia_plugins';
-var PLUGINS_DEFAULT = [
-  { id:'code-runner', nome:'Executor de Código',    activo:true,  desc:'Executa JS seguro' },
-  { id:'web-search',  nome:'Pesquisa Web',           activo:true,  desc:'DuckDuckGo auto' },
-  { id:'image-gen',   nome:'Geração de Imagem',      activo:true,  desc:'Pollinations.ai' },
-  { id:'audio-gen',   nome:'Geração de Áudio',       activo:true,  desc:'TTS Pollinations' },
-  { id:'kb-indexer',  nome:'Indexador KB',           activo:false, desc:'Base de conhecimento' },
-  { id:'ocr',         nome:'OCR',                    activo:false, desc:'Tesseract.js' }
-];
-function _getPlugins() {
-  try { return JSON.parse(localStorage.getItem(PLUGINS_KEY) || 'null') || PLUGINS_DEFAULT; } catch(e) { return PLUGINS_DEFAULT; }
-}
-function _setPlugins(p) { localStorage.setItem(PLUGINS_KEY, JSON.stringify(p)); }
-function listarPlugins()       { return _getPlugins(); }
-function ativarPlugin(id)      { var ps = _getPlugins(); ps.forEach(function(p) { if (p.id===id) p.activo=true; }); _setPlugins(ps); toast('Plugin activado ✓','ok'); renderAdvBody(); }
-function desativarPlugin(id)   { var ps = _getPlugins(); ps.forEach(function(p) { if (p.id===id) p.activo=false; }); _setPlugins(ps); toast('Plugin desactivado.','warn'); renderAdvBody(); }
-function configurarPlugin(id, op) { var ps = _getPlugins(); ps.forEach(function(p) { if (p.id===id) Object.assign(p,op); }); _setPlugins(ps); toast('Plugin configurado ✓','ok'); }
-
-function executarCodigoSegurado(codigo, linguagem) {
-  linguagem = (linguagem || 'javascript').toLowerCase();
-  if (linguagem === 'javascript') {
-    try {
-      var resultado = new Function('"use strict"; return (function(){' + codigo + '})()')();
-      renderMessageUI('ai', '```javascript\n// RESULTADO:\n' + JSON.stringify(resultado, null, 2) + '\n```');
-      return resultado;
-    } catch(err) {
-      renderMessageUI('ai', '```javascript\n⚠️ ERRO: ' + err.message + '\n```');
-      return null;
-    }
-  }
-  toast('Execução de "' + linguagem + '" requer backend sandbox.', 'warn');
-  return null;
-}
-function simularExecucao(codigo) {
-  var problemas = [];
-  if (/eval\(/.test(codigo))           problemas.push('⚠️ ERRO: eval() é inseguro.');
-  if (/document\.write/.test(codigo))  problemas.push('⚠️ ERRO: document.write deprecado.');
-  if (/innerHTML/.test(codigo))        problemas.push('⚠️ AVISO: innerHTML pode ser vector XSS.');
-  renderMessageUI('ai', '```\n' + (problemas.length ? problemas.join('\n') : '✅ Análise estática OK.') + '\n```');
-  return problemas;
-}
-function chamarAPIExterna(url, op) {
-  op = op || {};
-  return fetch(url, { method: op.method||'GET', headers: op.headers||{'Content-Type':'application/json'}, body: op.body ? JSON.stringify(op.body) : undefined })
-    .then(function(r) { return r.json(); })
-    .catch(function(e) { toast('Erro API externa: ' + e.message, 'err'); return null; });
-}
-var _webhooks = {};
-function registrarWebhook(evento, url) { _webhooks[evento] = url; toast('Webhook registado para "' + evento + '" ✓', 'ok'); }
-function autenticarAPI(tipo, cred)     { salvarMemoria('auth_' + tipo, cred); toast('Credenciais "' + tipo + '" guardadas ✓', 'ok'); }
-function renovarToken(tipo)            { var t = buscarMemoria('auth_' + tipo); if (!t) { toast('Sem token.', 'warn'); return; } toast('Renovação requer endpoint OAuth.', 'warn'); }
-
-// ------------------------------------------------------------
-// AGENDA & COMUNICAÇÃO
-// ------------------------------------------------------------
-var EVENTOS_KEY = 'zenia_eventos';
-function _getEventos() { try { return JSON.parse(localStorage.getItem(EVENTOS_KEY) || '[]'); } catch(e) { return []; } }
-function _setEventos(e) { localStorage.setItem(EVENTOS_KEY, JSON.stringify(e)); }
-
-function agendarEvento(titulo, data, desc) {
-  var ev = { id: Date.now().toString(), titulo: titulo, data: data, descricao: desc || '' };
-  var es = _getEventos(); es.push(ev); _setEventos(es);
-  registrarAuditoria('agendarEvento', { titulo: titulo });
-  toast('Evento "' + titulo + '" agendado ✓', 'ok');
-  return ev;
-}
-function cancelarEvento(id)      { _setEventos(_getEventos().filter(function(e) { return e.id !== id; })); toast('Evento cancelado ✓', 'ok'); }
-function sincronizarCalendario() { toast('Sincronização requer OAuth2. ' + _getEventos().length + ' evento(s) local(is).', 'warn'); return _getEventos(); }
-function enviarEmail(para, assunto, corpo) {
-  window.open('mailto:' + encodeURIComponent(para) + '?subject=' + encodeURIComponent(assunto) + '&body=' + encodeURIComponent(corpo));
-  toast('Rascunho de email aberto ✓', 'ok');
-}
-function enviarNotificacao(titulo, msg) {
-  if (!('Notification' in window)) { toast('Notificações não suportadas.', 'warn'); return; }
-  Notification.requestPermission().then(function(p) {
-    if (p === 'granted') new Notification(titulo, { body: msg });
-    else toast('Permissão negada.', 'err');
-  });
-}
-function sincronizarContactos() { toast('Sincronização de contactos requer API Contacts.', 'warn'); }
-
-// ------------------------------------------------------------
-// SEGURANÇA & PRIVACIDADE
-// ------------------------------------------------------------
-function autenticarUsuario(user, pass) {
-  var hash = btoa(user + ':' + pass);
-  salvarMemoria('auth_user', { user: user, hash: hash, ts: Date.now() });
-  toast('Utilizador autenticado (sessão local) ✓', 'ok');
-  return { token: hash, user: user };
-}
-function autorizarRoleBased(role) {
-  var roles = { admin: ['*'], editor: ['ler','escrever'], viewer: ['ler'] };
-  var p = roles[role] || [];
-  toast('Role "' + role + '": ' + (p.join(', ') || 'sem permissões'), 'ok');
-  return p;
-}
-function gerarChaveCriptografica(bits) {
-  bits = bits || 256;
-  var arr = new Uint8Array(bits / 8);
-  crypto.getRandomValues(arr);
-  var hex = Array.from(arr).map(function(b) { return b.toString(16).padStart(2,'0'); }).join('');
-  toast('Chave ' + bits + '-bit gerada ✓', 'ok');
-  return hex;
-}
-function criptografarDados(dados)   { return { cifrado: btoa(unescape(encodeURIComponent(JSON.stringify(dados)))), chave: gerarChaveCriptografica(128) }; }
-function descriptografarDados(cif) { try { return JSON.parse(decodeURIComponent(escape(atob(cif)))); } catch(e) { toast('Erro ao descriptografar.', 'err'); return null; } }
-function anonimizarDados(texto) {
-  return texto
-    .replace(/\b[A-Z][a-z]+ [A-Z][a-z]+\b/g, '[NOME]')
-    .replace(/\b\d{9}\b/g, '[BI]')
-    .replace(/\b[\w.-]+@[\w.-]+\.\w+\b/g, '[EMAIL]')
-    .replace(/\b\+?\d[\d\s()-]{8,}\b/g, '[TELEFONE]');
-}
-function definirLimitesSeguranca(limites) { sincronizarConfig({ limites_seguranca: limites }); toast('Limites de segurança definidos ✓', 'ok'); }
-function avaliarRiscoPrivacidade(texto) {
-  var riscos = [];
-  if (/\b[\w.-]+@[\w.-]+\.\w+\b/.test(texto))  riscos.push('Email');
-  if (/\b\d{9}\b/.test(texto))                   riscos.push('Possível BI/NIF');
-  if (/\b\+?\d[\d\s()-]{8,}\b/.test(texto))      riscos.push('Telefone');
-  if (/senha|password|token|secret/i.test(texto)) riscos.push('Credencial');
-  var nivel = riscos.length === 0 ? 'Baixo' : riscos.length < 3 ? 'Médio' : 'Alto';
-  toast('Risco: ' + nivel + (riscos.length ? ' — ' + riscos.join(', ') : ''), 'ok');
-  return { nivel: nivel, riscos: riscos };
-}
-
-// ------------------------------------------------------------
-// MODERAÇÃO
-// ------------------------------------------------------------
-var FILTER_WORDS = ['spam','phishing','malware','exploit','trojan'];
-function filtrarConteudo(texto) {
-  var found = FILTER_WORDS.filter(function(w) { return texto.toLowerCase().includes(w); });
-  if (found.length) { toast('Conteúdo filtrado: ' + found.join(', '), 'warn'); return null; }
-  return texto;
-}
-function moderacaoAutomatica(texto) {
-  var av = avaliarRiscoPrivacidade(texto);
-  var limpo = filtrarConteudo(texto);
-  return { aprovado: !!limpo, riscos: av.riscos, textoBloqueado: !limpo };
-}
-function sinalizarConteudo(msg, motivo) {
-  registrarAuditoria('sinalizarConteudo', { msg: msg.substring(0,50), motivo: motivo });
-  toast('Conteúdo sinalizado: ' + motivo, 'warn');
-}
-
-// ------------------------------------------------------------
-// SISTEMA, MÉTRICAS & MANUTENÇÃO
-// ------------------------------------------------------------
-var AUDIT_KEY   = 'zenia_audit';
-var METRICS_KEY = 'zenia_metrics';
-
-function registrarAuditoria(acao, detalhes) {
-  var logs = JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]');
-  logs.unshift({ acao: acao, detalhes: detalhes, ts: new Date().toISOString() });
-  if (logs.length > 500) logs = logs.slice(0, 500);
-  localStorage.setItem(AUDIT_KEY, JSON.stringify(logs));
-}
-function logErro(erro, ctx) {
-  registrarAuditoria('logErro', { erro: String(erro), ctx: ctx || '' });
-  console.error('[Zénia]', erro, ctx);
-  toast('Erro registado: ' + String(erro).substring(0,50), 'err');
-}
-function reportarBug(desc) {
-  if (!desc) return;
-  var payload = { desc: desc, ua: navigator.userAgent, ts: new Date().toISOString() };
-  registrarAuditoria('reportarBug', payload);
-  window.open('mailto:suporte@zenia-projects.ao?subject=Bug+IA-Zenia&body=' + encodeURIComponent(JSON.stringify(payload, null, 2)));
-  toast('Relatório enviado ✓', 'ok');
-}
-function coletarMetricas() {
-  var m = {
-    totalConversas:   conversations.length,
-    totalMensagens:   conversations.reduce(function(s,c) { return s+c.messages.length; }, 0),
-    memoriasGravadas: Object.keys(_getMem()).length,
-    kbDocumentos:     _getKB().length,
-    pluginsActivos:   _getPlugins().filter(function(p) { return p.activo; }).length,
-    auditEntradas:    JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]').length,
-    ultima:           new Date().toISOString()
-  };
-  localStorage.setItem(METRICS_KEY, JSON.stringify(m));
-  return m;
-}
-function monitorarPerformance() { var m = coletarMetricas(); toast('Métricas actualizadas ✓', 'ok'); return m; }
-function gerarRelatorioUso() {
-  var m   = coletarMetricas();
-  var rel = '# Relatório IA-Zénia\nData: ' + new Date().toLocaleString('pt-PT') + '\n\n'
-    + '- Conversas: '       + m.totalConversas   + '\n'
-    + '- Mensagens: '       + m.totalMensagens   + '\n'
-    + '- Memórias: '        + m.memoriasGravadas + '\n'
-    + '- Docs KB: '         + m.kbDocumentos     + '\n'
-    + '- Plugins activos: ' + m.pluginsActivos   + '\n';
-  var a   = document.createElement('a');
-  a.href  = URL.createObjectURL(new Blob([rel], { type: 'text/markdown' }));
-  a.download = 'zenia-relatorio-' + Date.now() + '.md';
-  a.click();
-  toast('Relatório exportado ✓', 'ok');
-}
-function iniciarTesteAB(vA, vB)   { var v = Math.random()>.5?'A':'B'; salvarMemoria('ab_variante',v); toast('Teste A/B — Variante: '+v,'ok'); return v==='A'?vA:vB; }
-function aplicarAtualizacao(v, c) { salvarMemoria('versao',v); registrarAuditoria('aplicarAtualizacao',{v:v,c:c}); toast('Actualização "'+v+'" aplicada ✓','ok'); }
-function limparCache() {
-  [METRICS_KEY, AUDIT_KEY].forEach(function(k) {
-    var items = JSON.parse(localStorage.getItem(k) || '[]');
-    if (Array.isArray(items) && items.length > 100) localStorage.setItem(k, JSON.stringify(items.slice(0,100)));
-  });
-  toast('Cache optimizado ✓', 'ok');
-}
-function agendarManutencao(dt, desc) { return agendarEvento('🔧 Manutenção: ' + desc, dt, desc); }
-function migrarDados(de, para) { registrarAuditoria('migrarDados',{de:de,para:para}); toast('Migração '+de+' → '+para+' registada ✓','ok'); }
-function fallbackResposta(msg) {
-  var rs = ['Não consegui processar. Podes reformular?','Ocorreu um problema. Tenta novamente.','Serviço temporariamente indisponível.'];
-  var r  = rs[Math.floor(Math.random()*rs.length)];
-  renderMessageUI('ai', r);
-  registrarAuditoria('fallbackResposta', { original: msg });
-  return r;
-}
-async function reintentarOperacao(fn, max, delay) {
-  max = max||3; delay = delay||1000;
-  for (var i=0; i<max; i++) {
-    try { return await fn(); }
-    catch(err) {
-      if (i < max-1) { toast('Tentativa '+(i+1)+'/'+max+' falhou. A reintentar…','warn'); await new Promise(function(r){setTimeout(r,delay*(i+1));}); }
-      else { logErro(err,'reintentarOperacao'); throw err; }
-    }
-  }
-}
-function degradarGracefully(fn, fb) { try { return fn(); } catch(err) { logErro(err,'degradar'); toast('Modo degradado activo.','warn'); return typeof fb==='function'?fb():null; } }
-function notificarErroCritico(err, ctx) { logErro(err,ctx); enviarNotificacao('Erro Crítico — IA-Zénia', String(err)); }
-function rastrearProveniencia(dado, fonte, ops) { return { dado:dado, fonte:fonte, operacoes:ops||[], ts:new Date().toISOString() }; }
-
-// ------------------------------------------------------------
-// CONVERSAÇÃO: EXPORTAR / IMPORTAR
-// ------------------------------------------------------------
-function exportarConversacao(id) {
-  var conv = id ? conversations.find(function(c){return c.id===id;}) : getCurrentConversation();
-  if (!conv) { toast('Nenhuma conversa activa.','warn'); return; }
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(conv, null, 2)], {type:'application/json'}));
-  a.download = 'zenia-conv-' + conv.id + '.json';
-  a.click();
-  registrarAuditoria('exportarConversacao', {id:conv.id});
-  toast('Conversa exportada ✓','ok');
-}
-function importarConversacao() {
-  var input = document.createElement('input'); input.type='file'; input.accept='.json';
-  input.onchange = function(e) {
-    var file = e.target.files[0]; if (!file) return;
-    var r = new FileReader();
-    r.onload = function(ev) {
-      try {
-        var conv = JSON.parse(ev.target.result);
-        if (!conv.id || !conv.messages) throw new Error('Formato inválido.');
-        conv.id = Date.now().toString();
-        conversations.unshift(conv); persistConversations(); renderHistoryList();
-        toast('Conversa importada ✓','ok');
-      } catch(err) { toast('Erro ao importar: ' + err.message,'err'); }
-    };
-    r.readAsText(file);
-  };
-  input.click();
-}
-function exportarLogsConversacao() {
-  var rows = conversations.map(function(c) {
-    return [c.id, '"' + c.title.replace(/"/g,'""') + '"', c.messages.length, new Date(parseInt(c.id)).toISOString()].join(',');
-  });
-  var csv = 'ID,Titulo,Mensagens,Criado\n' + rows.join('\n');
-  var a   = document.createElement('a');
-  a.href  = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
-  a.download = 'zenia-logs-' + Date.now() + '.csv';
-  a.click();
-  toast('Logs exportados ✓','ok');
-}
-function backupDados() {
-  var payload = {
-    conversas: conversations, memoria: _getMem(), kb: _getKB(),
-    config: getConfig(), plugins: _getPlugins(),
-    auditoria: JSON.parse(localStorage.getItem(AUDIT_KEY)||'[]'),
-    exportado: new Date().toISOString()
-  };
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'}));
-  a.download = 'zenia-backup-' + Date.now() + '.json';
-  a.click();
-  registrarAuditoria('backupDados', {ts: new Date().toISOString()});
-  toast('Backup completo exportado ✓','ok');
-}
-function restaurarDados(file) {
-  if (file) { _restoreFile(file); return; }
-  var input = document.createElement('input'); input.type='file'; input.accept='.json';
-  input.onchange = function(e) { _restoreFile(e.target.files[0]); };
-  input.click();
-}
-function _restoreFile(file) {
-  var r = new FileReader();
-  r.onload = function(ev) {
-    try {
-      var d = JSON.parse(ev.target.result);
-      if (d.conversas) { conversations = d.conversas; persistConversations(); }
-      if (d.memoria)   localStorage.setItem(MEM_KEY,     JSON.stringify(d.memoria));
-      if (d.kb)        localStorage.setItem(KB_KEY,      JSON.stringify(d.kb));
-      if (d.config)    localStorage.setItem(CONFIG_KEY,  JSON.stringify(d.config));
-      if (d.plugins)   localStorage.setItem(PLUGINS_KEY, JSON.stringify(d.plugins));
-      renderHistoryList();
-      toast('Dados restaurados ✓','ok');
-    } catch(err) { toast('Erro ao restaurar: ' + err.message,'err'); }
-  };
-  r.readAsText(file);
-}
-
-// ------------------------------------------------------------
-// GALERIA
-// ------------------------------------------------------------
-function toggleGallery() {
-  var g = document.getElementById('gallery-container');
-  if (!g) {
-    var parent = document.querySelector('button[onclick="toggleGallery()"]').parentElement;
-    g = document.createElement('div'); g.id='gallery-container'; g.className='mt-3 grid grid-cols-3 gap-2';
-    ['zenia1','zenia2','zenia3','zenia4','zenia5','zenia6'].forEach(function(seed) {
-      var img = document.createElement('img');
-      img.src = 'https://picsum.photos/seed/' + seed + '/300/200';
-      img.loading = 'lazy';
-      img.className = 'rounded-lg border border-gray-800 hover:opacity-80 transition cursor-pointer';
-      g.appendChild(img);
-    });
-    parent.appendChild(g);
-  } else { g.style.display = g.style.display==='none' ? '' : 'none'; }
-}
-
-// ------------------------------------------------------------
 // API STATUS
-// ------------------------------------------------------------
-function setApiStatus(state) {
-  var el  = document.getElementById('api-status');
-  var map = { ok:['status-ok','API: ativa ✓'], error:['status-err','API: erro ✗'], wait:['status-wait','API: verificando…'] };
-  var cfg = map[state] || map.wait;
-  el.className = 'text-[11px] px-2 py-1 rounded border ' + cfg[0];
-  el.textContent = cfg[1];
+function setApiSt(s) {
+  var el=document.getElementById('api-st');
+  var map={ok:['s-ok','API OK'],err:['s-err','API Erro'],wait:['s-wait','API...']};
+  var d=map[s]||map.wait;
+  el.className='sbadge '+d[0]; el.innerHTML='<i class="fas fa-circle" style="font-size:6px"></i> '+d[1];
 }
-async function updateApiStatus() {
-  setApiStatus('wait');
+async function checkAPI() {
+  setApiSt('wait');
   try {
-    var r = await fetch(CHAT_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+API_KEY },
-      body: JSON.stringify({ messages:[{role:'user',content:'ping'}], model:'openai', max_tokens:5, stream:false })
-    });
-    setApiStatus(r.ok ? 'ok' : 'error');
-  } catch(e) { setApiStatus('error'); }
+    var r = await fetch(CHAT_EP, { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+API_KEY}, body:JSON.stringify({messages:[{role:'user',content:'ping'}],model:'openai',max_tokens:3,stream:false}) });
+    setApiSt(r.ok?'ok':'err');
+  } catch(e) { setApiSt('err'); }
 }
 
-// ------------------------------------------------------------
-// TEXTAREA AUTO-RESIZE + ENTER
-// ------------------------------------------------------------
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+// VOICE
+function speakTxt(text) { if (!window.speechSynthesis) return; speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(text.substring(0,500)); u.lang='pt-PT'; u.rate=1; speechSynthesis.speak(u); }
+function toggleVoice() {
+  voiceOn=!voiceOn;
+  var btn=document.getElementById('voice-btn');
+  btn.className='sbadge '+(voiceOn?'s-ok':'s-wait');
+  btn.style.cssText='cursor:pointer;background:transparent;border:1px solid '+(voiceOn?'#22c55e40':'#4b556340');
+  if (!voiceOn && window.speechSynthesis) speechSynthesis.cancel();
 }
-userInput.addEventListener('input', function() { autoResize(userInput); });
-userInput.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); }
-});
 
-// ------------------------------------------------------------
-// PAINEL AVANÇADO UI
-// ------------------------------------------------------------
-var currentTab = 'mem';
-function openAdvPanel()  { document.getElementById('adv-panel').classList.add('open'); document.getElementById('adv-overlay').style.display='block'; renderAdvBody(); }
-function closeAdvPanel() { document.getElementById('adv-panel').classList.remove('open'); document.getElementById('adv-overlay').style.display='none'; }
-function switchTab(tab) {
-  currentTab = tab;
-  var tabs = ['mem','conv','media','kb','sys','sec'];
-  document.querySelectorAll('#adv-tabs button').forEach(function(b, i) { b.classList.toggle('active', tabs[i]===tab); });
-  renderAdvBody();
-}
-function toast(msg, type) {
-  var el = document.getElementById('adv-toast');
-  if (!el) return;
-  el.textContent = msg;
-  el.className   = 'adv-toast show ' + (type||'ok');
-  clearTimeout(el._t);
-  el._t = setTimeout(function() { el.classList.remove('show'); }, 3500);
-}
-function renderAdvBody() {
-  var body = document.getElementById('adv-body');
-  if (!body) return;
-  var html = '';
-  if (currentTab === 'mem') {
-    var mem  = listarMemorias();
-    var keys = Object.keys(mem);
-    html += '<div class="adv-section"><h4>Guardar Memória</h4>'
-      + '<input class="adv-input" id="mem-key-in" placeholder="Chave">'
-      + '<input class="adv-input" id="mem-val-in" placeholder="Valor">'
-      + '<button class="adv-btn" onclick="var k=document.getElementById(\'mem-key-in\').value,v=document.getElementById(\'mem-val-in\').value;salvarMemoria(k,v);renderAdvBody()">'
-      + '<span class="icon"><i class="fas fa-save text-blue-400"></i></span>Guardar<span class="desc">Persiste localmente</span></button></div>'
-      + '<div class="adv-section"><h4>Memórias (' + keys.length + ')</h4>';
-    if (!keys.length) html += '<p style="color:#6b7280;font-size:12px;text-align:center;padding:12px">Sem memórias.</p>';
-    keys.forEach(function(k) {
-      var v = typeof mem[k].valor==='object' ? JSON.stringify(mem[k].valor) : String(mem[k].valor);
-      html += '<div class="mem-item"><span class="mem-key">' + escHtml(k) + '</span><span class="mem-val">' + escHtml(v.substring(0,60)) + (v.length>60?'…':'') + '</span>'
-        + '<button class="mem-del" onclick="removerMemoria(\'' + escHtml(k) + '\')"><i class="fas fa-times"></i></button></div>';
-    });
-    html += '</div><button class="adv-btn" style="border-color:#ef444440;color:#ef4444" onclick="limparMemoriaUsuario()">'
-      + '<span class="icon"><i class="fas fa-trash text-red-500"></i></span>Limpar toda a memória</button>';
+// MIC
+var micBtn=document.getElementById('mic-btn'); var micRec=null; var micOn=false;
+if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+  var SRC=window.SpeechRecognition||window.webkitSpeechRecognition; micRec=new SRC(); micRec.lang='pt-PT';
+  micRec.onresult=function(e){inputEl.value=e.results[0][0].transcript;autoResize(inputEl);micOn=false;micBtn.style.color='';handleSend();};
+  micRec.onerror=function(){micOn=false;micBtn.style.color='';};
+  micRec.onend=function(){micOn=false;micBtn.style.color='';};
+  micBtn.onclick=function(){if(micOn){micRec.stop();}else{try{micRec.start();micOn=true;micBtn.style.color='#ef4444';}catch(e){}}};
+} else { micBtn.disabled=true; micBtn.style.opacity='.3'; }
 
-  } else if (currentTab === 'conv') {
-    html += '<div class="adv-section"><h4>Importar / Exportar</h4>'
-      + '<button class="adv-btn" onclick="exportarConversacao()"><span class="icon"><i class="fas fa-file-export text-blue-400"></i></span>Exportar conversa<span class="desc">.json</span></button>'
-      + '<button class="adv-btn" onclick="importarConversacao()"><span class="icon"><i class="fas fa-file-import text-green-400"></i></span>Importar conversa<span class="desc">.json</span></button>'
-      + '<button class="adv-btn" onclick="exportarLogsConversacao()"><span class="icon"><i class="fas fa-table text-yellow-400"></i></span>Exportar logs<span class="desc">.csv</span></button></div>'
-      + '<div class="adv-section"><h4>Backup Completo</h4>'
-      + '<button class="adv-btn" onclick="backupDados()"><span class="icon"><i class="fas fa-download text-purple-400"></i></span>Backup total<span class="desc">Inclui memória, KB e config</span></button>'
-      + '<button class="adv-btn" onclick="restaurarDados()"><span class="icon"><i class="fas fa-upload text-orange-400"></i></span>Restaurar backup<span class="desc">.json</span></button>'
-      + '<button class="adv-btn" onclick="gerarRelatorioUso()"><span class="icon"><i class="fas fa-chart-bar text-teal-400"></i></span>Relatório de uso<span class="desc">.md</span></button></div>';
+// CONFIG
+var CFG_KEY='zn_cfg'; var CFG_DEF={model:'qwen-coder',temperature:0.7,maxTokens:4096,voiceRate:1,username:'Utilizador'};
+function getCfg(){try{return Object.assign({},CFG_DEF,JSON.parse(localStorage.getItem(CFG_KEY)||'{}'));}catch(e){return Object.assign({},CFG_DEF);}}
+function saveCfg(o){var c=Object.assign(getCfg(),o||{});localStorage.setItem(CFG_KEY,JSON.stringify(c));var ud=document.getElementById('uname');if(ud)ud.textContent=c.username;toast('Config guardada!','ok');return c;}
+function resetCfg(){localStorage.removeItem(CFG_KEY);saveCfg(CFG_DEF);}
 
-  } else if (currentTab === 'media') {
-    var cfg = getConfig();
-    html += '<div class="adv-section"><h4>Voz</h4>'
-      + '<button class="adv-btn" onclick="reconhecerVozSTT(null)"><span class="icon"><i class="fas fa-microphone text-blue-400"></i></span>Reconhecimento STT<span class="desc">Voz para texto agora</span></button>'
-      + '<label style="font-size:11px;color:#8b949e">Velocidade (' + (cfg.voiceRate||1) + ')</label>'
-      + '<input class="adv-input" type="range" min="0.5" max="2" step="0.1" value="' + (cfg.voiceRate||1) + '" oninput="ajustarParametrosVoz({rate:this.value})">'
-      + '<label style="font-size:11px;color:#8b949e">Tom (' + (cfg.voicePitch||1) + ')</label>'
-      + '<input class="adv-input" type="range" min="0.5" max="2" step="0.1" value="' + (cfg.voicePitch||1) + '" oninput="ajustarParametrosVoz({pitch:this.value})">'
-      + '</div><div class="adv-section"><h4>Plugins</h4>';
-    listarPlugins().forEach(function(p) {
-      html += '<div class="plugin-item"><div><span style="font-size:12px;color:#c9d1d9">' + escHtml(p.nome) + '</span>'
-        + '<span style="display:block;font-size:10px;color:#6b7280">' + escHtml(p.desc) + '</span></div>'
-        + '<button class="plugin-toggle' + (p.activo?' on':'') + '" onclick="' + (p.activo?'desativarPlugin':'ativarPlugin') + '(\'' + p.id + '\')"></button></div>';
-    });
-    html += '</div>';
+// MEMORY
+var MEM_KEY='zn_mem';
+function getMem(){try{return JSON.parse(localStorage.getItem(MEM_KEY)||'{}');}catch(e){return {};}}
+function setMem(m){localStorage.setItem(MEM_KEY,JSON.stringify(m));}
+function salvarMem(k,v){if(!k){toast('Chave obrigatoria','warn');return;}var m=getMem();m[k]={v:v,ts:Date.now()};setMem(m);toast('"'+k+'" guardada!','ok');}
+function removerMem(k){var m=getMem();delete m[k];setMem(m);toast('"'+k+'" removida.','ok');renderAdvBody();}
+function limparMem(){if(!confirm('Apagar toda a memoria?'))return;localStorage.removeItem(MEM_KEY);toast('Memoria limpa.','warn');renderAdvBody();}
+function getMemCtx(){var m=getMem();var ks=Object.keys(m);if(!ks.length)return '';return '\nMEMORIA:\n'+ks.map(function(k){return '- '+k+': '+m[k].v;}).join('\n');}
 
-  } else if (currentTab === 'kb') {
-    var kb = _getKB();
-    html += '<div class="adv-section"><h4>Adicionar Conhecimento</h4>'
-      + '<input class="adv-input" id="kb-title" placeholder="Título">'
-      + '<textarea class="adv-input" id="kb-body" rows="3" placeholder="Conteúdo…" style="resize:none"></textarea>'
-      + '<input class="adv-input" id="kb-tags" placeholder="Tags (vírgula)">'
-      + '<button class="adv-btn" onclick="var t=document.getElementById(\'kb-title\').value,b=document.getElementById(\'kb-body\').value,g=document.getElementById(\'kb-tags\').value.split(\',\');if(t&amp;&amp;b){adicionarConhecimento(t,b,g);renderAdvBody();}else{toast(\'Título e conteúdo obrigatórios\',\'warn\')}">'
-      + '<span class="icon"><i class="fas fa-plus-circle text-green-400"></i></span>Adicionar</button></div>'
-      + '<div class="adv-section"><h4>Base (' + kb.length + ' docs)</h4>'
-      + '<input class="adv-input" placeholder="Pesquisar KB…" oninput="renderKBResults(this.value,this.closest(\'.adv-body\').querySelector(\'#kb-results\')">'
-      + '<div id="kb-results">';
-    kb.slice(0,8).forEach(function(d) {
-      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px;background:#161b22;border:1px solid #21262d;border-radius:6px;margin-bottom:4px;font-size:12px">'
-        + '<span style="color:#c9d1d9">' + escHtml(d.titulo) + '</span>'
-        + '<button onclick="removerConhecimento(\'' + d.id + '\')" style="color:#6b7280;background:none;border:none;cursor:pointer">✕</button></div>';
-    });
-    if (kb.length > 8) html += '<p style="color:#6b7280;font-size:11px;text-align:center">+ ' + (kb.length-8) + ' mais</p>';
-    html += '</div></div>'
-      + '<button class="adv-btn" onclick="consolidarBaseConhecimento();renderAdvBody()"><span class="icon"><i class="fas fa-compress-arrows-alt text-yellow-400"></i></span>Consolidar KB</button>'
-      + '<button class="adv-btn" onclick="atualizarIndiceVetorial()"><span class="icon"><i class="fas fa-project-diagram text-blue-400"></i></span>Actualizar índice vetorial</button>';
+// KB
+var KB_KEY='zn_kb';
+function getKB(){try{return JSON.parse(localStorage.getItem(KB_KEY)||'[]');}catch(e){return [];}}
+function setKB(k){localStorage.setItem(KB_KEY,JSON.stringify(k));}
+function addKB(titulo,cont,tags){var kb=getKB();var d={id:Date.now().toString(),titulo:titulo,conteudo:cont,tags:tags||[],ts:Date.now(),words:cont.toLowerCase().split(/\W+/).filter(Boolean)};kb.unshift(d);setKB(kb);toast('"'+titulo+'" adicionado!','ok');return d.id;}
+function remKB(id){setKB(getKB().filter(function(d){return d.id!==id;}));toast('Removido!','ok');renderAdvBody();}
+function srchKB(q){var ws=q.toLowerCase().split(/\W+/).filter(Boolean);return getKB().map(function(d){var s=ws.reduce(function(a,w){return a+d.words.filter(function(p){return p===w;}).length;},0);return{doc:d,score:s};}).filter(function(r){return r.score>0;}).sort(function(a,b){return b.score-a.score;}).map(function(r){return r.doc;});}
+function getKBCtx(q){var docs=srchKB(q);if(!docs.length)return '';return '\nKB:\n'+docs.slice(0,3).map(function(d){return '['+d.titulo+']: '+d.conteudo.substring(0,150);}).join('\n');}
 
-  } else if (currentTab === 'sys') {
-    var m   = coletarMetricas();
-    var cfg2 = getConfig();
-    html += '<div class="adv-section"><h4>Métricas</h4>'
-      + '<div class="metric-row"><span class="metric-label">Conversas</span><span class="metric-val">' + m.totalConversas + '</span></div>'
-      + '<div class="metric-row"><span class="metric-label">Mensagens</span><span class="metric-val">' + m.totalMensagens + '</span></div>'
-      + '<div class="metric-row"><span class="metric-label">Memórias</span><span class="metric-val">' + m.memoriasGravadas + '</span></div>'
-      + '<div class="metric-row"><span class="metric-label">Docs KB</span><span class="metric-val">' + m.kbDocumentos + '</span></div>'
-      + '<div class="metric-row"><span class="metric-label">Plugins activos</span><span class="metric-val">' + m.pluginsActivos + '</span></div>'
-      + '<div class="metric-row"><span class="metric-label">Auditoria</span><span class="metric-val">' + m.auditEntradas + '</span></div></div>'
-      + '<div class="adv-section"><h4>Configuração</h4>'
-      + '<label style="font-size:11px;color:#8b949e">Temperatura (' + cfg2.temperature + ')</label>'
-      + '<input class="adv-input" type="range" min="0" max="2" step="0.05" value="' + cfg2.temperature + '" oninput="sincronizarConfig({temperature:parseFloat(this.value)})">'
-      + '<label style="font-size:11px;color:#8b949e">Max Tokens</label>'
-      + '<input class="adv-input" type="number" value="' + cfg2.maxTokens + '" min="256" max="8192" step="256" onchange="sincronizarConfig({maxTokens:parseInt(this.value)})">'
-      + '<label style="font-size:11px;color:#8b949e">Nome</label>'
-      + '<input class="adv-input" value="' + escHtml(cfg2.username) + '" onchange="sincronizarConfig({username:this.value})">'
-      + '</div>'
-      + '<button class="adv-btn" onclick="restaurarConfiguracaoPadrao()"><span class="icon"><i class="fas fa-undo text-orange-400"></i></span>Restaurar padrão</button>'
-      + '<button class="adv-btn" onclick="limparCache()"><span class="icon"><i class="fas fa-broom text-teal-400"></i></span>Optimizar cache</button>'
-      + '<button class="adv-btn" onclick="var d=prompt(\'Descreve o bug:\');if(d)reportarBug(d)"><span class="icon"><i class="fas fa-bug text-red-400"></i></span>Reportar bug</button>';
+// BACKUP/RESTORE
+function backupAll(){var p={convs:convs,mem:getMem(),kb:getKB(),cfg:getCfg(),cm:getCM(),ts:new Date().toISOString()};var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(p,null,2)],{type:'application/json'}));a.download='zenia-backup-'+Date.now()+'.json';a.click();toast('Backup exportado!','ok');}
+function restoreAll(){var i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=function(e){var r=new FileReader();r.onload=function(ev){try{var d=JSON.parse(ev.target.result);if(d.convs){convs=d.convs;saveConvs();renderHist();}if(d.mem)localStorage.setItem(MEM_KEY,JSON.stringify(d.mem));if(d.kb)localStorage.setItem(KB_KEY,JSON.stringify(d.kb));if(d.cfg)localStorage.setItem(CFG_KEY,JSON.stringify(d.cfg));if(d.cm)localStorage.setItem('cm_json',JSON.stringify(d.cm));toast('Dados restaurados!','ok');}catch(err){toast('Erro: '+err.message,'err');}};r.readAsText(e.target.files[0]);};i.click();}
 
-  } else if (currentTab === 'sec') {
-    var audit = JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]').slice(0, 5);
-    html += '<div class="adv-section"><h4>Privacidade</h4>'
-      + '<button class="adv-btn" onclick="var c=getCurrentConversation();if(c&amp;&amp;c.messages.length){avaliarRiscoPrivacidade(c.messages[c.messages.length-1].content);}else{toast(\'Sem mensagens.\',\'warn\')}"><span class="icon"><i class="fas fa-eye text-yellow-400"></i></span>Avaliar risco da última msg</button>'
-      + '<button class="adv-btn" onclick="var c=getCurrentConversation();if(c&amp;&amp;c.messages.length){var t=c.messages[c.messages.length-1].content;renderMessageUI(\'ai\',\'Anonimizado:\\n\'+anonimizarDados(t));}"><span class="icon"><i class="fas fa-user-secret text-purple-400"></i></span>Anonimizar última msg</button></div>'
-      + '<div class="adv-section"><h4>Criptografia</h4>'
-      + '<button class="adv-btn" onclick="var k=gerarChaveCriptografica(256);renderMessageUI(\'ai\',\'Chave 256-bit: \`\'+k+\'\`\')"><span class="icon"><i class="fas fa-key text-green-400"></i></span>Gerar chave 256-bit</button>'
-      + '<button class="adv-btn" onclick="var r=prompt(\'Role (admin/editor/viewer):\');if(r)autorizarRoleBased(r)"><span class="icon"><i class="fas fa-user-shield text-blue-400"></i></span>Verificar permissões RBAC</button></div>'
-      + '<div class="adv-section"><h4>Auditoria (últimas 5)</h4>';
-    if (!audit.length) html += '<p style="color:#6b7280;font-size:12px">Sem entradas.</p>';
-    audit.forEach(function(a) {
-      html += '<div style="padding:6px;background:#161b22;border-radius:6px;margin-bottom:4px;font-size:11px">'
-        + '<span style="color:#58a6ff">' + escHtml(a.acao) + '</span>'
-        + '<span style="color:#6b7280;float:right">' + a.ts.substring(0,16).replace('T',' ') + '</span></div>';
-    });
-    html += '</div>';
+// CREATOR MODE
+function checkCreatorPwd(pwd) {
+  if (pwd === 'adm2007') {
+    creatorMode = true;
+    document.getElementById('app').classList.add('creator-mode');
+    document.getElementById('creator-badge').style.display = 'inline-flex';
+    toast('Modo Criador activado! Ola, Inacio!','ok');
+    renderMsg('ai','MODO CRIADOR ACTIVO!\n\nOla chefe, finalmente apareceste! Agora podes falar livremente comigo, sem segredos. Se me ensinares algo novo, guardo em cm.json. Podes exportar o cm.json na aba Seg. das ferramentas.\n\nO que precisas hoje?');
+    renderAdvBody(); return true;
   }
-  body.innerHTML = html;
+  toast('Senha errada!','err'); return false;
 }
-function renderKBResults(query, container) {
-  if (!container) return;
-  var results = query ? buscarConhecimento(query) : _getKB().slice(0, 8);
-  container.innerHTML = results.map(function(d) {
-    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px;background:#161b22;border:1px solid #21262d;border-radius:6px;margin-bottom:4px;font-size:12px">'
-      + '<span style="color:#c9d1d9">' + escHtml(d.titulo) + '</span>'
-      + '<button onclick="removerConhecimento(\'' + d.id + '\')" style="color:#6b7280;background:none;border:none;cursor:pointer">✕</button></div>';
-  }).join('') || '<p style="color:#6b7280;font-size:12px;text-align:center">Sem resultados.</p>';
-}
+function disableCreator(){creatorMode=false;document.getElementById('app').classList.remove('creator-mode');document.getElementById('creator-badge').style.display='none';toast('Modo Criador desactivado.','warn');renderAdvBody();}
 
-// ------------------------------------------------------------
+// CONV EXPORT
+function exportConv(){var c=getConv();if(!c){toast('Sem conversa activa.','warn');return;}var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(c,null,2)],{type:'application/json'}));a.download='zenia-conv-'+c.id+'.json';a.click();toast('Exportado!','ok');}
+function importConv(){var i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=function(e){var r=new FileReader();r.onload=function(ev){try{var c=JSON.parse(ev.target.result);if(!c.messages)throw new Error('Formato invalido');c.id=Date.now().toString();convs.unshift(c);saveConvs();renderHist();toast('Importado!','ok');}catch(err){toast('Erro: '+err.message,'err');}};r.readAsText(e.target.files[0]);};i.click();}
+function exportLogs(){var rows=convs.map(function(c){return[c.id,'"'+(c.title||'').replace(/"/g,'""')+'"',c.messages.length,new Date(parseInt(c.id)||0).toISOString()].join(',');});var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['ID,Titulo,Msgs,Criado\n'+rows.join('\n')],{type:'text/csv'}));a.download='zenia-logs.csv';a.click();toast('Logs exportados!','ok');}
+
+// ADV PANEL UI
+function openAdv(){document.getElementById('adv-panel').classList.add('open');document.getElementById('adv-ov').classList.add('show');renderAdvBody();}
+function closeAdv(){document.getElementById('adv-panel').classList.remove('open');document.getElementById('adv-ov').classList.remove('show');}
+function switchTab(t){advTab=t;var tabs=['mem','conv','media','kb','sys','sec'];document.querySelectorAll('#adv-tabs button').forEach(function(b,i){b.classList.toggle('active',tabs[i]===t);});renderAdvBody();}
+function toast(msg,type){var el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.className='toast show '+(type||'ok');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},3200);}
+
+function renderAdvBody() {
+  var body = document.getElementById('adv-body'); if (!body) return;
+  var h = '';
+  if (advTab === 'mem') {
+    var mem = getMem(); var ks = Object.keys(mem);
+    h += '<div class="adv-s"><h4>Guardar Memoria</h4>'
+      + '<input class="adv-in" id="mk" placeholder="Chave">'
+      + '<input class="adv-in" id="mv" placeholder="Valor">'
+      + '<button class="adv-btn" onclick="salvarMem(document.getElementById(\'mk\').value,document.getElementById(\'mv\').value);renderAdvBody()">'
+      + '<span class="ic"><i class="fas fa-save" style="color:#3b5bdb"></i></span>Guardar</button></div>'
+      + '<div class="adv-s"><h4>Memorias (' + ks.length + ')</h4>';
+    if (!ks.length) h += '<p style="color:#374151;font-size:12px;text-align:center;padding:8px">Sem memorias.</p>';
+    ks.forEach(function(k) {
+      var v = typeof mem[k].v==='object' ? JSON.stringify(mem[k].v) : String(mem[k].v);
+      h += '<div class="mem-item"><span class="mem-key">'+escHtml(k)+'</span><span class="mem-val">'+escHtml(v.substring(0,55))+'</span>'
+        + '<button class="mem-del" onclick="removerMem(\''+escHtml(k)+'\')"><i class="fas fa-times"></i></button></div>';
+    });
+    h += '</div><button class="adv-btn" style="border-color:#ef444420;color:#ef4444" onclick="limparMem()">'
+      + '<span class="ic"><i class="fas fa-trash" style="color:#ef4444"></i></span>Limpar toda a memoria</button>';
+
+  } else if (advTab === 'conv') {
+    h += '<div class="adv-s"><h4>Conversas</h4>'
+      + '<button class="adv-btn" onclick="exportConv()"><span class="ic"><i class="fas fa-file-export" style="color:#3b5bdb"></i></span>Exportar conversa</button>'
+      + '<button class="adv-btn" onclick="importConv()"><span class="ic"><i class="fas fa-file-import" style="color:#22c55e"></i></span>Importar conversa</button>'
+      + '<button class="adv-btn" onclick="exportLogs()"><span class="ic"><i class="fas fa-table" style="color:#f59e0b"></i></span>Exportar logs CSV</button></div>'
+      + '<div class="adv-s"><h4>Backup</h4>'
+      + '<button class="adv-btn" onclick="backupAll()"><span class="ic"><i class="fas fa-download" style="color:#7c3aed"></i></span>Backup completo</button>'
+      + '<button class="adv-btn" onclick="restoreAll()"><span class="ic"><i class="fas fa-upload" style="color:#f97316"></i></span>Restaurar backup</button></div>';
+
+  } else if (advTab === 'media') {
+    var cfg = getCfg();
+    h += '<div class="adv-s"><h4>Gerar Imagem</h4>'
+      + '<input class="adv-in" id="img-in" placeholder="Descricao da imagem...">'
+      + '<button class="adv-btn" onclick="var p=document.getElementById(\'img-in\').value;if(p){closeAdv();genImg(p);}else{toast(\'Descricao obrigatoria\',\'warn\')}">'
+      + '<span class="ic"><i class="fas fa-image" style="color:#7c3aed"></i></span>Gerar Imagem</button></div>'
+      + '<div class="adv-s"><h4>Gerar Audio TTS</h4>'
+      + '<input class="adv-in" id="aud-in" placeholder="Tema do audio...">'
+      + '<button class="adv-btn" onclick="var p=document.getElementById(\'aud-in\').value;if(p){closeAdv();genAud(p);}else{toast(\'Descricao obrigatoria\',\'warn\')}">'
+      + '<span class="ic"><i class="fas fa-music" style="color:#22c55e"></i></span>Gerar Audio</button></div>'
+      + '<div class="adv-s"><h4>Voz</h4>'
+      + '<button class="adv-btn" onclick="toggleVoice()"><span class="ic"><i class="fas fa-headset" style="color:#3b5bdb"></i></span>'+(voiceOn?'Desligar Voz':'Ligar Voz')+'</button>'
+      + '<label style="font-size:11px;color:#6b7280">Velocidade TTS</label>'
+      + '<input class="adv-in" type="range" min="0.5" max="2" step="0.1" value="'+cfg.voiceRate+'" oninput="saveCfg({voiceRate:parseFloat(this.value)})">'
+      + '</div>';
+
+  } else if (advTab === 'kb') {
+    var kb = getKB();
+    h += '<div class="adv-s"><h4>Adicionar Conhecimento</h4>'
+      + '<input class="adv-in" id="kbt" placeholder="Titulo">'
+      + '<textarea class="adv-in" id="kbc" rows="3" placeholder="Conteudo..." style="resize:none"></textarea>'
+      + '<button class="adv-btn" onclick="var t=document.getElementById(\'kbt\').value,c=document.getElementById(\'kbc\').value;if(t&amp;&amp;c){addKB(t,c,[]);renderAdvBody();}else{toast(\'Titulo e conteudo obrigatorios\',\'warn\')}">'
+      + '<span class="ic"><i class="fas fa-plus" style="color:#22c55e"></i></span>Adicionar</button></div>'
+      + '<div class="adv-s"><h4>Base (' + kb.length + ' docs)</h4>';
+    kb.slice(0,8).forEach(function(d) {
+      h += '<div style="display:flex;align-items:center;gap:5px;padding:5px 7px;background:#111318;border:1px solid #1e2330;border-radius:6px;margin-bottom:3px;font-size:12px">'
+        + '<span style="color:#c9d1d9;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(d.titulo)+'</span>'
+        + '<button onclick="remKB(\''+d.id+'\')" style="color:#374151;background:none;border:none;cursor:pointer;flex-shrink:0;font-size:11px">x</button></div>';
+    });
+    if (kb.length>8) h += '<p style="color:#374151;font-size:11px;text-align:center">+' + (kb.length-8) + ' mais</p>';
+    h += '</div>';
+
+  } else if (advTab === 'sys') {
+    var sm = {convs:convs.length,msgs:convs.reduce(function(s,c){return s+c.messages.length;},0),mems:Object.keys(getMem()).length,kb:getKB().length};
+    var sc = getCfg();
+    h += '<div class="adv-s"><h4>Metricas</h4>'
+      + '<div class="mrow"><span class="mlbl">Conversas</span><span class="mval">'+sm.convs+'</span></div>'
+      + '<div class="mrow"><span class="mlbl">Mensagens</span><span class="mval">'+sm.msgs+'</span></div>'
+      + '<div class="mrow"><span class="mlbl">Memorias</span><span class="mval">'+sm.mems+'</span></div>'
+      + '<div class="mrow"><span class="mlbl">KB docs</span><span class="mval">'+sm.kb+'</span></div></div>'
+      + '<div class="adv-s"><h4>Configuracao</h4>'
+      + '<label style="font-size:11px;color:#6b7280">Nome</label>'
+      + '<input class="adv-in" value="'+escHtml(sc.username)+'" onchange="saveCfg({username:this.value})">'
+      + '<label style="font-size:11px;color:#6b7280">Temperatura ('+sc.temperature+')</label>'
+      + '<input class="adv-in" type="range" min="0" max="2" step="0.05" value="'+sc.temperature+'" oninput="saveCfg({temperature:parseFloat(this.value)})">'
+      + '</div>'
+      + '<button class="adv-btn" onclick="resetCfg()"><span class="ic"><i class="fas fa-undo" style="color:#f97316"></i></span>Restaurar config padrao</button>';
+
+  } else if (advTab === 'sec') {
+    h += '<div class="adv-s"><h4>Modo Criador</h4>';
+    if (creatorMode) {
+      var cm = getCM();
+      h += '<div style="background:#1a0a2e;border:1px solid #7c3aed40;border-radius:8px;padding:10px;margin-bottom:9px">'
+        + '<div style="font-size:12px;color:#a78bfa;font-weight:700;margin-bottom:3px">MODO CRIADOR ACTIVO</div>'
+        + '<div style="font-size:11px;color:#6b7280">Utilizador: Inacio U. Daniel</div>'
+        + '<div style="font-size:11px;color:#6b7280">cm.json: '+cm.itens.length+' entradas</div></div>'
+        + '<button class="adv-btn" onclick="exportCM()"><span class="ic"><i class="fas fa-download" style="color:#a78bfa"></i></span>Exportar cm.json</button>'
+        + '<button class="adv-btn" style="border-color:#ef444420;color:#ef4444" onclick="disableCreator()"><span class="ic"><i class="fas fa-lock" style="color:#ef4444"></i></span>Desactivar modo criador</button>';
+    } else {
+      h += '<p style="font-size:12px;color:#6b7280;margin-bottom:7px">Introduz a senha para activar o modo criador.</p>'
+        + '<input class="adv-in" id="cpwd" type="password" placeholder="Senha...">'
+        + '<button class="adv-btn" onclick="checkCreatorPwd(document.getElementById(\'cpwd\').value)">'
+        + '<span class="ic"><i class="fas fa-unlock" style="color:#7c3aed"></i></span>Activar Modo Criador</button>';
+    }
+    h += '</div><div class="adv-s"><h4>Seguranca</h4>'
+      + '<button class="adv-btn" onclick="var k=genKey();renderMsg(\'ai\',\'Chave 256-bit: \'+k)">'
+      + '<span class="ic"><i class="fas fa-key" style="color:#22c55e"></i></span>Gerar chave 256-bit</button>'
+      + '<button class="adv-btn" onclick="var d=prompt(\'Bug:\');if(d)window.open(\'mailto:suporte@zenia.ao?subject=Bug+Zenia&body=\'+encodeURIComponent(d))">'
+      + '<span class="ic"><i class="fas fa-bug" style="color:#ef4444"></i></span>Reportar bug</button></div>';
+  }
+  body.innerHTML = h;
+}
+function genKey(){var a=new Uint8Array(32);crypto.getRandomValues(a);return Array.from(a).map(function(b){return b.toString(16).padStart(2,'0');}).join('');}
+
+// INPUT
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
+inputEl.addEventListener('input',function(){autoResize(inputEl);});
+inputEl.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend();}});
+
 // INIT
-// ------------------------------------------------------------
-window.onload = function() {
-  sincronizarConfig(getConfig());
-  renderHistoryList();
-  if (conversations.length > 0) loadConversation(conversations[0].id);
-  updateApiStatus();
-  setInterval(updateApiStatus, 30000);
-};
+window.addEventListener('load',function(){
+  var cfg=getCfg(); var ud=document.getElementById('uname'); if(ud)ud.textContent=cfg.username;
+  renderHist();
+  if (convs.length>0) loadConv(convs[0].id); else showWelcome();
+  checkAPI(); setInterval(checkAPI,45000);
+});
 </script>
 </body>
 </html>
