@@ -159,6 +159,18 @@ body{background:#0b0d11;color:#e5e7eb;font-family:Inter,system-ui,sans-serif;fon
         <button onclick="openAdv()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:#9ca3af;font-size:12px;text-align:left">
           <i class="fas fa-sliders-h" style="color:#3b5bdb;width:15px"></i> Ferramentas Avancadas
         </button>
+        <button onclick="openGallery()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:#9ca3af;font-size:12px;text-align:left">
+          <i class="fas fa-images" style="color:#db2777;width:15px"></i> Galeria
+        </button>
+      </div>
+      <div style="padding:9px 10px 3px">
+        <p style="font-size:10px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;padding:0 3px">Aplicativos</p>
+        <a href="https://antonia-ia.netlify.app" target="_blank" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;text-decoration:none;color:#9ca3af;font-size:12px">
+          <i class="fas fa-comment-dots" style="color:#10b981;width:15px"></i> Antonia IA
+        </a>
+        <a href="https://zenia-projects.netlify.app" target="_blank" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;text-decoration:none;color:#9ca3af;font-size:12px">
+          <i class="fas fa-project-diagram" style="color:#f59e0b;width:15px"></i> Zenia Projects
+        </a>
       </div>
       <div style="padding:9px 10px">
         <p style="font-size:10px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;padding:0 3px">Historico</p>
@@ -236,6 +248,7 @@ body{background:#0b0d11;color:#e5e7eb;font-family:Inter,system-ui,sans-serif;fon
     <button onclick="switchTab('mem')" class="active">Mem.</button>
     <button onclick="switchTab('conv')">Conv.</button>
     <button onclick="switchTab('media')">Media</button>
+    <button onclick="switchTab('gal')">Gal.</button>
     <button onclick="switchTab('kb')">KB</button>
     <button onclick="switchTab('sys')">Sist.</button>
     <button onclick="switchTab('sec')">Seg.</button>
@@ -266,8 +279,10 @@ var sbColl      = false;
 var sbMobOpen   = false;
 
 // IMG/AUD detection patterns
-var IMG_RX = /\b(gera?|cria?|faz|desenha?|pinta?|mostra?|quero ver|faz-me)\s+(uma?\s+)?(imagem|foto|image|picture|ilustra\w*|wallpaper|arte|avatar|paisagem|retrato|fotografia|desenho)/i;
-var AUD_RX = /\b(gera?|cria?|faz|toca?|compo[es]|quero ouvir|faz-me)\s+(uma?\s+)?(musica|musica|audio|som|song|beat|trilha|melodia|faixa|track|instrumenta\w*)/i;
+var IMG_RX = /\b(gera|cria|faz|desenha|pinta|mostra|quero\s+ver|faz-me).{0,35}\b(imagem|foto|image|picture|ilustra|wallpaper|arte|avatar|paisagem|retrato|fotografia|desenho)\b/i;
+var AUD_RX = /\b(gera|cria|faz|toca|compoe|quero\s+ouvir|faz-me).{0,35}\b(musica|audio|som|song|beat|trilha|melodia|faixa|track|instrumental)\b/i;
+
+function openGallery() { openAdv(); switchTab('gal'); }
 
 // SIDEBAR
 function toggleSidebar() {
@@ -719,6 +734,25 @@ function renderAdvBody() {
       + '<input class="adv-in" type="range" min="0.5" max="2" step="0.1" value="'+cfg.voiceRate+'" oninput="saveCfg({voiceRate:parseFloat(this.value)})">'
       + '</div>';
 
+  } else if (advTab === 'gal') {
+    h += '<div class="adv-s"><h4>Galeria de Imagens</h4>';
+    var hasImg = false;
+    convs.forEach(function(c){
+      c.messages.forEach(function(m){
+        if(m.role==='assistant' && m.content.indexOf('[Imagem:') !== -1) {
+          var p = m.content.match(/\[Imagem:\s*(.*?)\]/);
+          if(p && p[1]) {
+             hasImg = true;
+             var prompt = p[1];
+             h += '<div class="media-card" style="margin-bottom:10px"><div style="padding:10px;font-size:12px;color:#9ca3af"><i class="fas fa-image" style="margin-right:5px;color:#db2777"></i>'+escHtml(prompt)+'</div>'
+               + '<div class="media-foot"><button class="mbtn" onclick="genImg(\''+escHtml(prompt.replace(/'/g,"\\'"))+'\')"><i class="fas fa-redo"></i> Regerar</button></div></div>';
+          }
+        }
+      });
+    });
+    if(!hasImg) h += '<p style="color:#6b7280;font-size:12px;padding:10px;text-align:center">Nenhuma imagem encontrada no historico.</p>';
+    h += '</div>';
+
   } else if (advTab === 'kb') {
     var kb = getKB();
     h += '<div class="adv-s"><h4>Adicionar Conhecimento</h4>'
@@ -792,3 +826,4 @@ window.addEventListener('load',function(){
 </script>
 </body>
 </html>
+
