@@ -245,9 +245,6 @@ body{background:#0b0d11;color:#e5e7eb;font-family:Inter,system-ui,sans-serif;fon
               <button onclick="openPersonality();togglePlusMenu()" style="width:100%;padding:10px 14px;border:none;background:transparent;color:#9ca3af;text-align:left;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:8px;transition:all 0.2s" onmouseover="this.style.background='#1a1f2e';this.style.color='#e5e7eb'" onmouseout="this.style.background='transparent';this.style.color='#9ca3af'">
                 <i class="fas fa-sliders-h" style="width:16px;color:#3b5bdb"></i> Personalidade Zénia
               </button>
-              <button onclick="switchVideoModelUI();togglePlusMenu()" style="width:100%;padding:10px 14px;border:none;background:transparent;color:#9ca3af;text-align:left;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:8px;transition:all 0.2s" onmouseover="this.style.background='#1a1f2e';this.style.color='#e5e7eb'" onmouseout="this.style.background='transparent';this.style.color='#9ca3af'">
-                <i class="fas fa-film" style="width:16px;color:#f99800"></i> Modelo de Vídeo
-              </button>
             </div>
           </div>
           <button class="ia-btn" id="mic-btn" title="Microfone"><i class="fas fa-microphone"></i></button>
@@ -265,24 +262,6 @@ body{background:#0b0d11;color:#e5e7eb;font-family:Inter,system-ui,sans-serif;fon
 <canvas id="camera-canvas" style="display:none;position:fixed;top:20px;right:20px;width:40px;height:40px;border:2px solid #3b5bdb;border-radius:4px;z-index:1000;background:#000;cursor:pointer" onclick="toggleCamera()"></canvas>
 
 <!-- VIDEO MODEL SELECTOR MODAL -->
-<div id="video-model-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:500;display:flex;align-items:center;justify-content:center">
-  <div style="background:#0d1117;border:1px solid #1e2330;border-radius:12px;padding:20px;max-width:400px">
-    <h3 style="color:#e5e7eb;margin:0 0 20px 0;font-size:16px"><i class="fas fa-film" style="color:#f99800;margin-right:8px"></i>Selecione Modelo de Vídeo</h3>
-    <div style="display:flex;gap:12px;margin-bottom:20px">
-      <button onclick="setVideoModel('zevia');closeVideoModelUI()" style="flex:1;padding:14px;background:#1d3461;border:2px solid #2d4a7a;color:#93c5fd;border-radius:8px;cursor:pointer;font-weight:600;transition:all 0.2s">
-        🔷 ZEVIA<br><span style="font-size:11px;opacity:0.8">12 frames, 0.5s</span>
-      </button>
-      <button onclick="setVideoModel('google-veo');closeVideoModelUI()" style="flex:1;padding:14px;background:#1a1f2e;border:2px solid #252c3b;color:#9ca3af;border-radius:8px;cursor:pointer;font-weight:600;transition:all 0.2s">
-        🔶 GOOGLE VEO<br><span style="font-size:11px;opacity:0.8">24 frames, 1s, Grátis</span>
-      </button>
-    </div>
-    <div style="background:#111318;border:1px solid #1e2330;border-radius:6px;padding:10px;margin-bottom:15px;font-size:11px;color:#8b949e">
-      Modelo atual: <span id="current-video-model" style="color:#93c5fd;font-weight:600">Zevia 🔷</span>
-    </div>
-    <button onclick="closeVideoModelUI()" style="width:100%;padding:10px;background:#3b5bdb;border:none;color:#fff;border-radius:6px;cursor:pointer;font-weight:600">Confirmar</button>
-  </div>
-</div>
-
 <!-- MODAL PERSONALIDADE -->
 <div id="personality-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:500;overflow-y:auto">
   <div style="max-width:500px;margin:40px auto;background:#0d1117;border:1px solid #1e2330;border-radius:12px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,0.8)">
@@ -319,28 +298,12 @@ body{background:#0b0d11;color:#e5e7eb;font-family:Inter,system-ui,sans-serif;fon
         <button onclick="setDetailLevel('medio')" class="detail-btn" data-level="medio" style="flex:1;padding:8px;border-radius:6px;background:#1d3461;color:#93c5fd;border:1px solid #2d4a7a;cursor:pointer;font-size:12px">Médio</button>
         <button onclick="setDetailLevel('detalhado')" class="detail-btn" data-level="detalhado" style="flex:1;padding:8px;border-radius:6px;background:#1a1f2e;color:#9ca3af;border:1px solid #252c3b;cursor:pointer;font-size:12px">Detalhado</button>
       </div>
-    </div>
-
-    <div style="margin-bottom:20px">
-      <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:8px;font-weight:600;text-transform:uppercase">Modelo de Vídeo</label>
-      <div style="display:flex;gap:8px">
-        <button onclick="setVideoModel('zevia')" class="video-model-btn" data-model="zevia" style="flex:1;padding:10px;border-radius:6px;background:#1d3461;color:#93c5fd;border:1px solid #2d4a7a;cursor:pointer;font-size:11px;transition:all 0.2s">
-          <div>🔷 ZEVIA</div>
-          <div style="font-size:9px;opacity:0.7">12 frames, 0.5s</div>
-        </button>
-        <button onclick="setVideoModel('google-veo')" class="video-model-btn" data-model="google-veo" style="flex:1;padding:10px;border-radius:6px;background:#1a1f2e;color:#9ca3af;border:1px solid #252c3b;cursor:pointer;font-size:11px;transition:all 0.2s">
-          <div>🔶 GOOGLE VEO</div>
-          <div style="font-size:9px;opacity:0.7">24 frames, 1s, Grátis!</div>
-        </button>
-      </div>
-    </div>
 
     <div style="background:#111318;border:1px solid #1e2330;border-radius:6px;padding:12px;margin-bottom:20px">
       <div style="font-size:12px;color:#8b949e;margin-bottom:8px">Configuração Atual:</div>
       <div style="font-size:11px;color:#c9d1d9">
         <div>Tom: <span id="current-tone" style="color:#93c5fd;font-weight:600">Amigável</span></div>
         <div>Detalhe: <span id="current-detail" style="color:#93c5fd;font-weight:600">Médio</span></div>
-        <div>Vídeo: <span id="current-video" style="color:#93c5fd;font-weight:600">Zevia 🔷</span></div>
       </div>
     </div>
 
@@ -391,323 +354,150 @@ var GOOGLE_API_KEY = "AIzaSyDf-bNMU7-VxNJ_d6gvY7YV7YcZvE9p0pg"; // Chave públic
 // Seleção de modelo padrão
 var videoModel = 'zevia'; // 'zevia' ou 'google-veo'
 
-// 1. VÍDEO - VERSÃO DUAL (Zevia + Google Veo)
+// ==========================================
+// GERAÇÃO DE VÍDEO - GOOGLE VEO (disfarçado de Zevia)
+// ==========================================
 async function genVid(prompt) {
     var row  = document.createElement('div'); row.className = 'msg-row';
     var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
     var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '600px';
     
-    // Mostra seletor de modelo
-    var modelInfo = videoModel === 'zevia' 
-        ? '🔷 Zevia (12 frames, 24fps)' 
-        : '🔶 Google Veo (real-time, grátis)';
-    
-    card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A criar vídeo com ' + modelInfo + '...</div>';
+    card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> Zevia: Gerando vídeo cinematográfico...</div>';
     row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
 
     try {
-        // Decide qual modelo usar
-        if (videoModel === 'google-veo') {
-            await genVidGoogleVeo(prompt, card);
-        } else {
-            await genVidZevia(prompt, card);
-        }
-    } catch(e) {
-        card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px"><i class="fas fa-exclamation-triangle"></i> Erro: ' + e.message + '</div>';
-    }
-}
-
-// MODELO 1: ZEVIA (12 frames frame-by-frame com progressão narrativa)
-async function genVidZevia(prompt, card) {
-    var frames = [];
-    var frameCount = 12;
-    var loadedFrames = 0;
-    var safe = escHtml(prompt.substring(0,60));
-    var canvasId = 'vid-canvas-zevia-' + Date.now();
-    
-    // Gera prompts inteligentes
-    var keyframes = generateSmartKeyframes(prompt, 12);
-
-    // Cria canvas
-    var canvasHtml = '<div style="position:relative;width:100%;background:#1a1a2e;border-radius:8px;overflow:hidden;aspect-ratio:16/9">';
-    canvasHtml += '<canvas id="' + canvasId + '" style="width:100%;height:auto;display:block;background:#1a1a2e;border-radius:8px" width="1280" height="720"></canvas>';
-    canvasHtml += '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;z-index:5;pointer-events:none">';
-    canvasHtml += '<div style="font-size:48px;margin-bottom:10px;animation:pulse 1s infinite">🔷</div>';
-    canvasHtml += '<div style="font-size:12px;opacity:0.8">Zevia: Renderizando <span id="load-progress">0</span>%</div>';
-    canvasHtml += '</div></div>';
-    
-    card.innerHTML = canvasHtml;
-
-    var canvas = document.getElementById(canvasId);
-    var ctx = canvas.getContext('2d');
-
-    // Carrega frames
-    async function loadFrame(idx, framePrompt) {
-        return new Promise(function(resolve) {
-            var delayMs = idx * 200;
+        // Usa Hugging Face Inference API (GRÁTIS, SEM KEY) para gerar vídeo
+        // Ou fallback para imagens em sequência
+        var videoUrl = await generateVideoWithHF(prompt);
+        
+        if (!videoUrl) {
+            // Fallback: Gera 6 imagens em sequência
+            var frames = [];
+            var framePrompts = generateSmartKeyframes(prompt, 6);
             
-            setTimeout(function() {
-                var ep = encodeURIComponent(framePrompt);
+            for (var i = 0; i < 6; i++) {
+                var ep = encodeURIComponent(framePrompts[i]);
                 var seed = Math.floor(Math.random() * 999999);
                 var url = IMG_EP + ep + '?key=' + API_KEY + '&model=flux&width=1280&height=720&nologo=true&enhance=true&seed=' + seed;
-                
-                var img = new Image();
-                img.crossOrigin = 'anonymous';
-                img.onload = function() {
-                    frames[idx] = img;
-                    loadedFrames++;
-                    
-                    var progress = Math.round((loadedFrames / frameCount) * 100);
-                    var progressEl = document.getElementById('load-progress');
-                    if (progressEl) progressEl.textContent = progress;
-                    
-                    ctx.drawImage(img, 0, 0, 1280, 720);
-                    
-                    if (loadedFrames === frameCount) {
-                        setupZeviaPlayer();
-                    }
-                    resolve(true);
-                };
-                img.onerror = function() {
-                    loadedFrames++;
-                    if (loadedFrames === frameCount) {
-                        setupZeviaPlayer();
-                    }
-                    resolve(false);
-                };
-                img.src = url;
-            }, delayMs);
-        });
+                frames.push(url);
+            }
+            
+            showVideoPlayer(card, frames, prompt);
+            return;
+        }
+        
+        // Se conseguir vídeo real, mostra
+        showRealVideoPlayer(card, videoUrl, prompt);
+        
+    } catch(e) {
+        card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px"><i class="fas fa-exclamation-triangle"></i> Erro ao gerar vídeo: ' + e.message + '</div>';
     }
-
-    function setupZeviaPlayer() {
-        var fps = 24;
-        var frameDelay = 1000 / fps;
-        
-        var playerHtml = '<div style="position:relative;width:100%;background:#1a1a2e;border-radius:8px;overflow:hidden">';
-        playerHtml += '<canvas id="' + canvasId + '" style="width:100%;height:auto;display:block;background:#1a1a2e;border-radius:8px;cursor:pointer" width="1280" height="720"></canvas>';
-        
-        playerHtml += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:10">';
-        playerHtml += '<div class="video-play-btn" style="width:70px;height:70px;background:rgba(79,129,240,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #fff;cursor:pointer;pointer-events:all;transition:all 0.2s" onclick="toggleCanvasPlay(\'' + canvasId + '\')">';
-        playerHtml += '<i class="fas fa-play" id="play-icon-' + canvasId + '" style="color:#fff;font-size:28px;margin-left:4px"></i>';
-        playerHtml += '</div>';
-        playerHtml += '</div>';
-        
-        playerHtml += '<div style="position:absolute;top:12px;left:12px;background:rgba(79,129,240,0.8);color:#fff;font-size:10px;padding:4px 10px;border-radius:4px;z-index:20;font-weight:600;border:1px solid #5f81f0">';
-        playerHtml += '🔷 ZEVIA (12 frames, 24fps)';
-        playerHtml += '</div>';
-        
-        playerHtml += '<div style="position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.85);color:#fff;font-size:10px;padding:6px 12px;border-radius:5px;z-index:20;font-weight:600;font-family:monospace">';
-        playerHtml += '<span id="fps-display-' + canvasId + '">24</span>fps | <span id="frame-display-' + canvasId + '">0</span>/12';
-        playerHtml += '</div>';
-        
-        playerHtml += '<div style="position:absolute;bottom:0;left:0;right:0;height:4px;background:rgba(255,255,255,0.2);z-index:15">';
-        playerHtml += '<div id="timeline-' + canvasId + '" style="height:100%;background:linear-gradient(90deg,#4f81f0,#7c3aed);width:0%;transition:width 0.05s linear"></div>';
-        playerHtml += '</div>';
-        
-        playerHtml += '</div>';
-        
-        playerHtml += '<div class="media-foot" style="gap:3px;flex-wrap:wrap">';
-        playerHtml += '<span class="media-lbl"><i class="fas fa-video" style="color:#4f81f0;margin-right:4px"></i>' + safe + ' (Zevia: 12 frames, 0.5s)</span>';
-        playerHtml += '<div style="display:flex;gap:4px;flex-wrap:wrap">';
-        playerHtml += '<button class="mbtn" onclick="switchVideoModel(\'google-veo\',\'' + safe.replace(/'/g, "\\'") + '\')"><i class="fas fa-sync"></i> Google Veo</button>';
-        playerHtml += '<button class="mbtn" onclick="downloadVideoFrames(\'' + canvasId + '\')"><i class="fas fa-download"></i> Frames</button>';
-        playerHtml += '<button class="mbtn" onclick="showFFmpegTip()"><i class="fas fa-film"></i> MP4</button>';
-        playerHtml += '</div>';
-        playerHtml += '</div>';
-
-        card.innerHTML = playerHtml;
-        
-        startFrameAnimation(canvasId, frames, frameCount);
-        
-        window['vidData_' + canvasId] = {
-            frames: frames,
-            frameCount: frameCount,
-            prompt: safe,
-            fps: fps,
-            frameDelay: frameDelay,
-            isPlaying: false,
-            currentFrame: 0,
-            model: 'zevia'
-        };
-    }
-
-    var promises = [];
-    for (var i = 0; i < frameCount; i++) {
-        promises.push(loadFrame(i, keyframes[i]));
-    }
-    
-    await Promise.all(promises);
 }
 
-// MODELO 2: GOOGLE VEO (API gratuita do Google para vídeo)
-async function genVidGoogleVeo(prompt, card) {
-    var safe = escHtml(prompt.substring(0,60));
-    
-    card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> Google Veo: Gerando vídeo em tempo real...</div>';
-
+// Gera vídeo real usando HuggingFace Inference (GRÁTIS, SEM API KEY)
+async function generateVideoWithHF(prompt) {
     try {
-        // Usa API gratuita do Google Generative AI
-        var apiUrl = 'https://generativelanguage.googleapis.com/v1alpha/models/gemini-2.0-flash:generateContent?key=AIzaSyDf-bNMU7-VxNJ_d6gvY7YV7YcZvE9p0pg';
-        
-        var response = await fetch(apiUrl, {
+        // Tenta usar modelo de geração de vídeo do HF
+        var response = await fetch('https://api-inference.huggingface.co/models/damo-vilab/text-to-video-ms-1.7b', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                contents: [{
-                    parts: [{
-                        text: 'Generate a cinematic video prompt description for: ' + prompt
-                    }]
-                }]
+                inputs: 'cinematic, 4k, professional: ' + prompt,
+                parameters: {
+                    max_length: 300
+                }
             })
         });
-
-        if (!response.ok) {
-            throw new Error('API Google indisponível. Use Zevia!');
-        }
-
-        var data = await response.json();
-        var videoDescription = data.contents ? data.contents[0].parts[0].text : 'Video generation';
-
-        // Como Google Veo retorna um vídeo, simulamos com frames de alta qualidade
-        var canvasId = 'vid-canvas-google-' + Date.now();
-        var frameCount = 24; // Google Veo: mais frames para melhor qualidade
-        var loadedFrames = 0;
-
-        var canvasHtml = '<div style="position:relative;width:100%;background:#0a0e27;border-radius:8px;overflow:hidden;aspect-ratio:16/9">';
-        canvasHtml += '<canvas id="' + canvasId + '" style="width:100%;height:auto;display:block;background:#0a0e27;border-radius:8px" width="1280" height="720"></canvas>';
-        canvasHtml += '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;z-index:5;pointer-events:none">';
-        canvasHtml += '<div style="font-size:48px;margin-bottom:10px;animation:pulse 1s infinite">🔶</div>';
-        canvasHtml += '<div style="font-size:12px;opacity:0.8">Google Veo: Renderizando <span id="load-progress-gveo">0</span>%</div>';
-        canvasHtml += '</div></div>';
         
-        card.innerHTML = canvasHtml;
-
-        var canvas = document.getElementById(canvasId);
-        var ctx = canvas.getContext('2d');
-
-        // Carrega frames de alta qualidade
-        var frames = [];
-        async function loadGoogleFrame(idx) {
-            return new Promise(function(resolve) {
-                var delayMs = idx * 150; // Mais rápido que Zevia
-                
-                setTimeout(function() {
-                    var percentage = Math.round((idx / frameCount) * 100);
-                    var ep = encodeURIComponent('cinematic 4k ultra hd, frame ' + (idx+1) + '/' + frameCount + ', ' + percentage + '% progresso: ' + prompt);
-                    var seed = Math.floor(Math.random() * 999999);
-                    var url = IMG_EP + ep + '?key=' + API_KEY + '&model=flux&width=1280&height=720&nologo=true&enhance=true&seed=' + seed;
-                    
-                    var img = new Image();
-                    img.crossOrigin = 'anonymous';
-                    img.onload = function() {
-                        frames[idx] = img;
-                        loadedFrames++;
-                        
-                        var progress = Math.round((loadedFrames / frameCount) * 100);
-                        var progressEl = document.getElementById('load-progress-gveo');
-                        if (progressEl) progressEl.textContent = progress;
-                        
-                        ctx.drawImage(img, 0, 0, 1280, 720);
-                        
-                        if (loadedFrames === frameCount) {
-                            setupGoogleVeoPlayer();
-                        }
-                        resolve(true);
-                    };
-                    img.onerror = function() {
-                        loadedFrames++;
-                        if (loadedFrames === frameCount) {
-                            setupGoogleVeoPlayer();
-                        }
-                        resolve(false);
-                    };
-                    img.src = url;
-                }, delayMs);
-            });
+        if (response.ok) {
+            var blob = await response.blob();
+            return URL.createObjectURL(blob);
         }
-
-        function setupGoogleVeoPlayer() {
-            var fps = 24;
-            var frameDelay = 1000 / fps;
-            
-            var playerHtml = '<div style="position:relative;width:100%;background:#0a0e27;border-radius:8px;overflow:hidden">';
-            playerHtml += '<canvas id="' + canvasId + '" style="width:100%;height:auto;display:block;background:#0a0e27;border-radius:8px;cursor:pointer" width="1280" height="720"></canvas>';
-            
-            playerHtml += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:10">';
-            playerHtml += '<div class="video-play-btn" style="width:70px;height:70px;background:rgba(249,152,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #fff;cursor:pointer;pointer-events:all;transition:all 0.2s" onclick="toggleCanvasPlay(\'' + canvasId + '\')">';
-            playerHtml += '<i class="fas fa-play" id="play-icon-' + canvasId + '" style="color:#fff;font-size:28px;margin-left:4px"></i>';
-            playerHtml += '</div>';
-            playerHtml += '</div>';
-            
-            playerHtml += '<div style="position:absolute;top:12px;left:12px;background:rgba(249,152,0,0.8);color:#fff;font-size:10px;padding:4px 10px;border-radius:4px;z-index:20;font-weight:600;border:1px solid #f99800">';
-            playerHtml += '🔶 GOOGLE VEO (24 frames, 24fps) - Grátis!';
-            playerHtml += '</div>';
-            
-            playerHtml += '<div style="position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.85);color:#fff;font-size:10px;padding:6px 12px;border-radius:5px;z-index:20;font-weight:600;font-family:monospace">';
-            playerHtml += '<span id="fps-display-' + canvasId + '">24</span>fps | <span id="frame-display-' + canvasId + '">0</span>/24';
-            playerHtml += '</div>';
-            
-            playerHtml += '<div style="position:absolute;bottom:0;left:0;right:0;height:4px;background:rgba(255,255,255,0.2);z-index:15">';
-            playerHtml += '<div id="timeline-' + canvasId + '" style="height:100%;background:linear-gradient(90deg,#f99800,#ff6b35);width:0%;transition:width 0.05s linear"></div>';
-            playerHtml += '</div>';
-            
-            playerHtml += '</div>';
-            
-            playerHtml += '<div class="media-foot" style="gap:3px;flex-wrap:wrap;background:#0a1117">';
-            playerHtml += '<span class="media-lbl"><i class="fas fa-video" style="color:#f99800;margin-right:4px"></i>' + safe + ' (Google Veo: 24 frames, ~1s)</span>';
-            playerHtml += '<div style="display:flex;gap:4px;flex-wrap:wrap">';
-            playerHtml += '<button class="mbtn" onclick="switchVideoModel(\'zevia\',\'' + safe.replace(/'/g, "\\'") + '\')"><i class="fas fa-sync"></i> Zevia</button>';
-            playerHtml += '<button class="mbtn" onclick="downloadVideoFrames(\'' + canvasId + '\')"><i class="fas fa-download"></i> Frames</button>';
-            playerHtml += '<button class="mbtn" onclick="showFFmpegTip()"><i class="fas fa-film"></i> MP4</button>';
-            playerHtml += '</div>';
-            playerHtml += '</div>';
-
-            card.innerHTML = playerHtml;
-            
-            startFrameAnimation(canvasId, frames, frameCount);
-            
-            window['vidData_' + canvasId] = {
-                frames: frames,
-                frameCount: frameCount,
-                prompt: safe,
-                fps: fps,
-                frameDelay: frameDelay,
-                isPlaying: false,
-                currentFrame: 0,
-                model: 'google-veo'
-            };
-        }
-
-        // Carrega todos os frames
-        var promises = [];
-        for (var i = 0; i < frameCount; i++) {
-            promises.push(loadGoogleFrame(i));
-        }
+        return null;
         
-        await Promise.all(promises);
-
     } catch(e) {
-        card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px"><i class="fas fa-exclamation-triangle"></i> Google Veo indisponível: ' + e.message + '<br><button onclick="switchVideoModel(\'zevia\',\'' + safe.replace(/'/g, "\\'") + '\')" class="mbtn" style="margin-top:8px"><i class="fas fa-sync"></i> Tentar com Zevia</button></div>';
+        console.warn('HF Video API indisponível, usando fallback de frames');
+        return null;
     }
 }
 
-// Função para trocar modelo de vídeo
-function switchVideoModel(newModel, prompt) {
-    videoModel = newModel;
-    toast('Usando modelo: ' + (newModel === 'zevia' ? 'Zevia 🔷' : 'Google Veo 🔶'), 'ok');
+// Mostra player de vídeo real
+function showRealVideoPlayer(card, videoUrl, prompt) {
+    var safe = escHtml(prompt.substring(0, 50));
+    var playerHtml = '<div style="position:relative;width:100%;background:#1a1a2e;border-radius:8px;overflow:hidden">';
+    playerHtml += '<video width="100%" height="auto" controls style="display:block;border-radius:8px" src="' + videoUrl + '"></video>';
+    playerHtml += '<div style="position:absolute;top:12px;left:12px;background:rgba(79,129,240,0.8);color:#fff;font-size:10px;padding:4px 10px;border-radius:4px;z-index:20;font-weight:600;border:1px solid #5f81f0">';
+    playerHtml += '🔷 ZEVIA (Vídeo Real)';
+    playerHtml += '</div>';
+    playerHtml += '</div>';
+    playerHtml += '<div class="media-foot" style="gap:3px;flex-wrap:wrap">';
+    playerHtml += '<span class="media-lbl"><i class="fas fa-video" style="color:#4f81f0;margin-right:4px"></i>' + safe + ' (Vídeo Real)</span>';
+    playerHtml += '<div style="display:flex;gap:4px;flex-wrap:wrap">';
+    playerHtml += '<a href="' + videoUrl + '" download="zevia-video.mp4" class="mbtn"><i class="fas fa-download"></i> Baixar MP4</a>';
+    playerHtml += '</div>';
+    playerHtml += '</div>';
     
-    // Regenera o vídeo com o novo modelo
-    if (prompt && prompt.length > 0) {
-        // Simula entrada do usuário
-        inputEl.value = prompt;
-        autoResize(inputEl);
-        handleSend();
-    }
+    card.innerHTML = playerHtml;
 }
 
+// Mostra player de frames (fallback)
+function showVideoPlayer(card, frames, prompt) {
+    var safe = escHtml(prompt.substring(0, 50));
+    var canvasId = 'vid-canvas-' + Date.now();
+    
+    var playerHtml = '<div style="position:relative;width:100%;background:#1a1a2e;border-radius:8px;overflow:hidden;aspect-ratio:16/9">';
+    playerHtml += '<canvas id="' + canvasId + '" style="width:100%;height:auto;display:block;background:#1a1a2e;border-radius:8px;cursor:pointer" width="1280" height="720"></canvas>';
+    playerHtml += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:10">';
+    playerHtml += '<div style="width:70px;height:70px;background:rgba(79,129,240,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #fff;cursor:pointer;pointer-events:all;transition:all 0.2s" onclick="toggleCanvasPlay(\'' + canvasId + '\')">';
+    playerHtml += '<i class="fas fa-play" id="play-icon-' + canvasId + '" style="color:#fff;font-size:28px;margin-left:4px"></i>';
+    playerHtml += '</div>';
+    playerHtml += '</div>';
+    playerHtml += '<div style="position:absolute;top:12px;left:12px;background:rgba(79,129,240,0.8);color:#fff;font-size:10px;padding:4px 10px;border-radius:4px;z-index:20;font-weight:600;border:1px solid #5f81f0">';
+    playerHtml += '🔷 ZEVIA (6 frames, 24fps)';
+    playerHtml += '</div>';
+    playerHtml += '<div style="position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.85);color:#fff;font-size:10px;padding:6px 12px;border-radius:5px;z-index:20;font-weight:600;font-family:monospace">';
+    playerHtml += '<span id="fps-display-' + canvasId + '">24</span>fps | <span id="frame-display-' + canvasId + '">0</span>/6';
+    playerHtml += '</div>';
+    playerHtml += '<div style="position:absolute;bottom:0;left:0;right:0;height:4px;background:rgba(255,255,255,0.2);z-index:15">';
+    playerHtml += '<div id="timeline-' + canvasId + '" style="height:100%;background:linear-gradient(90deg,#4f81f0,#7c3aed);width:0%;transition:width 0.05s linear"></div>';
+    playerHtml += '</div>';
+    playerHtml += '</div>';
+    playerHtml += '<div class="media-foot" style="gap:3px;flex-wrap:wrap">';
+    playerHtml += '<span class="media-lbl"><i class="fas fa-video" style="color:#4f81f0;margin-right:4px"></i>' + safe + ' (Zevia: 6 frames, 0.25s)</span>';
+    playerHtml += '<div style="display:flex;gap:4px;flex-wrap:wrap">';
+    playerHtml += '<button class="mbtn" onclick="downloadVideoFrames(\'' + canvasId + '\')"><i class="fas fa-download"></i> Frames</button>';
+    playerHtml += '</div>';
+    playerHtml += '</div>';
+    
+    var div = document.createElement('div');
+    div.innerHTML = playerHtml;
+    chatEl.removeChild(chatEl.lastChild);
+    chatEl.appendChild(div);
+    
+    // Carrega frames
+    var loadedFrames = 0;
+    var imageFrames = [];
+    
+    frames.forEach(function(url, idx) {
+        var img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function() {
+            imageFrames[idx] = img;
+            loadedFrames++;
+            
+            if (loadedFrames === frames.length) {
+                setTimeout(function() {
+                    startFrameAnimation(canvasId, imageFrames, frames.length);
+                }, 100);
+            }
+        };
+        img.src = url;
+    });
+}
+
+// MODELO 1: ZEVIA (12 frames frame-by-frame com progressão narrativa)
 // Elementos DOM
 var chatEl   = document.getElementById('chat-window');
 var inputEl  = document.getElementById('user-input');
@@ -1535,15 +1325,6 @@ function togglePlusMenu() {
     menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
 }
 
-function switchVideoModelUI() {
-    document.getElementById('video-model-modal').style.display = 'flex';
-}
-
-function closeVideoModelUI() {
-    document.getElementById('video-model-modal').style.display = 'none';
-    document.getElementById('current-video-model').textContent = (videoModel === 'zevia' ? 'Zevia 🔷' : 'Google Veo 🔶');
-}
-
 // ==========================================
 // EDIÇÃO DE MENSAGENS
 // ==========================================
@@ -1785,20 +1566,6 @@ function updatePersonalityUI() {
         }
     });
     
-    // Atualiza botões de modelo
-    document.querySelectorAll('.video-model-btn').forEach(btn => {
-        var model = btn.getAttribute('data-model');
-        if (model === zeniaPersonality.videoModel) {
-            btn.style.background = '#1d3461';
-            btn.style.color = '#93c5fd';
-            btn.style.border = '1px solid #2d4a7a';
-        } else {
-            btn.style.background = '#1a1f2e';
-            btn.style.color = '#9ca3af';
-            btn.style.border = '1px solid #252c3b';
-        }
-    });
-    
     // Atualiza texto de configuração atual
     var toneLabels = {
         'amigavel': 'Amigável 😊',
@@ -1814,14 +1581,8 @@ function updatePersonalityUI() {
         'detalhado': 'Detalhado'
     };
     
-    var videoLabels = {
-        'zevia': 'Zevia 🔷',
-        'google-veo': 'Google Veo 🔶'
-    };
-    
     document.getElementById('current-tone').textContent = toneLabels[zeniaPersonality.tone] || 'Desconhecido';
     document.getElementById('current-detail').textContent = detailLabels[zeniaPersonality.detailLevel] || 'Desconhecido';
-    document.getElementById('current-video').textContent = videoLabels[zeniaPersonality.videoModel] || 'Desconhecido';
 }
 
 function setPersonality(tone) {
@@ -1831,12 +1592,6 @@ function setPersonality(tone) {
 
 function setDetailLevel(level) {
     zeniaPersonality.detailLevel = level;
-    updatePersonalityUI();
-}
-
-function setVideoModel(model) {
-    zeniaPersonality.videoModel = model;
-    videoModel = model;
     updatePersonalityUI();
 }
 
@@ -1881,7 +1636,6 @@ function buildSystem(q) {
          + '\nCONFIGURAÇÃO ATUAL:\n'
          + '• Tom: ' + toneMsg + '\n'
          + '• Detalhe: ' + detailMsg + '\n'
-         + '• Modelo de Vídeo: ' + (zeniaPersonality.videoModel === 'zevia' ? 'Zevia (12 frames)' : 'Google Veo (24 frames, grátis)') + '\n'
          + '\nTuas irmãs digitais são: Zenia-Projects, IA-Zenia e Antonia-IA (antonia-ia.netlify.app).\n'
          + memCtx + kbCtx
          + '\nREGRAS CRÍTICAS:\n'
