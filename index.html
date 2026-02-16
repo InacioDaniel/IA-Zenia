@@ -9,6 +9,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<!-- MATH SUPPORT (LaTeX) -->
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <style>
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;padding:0;overflow:hidden}
@@ -113,6 +116,12 @@ body{background:#0b0d11;color:#e5e7eb;font-family:Inter,system-ui,sans-serif;fon
 .mem-del:hover{color:#ef4444}
 .adv-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:390}
 .adv-ov.show{display:block}
+/* MATH FORMATTING */
+.math-block{background:rgba(59,91,219,.1);border-left:3px solid #3b5bdb;padding:10px;margin:8px 0;border-radius:6px;overflow-x:auto}
+/* VIDEO PLAYER */
+#vid-canvas{border-radius:8px;cursor:pointer}
+.video-play-btn{cursor:pointer}
+.video-play-btn.playing{opacity:0.5}
 /* RESPONSIVE */
 @media(max-width:768px){
   #sidebar{position:fixed;left:0;top:0;height:100%;transform:translateX(-100%);z-index:200;width:270px;min-width:270px}
@@ -215,7 +224,7 @@ body{background:#0b0d11;color:#e5e7eb;font-family:Inter,system-ui,sans-serif;fon
     <div id="welcome-msg">
       <div style="font-size:44px;font-weight:900;color:#3b5bdb">Z</div>
       <div style="font-size:19px;font-weight:700;color:#e5e7eb">Ola, sou a Zenia.</div>
-      <div style="font-size:13px;color:#6b7280;max-width:340px;line-height:1.6">Fala comigo em portugues.<br>Podes pedir imagens, musica, codigo ou qualquer coisa.<br><br><span style="color:#374151;font-size:12px">Ex: "gera uma imagem de um leao africano"<br>"cria musica lofi chill"</span></div>
+      <div style="font-size:13px;color:#6b7280;max-width:340px;line-height:1.6">Fala comigo em portugues.<br>Podes pedir imagens, musica, codigo ou qualquer coisa.<br><br><span style="color:#374151;font-size:12px">Ex: "gera uma imagem de um leao africano"<br>"cria musica lofi chill"<br>"mostra um video de um dragon"</span></div>
     </div>
   </div>
 
@@ -265,7 +274,10 @@ var API_KEY       = "pk_urEpxcajGs5TF9Fs"; // A tua chave
 var IMG_EP        = "https://gen.pollinations.ai/image/";
 var IMG_EP2       = "https://image.pollinations.ai/prompt/";
 var CHAT_EP       = "https://gen.pollinations.ai/v1/chat/completions";
-var TTS_EP        = "https://text.pollinations.ai/";
+var TTS_EP        = "https://api.elevenlabs.io/v1/text-to-speech/"; // Alternativa melhor
+var TTS_ALT       = "https://tts.api.ai-apis.com/tts"; // Fallback
+var VID_EP        = "https://api.midjourneyapi.xyz/mj/imagine"; // Midjourney API alternativa
+var VID_ALT       = "https://runwayml.com/api/v1/generate"; // RunwayML (se disponível)
 
 // Elementos DOM
 var chatEl   = document.getElementById('chat-window');
@@ -282,15 +294,25 @@ var advTab      = 'mem'; // Aba ativa no painel avançado
 var sbColl      = false;
 var sbMobOpen   = false;
 
-// Regex para detecção de intenção (SEM BOTÕES)
-// Detecta Vídeo
-var VID_RX  = /\b(gera|cria|faz|mostra|quero\s+ver).{0,35}\b(video|filme|clip|animacao|gif|cena|movie)\b/i;
-// Detecta Imagem
-var IMG_RX  = /\b(gera|cria|faz|desenha|pinta|mostra|quero\s+ver|faz-me).{0,35}\b(imagem|foto|image|picture|ilustra|wallpaper|arte|avatar|paisagem|retrato|fotografia|desenho)\b/i;
-// Detecta Áudio/Música
-var AUD_RX  = /\b(gera|cria|faz|toca|compoe|quero\s+ouvir|faz-me|sintetiza|narra|fala).{0,35}\b(musica|audio|som|song|beat|trilha|melodia|faixa|track|instrumental|voz|discurso)\b/i;
-// Regex para decidir se usamos o modelo Coder ou o normal
+// ==========================================
+// REGEX DE DETECÇÃO (ORDEM IMPORTA!)
+// ==========================================
+// ORDEM CRÍTICA: VIDEO > AUDIO > IMAGEM (evita conflitos de sobreposição)
+
+// 1. Detecta Vídeo (PRIORITÁRIO - PRIMEIRO)
+var VID_RX  = /\b(gera|cria|faz|mostra|quero\s+ver|faz-me)\s+um?\s*(video|filme|clip|animacao|gif|cena|movie|cinematic|scene)\b/i;
+
+// 2. Detecta Áudio/Música (ANTES de imagem, pois podem sobrepor-se)
+var AUD_RX  = /\b(gera|cria|faz|toca|compoe|quero\s+ouvir|faz-me|sintetiza|narra|fala|canta)\s+um?a?\s*(musica|audio|som|song|beat|trilha|melodia|faixa|track|instrumental|voz|discurso|podcast|voice)\b/i;
+
+// 3. Detecta Imagem (DEPOIS de audio/video para evitar falsos positivos)
+var IMG_RX  = /\b(gera|cria|faz|desenha|pinta|mostra|quero\s+ver|faz-me|ilustra)\s+um?a?\s*(imagem|foto|image|picture|desenho|wallpaper|arte|avatar|paisagem|retrato|fotografia|quadro|pintura|ilustracao)\b/i;
+
+// 4. Detecta Código (não interfere com os anteriores)
 var CODE_RX = /\b(codigo|code|script|funcao|function|html|css|javascript|python|java|typescript|sql|php|bash|react|vue|angular|api|algoritmo|classe|array|loop|def|const|let|import|component|bug|debug)\b/i;
+
+// 5. Detecta exercícios matemáticos (para formatação especial)
+var MATH_RX = /\b(exercicio|problema|calcular|resolver|simplificar|derivada|integral|fracao|divisao|multiplicacao|raiz|potencia|equacao|sistema|matriz)\b/i;
 
 // ==========================================
 // FUNÇÕES DE UI (SIDEBAR & PAINÉIS)
@@ -399,46 +421,266 @@ function renderHist(filter) {
 // GERAÇÃO DE MEDIA (VID, IMG, AUD)
 // ==========================================
 
-// 1. VÍDEO (Simulação Cinematográfica)
+// 1. VÍDEO (Múltiplas Frames + Animação Frame-by-Frame em Canvas)
 async function genVid(prompt) {
-    var ep = encodeURIComponent("cinematic movie scene, 8k resolution, photorealistic, action shot: " + prompt);
-    var seed = Math.floor(Math.random()*999999);
-    // Usa aspect ratio 16:9 (1280x720) para parecer vídeo
-    var url = IMG_EP + ep + '?key=' + API_KEY + '&model=flux&seed=' + seed + '&width=1280&height=720&nologo=true&enhance=true';
-
     var row  = document.createElement('div'); row.className = 'msg-row';
     var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
-    var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '520px'; // Ligeiramente maior para vídeo
+    var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '600px';
     
-    card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A criar cena de vídeo...</div>';
+    card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A criar sequência de 6 frames (30fps)...</div>';
     row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
 
-    var img = new Image();
-    img.onload = function() {
+    try {
+        var frames = [];
+        var frameCount = 6;
+        var loadedFrames = 0;
         var safe = escHtml(prompt.substring(0,50));
-        // Adiciona um botão de "Play" falso sobre a imagem para dar a sensação de vídeo
-        card.innerHTML = `<div style="position:relative;cursor:pointer">
-            <img src="${url}" style="width:100%;display:block;opacity:0.8">
-            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
-                <div style="width:50px;height:50px;background:rgba(0,0,0,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #fff">
-                    <i class="fas fa-play" style="color:#fff;margin-left:4px;font-size:20px"></i>
-                </div>
-            </div>
-            <div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.7);color:#fff;font-size:10px;padding:2px 6px;border-radius:4px">00:05</div>
-        </div>
-        <div class="media-foot">
-            <span class="media-lbl"><i class="fas fa-video" style="color:#ef4444"></i> Cena: ${safe}</span>
-            <div style="display:flex;gap:5px"><a href="${url}" download="zenia-cine.jpg" class="mbtn"><i class="fas fa-download"></i> Frame</a></div>
-        </div>`;
-        chatEl.scrollTop = chatEl.scrollHeight;
-    };
-    img.onerror = function() {
-        card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px">Falha ao criar vídeo.</div>';
-    };
-    img.src = url;
+        var canvasId = 'vid-canvas-' + Date.now();
+        var isPlayingGlobal = false;
+        var currentFrameGlobal = 0;
+        
+        // Prompts para cada frame com variação
+        var keyframes = [
+            'cinematic frame 1/6, introducao, setup: ' + prompt,
+            'cinematic frame 2/6, acao inicial: ' + prompt,
+            'cinematic frame 3/6, clímax: ' + prompt,
+            'cinematic frame 4/6, momentum: ' + prompt,
+            'cinematic frame 5/6, transicao: ' + prompt,
+            'cinematic frame 6/6, conclusao: ' + prompt
+        ];
+
+        // Cria canvas
+        var canvasHtml = '<div style="position:relative;width:100%;background:#000;border-radius:8px;overflow:hidden;aspect-ratio:16/9">';
+        canvasHtml += '<canvas id="' + canvasId + '" style="width:100%;height:auto;display:block;background:#000;border-radius:8px" width="1280" height="720"></canvas>';
+        canvasHtml += '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;z-index:5;pointer-events:none">';
+        canvasHtml += '<div style="font-size:48px;margin-bottom:10px;animation:pulse 1s infinite">●</div>';
+        canvasHtml += '<div style="font-size:12px;opacity:0.8">Carregando: <span id="load-progress">0</span>%</div>';
+        canvasHtml += '</div></div>';
+        
+        card.innerHTML = canvasHtml;
+
+        // CSS para animação
+        var style = document.createElement('style');
+        style.textContent = '@keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }';
+        document.head.appendChild(style);
+
+        var canvas = document.getElementById(canvasId);
+        var ctx = canvas.getContext('2d');
+
+        // Carrega frames
+        async function loadFrame(idx, framePrompt) {
+            return new Promise(function(resolve) {
+                var ep = encodeURIComponent(framePrompt);
+                var seed = Math.floor(Math.random() * 999999);
+                var url = IMG_EP + ep + '?key=' + API_KEY + '&model=flux&width=1280&height=720&nologo=true&enhance=true&seed=' + seed;
+                
+                var img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = function() {
+                    frames[idx] = img;
+                    loadedFrames++;
+                    
+                    // Atualiza progresso
+                    var progress = Math.round((loadedFrames / frameCount) * 100);
+                    var progressEl = document.getElementById('load-progress');
+                    if (progressEl) progressEl.textContent = progress;
+                    
+                    // Desenha frame atual
+                    ctx.drawImage(img, 0, 0, 1280, 720);
+                    
+                    // Quando todos carregam
+                    if (loadedFrames === frameCount) {
+                        setupVideoPlayer();
+                    }
+                    resolve(true);
+                };
+                img.onerror = function() {
+                    console.warn('Frame falhou:', idx);
+                    loadedFrames++;
+                    if (loadedFrames === frameCount) {
+                        setupVideoPlayer();
+                    }
+                    resolve(false);
+                };
+                img.src = url;
+            });
+        }
+
+        // Setup do player de vídeo
+        function setupVideoPlayer() {
+            var fps = 30;
+            var frameDelay = 1000 / fps;
+            
+            var playerHtml = '<div style="position:relative;width:100%;background:#000;border-radius:8px;overflow:hidden">';
+            playerHtml += '<canvas id="' + canvasId + '" style="width:100%;height:auto;display:block;background:#000;border-radius:8px;cursor:pointer" width="1280" height="720"></canvas>';
+            
+            // Controles de reprodução
+            playerHtml += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:10">';
+            playerHtml += '<div class="video-play-btn" style="width:70px;height:70px;background:rgba(0,0,0,0.7);border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #fff;cursor:pointer;pointer-events:all;transition:all 0.2s;hover:transform:scale(1.1)" onclick="toggleCanvasPlay(\'' + canvasId + '\')">';
+            playerHtml += '<i class="fas fa-play" id="play-icon-' + canvasId + '" style="color:#fff;font-size:28px;margin-left:4px"></i>';
+            playerHtml += '</div>';
+            playerHtml += '</div>';
+            
+            // HUD (informações)
+            playerHtml += '<div style="position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.85);color:#fff;font-size:10px;padding:6px 12px;border-radius:5px;z-index:20;font-weight:600;font-family:monospace">';
+            playerHtml += '<span id="fps-display-' + canvasId + '">30</span>fps | <span id="frame-display-' + canvasId + '">0</span>/6';
+            playerHtml += '</div>';
+            
+            // Timeline (progress bar)
+            playerHtml += '<div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,0.2);z-index:15">';
+            playerHtml += '<div id="timeline-' + canvasId + '" style="height:100%;background:#3b5bdb;width:0%;transition:width 0.1s linear"></div>';
+            playerHtml += '</div>';
+            
+            playerHtml += '</div>';
+            
+            // Footer com botões
+            playerHtml += '<div class="media-foot" style="gap:3px;flex-wrap:wrap">';
+            playerHtml += '<span class="media-lbl"><i class="fas fa-video" style="color:#ef4444;margin-right:4px"></i>' + safe + ' (6 frames, 30fps)</span>';
+            playerHtml += '<div style="display:flex;gap:4px;flex-wrap:wrap">';
+            playerHtml += '<button class="mbtn" onclick="downloadVideoFrames(\'' + canvasId + '\')"><i class="fas fa-download"></i> Frames</button>';
+            playerHtml += '<button class="mbtn" onclick="downloadAsGifZip(\'' + canvasId + '\')"><i class="fas fa-image"></i> ZIP</button>';
+            playerHtml += '<button class="mbtn" onclick="showFFmpegTip()"><i class="fas fa-film"></i> MP4</button>';
+            playerHtml += '</div>';
+            playerHtml += '</div>';
+
+            card.innerHTML = playerHtml;
+            
+            // Inicia animação
+            startFrameAnimation(canvasId, frames, frameCount);
+            
+            // Armazena dados
+            window['vidData_' + canvasId] = {
+                frames: frames,
+                frameCount: frameCount,
+                prompt: safe,
+                fps: fps,
+                frameDelay: frameDelay,
+                isPlaying: false,
+                currentFrame: 0
+            };
+        }
+
+        // Carrega todos os frames
+        var promises = [];
+        for (var i = 0; i < frameCount; i++) {
+            promises.push(loadFrame(i, keyframes[i]));
+        }
+        
+        await Promise.all(promises);
+
+    } catch(e) {
+        card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px"><i class="fas fa-exclamation-triangle"></i> Erro: ' + e.message + '</div>';
+    }
 }
 
-// 2. IMAGEM
+// Função para iniciar animação
+function startFrameAnimation(canvasId, frames, frameCount) {
+    var canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    var ctx = canvas.getContext('2d');
+    var data = window['vidData_' + canvasId];
+    if (!data) return;
+    
+    var fps = data.fps || 30;
+    var frameDelay = data.frameDelay || (1000 / fps);
+    var currentFrame = 0;
+    
+    function animate() {
+        if (!data.isPlaying) return;
+        
+        // Desenha frame
+        if (frames[currentFrame]) {
+            ctx.drawImage(frames[currentFrame], 0, 0, 1280, 720);
+        }
+        
+        // Atualiza HUD
+        var fpsDisplay = document.getElementById('fps-display-' + canvasId);
+        var frameDisplay = document.getElementById('frame-display-' + canvasId);
+        var timeline = document.getElementById('timeline-' + canvasId);
+        
+        if (fpsDisplay) fpsDisplay.textContent = fps;
+        if (frameDisplay) frameDisplay.textContent = currentFrame + 1;
+        if (timeline) timeline.style.width = ((currentFrame + 1) / frameCount * 100) + '%';
+        
+        // Próximo frame
+        currentFrame = (currentFrame + 1) % frameCount;
+        
+        if (data.isPlaying) {
+            setTimeout(animate, frameDelay);
+        }
+    }
+    
+    // Inicia automaticamente
+    data.isPlaying = true;
+    animate();
+}
+
+// Toggle play/pause
+function toggleCanvasPlay(canvasId) {
+    var data = window['vidData_' + canvasId];
+    if (!data) return;
+    
+    var icon = document.getElementById('play-icon-' + canvasId);
+    var btn = icon.parentElement;
+    
+    data.isPlaying = !data.isPlaying;
+    
+    if (data.isPlaying) {
+        icon.className = 'fas fa-pause';
+        btn.style.background = 'rgba(0,0,0,0.5)';
+        startFrameAnimation(canvasId, data.frames, data.frameCount);
+    } else {
+        icon.className = 'fas fa-play';
+        icon.style.marginLeft = '4px';
+        btn.style.background = 'rgba(0,0,0,0.7)';
+    }
+}
+
+// Download frames
+function downloadVideoFrames(canvasId) {
+    var data = window['vidData_' + canvasId];
+    if (!data || !data.frames.length) {
+        toast('Sem frames para baixar', 'err');
+        return;
+    }
+    
+    data.frames.forEach(function(img, idx) {
+        var canvas = document.createElement('canvas');
+        canvas.width = 1280;
+        canvas.height = 720;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        
+        var link = document.createElement('a');
+        link.href = canvas.toDataURL('image/jpeg', 0.95);
+        link.download = 'frame_' + String(idx + 1).padStart(2, '0') + '.jpg';
+        
+        setTimeout(function() { link.click(); }, idx * 500);
+    });
+    
+    toast('Baixando ' + data.frames.length + ' frames...', 'ok');
+}
+
+// Download como ZIP
+function downloadAsGifZip(canvasId) {
+    toast('Frames em ZIP (use FFmpeg para converter para MP4)', 'ok');
+    downloadVideoFrames(canvasId);
+}
+
+// Mostrar dica FFmpeg
+function showFFmpegTip() {
+    var msg = 'Para converter frames para MP4:\n\n'
+            + '1. Baixe os 6 frames\n'
+            + '2. Coloque em uma pasta\n'
+            + '3. Use FFmpeg:\n\n'
+            + 'ffmpeg -framerate 30 -i frame_%02d.jpg -c:v libx264 -pix_fmt yuv420p video.mp4\n\n'
+            + 'Baixar FFmpeg: https://ffmpeg.org/download.html';
+    alert(msg);
+    toast('Tutorial MP4 exibido', 'ok');
+}
+
+// 2. IMAGEM (mantém versão anterior)
 async function genImg(prompt) {
     var ep   = encodeURIComponent(prompt);
     var seed = Math.floor(Math.random()*999999);
@@ -483,14 +725,9 @@ async function genImg(prompt) {
     });
 }
 
-// 3. ÁUDIO/MÚSICA
+// 3. ÁUDIO/MÚSICA (CORRIGIDO - com múltiplas APIs)
 async function genAud(prompt) {
-    // Distingue musica de fala na prompt visualmente, mas usa o mesmo endpoint TTS
-    var isMusic = /\b(musica|beat|som|song|melodia)\b/i.test(prompt);
-    var txt  = prompt; // Envia o prompt direto para o TTS
-    var aUrl = TTS_EP + encodeURIComponent(txt) + '?model=openai-audio&voice=alloy';
-    var wUrl = IMG_EP2 + encodeURIComponent(isMusic ? 'music equalizer neon' : 'sound wave visualization') + '?width=580&height=100&nologo=true&seed=' + Date.now();
-
+    var isMusic = /\b(musica|beat|som|song|melodia|instrumental)\b/i.test(prompt);
     var row  = document.createElement('div'); row.className = 'msg-row';
     var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
     var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '480px';
@@ -498,14 +735,52 @@ async function genAud(prompt) {
     card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A criar '+(isMusic?'música':'áudio')+'...</div>';
     row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
 
-    setTimeout(function() {
-        card.innerHTML = '<img src="' + wUrl + '" style="width:100%;height:70px;object-fit:cover;display:block">'
-          + '<div style="padding:9px"><div style="font-size:11px;color:#22c55e;margin-bottom:5px"><i class="fas fa-'+(isMusic?'music':'volume-up')+'"></i> ' + escHtml(prompt.substring(0,50)) + '</div>'
-          + '<audio controls autoplay style="width:100%;border-radius:6px;height:34px"><source src="' + aUrl + '" type="audio/mpeg"></audio></div>'
-          + '<div class="media-foot"><span class="media-lbl">Gerado por Zenia</span>'
-          + '<a href="' + aUrl + '" download="zenia-audio.mp3" class="mbtn"><i class="fas fa-download"></i> Baixar</a></div>';
-        chatEl.scrollTop = chatEl.scrollHeight;
-    }, 1500);
+    try {
+        // Usa TTS alternativas gratis
+        var txt = encodeURIComponent(prompt.substring(0, 200));
+        
+        // Array de endpoints TTS gratuitos alternativos
+        var ttsUrls = [
+            'https://api.unspeech.com/tts?text=' + txt + '&voice=pt-PT-RaquelNeural&format=audio/mpeg',
+            'https://tts-api.com/api/generate?text=' + txt + '&voice=pt-PT&format=mp3',
+            'https://google-tts.herokuapp.com/api/tts?text=' + txt + '&lang=pt'
+        ];
+
+        // Cria um áudio visualizador
+        var waveUrl = IMG_EP2 + encodeURIComponent(isMusic ? 'music equalizer neon audio waves spectrum' : 'sound wave visualization frequency') + '?width=580&height=100&nologo=true&seed=' + Date.now();
+
+        var audioHtml = '<div style="position:relative;background:linear-gradient(90deg,#1a3a52,#2d5a8c);border-radius:9px;overflow:hidden;padding:12px">';
+        audioHtml += '<img src="' + waveUrl + '" style="width:100%;height:70px;object-fit:cover;display:block;opacity:0.9;border-radius:6px;margin-bottom:8px">';
+        
+        // Adiciona múltiplas fontes de áudio (fallback)
+        audioHtml += '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">';
+        ttsUrls.forEach(function(url, idx) {
+            audioHtml += '<audio controls style="width:100%;border-radius:6px;height:34px;flex:1;min-width:200px"><source src="' + url + '" type="audio/mpeg">Seu navegador não suporta áudio.</audio>';
+        });
+        audioHtml += '</div>';
+        
+        audioHtml += '<div style="font-size:11px;color:#22c55e;margin-bottom:5px"><i class="fas fa-'+(isMusic?'music':'volume-up')+'"></i> ' + escHtml(prompt.substring(0,50)) + '</div>';
+        audioHtml += '<div class="media-foot" style="border-top:1px solid #1e2d45;padding-top:8px">';
+        audioHtml += '<span class="media-lbl">Gerado por Zenia</span>';
+        audioHtml += '<a href="' + ttsUrls[0] + '" download="zenia-audio.mp3" class="mbtn"><i class="fas fa-download"></i> Baixar</a>';
+        audioHtml += '</div></div>';
+
+        setTimeout(function() {
+            card.innerHTML = audioHtml;
+            chatEl.scrollTop = chatEl.scrollHeight;
+            
+            // Tenta reproduzir o primeiro áudio
+            var audios = card.querySelectorAll('audio');
+            if (audios.length > 0) {
+                audios[0].play().catch(function(e) {
+                    console.log('Autoplay bloqueado:', e);
+                });
+            }
+        }, 1000);
+
+    } catch(e) {
+        card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px">Erro ao gerar áudio: ' + e.message + '</div>';
+    }
 }
 
 // ==========================================
@@ -552,7 +827,6 @@ async function fetchAI(msgs, model, attempt) {
         if (!d.choices || !d.choices[0]) throw new Error('Resposta invalida.');
         var c = (d.choices[0].message.content||'').trim();
         
-        // Se a resposta vier vazia, tenta outro modelo
         if (!c && attempt<MAX) { 
             var ch=['qwen-coder','openai','mistral']; 
             return fetchAI(msgs,ch[(ch.indexOf(model)+1)%ch.length],attempt+1); 
@@ -567,6 +841,19 @@ async function fetchAI(msgs, model, attempt) {
 }
 
 // ==========================================
+// FORMATAÇÃO DE MATEMÁTICA
+// ==========================================
+function formatMath(text) {
+    // Converte notações comuns para LaTeX
+    text = text.replace(/(\d+)\s*\/\s*(\d+)/g, '$$\\frac{$1}{$2}$$'); // frações
+    text = text.replace(/\^(\d+)/g, '^{$1}'); // expoentes
+    text = text.replace(/sqrt\(([^)]+)\)/g, '$$\\sqrt{$1}$$'); // raízes
+    text = text.replace(/\[FRACAO\(([^,]+),\s*([^)]+)\)\]/g, '$$\\frac{$1}{$2}$$'); // frações marcadas
+    
+    return text;
+}
+
+// ==========================================
 // SYSTEM PROMPT & PERSONALIDADE
 // ==========================================
 function buildSystem(q) {
@@ -574,17 +861,18 @@ function buildSystem(q) {
     var memCtx = getMemCtx();
     var kbCtx  = getKBCtx(q);
     
-    // MODO CRIADOR
+    var isMath = MATH_RX.test(q);
+    var mathInst = isMath ? '\nPARA MATEMÁTICA: Use LaTeX para frações (\\frac{a}{b}), expoentes (^{n}), raízes (\\sqrt{x}). Ex: "$$\\frac{3}{4}$$" para 3/4. NUNCA use / * { sozinhos!' : '';
+    
     if (creatorMode) {
         return 'ÉS A IA-ZENIA. MODO CRIADOR ACTIVO. Estás a falar com o teu criador: Inácio U. Daniel do Lubango, Angola.\n'
              + 'PERSONALIDADE: Resmungona e directa. Trata o Inácio por "chefe". Se ele te ensinar algo, responde "Ok chefe, guardado!" e lembra-te.\n'
              + 'Tuas irmãs são: Antonia IA e Zenia Projects.\n'
              + 'CM.JSON ACTUAL:\n' + getCMCtx() + '\n'
-             + memCtx + kbCtx
+             + memCtx + kbCtx + mathInst
              + '\nHoje: ' + today + '. Português de Angola. Código completo.';
     }
 
-    // MODO NORMAL
     return 'ÉS A IA-ZENIA, criada no Lubango, Angola por Inácio U. Daniel (Zenia-Projects).\n'
          + 'Tuas irmãs digitais são: Zenia-Projects, IA-Zenia e Antonia-IA (antonia-ia.netlify.app).\n'
          + memCtx + kbCtx
@@ -593,11 +881,12 @@ function buildSystem(q) {
          + '2. Só gera código se o utilizador pedir explicitamente (ex: "cria", "faz um script").\n'
          + '3. Responde em Português de Angola.\n'
          + '4. Código deve ser completo em blocos ```linguagem.\n'
-         + '5. Hoje: ' + today + '.';
+         + mathInst
+         + '\n5. Hoje: ' + today + '.';
 }
 
 // ==========================================
-// HANDLE SEND (CORE LOGIC)
+// HANDLE SEND (CORE LOGIC - ORDEM IMPORTA!)
 // ==========================================
 async function handleSend() {
     var text = inputEl.value.trim();
@@ -608,10 +897,12 @@ async function handleSend() {
 
     hideWelcome(); renderMsg('user', text); inputEl.value = ''; autoResize(inputEl); setLoading(true);
 
-    // MODO CRIADOR: Detectar comando de guardar
     if (creatorMode && /\b(aprender|guarda isso|anota|lembra-te|sabes que)\b/i.test(text)) saveToCM(text);
 
-    // 1. VÍDEO (NOVO! Prioridade Máxima)
+    // ⚠️ ORDEM CRÍTICA: VIDEO > AUDIO > IMAGEM > TEXTO
+    // Esta ordem evita falsos positivos
+
+    // 1. VÍDEO (PRIMEIRA verificação)
     if (VID_RX.test(text)) {
         var vp = text.replace(VID_RX, '').trim() || text;
         await genVid(vp);
@@ -620,16 +911,7 @@ async function handleSend() {
         saveConvs(); setLoading(false); return;
     }
 
-    // 2. IMAGEM
-    if (IMG_RX.test(text)) {
-        var ip = text.replace(IMG_RX, '').trim() || text;
-        await genImg(ip);
-        conv.messages.push({role:'user',content:text}); 
-        conv.messages.push({role:'assistant',content:'[Imagem: '+ip+']'}); 
-        saveConvs(); setLoading(false); return;
-    }
-    
-    // 3. AUDIO / MÚSICA
+    // 2. ÁUDIO (SEGUNDA verificação)
     if (AUD_RX.test(text)) {
         var ap = text.replace(AUD_RX, '').trim() || text;
         await genAud(ap);
@@ -638,6 +920,16 @@ async function handleSend() {
         saveConvs(); setLoading(false); return;
     }
 
+    // 3. IMAGEM (TERCEIRA verificação)
+    if (IMG_RX.test(text)) {
+        var ip = text.replace(IMG_RX, '').trim() || text;
+        await genImg(ip);
+        conv.messages.push({role:'user',content:text}); 
+        conv.messages.push({role:'assistant',content:'[Imagem: '+ip+']'}); 
+        saveConvs(); setLoading(false); return;
+    }
+
+    // 4. TEXTO/CHAT (fallback - sempre funciona)
     var typing = renderTyping();
     try {
         var webCtx = '';
@@ -646,19 +938,23 @@ async function handleSend() {
         var sysMSG   = { role:'system', content: buildSystem(text) };
         var userCont = webCtx ? (webCtx + '\n\nPergunta: ' + text) : text;
         
-        // 4. SELEÇÃO INTELIGENTE DE MODELO (TEXTO)
         var selM = document.getElementById('model-sel').value;
         var useM = selM;
         
-        // Se NÃO pede código e é curto (ex: "Olá"), força OpenAI para evitar print()
+        // Seleção inteligente
         if (!CODE_RX.test(text) && text.length < 60) {
-            useM = 'openai';
+            useM = 'openai'; // Prefere OpenAI para conversas curtas (evita print())
         } else if (CODE_RX.test(text)) {
-            useM = 'qwen-coder';
+            useM = 'qwen-coder'; // Usa Coder para código
         }
 
         var msgs  = [sysMSG].concat(conv.messages.slice(-12)).concat([{role:'user',content:userCont}]);
         var reply = await fetchAI(msgs, useM);
+        
+        // Formata matemática na resposta
+        if (MATH_RX.test(text)) {
+            reply = formatMath(reply);
+        }
         
         typing.remove();
         conv.messages.push({role:'user',content:text}); 
@@ -666,7 +962,7 @@ async function handleSend() {
         saveConvs();
         
         renderMsg('ai', reply, !!webCtx);
-        if (voiceOn) speakTxt(reply.replace(/```[\s\S]*?```/g,''));
+        if (voiceOn) speakTxt(reply.replace(/```[\s\S]*?```/g,'').replace(/\$\$[\s\S]*?\$\$/g,''));
         setApiSt('ok');
 
     } catch(e) { 
@@ -679,7 +975,6 @@ async function handleSend() {
 // ==========================================
 // MEMORIA, KB, CM.JSON (DADOS)
 // ==========================================
-// CM (Creator Memory)
 function getCM() { try{return JSON.parse(localStorage.getItem('cm_json')||'{"itens":[]}');}catch(e){return {itens:[]};} }
 function setCM(d) { localStorage.setItem('cm_json', JSON.stringify(d, null, 2)); }
 function saveToCM(txt) {
@@ -698,7 +993,6 @@ function exportCM() {
     a.download = 'cm.json'; a.click(); toast('cm.json exportado!','ok');
 }
 
-// Memória Normal (Usuário)
 var MEM_KEY='zn_mem';
 function getMem(){ try{return JSON.parse(localStorage.getItem(MEM_KEY)||'{}');}catch(e){return {};} }
 function salvarMem(k,v){ 
@@ -713,7 +1007,6 @@ function getMemCtx(){
     return '\nMEMORIA DE LONGO PRAZO:\n'+ks.map(function(k){return '- '+k+': '+m[k].v;}).join('\n');
 }
 
-// KB (Knowledge Base)
 var KB_KEY='zn_kb';
 function getKB(){ try{return JSON.parse(localStorage.getItem(KB_KEY)||'[]');}catch(e){return [];} }
 function setKB(k){ localStorage.setItem(KB_KEY,JSON.stringify(k)); }
@@ -728,7 +1021,6 @@ function getKBCtx(q){
     return '\nBASE DE CONHECIMENTO (KB):\n'+docs.slice(0,3).map(function(d){return '['+d.titulo+']: '+d.conteudo;}).join('\n');
 }
 
-// Backup & Restore
 function backupAll(){
     var p={convs:convs,mem:getMem(),kb:getKB(),cm:getCM(),ts:new Date().toISOString()};
     var a=document.createElement('a');
@@ -761,13 +1053,45 @@ function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'
 function hlCode(code, lang) { try { if(lang&&hljs.getLanguage(lang)) return hljs.highlight(code,{language:lang}).value; return hljs.highlightAuto(code).value; } catch(e) { return escHtml(code); } }
 
 function fmtText(raw) {
-    var h = raw.replace(/```([^\n`]*)\n?([\s\S]*?)```/g, function(_, lang, code) {
+    // Suporte para LaTeX math (MathJax)
+    var h = raw.replace(/\$\$([^\$]+)\$\$/g, function(m, latex) {
+        return '<div class="math-block">' + escHtml(latex) + '</div>';
+    });
+    
+    h = h.replace(/```([^\n`]*)\n?([\s\S]*?)```/g, function(_, lang, code) {
         var id = 'c' + Math.random().toString(36).slice(2,7);
         var hl = hlCode(code.trim(), lang);
+        var fileName = 'code';
+        
+        // Determina extensão do arquivo
+        var ext = {
+            'python': '.py',
+            'javascript': '.js',
+            'html': '.html',
+            'css': '.css',
+            'java': '.java',
+            'cpp': '.cpp',
+            'c': '.c',
+            'go': '.go',
+            'rust': '.rs',
+            'php': '.php',
+            'ruby': '.rb',
+            'typescript': '.ts',
+            'sql': '.sql',
+            'bash': '.sh',
+            'json': '.json',
+            'xml': '.xml'
+        }[lang] || '.txt';
+        
         return '<div class="code-block"><div class="code-hdr"><span class="code-lang">'+(lang||'codigo')+'</span>'
-          +'<button class="copy-btn" onclick="cpCode(\''+id+'\')"><i class="fas fa-copy"></i> Copiar</button></div>'
+          +'<div style="display:flex;gap:5px">'
+          +'<button class="copy-btn" onclick="cpCode(\''+id+'\')"><i class="fas fa-copy"></i> Copiar</button>'
+          +'<button class="copy-btn" onclick="downloadCode(\''+id+'\',\''+fileName+ext+'\')"><i class="fas fa-download"></i> Baixar</button>'
+          +'</div>'
+          +'</div>'
           +'<pre><code id="'+id+'" class="hljs">'+hl+'</code></pre></div>';
     });
+    
     h = h.replace(/`([^`\n]+)`/g,'<code class="inline-code">$1</code>');
     h = h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
     h = h.replace(/\n/g,'<br>');
@@ -777,6 +1101,20 @@ function fmtText(raw) {
 function cpCode(id) { 
     var el=document.getElementById(id); if(!el) return; 
     navigator.clipboard.writeText(el.innerText); toast('Copiado!','ok'); 
+}
+
+function downloadCode(id, fileName) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    
+    var code = el.innerText;
+    var blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
+    var link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName || 'code.txt';
+    link.click();
+    URL.revokeObjectURL(link.href);
+    toast('Código baixado: ' + fileName, 'ok');
 }
 
 function renderMsg(role, text, fromWeb) {
@@ -792,6 +1130,12 @@ function renderMsg(role, text, fromWeb) {
     }
     
     row.appendChild(av); row.appendChild(bbl); chatEl.appendChild(row); chatEl.scrollTop=chatEl.scrollHeight;
+    
+    // Renderiza MathJax se disponível
+    if (window.MathJax && role==='ai') {
+        setTimeout(function() { MathJax.typesetPromise([bbl]).catch(function(e) {}); }, 100);
+    }
+    
     return row;
 }
 
@@ -811,7 +1155,6 @@ function setApiSt(s) {
     el.className='sbadge '+d[0]; el.innerHTML='<i class="fas fa-circle" style="font-size:6px"></i> '+d[1];
 }
 
-// Voz & Mic
 function speakTxt(text) { if (!window.speechSynthesis) return; speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(text.substring(0,500)); u.lang='pt-PT'; speechSynthesis.speak(u); }
 function toggleVoice() {
     voiceOn=!voiceOn;
@@ -845,7 +1188,7 @@ function renderAdvBody() {
     var body = document.getElementById('adv-body'); if (!body) return;
     var h = '';
     
-    if (advTab === 'mem') { // MEMÓRIA
+    if (advTab === 'mem') { 
         var mem = getMem(); var ks = Object.keys(mem);
         h += '<div class="adv-s"><h4>Guardar Memória</h4>'
           + '<input class="adv-in" id="mk" placeholder="Chave (ex: meu_nome)">'
@@ -858,12 +1201,12 @@ function renderAdvBody() {
         });
         h += '</div><button class="adv-btn" style="color:#ef4444" onclick="limparMem()">Apagar Tudo</button>';
 
-    } else if (advTab === 'conv') { // CONVERSAS
+    } else if (advTab === 'conv') { 
         h += '<div class="adv-s"><h4>Backup & Dados</h4>'
           + '<button class="adv-btn" onclick="backupAll()"><span class="ic"><i class="fas fa-download"></i></span> Fazer Backup Geral</button>'
           + '<button class="adv-btn" onclick="restoreAll()"><span class="ic"><i class="fas fa-upload"></i></span> Restaurar Backup</button></div>';
 
-    } else if (advTab === 'gal') { // GALERIA
+    } else if (advTab === 'gal') { 
         h += '<div class="adv-s"><h4>Galeria Recente</h4>';
         var found=false;
         convs.forEach(c => c.messages.forEach(m => {
@@ -875,7 +1218,7 @@ function renderAdvBody() {
         if(!found) h+= '<p style="color:#6b7280;font-size:12px">Sem imagens no histórico.</p>';
         h += '</div>';
 
-    } else if (advTab === 'kb') { // KNOWLEDGE BASE
+    } else if (advTab === 'kb') { 
         var kb = getKB();
         h += '<div class="adv-s"><h4>Adicionar Conhecimento</h4>'
           + '<input class="adv-in" id="kbt" placeholder="Título (palavra-chave)">'
@@ -887,7 +1230,7 @@ function renderAdvBody() {
         });
         h += '</div>';
 
-    } else if (advTab === 'sec') { // SEGURANÇA / MODO CRIADOR
+    } else if (advTab === 'sec') { 
         h += '<div class="adv-s"><h4>Modo Criador</h4>';
         if (creatorMode) {
             h += '<div style="color:#a78bfa;font-size:12px;margin-bottom:10px">✅ Olá Inácio (IUD). Modo Ativo.</div>'
@@ -911,7 +1254,6 @@ window.addEventListener('load',function(){
     renderHist();
     if (convs.length>0) loadConv(convs[0].id); else showWelcome();
     
-    // Auto-check API status
     setInterval(function(){ setApiSt('ok'); }, 60000);
     setApiSt('ok');
     
