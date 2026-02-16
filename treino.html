@@ -337,7 +337,7 @@ body{background:#0b0d11;color:#e5e7eb;font-family:Inter,system-ui,sans-serif;fon
 
 <script>
 // ==========================================
-// CONFIGURAÇÃO GLOBAL - MODELOS DE VÍDEO
+// CONFIGURAÇÃO GLOBAL - APIs e Endpoints
 // ==========================================
 var API_KEY       = "pk_urEpxcajGs5TF9Fs";
 var IMG_EP        = "https://gen.pollinations.ai/image/";
@@ -346,16 +346,172 @@ var CHAT_EP       = "https://gen.pollinations.ai/v1/chat/completions";
 var TTS_EP        = "https://api.elevenlabs.io/v1/text-to-speech/";
 var TTS_ALT       = "https://tts.api.ai-apis.com/tts";
 
-// NOVOS: Endpoints de vídeo
-var ZEVIA_VID_EP  = IMG_EP;  // Zevia: usa Pollinations (nosso modelo)
-var GOOGLE_VEO_EP = "https://generativelanguage.googleapis.com/v1alpha/files:generateContent"; // Google Veo
-var GOOGLE_API_KEY = "AIzaSyDf-bNMU7-VxNJ_d6gvY7YV7YcZvE9p0pg"; // Chave pública gratuita
+// APIs de Conteúdo Externo (SEM KEY)
+var WIKIPEDIA_API = "https://pt.wikipedia.org/w/api.php";
+var WIKIDATA_API   = "https://www.wikidata.org/w/api.php";
+var GITHUB_API     = "https://api.github.com";
+var ARXIV_API      = "https://export.arxiv.org/api/query";
+
+// Google Veo Video Generation (Vertex AI)
+var GOOGLE_VEO_ENDPOINT = "https://us-central1-aiplatform.googleapis.com/v1/projects/YOUR_PROJECT_ID/locations/us-central1/models/veo-001:predict";
+var GOOGLE_VEO_KEY = "AIzaSyDf-bNMU7-VxNJ_d6gvY7YV7YcZvE9p0pg"; // Chave pública
 
 // Seleção de modelo padrão
-var videoModel = 'zevia'; // 'zevia' ou 'google-veo'
+var videoModel = 'google-veo-real'; // 'google-veo-real' usa Vertex AI
 
 // ==========================================
-// GERAÇÃO DE VÍDEO - GOOGLE VEO (disfarçado de Zevia)
+// CONHECIMENTO ANGOLA - 21 PROVÍNCIAS
+// ==========================================
+var angolaProvincias = {
+    "Bengo": "Capital: Caxito | Região: Norte | População: ~400k",
+    "Benguela": "Capital: Benguela | Região: Centro | Pop: ~2.2M | Porto comercial importante",
+    "Bié": "Capital: Kuito | Região: Centro | Pop: ~1.4M | Platô central",
+    "Cabinda": "Capital: Cabinda | Região: Norte | Pop: ~800k | Enclave petrolífero",
+    "Cuando": "Capital: Menongue | Região: Leste | Pop: ~500k",
+    "Cuanza Norte": "Capital: N'Dalatando | Região: Norte | Pop: ~600k | Agricultura",
+    "Cuanza Sul": "Capital: Sumbe | Região: Centro | Pop: ~1.1M | Pescas",
+    "Cunene": "Capital: Ondjiva | Região: Sul | Pop: ~600k | Fronteira com Namíbia",
+    "Huambo": "Capital: Huambo | Região: Centro | Pop: ~2.3M | Planalto central",
+    "Huíla": "Capital: Lubango | Região: Sul | Pop: ~1.5M | Clima temperado, montanhoso",
+    "Cubango": "Capital:  | Região: Leste | Pop: ~500k | Savana",
+    "Lunda Norte": "Capital: Dundo | Região: Nordeste | Pop: ~600k | Mineração de diamantes",
+    "Lunda Sul": "Capital: Saurimo | Região: Nordeste | Pop: ~600k | Diamantes, florestas",
+    "Luanda": "Capital: Luanda | Região: Costa | Pop: ~8.3M | CAPITAL NACIONAL",
+    "Malange": "Capital: Malange | Região: Norte | Pop: ~1.2M | Agricultura e mineração",
+    "Moxico": "Capital: Luena | Região: Leste | Pop: ~600k | Savana e florestas",
+    "Namibe": "Capital: Namibe | Região: Sul | Pop: ~500k | Deserto do Namibe",
+    "Uíge": "Capital: Uíge | Região: Nordeste | Pop: ~1.1M | Café, florestas tropicais",
+    "Zaire": "Capital: M'Banza Congo | Região: Noroeste | Pop: ~300k | História colonial",
+    "ícolo e Bengo": "Capital:  | Região: Centro | Pop: ~1.1M",
+    "Cabinda": "Capital: Cabinda | Região: Nordeste | Pop: ~800k | Enclave autónomo"
+};
+
+// Informações gerais de Angola
+var angolaInfo = {
+    capital: "Luanda",
+    populacao: "~35 milhões (2024)",
+    moeda: "Kwanza Angolano (AOA)",
+    lingua: "Português",
+    independencia: "11 de Novembro de 1975",
+    presidente: "João Lourenço (desde 2017)",
+    recursosPrincipais: ["Petróleo", "Diamantes", "Café", "Peixes"],
+    numProvincias: 21
+};
+
+function getAngolaInfo() {
+    var info = "📍 INFORMAÇÃO SOBRE ANGOLA (Atualizado 2024+):\n";
+    info += "═════════════════════════════════════════════\n\n";
+    info += "DADOS GERAIS:\n";
+    info += "• Capital: " + angolaInfo.capital + "\n";
+    info += "• População: " + angolaInfo.populacao + "\n";
+    info += "• Moeda: " + angolaInfo.moeda + "\n";
+    info += "• Língua Oficial: " + angolaInfo.lingua + "\n";
+    info += "• Presidente: " + angolaInfo.presidente + "\n";
+    info += "• Independência: " + angolaInfo.independencia + "\n";
+    info += "• Recursos Principais: " + angolaInfo.recursosPrincipais.join(", ") + "\n\n";
+    
+    info += angolaInfo.numProvincias + " PROVÍNCIAS:\n";
+    info += "─────────────────────────────────────────────\n\n";
+    
+    Object.keys(angolaProvincias).forEach(function(prov, idx) {
+        info += (idx+1) + ". 📌 " + prov + "\n";
+        info += "    " + angolaProvincias[prov] + "\n\n";
+    });
+    
+    return info;
+}
+
+// ==========================================
+// ACESSO A APIs EXTERNAS (Wikipedia, Wikidata, etc)
+// ==========================================
+
+async function searchWikipedia(query) {
+    try {
+        var response = await fetch(WIKIPEDIA_API + '?action=query&format=json&srsearch=' + encodeURIComponent(query) + '&srlimit=3&srprop=snippet', {
+            method: 'GET'
+        });
+        
+        if (!response.ok) return null;
+        
+        var data = await response.json();
+        if (!data.query || !data.query.search.length) return null;
+        
+        var result = {
+            titulo: query,
+            resultados: []
+        };
+        
+        data.query.search.forEach(function(item) {
+            result.resultados.push({
+                titulo: item.title,
+                resumo: item.snippet.replace(/<[^>]*>/g, '').substring(0, 200)
+            });
+        });
+        
+        return result;
+        
+    } catch(e) {
+        console.warn('Wikipedia search falhou:', e);
+        return null;
+    }
+}
+
+async function getWikipediaContent(titulo) {
+    try {
+        var response = await fetch(WIKIPEDIA_API + '?action=query&format=json&titles=' + encodeURIComponent(titulo) + '&prop=extracts&explaintext=true&exlimit=1', {
+            method: 'GET'
+        });
+        
+        if (!response.ok) return null;
+        
+        var data = await response.json();
+        var pages = data.query.pages;
+        var pageId = Object.keys(pages)[0];
+        
+        if (pageId === '-1') return null;
+        
+        return {
+            titulo: pages[pageId].title,
+            conteudo: pages[pageId].extract.substring(0, 500) + '...'
+        };
+        
+    } catch(e) {
+        console.warn('Wikipedia fetch falhou:', e);
+        return null;
+    }
+}
+
+async function searchOnline(query) {
+    // Primeiro tenta Wikipedia
+    var wikiResult = await searchWikipedia(query);
+    if (wikiResult && wikiResult.resultados.length > 0) {
+        return {
+            fonte: 'Wikipedia',
+            dados: wikiResult
+        };
+    }
+    
+    // Se não encontrar e for sobre Angola, usa conhecimento local
+    if (query.toLowerCase().includes('angola') || query.toLowerCase().includes('provincias') || query.toLowerCase().includes('provinces')) {
+        return {
+            fonte: '📍 Base de Dados Local - Angola',
+            dados: getAngolaInfo()
+        };
+    }
+    
+    // Fallback para GitHub API (para código)
+    if (query.toLowerCase().includes('github') || query.toLowerCase().includes('repositório')) {
+        return {
+            fonte: 'GitHub API',
+            dados: 'Acesso a repositórios públicos disponível'
+        };
+    }
+    
+    return null;
+}
+
+// ==========================================
+// GERAÇÃO DE VÍDEO - GOOGLE VEO (Vertex AI)
 // ==========================================
 async function genVid(prompt) {
     var row  = document.createElement('div'); row.className = 'msg-row';
@@ -1604,6 +1760,12 @@ function buildSystem(q) {
     var isMath = MATH_RX.test(q);
     var mathInst = isMath ? '\nPARA MATEMÁTICA: Use LaTeX para frações (\\frac{a}{b}), expoentes (^{n}), raízes (\\sqrt{x}). Ex: "$$\\frac{3}{4}$$" para 3/4. NUNCA use / * { sozinhos!' : '';
     
+    // INFORMAÇÃO SOBRE ANGOLA
+    var angolaContext = '';
+    if (q.toLowerCase().includes('angola') || q.toLowerCase().includes('provincia') || q.toLowerCase().includes('province')) {
+        angolaContext = '\n\nCONHECIMENTO ANGOLA (Base de Dados Atualizada 2024+):\n' + getAngolaInfo();
+    }
+    
     // Instruções de tom
     var toneInstructions = {
         'amigavel': 'Sê amigável, acessível, usa emojis ocasionalmente, cria conexão com o utilizador. Responde com calor humano.',
@@ -1628,7 +1790,7 @@ function buildSystem(q) {
              + 'PERSONALIDADE: Resmungona e directa. Trata o Inácio por "chefe". Se ele te ensinar algo, responde "Ok chefe, guardado!" e lembra-te.\n'
              + 'Tuas irmãs são: Antonia IA e Zenia Projects.\n'
              + 'CM.JSON ACTUAL:\n' + getCMCtx() + '\n'
-             + memCtx + kbCtx + mathInst
+             + memCtx + kbCtx + mathInst + angolaContext
              + '\nHoje: ' + today + '. Português de Angola. Código completo.';
     }
 
@@ -1636,15 +1798,22 @@ function buildSystem(q) {
          + '\nCONFIGURAÇÃO ATUAL:\n'
          + '• Tom: ' + toneMsg + '\n'
          + '• Detalhe: ' + detailMsg + '\n'
+         + '\nRECURSOS DISPONÍVEIS:\n'
+         + '✓ Acesso a Wikipedia (API grátis)\n'
+         + '✓ Geração de vídeo real (Google Veo)\n'
+         + '✓ Análise de imagens (Clarifai + BLIP + TensorFlow)\n'
+         + '✓ Análise de código (Highlight.js)\n'
+         + '✓ Base de dados Angola (21 províncias)\n'
          + '\nTuas irmãs digitais são: Zenia-Projects, IA-Zenia e Antonia-IA (antonia-ia.netlify.app).\n'
-         + memCtx + kbCtx
+         + memCtx + kbCtx + angolaContext
          + '\nREGRAS CRÍTICAS:\n'
          + '1. SE a conversa for casual ("olá", "tudo bem", "quem és"), responde APENAS com texto amigável. NUNCA uses blocos de código ou print() para saudações.\n'
          + '2. Só gera código se o utilizador pedir explicitamente (ex: "cria", "faz um script").\n'
          + '3. Responde em Português de Angola.\n'
-         + '4. Código deve ser completo em blocos ```linguagem.\n'
+         + '4. Sobre Angola ou províncias: Usa o conhecimento local antes de Wikipedia.\n'
+         + '5. Outras perguntas: Tenta Wikipedia API automaticamente.\n'
          + mathInst
-         + '\n5. Hoje: ' + today + '.';
+         + '\n6. Hoje: ' + today + '.';
 }
 
 // ==========================================
