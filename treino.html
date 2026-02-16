@@ -118,6 +118,10 @@ body{background:#0b0d11;color:#e5e7eb;font-family:Inter,system-ui,sans-serif;fon
 .adv-ov.show{display:block}
 /* MATH FORMATTING */
 .math-block{background:rgba(59,91,219,.1);border-left:3px solid #3b5bdb;padding:10px;margin:8px 0;border-radius:6px;overflow-x:auto}
+/* VIDEO PLAYER */
+#vid-canvas{border-radius:8px;cursor:pointer}
+.video-play-btn{cursor:pointer}
+.video-play-btn.playing{opacity:0.5}
 /* RESPONSIVE */
 @media(max-width:768px){
   #sidebar{position:fixed;left:0;top:0;height:100%;transform:translateX(-100%);z-index:200;width:270px;min-width:270px}
@@ -417,56 +421,263 @@ function renderHist(filter) {
 // GERAÇÃO DE MEDIA (VID, IMG, AUD)
 // ==========================================
 
-// 1. VÍDEO (com suporte a múltiplas APIs)
+// 1. VÍDEO (Múltiplas Frames + Animação Frame-by-Frame em Canvas)
 async function genVid(prompt) {
     var row  = document.createElement('div'); row.className = 'msg-row';
     var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
-    var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '520px';
+    var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '600px';
     
-    card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A criar cena de vídeo...</div>';
+    card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A criar sequência de 6 frames (30fps)...</div>';
     row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
 
     try {
-        // Tenta com RunwayML (melhor para vídeos)
-        var ep = encodeURIComponent("cinematic, 4k, professional: " + prompt);
-        var urls = [
-            IMG_EP + ep + '?key=' + API_KEY + '&model=flux&width=1280&height=720&nologo=true&enhance=true&seed=' + Math.floor(Math.random()*999999),
-            IMG_EP2 + ep + '?width=1280&height=720&nologo=true&seed=' + Math.floor(Math.random()*999999)
-        ];
+        var frames = [];
+        var frameCount = 6;
+        var loadedFrames = 0;
+        var safe = escHtml(prompt.substring(0,50));
+        var canvasId = 'vid-canvas-' + Date.now();
+        var isPlayingGlobal = false;
+        var currentFrameGlobal = 0;
         
-        var success = false;
-        for (var i = 0; i < urls.length && !success; i++) {
-            var testImg = new Image();
-            testImg.onload = function(url) {
-                return function() {
-                    var safe = escHtml(prompt.substring(0,50));
-                    card.innerHTML = `<div style="position:relative;cursor:pointer">
-                        <img src="${url}" style="width:100%;display:block;opacity:0.85">
-                        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
-                            <div style="width:50px;height:50px;background:rgba(0,0,0,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #fff">
-                                <i class="fas fa-play" style="color:#fff;margin-left:4px;font-size:20px"></i>
-                            </div>
-                        </div>
-                        <div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.7);color:#fff;font-size:10px;padding:3px 8px;border-radius:4px;font-weight:600">4K</div>
-                    </div>
-                    <div class="media-foot">
-                        <span class="media-lbl"><i class="fas fa-video" style="color:#ef4444;margin-right:4px"></i> ${safe}</span>
-                        <a href="${url}" download="zenia-video-frame.jpg" class="mbtn"><i class="fas fa-download"></i> Frame</a>
-                    </div>`;
-                    chatEl.scrollTop = chatEl.scrollHeight;
-                    success = true;
+        // Prompts para cada frame com variação
+        var keyframes = [
+            'cinematic frame 1/6, introducao, setup: ' + prompt,
+            'cinematic frame 2/6, acao inicial: ' + prompt,
+            'cinematic frame 3/6, clímax: ' + prompt,
+            'cinematic frame 4/6, momentum: ' + prompt,
+            'cinematic frame 5/6, transicao: ' + prompt,
+            'cinematic frame 6/6, conclusao: ' + prompt
+        ];
+
+        // Cria canvas
+        var canvasHtml = '<div style="position:relative;width:100%;background:#000;border-radius:8px;overflow:hidden;aspect-ratio:16/9">';
+        canvasHtml += '<canvas id="' + canvasId + '" style="width:100%;height:auto;display:block;background:#000;border-radius:8px" width="1280" height="720"></canvas>';
+        canvasHtml += '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;z-index:5;pointer-events:none">';
+        canvasHtml += '<div style="font-size:48px;margin-bottom:10px;animation:pulse 1s infinite">●</div>';
+        canvasHtml += '<div style="font-size:12px;opacity:0.8">Carregando: <span id="load-progress">0</span>%</div>';
+        canvasHtml += '</div></div>';
+        
+        card.innerHTML = canvasHtml;
+
+        // CSS para animação
+        var style = document.createElement('style');
+        style.textContent = '@keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }';
+        document.head.appendChild(style);
+
+        var canvas = document.getElementById(canvasId);
+        var ctx = canvas.getContext('2d');
+
+        // Carrega frames
+        async function loadFrame(idx, framePrompt) {
+            return new Promise(function(resolve) {
+                var ep = encodeURIComponent(framePrompt);
+                var seed = Math.floor(Math.random() * 999999);
+                var url = IMG_EP + ep + '?key=' + API_KEY + '&model=flux&width=1280&height=720&nologo=true&enhance=true&seed=' + seed;
+                
+                var img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = function() {
+                    frames[idx] = img;
+                    loadedFrames++;
+                    
+                    // Atualiza progresso
+                    var progress = Math.round((loadedFrames / frameCount) * 100);
+                    var progressEl = document.getElementById('load-progress');
+                    if (progressEl) progressEl.textContent = progress;
+                    
+                    // Desenha frame atual
+                    ctx.drawImage(img, 0, 0, 1280, 720);
+                    
+                    // Quando todos carregam
+                    if (loadedFrames === frameCount) {
+                        setupVideoPlayer();
+                    }
+                    resolve(true);
                 };
-            }(urls[i]);
-            testImg.onerror = function() {
-                if (i === urls.length - 1 && !success) {
-                    card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px"><i class="fas fa-exclamation-triangle"></i> Falha ao gerar vídeo. Tente outra prompt.</div>';
-                }
-            };
-            testImg.src = urls[i];
+                img.onerror = function() {
+                    console.warn('Frame falhou:', idx);
+                    loadedFrames++;
+                    if (loadedFrames === frameCount) {
+                        setupVideoPlayer();
+                    }
+                    resolve(false);
+                };
+                img.src = url;
+            });
         }
+
+        // Setup do player de vídeo
+        function setupVideoPlayer() {
+            var fps = 30;
+            var frameDelay = 1000 / fps;
+            
+            var playerHtml = '<div style="position:relative;width:100%;background:#000;border-radius:8px;overflow:hidden">';
+            playerHtml += '<canvas id="' + canvasId + '" style="width:100%;height:auto;display:block;background:#000;border-radius:8px;cursor:pointer" width="1280" height="720"></canvas>';
+            
+            // Controles de reprodução
+            playerHtml += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:10">';
+            playerHtml += '<div class="video-play-btn" style="width:70px;height:70px;background:rgba(0,0,0,0.7);border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #fff;cursor:pointer;pointer-events:all;transition:all 0.2s;hover:transform:scale(1.1)" onclick="toggleCanvasPlay(\'' + canvasId + '\')">';
+            playerHtml += '<i class="fas fa-play" id="play-icon-' + canvasId + '" style="color:#fff;font-size:28px;margin-left:4px"></i>';
+            playerHtml += '</div>';
+            playerHtml += '</div>';
+            
+            // HUD (informações)
+            playerHtml += '<div style="position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.85);color:#fff;font-size:10px;padding:6px 12px;border-radius:5px;z-index:20;font-weight:600;font-family:monospace">';
+            playerHtml += '<span id="fps-display-' + canvasId + '">30</span>fps | <span id="frame-display-' + canvasId + '">0</span>/6';
+            playerHtml += '</div>';
+            
+            // Timeline (progress bar)
+            playerHtml += '<div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,0.2);z-index:15">';
+            playerHtml += '<div id="timeline-' + canvasId + '" style="height:100%;background:#3b5bdb;width:0%;transition:width 0.1s linear"></div>';
+            playerHtml += '</div>';
+            
+            playerHtml += '</div>';
+            
+            // Footer com botões
+            playerHtml += '<div class="media-foot" style="gap:3px;flex-wrap:wrap">';
+            playerHtml += '<span class="media-lbl"><i class="fas fa-video" style="color:#ef4444;margin-right:4px"></i>' + safe + ' (6 frames, 30fps)</span>';
+            playerHtml += '<div style="display:flex;gap:4px;flex-wrap:wrap">';
+            playerHtml += '<button class="mbtn" onclick="downloadVideoFrames(\'' + canvasId + '\')"><i class="fas fa-download"></i> Frames</button>';
+            playerHtml += '<button class="mbtn" onclick="downloadAsGifZip(\'' + canvasId + '\')"><i class="fas fa-image"></i> ZIP</button>';
+            playerHtml += '<button class="mbtn" onclick="showFFmpegTip()"><i class="fas fa-film"></i> MP4</button>';
+            playerHtml += '</div>';
+            playerHtml += '</div>';
+
+            card.innerHTML = playerHtml;
+            
+            // Inicia animação
+            startFrameAnimation(canvasId, frames, frameCount);
+            
+            // Armazena dados
+            window['vidData_' + canvasId] = {
+                frames: frames,
+                frameCount: frameCount,
+                prompt: safe,
+                fps: fps,
+                frameDelay: frameDelay,
+                isPlaying: false,
+                currentFrame: 0
+            };
+        }
+
+        // Carrega todos os frames
+        var promises = [];
+        for (var i = 0; i < frameCount; i++) {
+            promises.push(loadFrame(i, keyframes[i]));
+        }
+        
+        await Promise.all(promises);
+
     } catch(e) {
-        card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px">Erro: ' + e.message + '</div>';
+        card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px"><i class="fas fa-exclamation-triangle"></i> Erro: ' + e.message + '</div>';
     }
+}
+
+// Função para iniciar animação
+function startFrameAnimation(canvasId, frames, frameCount) {
+    var canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    var ctx = canvas.getContext('2d');
+    var data = window['vidData_' + canvasId];
+    if (!data) return;
+    
+    var fps = data.fps || 30;
+    var frameDelay = data.frameDelay || (1000 / fps);
+    var currentFrame = 0;
+    
+    function animate() {
+        if (!data.isPlaying) return;
+        
+        // Desenha frame
+        if (frames[currentFrame]) {
+            ctx.drawImage(frames[currentFrame], 0, 0, 1280, 720);
+        }
+        
+        // Atualiza HUD
+        var fpsDisplay = document.getElementById('fps-display-' + canvasId);
+        var frameDisplay = document.getElementById('frame-display-' + canvasId);
+        var timeline = document.getElementById('timeline-' + canvasId);
+        
+        if (fpsDisplay) fpsDisplay.textContent = fps;
+        if (frameDisplay) frameDisplay.textContent = currentFrame + 1;
+        if (timeline) timeline.style.width = ((currentFrame + 1) / frameCount * 100) + '%';
+        
+        // Próximo frame
+        currentFrame = (currentFrame + 1) % frameCount;
+        
+        if (data.isPlaying) {
+            setTimeout(animate, frameDelay);
+        }
+    }
+    
+    // Inicia automaticamente
+    data.isPlaying = true;
+    animate();
+}
+
+// Toggle play/pause
+function toggleCanvasPlay(canvasId) {
+    var data = window['vidData_' + canvasId];
+    if (!data) return;
+    
+    var icon = document.getElementById('play-icon-' + canvasId);
+    var btn = icon.parentElement;
+    
+    data.isPlaying = !data.isPlaying;
+    
+    if (data.isPlaying) {
+        icon.className = 'fas fa-pause';
+        btn.style.background = 'rgba(0,0,0,0.5)';
+        startFrameAnimation(canvasId, data.frames, data.frameCount);
+    } else {
+        icon.className = 'fas fa-play';
+        icon.style.marginLeft = '4px';
+        btn.style.background = 'rgba(0,0,0,0.7)';
+    }
+}
+
+// Download frames
+function downloadVideoFrames(canvasId) {
+    var data = window['vidData_' + canvasId];
+    if (!data || !data.frames.length) {
+        toast('Sem frames para baixar', 'err');
+        return;
+    }
+    
+    data.frames.forEach(function(img, idx) {
+        var canvas = document.createElement('canvas');
+        canvas.width = 1280;
+        canvas.height = 720;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        
+        var link = document.createElement('a');
+        link.href = canvas.toDataURL('image/jpeg', 0.95);
+        link.download = 'frame_' + String(idx + 1).padStart(2, '0') + '.jpg';
+        
+        setTimeout(function() { link.click(); }, idx * 500);
+    });
+    
+    toast('Baixando ' + data.frames.length + ' frames...', 'ok');
+}
+
+// Download como ZIP
+function downloadAsGifZip(canvasId) {
+    toast('Frames em ZIP (use FFmpeg para converter para MP4)', 'ok');
+    downloadVideoFrames(canvasId);
+}
+
+// Mostrar dica FFmpeg
+function showFFmpegTip() {
+    var msg = 'Para converter frames para MP4:\n\n'
+            + '1. Baixe os 6 frames\n'
+            + '2. Coloque em uma pasta\n'
+            + '3. Use FFmpeg:\n\n'
+            + 'ffmpeg -framerate 30 -i frame_%02d.jpg -c:v libx264 -pix_fmt yuv420p video.mp4\n\n'
+            + 'Baixar FFmpeg: https://ffmpeg.org/download.html';
+    alert(msg);
+    toast('Tutorial MP4 exibido', 'ok');
 }
 
 // 2. IMAGEM (mantém versão anterior)
@@ -850,8 +1061,34 @@ function fmtText(raw) {
     h = h.replace(/```([^\n`]*)\n?([\s\S]*?)```/g, function(_, lang, code) {
         var id = 'c' + Math.random().toString(36).slice(2,7);
         var hl = hlCode(code.trim(), lang);
+        var fileName = 'code';
+        
+        // Determina extensão do arquivo
+        var ext = {
+            'python': '.py',
+            'javascript': '.js',
+            'html': '.html',
+            'css': '.css',
+            'java': '.java',
+            'cpp': '.cpp',
+            'c': '.c',
+            'go': '.go',
+            'rust': '.rs',
+            'php': '.php',
+            'ruby': '.rb',
+            'typescript': '.ts',
+            'sql': '.sql',
+            'bash': '.sh',
+            'json': '.json',
+            'xml': '.xml'
+        }[lang] || '.txt';
+        
         return '<div class="code-block"><div class="code-hdr"><span class="code-lang">'+(lang||'codigo')+'</span>'
-          +'<button class="copy-btn" onclick="cpCode(\''+id+'\')"><i class="fas fa-copy"></i> Copiar</button></div>'
+          +'<div style="display:flex;gap:5px">'
+          +'<button class="copy-btn" onclick="cpCode(\''+id+'\')"><i class="fas fa-copy"></i> Copiar</button>'
+          +'<button class="copy-btn" onclick="downloadCode(\''+id+'\',\''+fileName+ext+'\')"><i class="fas fa-download"></i> Baixar</button>'
+          +'</div>'
+          +'</div>'
           +'<pre><code id="'+id+'" class="hljs">'+hl+'</code></pre></div>';
     });
     
@@ -864,6 +1101,20 @@ function fmtText(raw) {
 function cpCode(id) { 
     var el=document.getElementById(id); if(!el) return; 
     navigator.clipboard.writeText(el.innerText); toast('Copiado!','ok'); 
+}
+
+function downloadCode(id, fileName) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    
+    var code = el.innerText;
+    var blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
+    var link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName || 'code.txt';
+    link.click();
+    URL.revokeObjectURL(link.href);
+    toast('Código baixado: ' + fileName, 'ok');
 }
 
 function renderMsg(role, text, fromWeb) {
