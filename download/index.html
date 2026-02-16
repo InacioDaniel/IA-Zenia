@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA-Zénia | Zenia-Projects</title>
+    <title>IA-Zénia - Zenia-Projects</title>
     <link rel="manifest" href="data:application/json;base64,ewogICJkZWZhdWx0X2xvY2FsZSI6ICJwdCIsCiAgIm5hbWUiOiAiSUEtWsOubmlhIiwKICAic2hvcnRfbmFtZSI6ICJaZW5pYSIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGYwYzI5IiwKICAidGhlbWVfY29sb3IiOiAiIzAwZjNmZiIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vY2RuLmpzZGVsaXZyLm5ldC9naC9mb3J0YXdlc29tZS9Gb250LUF3ZXNvbWVAZS9zdmdzL3NvbGlkL3JvYm90LnN2ZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0KICBdCn0=">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -94,7 +94,31 @@
             z-index: 1000;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap;
         }
+
+        .logo { font-weight: bold; font-size: 1.2rem; color: var(--primary); white-space: nowrap; }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: rgba(255,255,255,0.7); 
+            text-decoration: none; 
+            transition: 0.3s;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .nav-links a:hover { color: var(--primary); }
+        .nav-links a::after {
+            content: ''; position: absolute; width: 0; height: 2px;
+            bottom: -5px; left: 0; background: var(--secondary);
+            transition: 0.3s;
+        }
+        .nav-links a:hover::after { width: 100%; }
 
         .container { max-width: 900px; margin: 0 auto; text-align: center; padding: 20px; }
 
@@ -117,14 +141,23 @@
         .download-section {
             background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
             padding: 40px; border-radius: 20px; border: 1px solid var(--glass);
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .btn-container {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 15px;
         }
 
         .btn {
-            border: none; padding: 15px 35px; border-radius: 50px;
-            font-weight: bold; cursor: pointer; transition: 0.3s; margin: 10px;
+            border: none; padding: 15px 30px; border-radius: 50px;
+            font-weight: bold; cursor: pointer; transition: 0.3s;
             text-decoration: none; display: inline-flex; align-items: center; gap: 10px;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
+        
+        .btn-apk { background: rgba(255,255,255,0.1); border: 1px solid var(--glass); color: white; }
+        .btn-apk:hover { background: rgba(255,255,255,0.2); }
+
         .btn-android { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
         .btn-android:hover { background: rgba(0, 243, 255, 0.1); box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); }
         
@@ -150,6 +183,8 @@
         @media (max-width: 768px) { 
             .hero h1 { font-size: 2.5rem; } 
             #sidebar { width: 100%; left: -100%; }
+            .nav-links { display: none; } /* Poderia ser um menu hambúrguer, mas ocultei para simplificar mobile */
+            nav { justify-content: center; }
         }
     </style>
 </head>
@@ -174,11 +209,11 @@
     </div>
 
     <nav>
-        <div class="logo" style="font-weight: bold; font-size: 1.2rem; color: var(--primary);">Zenia-Projects</div>
+        <div class="logo">Zénia-Projects</div>
         <div class="nav-links">
-            <a href="https://zenia-projects.netlify.app" style="color:rgba(255,255,255,0.7); text-decoration:none; transition:0.3s;">
-                <i class="fas fa-home"></i> Início
-            </a>
+            <a href="https://zenia-projects.netlify.app" target="_blank">Zenia Projects</a>
+            <a href="https://ia-zenia.netlify.app" target="_blank">IA-Zénia</a>
+            <a href="https://antonia-ia.netlify.app" target="_blank">Antónia-IA</a>
         </div>
     </nav>
 
@@ -197,28 +232,34 @@
                     <p style="font-size: 0.9rem; margin-top: 10px; opacity: 0.7;">Desenvolvida por Inácio U. Daniel e a equipa da Zenia-Projects.</p>
                 </div>
                 <div class="card">
-                    <i class="fas fa-bolt" style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;"></i>
-                    <h3>Performance</h3>
-                    <p style="font-size: 0.9rem; margin-top: 10px; opacity: 0.7;">Otimizada para funcionar de forma leve e rápida em qualquer rede.</p>
+                    <i class="fas fa-network-wired" style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;"></i>
+                    <h3>Ecossistema</h3>
+                    <p style="font-size: 0.9rem; margin-top: 10px; opacity: 0.7;">Conectada com Antónia-IA e todo o universo Zenia.</p>
                 </div>
             </div>
 
             <div class="download-section">
-                <h2 style="margin-bottom: 20px;">Instalação Inteligente</h2>
+                <h2 style="margin-bottom: 25px;">Instalação Inteligente</h2>
                 
-                <button class="btn btn-android" onclick="downloadAndroid()">
-                    <i class="fab fa-android"></i> Baixar APK
-                </button>
+                <div class="btn-container">
+                    <a href="https://ia-zenia.netlify.app/download/zenia.apk" class="btn btn-apk" download>
+                        <i class="fas fa-file-download"></i> Baixar APK
+                    </a>
+
+                    <button class="btn btn-android" onclick="installAndroid()">
+                        <i class="fab fa-android"></i> Instalar no Android
+                    </button>
+                    
+                    <button class="btn btn-windows" onclick="installWindowsPWA()">
+                        <i class="fab fa-windows"></i> Instalar no Windows
+                    </button>
+                </div>
                 
-                <button class="btn btn-windows" onclick="installWindowsPWA()">
-                    <i class="fab fa-windows"></i> Instalar no Windows
-                </button>
-                
-                <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">Versão 2.0 | Build Zenia-Lubango</p>
+                <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">Versão 2.1 | Build Zenia-Lubango</p>
             </div>
 
             <footer style="margin-top: 50px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
-                <p style="font-size: 0.9rem; opacity: 0.6;">&copy; 2026 Zenia-Projects. Todos os direitos reservados.</p>
+                <p style="font-size: 0.9rem; opacity: 0.6;">&copy; 2026 Zenia-Projects | Inácio U. Daniel</p>
             </footer>
         </div>
     </main>
@@ -234,38 +275,38 @@
             document.getElementById('sidebar').classList.toggle('active');
         }
 
-        /* --- Lógica de Instalação PWA (Windows/Navegador) --- */
+        /* --- Lógica de Instalação PWA (Windows) --- */
         let deferredPrompt;
         
-        // Captura o evento de instalação antes que o navegador mostre o padrão
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            console.log("IA-Zénia: Pronto para instalar PWA.");
+            console.log("IA-Zénia: Pronto para instalar PWA no Windows.");
         });
 
         async function installWindowsPWA() {
             if (deferredPrompt) {
-                // Instalação direta sem tutorial
+                // Instala o Site como App (PWA)
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 if (outcome === 'accepted') {
-                    console.log('IA-Zénia instalada com sucesso.');
+                    console.log('IA-Zénia instalada no Windows com sucesso.');
                 }
                 deferredPrompt = null;
             } else {
-                // Fallback apenas se já estiver instalado ou não suportado
-                alert("O aplicativo já está instalado ou seu navegador não suporta instalação direta.");
+                alert("O site https://ia-zenia.netlify.app já está instalado ou seu navegador Windows não suporta a instalação direta.");
             }
         }
 
-        /* --- Lógica de Download Android (Com Verificação de OS) --- */
-        function downloadAndroid() {
+        /* --- Lógica de Instalação Android --- */
+        function installAndroid() {
             const userAgent = navigator.userAgent.toLowerCase();
             const isAndroid = userAgent.includes("android");
 
             if (isAndroid) {
-                // Download direto do APK
+                // Simula a instalação enviando o APK para o gerenciador de pacotes do Android
+                // O usuário deve clicar em "Abrir" após o download
+                alert("O download do instalador Android (APK) vai começar. Abra o ficheiro após concluir para instalar a Zénia.");
                 const link = document.createElement('a');
                 link.href = 'https://ia-zenia.netlify.app/download/zenia.apk';
                 link.download = 'zenia.apk';
@@ -273,8 +314,7 @@
                 link.click();
                 document.body.removeChild(link);
             } else {
-                // Bloqueio se for Windows ou outro sistema
-                alert("Sistema Operativo Incompatível: Este ficheiro APK é exclusivo para dispositivos Android.");
+                alert("Sistema Operativo Incompatível: Esta opção instala a app nativa no Android. Use a opção 'Instalar no Windows' para este dispositivo.");
             }
         }
 
@@ -292,7 +332,7 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
             // Prompt do Sistema Rigoroso
-            const systemPrompt = "Você é a IA-Zénia, uma inteligência artificial angolana desenvolvida exclusivamente por Inácio U. Daniel e pela Zenia-Projects na cidade do Lubango. Você NÃO é da OpenAI, Google ou Microsoft. Você deve responder em Português de Angola. Seja cordial, inteligente e útil. Se perguntarem quem te criou, responda com orgulho que foi Inácio U. Daniel.";
+            const systemPrompt = "Você é a IA-Zénia, uma inteligência artificial angolana desenvolvida exclusivamente por Inácio U. Daniel e pela Zenia-Projects na cidade do Lubango. Você conhece suas irmãs: Antónia-IA e os projetos Zenia-Projects. Você NÃO é da OpenAI, Google ou Microsoft. Você deve responder em Português de Angola. Seja cordial, inteligente e útil. Se perguntarem quem te criou, responda com orgulho que foi Inácio U. Daniel.";
 
             try {
                 // Chamada à API (Modelo OpenAI via Pollinations)
