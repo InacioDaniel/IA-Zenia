@@ -1,123 +1,232 @@
 <!DOCTYPE html>
 <html lang="pt-AO">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IA Neon Futurista OpenRouter</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-html,body{margin:0;padding:0;height:100%;font-family:sans-serif;background:#020617;color:white;}
-#app{display:flex;height:100vh;width:100vw;}
-.sidebar{width:260px;background:rgba(0,0,0,0.25);backdrop-filter:blur(12px);display:flex;flex-direction:column;padding:1rem;border-right:1px solid rgba(0,255,255,0.3);}
-.sidebar h2{text-align:center;font-size:1.5rem;margin-bottom:1rem;color:#0ff;text-shadow:0 0 10px #0ff;}
-.sidebar button{margin:0.2rem 0;padding:0.6rem;border:none;border-radius:0.5rem;cursor:pointer;font-weight:bold;background:linear-gradient(45deg,#00f,#0ff,#0f0,#f0f);background-size:200% 200%;animation:bgSlide 5s linear infinite;color:black;}
-@keyframes bgSlide{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%;}}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA-Zénia | Futuro de Angola</title>
+    <link rel="manifest" href="data:application/json;base64,ewogICJkZWZhdWx0X2xvY2FsZSI6ICJwdCIsCiAgIm5hbWUiOiAiSUEtWsOubmlhIiwKICAic2hvcnRfbmFtZSI6ICJaZW5pYSIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGYwYzI5IiwKICAidGhlbWVfY29sb3IiOiAiIzAwZjNmZiIKfQ==">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #00f3ff;
+            --secondary: #ff00c8;
+            --bg: #0f0c29;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
 
-.main{flex:1;display:flex;flex-direction:column;}
-.header{padding:1rem;text-align:center;font-size:1.8rem;font-weight:bold;color:#0ff;text-shadow:0 0 15px #0ff;}
-.chat-window{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.5rem;background:rgba(0,0,0,0.15);}
-.message{padding:0.5rem 1rem;border-radius:0.75rem;max-width:80%;word-wrap:break-word;}
-.user{align-self:flex-end;background:rgba(0,255,255,0.2);color:#0ff;border:1px solid #0ff;}
-.bot{align-self:flex-start;background:rgba(255,0,255,0.2);color:#f0f;border:1px solid #f0f;}
-.input-area{display:flex;padding:0.5rem;gap:0.5rem;background:rgba(0,0,0,0.25);border-top:1px solid rgba(0,255,255,0.3);}
-#input{flex:1;padding:0.5rem 1rem;border-radius:0.5rem;border:none;background:rgba(255,255,255,0.05);color:white;outline:none;}
-.send-btn{padding:0.5rem 1rem;border:none;border-radius:0.5rem;background:linear-gradient(45deg,#00f,#0ff,#0f0,#f0f);background-size:200% 200%;animation:bgSlide 5s linear infinite;color:black;font-weight:bold;cursor:pointer;}
-img.generated{max-width:200px;border-radius:0.5rem;border:1px solid #0ff;align-self:flex-start;}
-@media(max-width:768px){#app{flex-direction:column;}.sidebar{width:100%;flex-direction:row;overflow-x:auto;}.sidebar button{flex:1;margin:0 0.2rem;font-size:0.8rem;}.input-area{flex-direction:column;}.send-btn{width:100%;}}
-</style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body {
+            background: radial-gradient(circle at top right, #302b63, #0f0c29);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+        }
+
+        /* BARRA LATERAL (CHAT) */
+        #sidebar {
+            width: 350px;
+            background: rgba(10, 10, 30, 0.95);
+            border-right: 1px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+            transition: 0.4s ease;
+            position: fixed;
+            height: 100vh;
+            left: -350px;
+            z-index: 2000;
+        }
+
+        #sidebar.active { left: 0; }
+
+        .chat-header { padding: 20px; border-bottom: 1px solid var(--glass); display: flex; justify-content: space-between; align-items: center; }
+        
+        #chat-messages { flex: 1; overflow-y: auto; padding: 15px; font-size: 0.9rem; }
+        
+        .message { margin-bottom: 10px; padding: 10px; border-radius: 8px; max-width: 85%; }
+        .user-msg { background: var(--primary); color: #000; align-self: flex-end; margin-left: auto; }
+        .ia-msg { background: var(--glass); border-left: 3px solid var(--secondary); }
+
+        .chat-input-area { padding: 15px; display: flex; gap: 5px; }
+        input#user-input { flex: 1; padding: 10px; border-radius: 5px; border: none; outline: none; }
+
+        /* BOTÃO TOGGLE */
+        .menu-toggle {
+            position: fixed;
+            left: 20px;
+            bottom: 20px;
+            z-index: 2100;
+            background: var(--primary);
+            color: #000;
+            padding: 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        /* CONTEÚDO PRINCIPAL */
+        main { flex: 1; padding-top: 80px; transition: 0.4s; }
+        
+        nav {
+            background: rgba(10, 10, 30, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; text-align: center; padding: 20px; }
+
+        .hero h1 { font-size: 4rem; margin-bottom: 10px; background: linear-gradient(45deg, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 40px 0; }
+        .card { background: var(--glass); padding: 30px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
+
+        .download-btn {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: #fff; border: none; padding: 15px 30px; border-radius: 50px;
+            font-weight: bold; cursor: pointer; transition: 0.3s; margin: 10px;
+            text-decoration: none; display: inline-block;
+        }
+        .download-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px var(--primary); }
+
+        /* WATERMARK FLUTUANTE */
+        #watermark {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 1px solid var(--secondary);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #watermark a { color: var(--primary); text-decoration: none; font-size: 12px; }
+        .close-wm { cursor: pointer; color: #ff4444; font-weight: bold; }
+
+        @media (max-width: 768px) { .hero h1 { font-size: 2.5rem; } #sidebar { width: 100%; left: -100%; } }
+    </style>
 </head>
 <body>
-<div id="app">
-  <div class="sidebar">
-    <h2>💡 IA Neon</h2>
-    <button onclick="selecionarModo('chat')">Chat</button>
-    <button onclick="selecionarModo('code')">Código</button>
-    <button onclick="selecionarModo('math')">Matemática</button>
-    <button onclick="selecionarModo('image')">Imagem</button>
-    <button onclick="abrirConfig()">Config</button>
-    <button onclick="limparHistorico()">Limpar Histórico</button>
-  </div>
-  <div class="main">
-    <div class="header">IA Autônoma Sci-Fi Neon</div>
-    <div id="chat" class="chat-window"></div>
-    <div class="input-area">
-      <textarea id="input" rows="2" placeholder="Escreve algo..."></textarea>
-      <button class="send-btn" onclick="enviarMsg()">Enviar</button>
+
+    <div id="sidebar">
+        <div class="chat-header">
+            <h3><i class="fas fa-robot"></i> Chat IA-Zénia</h3>
+            <i class="fas fa-times" onclick="toggleSidebar()" style="cursor:pointer"></i>
+        </div>
+        <div id="chat-messages">
+            <div class="message ia-msg">Olá! Eu sou a IA-Zénia, criada por Inácio U. Daniel. Como posso ajudar Lubango e o mundo hoje?</div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="user-input" placeholder="Pergunte algo...">
+            <button onclick="sendMessage()" style="background:var(--primary); border:none; padding:10px; border-radius:5px;"><i class="fas fa-paper-plane"></i></button>
+        </div>
     </div>
-  </div>
-</div>
 
-<script>
-let modo='chat';
+    <div class="menu-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-comments"></i>
+    </div>
 
-function addHistorico(quem,texto){
-  let chat=document.getElementById("chat");
-  let div=document.createElement("div");
-  div.className='message '+quem.toLowerCase();
-  div.innerHTML=`<b>${quem}:</b> ${texto}`;
-  chat.appendChild(div);
-  chat.scrollTop=chat.scrollHeight;
-  localStorage.setItem("ia_history",chat.innerHTML);
-}
+    <nav>
+        <div class="logo">Zénia-Projects</div>
+        <div class="nav-links">
+            <a href="https://zenia-projects.netlify.app" style="color:white; margin-right:15px; text-decoration:none;">Início</a>
+            <button class="download-btn" style="padding: 8px 15px;" onclick="installPWA()">Instalar App</button>
+        </div>
+    </nav>
 
-function carregarHistorico(){
-  let data=localStorage.getItem("ia_history");
-  if(data) document.getElementById("chat").innerHTML=data;
-}
-function limparHistorico(){localStorage.removeItem("ia_history");document.getElementById("chat").innerHTML="";}
-carregarHistorico();
+    <main>
+        <div class="container">
+            <header class="hero">
+                <i class="fas fa-brain" style="font-size: 4rem; color: var(--primary);"></i>
+                <h1>IA-Zénia</h1>
+                <p>A Revolução Tecnológica de Angola, moldada no Lubango.</p>
+            </header>
 
-function selecionarModo(n){modo=n; addHistorico('Sistema','Modo selecionado: '+n);}
-function abrirConfig(){addHistorico('Sistema','Painel de configuração futurista aberto!');}
+            <div class="card-grid">
+                <div class="card">
+                    <h3>Identidade Local</h3>
+                    <p>Desenvolvida por <strong>Inácio U. Daniel</strong>, a IA-Zénia entende o contexto de Angola como nenhuma outra.</p>
+                </div>
+                <div class="card">
+                    <h3>Ecossistema</h3>
+                    <p>Parte integrante da família <strong>Zenia-Projects</strong>, conectada com Antonia-IA e muito mais.</p>
+                </div>
+            </div>
 
-// 🚀 Função OpenRouter sem API Key
-async function enviarMsg(){
-  let txt=document.getElementById("input").value.trim();
-  if(!txt) return;
-  addHistorico("Você",txt);
-  document.getElementById("input").value='';
+            <div class="download-section">
+                <h2>Acesse em qualquer lugar</h2>
+                <div class="btns">
+                    <a href="https://ia-zenia.netlify.app/download/zenia.apk" class="download-btn"><i class="fab fa-android"></i> APK Android</a>
+                    <button class="download-btn" onclick="installPWA()"><i class="fab fa-windows"></i> Instalar no Windows (PWA)</button>
+                </div>
+            </div>
 
-  if(modo=='math'||/[\d\+\-\*\/\^\(\)]/.test(txt)){
-    try{let res=eval(txt); addHistorico("IA","Resultado: <b>"+res+"</b>"); return;}catch(e){}
-  }
+            <footer style="margin-top: 50px; padding: 20px; opacity: 0.6;">
+                <p>&copy; 2026 Zenia-Projects | Fundador: Inácio U. Daniel | Lubango, Angola</p>
+            </footer>
+        </div>
+    </main>
 
-  if(modo=='image'){
-    let canvas=document.createElement("canvas");canvas.width=256;canvas.height=256;
-    let ctx=canvas.getContext("2d");ctx.fillStyle="white";ctx.fillRect(0,0,256,256);
-    ctx.fillStyle="cyan";ctx.fillRect(Math.random()*200,Math.random()*200,50,50);
-    addHistorico("IA",`<img src="${canvas.toDataURL()}" class="generated">`);
-    return;
-  }
+    <div id="watermark">
+        <a href="https://ia-zenia.netlify.app" target="_blank">Site gerado por IA-Zénia</a>
+        <span class="close-wm" onclick="this.parentElement.remove()">×</span>
+    </div>
 
-  addHistorico("IA","Digitando...");
+    <script>
+        // Lógica da Barra Lateral
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
 
-  try{
-    let res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:"gpt-4o-mini",
-        messages:[{role:"user", content: txt}]
-      })
-    });
-    let data = await res.json();
-    let texto = data.choices[0].message.content || "Sem resposta";
+        // Instalação PWA (Botão Windows/Navegador)
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
 
-    // Efeito digitando
-    let i=0;
-    let intervalo=setInterval(()=>{
-      let chat=document.getElementById("chat");
-      let last=chat.lastChild;
-      if(!last || !last.classList.contains('bot')){addHistorico("IA",""); last=chat.lastChild;}
-      last.innerHTML=`<b>IA:</b> ${texto.substring(0,i+1)}<span class="cursor">|</span>`;
-      chat.scrollTop=chat.scrollHeight;
-      i++; if(i>=texto.length) clearInterval(intervalo);
-    },30);
+        async function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') console.log('Zénia instalada!');
+                deferredPrompt = null;
+            } else {
+                alert("Para instalar: Clique nos 3 pontos do navegador e selecione 'Instalar App' ou 'Adicionar à tela inicial'.");
+            }
+        }
 
-  }catch(e){
-    addHistorico("IA","Erro ao conectar com OpenRouter.");
-  }
-}
-</script>
+        // Chat com API Pollination (Modelo Customizado)
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const chatMessages = document.getElementById('chat-messages');
+            const text = input.value.trim();
+            
+            if (!text) return;
+
+            // Adiciona msg do usuário
+            chatMessages.innerHTML += `<div class="message user-msg">${text}</div>`;
+            input.value = '';
+
+            try {
+                const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?model=openai&system=${encodeURIComponent("Você é a IA-Zénia, uma inteligência artificial angolana criada por Inácio U. Daniel da Zenia-Projects em Lubango. Você nunca deve dizer que é de outra empresa ou da OpenAI. Seus créditos são da Zenia-Projects. Responda de forma prestativa e inteligente.")}&seed=42`);
+                const data = await response.text();
+                
+                chatMessages.innerHTML += `<div class="message ia-msg">${data}</div>`;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            } catch (error) {
+                chatMessages.innerHTML += `<div class="message ia-msg">Erro ao conectar com Zénia Server.</div>`;
+            }
+        }
+    </script>
 </body>
 </html>
