@@ -3,502 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA-Zénia - Download</title>
+    <title>IA-Zénia - Download Oficial</title>
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIklBLVrOubmlhIiwKICAic2hvcnRfbmFtZSI6ICJaZW5pYSIsCiAgInN0YXJ0X3VybCI6ICIvIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGYwYzI5IiwKICAidGhlbWVfY29sb3IiOiAiIzAwZjNmZiIsCiAgImljb25zIjogW3sgInNyYyI6ICJodHRwczovL2lhLXplbmlhLm5ldGxpZnkuYXBwL2ljb24ucG5nIiwgInNpemVzIjogIjUxMng1MTIiLCAidHlwZSI6ICJpbWFnZS9wbmciIH1dCn0=">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
+        :root { --primary: #00f3ff; --secondary: #ff00c8; --dark: #0a0a1e; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        
         body {
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            background: #0f0c29;
             color: #fff;
-            min-height: 100vh;
             overflow-x: hidden;
-            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
-        /* Navbar Styles */
-        nav {
-            background: rgba(10, 10, 30, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 1rem 2rem;
+        /* Sidebar de Chat */
+        #sidebar {
             position: fixed;
-            width: 100%;
+            left: -350px;
             top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(0, 243, 255, 0.2);
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.8rem;
-            color: #00f3ff;
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
-            font-weight: bold;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .nav-links a {
-            color: #fff;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .nav-links a:hover {
-            color: #00f3ff;
-            background: rgba(0, 243, 255, 0.1);
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: #00f3ff;
-            transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        .nav-buttons {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .nav-btn {
-            background: transparent;
-            color: #00f3ff;
-            border: 1px solid #00f3ff;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .nav-btn:hover {
-            background: rgba(0, 243, 255, 0.2);
-        }
-
-        /* Background Elements */
-        .background-elements {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
+            width: 350px;
             height: 100%;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .circle {
-            position: absolute;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(106, 27, 154, 0.2) 0%, transparent 70%);
-            animation: float 15s infinite ease-in-out;
-        }
-
-        .circle:nth-child(1) {
-            width: 300px;
-            height: 300px;
-            top: 10%;
-            left: 5%;
-            animation-delay: 0s;
-        }
-
-        .circle:nth-child(2) {
-            width: 200px;
-            height: 200px;
-            bottom: 15%;
-            right: 10%;
-            animation-delay: 2s;
-        }
-
-        .circle:nth-child(3) {
-            width: 150px;
-            height: 150px;
-            top: 40%;
-            right: 20%;
-            animation-delay: 4s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(-20px, 20px); }
-            50% { transform: translate(20px, -20px); }
-            75% { transform: translate(-20px, -20px); }
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-            text-align: center;
-            margin-top: 80px;
-        }
-
-        header {
-            padding: 2rem 0;
-            animation: fadeInDown 1s ease;
-        }
-
-        .logo-header {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: #00f3ff;
-            text-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
-        }
-
-        h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(to right, #00f3ff, #ff00c8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.8;
-            max-width: 600px;
-            margin: 0 auto 2rem;
-        }
-
-        .main-content {
+            background: var(--dark);
+            border-right: 2px solid var(--primary);
+            transition: 0.3s;
+            z-index: 3000;
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 3rem;
-            margin: 3rem 0;
+            flex-direction: column;
         }
+        #sidebar.open { left: 0; }
+        
+        .chat-box { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px; border-radius: 10px; max-width: 80%; font-size: 14px; }
+        .ia { background: rgba(0, 243, 255, 0.1); border: 1px solid var(--primary); align-self: flex-start; }
+        .user { background: var(--secondary); align-self: flex-end; }
 
-        .app-preview {
-            flex: 1;
-            min-width: 300px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            animation: fadeInUp 1s ease;
-        }
+        .chat-input { padding: 15px; background: #16162d; display: flex; gap: 10px; }
+        input { flex: 1; padding: 10px; border-radius: 5px; border: none; }
 
-        .features {
-            flex: 1;
-            min-width: 300px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            animation: fadeInUp 1s ease 0.2s both;
-        }
-
-        .feature-list {
-            list-style: none;
-            text-align: left;
-        }
-
-        .feature-list li {
-            padding: 1rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-        }
-
-        .feature-list li:last-child {
-            border-bottom: none;
-        }
-
-        .feature-list i {
-            color: #00f3ff;
-            margin-right: 1rem;
-            font-size: 1.2rem;
-        }
-
-        .download-section {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 3rem;
-            margin: 3rem 0;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            animation: fadeIn 1.5s ease;
-        }
-
-        .download-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-
-        .download-btn {
-            background: linear-gradient(45deg, #00f3ff, #ff00c8);
-            color: white;
-            border: none;
-            padding: 1.2rem 2rem;
-            font-size: 1.1rem;
+        /* Estilo Principal */
+        nav { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); }
+        .hero { text-align: center; padding: 60px 20px; }
+        .hero h1 { font-size: 3.5rem; color: var(--primary); text-shadow: 0 0 20px rgba(0,243,255,0.5); }
+        
+        .btn-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 30px; }
+        .btn {
+            padding: 15px 30px;
             border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            color: white;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 243, 255, 0.3);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.8rem;
-            min-width: 220px;
-        }
-
-        .download-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 243, 255, 0.5);
-        }
-
-        .download-btn:active {
-            transform: translateY(0);
-        }
-
-        .info-text {
-            margin-top: 2rem;
-            font-size: 0.9rem;
-            opacity: 0.7;
-        }
-
-        .app-icon {
-            width: 150px;
-            height: 150px;
-            margin: 0 auto 2rem;
-            background: linear-gradient(45deg, #00f3ff, #ff00c8);
-            border-radius: 20px;
+            transition: 0.3s;
+            border: none;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+            gap: 10px;
         }
+        .btn-apk { background: linear-gradient(45deg, #00c6ff, #0072ff); }
+        .btn-pwa { background: linear-gradient(45deg, #f2994a, #f2c94c); }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,243,255,0.4); }
 
-        footer {
-            padding: 2rem 0;
-            opacity: 0.7;
-            font-size: 0.9rem;
-            margin-top: 2rem;
+        /* Watermark */
+        #wm {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #000;
+            padding: 10px;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            z-index: 4000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
+        #wm a { color: var(--primary); text-decoration: none; font-size: 12px; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .nav-container {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .nav-links {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            
-            h1 {
-                font-size: 2.5rem;
-            }
-            
-            .main-content {
-                flex-direction: column;
-            }
-            
-            .download-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .download-btn {
-                width: 100%;
-                max-width: 300px;
-            }
-        }
+        /* Menu Toggle */
+        .toggle-btn { position: fixed; left: 20px; bottom: 20px; background: var(--primary); color: #000; padding: 15px; border-radius: 50%; cursor: pointer; z-index: 3100; }
     </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
+
     <nav>
-        <div class="nav-container">
-            <div class="logo">IA-Zénia</div>
-            <div class="nav-links">
-                <a href="https://zenia-projects.netlify.app" target="_blank"><i class="fas fa-home"></i> Zenia-Projects</a>
-                <a href="https://ia-zenia.netlify.app" target="_blank"><i class="fas fa-robot"></i> IA-Zénia</a>
-                <a href="https://antonia-ia.netlify.app" target="_blank"><i class="fas fa-brain"></i> Antonia-IA</a>
-            </div>
-            <div class="nav-buttons">
-                <button class="nav-btn" onclick="downloadApp()">
-                    <i class="fas fa-download"></i> Download APK
-                </button>
-            </div>
-        </div>
+        <div style="font-size: 24px; font-weight: bold;">Zénia-Projects</div>
+        <div>Lubango, Angola</div>
     </nav>
 
-    <div class="background-elements">
-        <div class="circle"></div>
-        <div class="circle"></div>
-        <div class="circle"></div>
+    <div id="sidebar">
+        <div style="padding: 20px; background: var(--primary); color: #000; font-weight: bold; display: flex; justify-content: space-between;">
+            <span>IA-Zénia Chat</span>
+            <i class="fas fa-times" onclick="toggleChat()" style="cursor:pointer"></i>
+        </div>
+        <div class="chat-box" id="chatBox">
+            <div class="msg ia">Olá! Sou a IA-Zénia. Criada por Inácio U. Daniel. Como posso ajudar Lubango hoje?</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="userInput" placeholder="Escreva aqui...">
+            <button onclick="askZenia()" style="padding: 10px; background: var(--primary); border: none; border-radius: 5px;"><i class="fas fa-paper-plane"></i></button>
+        </div>
     </div>
 
-    <div class="container">
-        <header>
-            <div class="logo-header">
-                <i class="fas fa-robot"></i>
-            </div>
-            <h1>IA-Zénia</h1>
-            <p class="subtitle">A IA mais avançada para Angola, desenvolvida em Lubango por Zenia-Projects</p>
-        </header>
+    <div class="toggle-btn" onclick="toggleChat()"><i class="fas fa-robot"></i></div>
 
-        <div class="main-content">
-            <div class="app-preview">
-                <h2>Funcionalidades</h2>
-                <div class="app-icon">
-                    <i class="fas fa-brain"></i>
-                </div>
-                <p>Descubra as capacidades da IA-Zénia:</p>
-                <ul class="feature-list">
-                    <li><i class="fas fa-check-circle"></i> Processamento de linguagem natural avançado</li>
-                    <li><i class="fas fa-check-circle"></i> Suporte para múltiplos idiomas</li>
-                    <li><i class="fas fa-check-circle"></i> Integração com tecnologias locais</li>
-                    <li><i class="fas fa-check-circle"></i> Interface intuitiva e moderna</li>
-                    <li><i class="fas fa-check-circle"></i> Segurança de dados de primeira linha</li>
-                </ul>
-            </div>
+    <main class="hero">
+        <h1>IA-Zénia</h1>
+        <p style="font-size: 1.2rem; margin-top: 10px;">A inteligência artificial genuinamente angolana.</p>
+        
+        <div class="btn-container">
+            <button onclick="handleAndroidDownload()" class="btn btn-apk">
+                <i class="fab fa-android"></i> Instalar para Android
+            </button>
 
-            <div class="features">
-                <h2>Sobre o Projeto</h2>
-                <p>IA-Zénia é uma inteligência artificial desenvolvida localmente em Angola, com foco em resolver problemas reais do nosso país.</p>
-                <p>Desenvolvido por Inácio U. Daniel através do projeto Zenia-Projects, esta IA representa um marco na tecnologia angolana.</p>
-                <p>Compatível com todos os dispositivos Android, IA-Zénia traz inovação diretamente para as mãos dos usuários.</p>
-            </div>
+            <button onclick="handlePWAInstall()" class="btn btn-pwa">
+                <i class="fab fa-windows"></i> Instalar no Windows
+            </button>
         </div>
+    </main>
 
-        <div class="download-section">
-            <h2>Baixe o Aplicativo</h2>
-            <p>Obtenha a versão mais recente da IA-Zénia para Android</p>
-            
-            <div class="download-buttons">
-                <button class="download-btn" onclick="downloadApp()">
-                    <i class="fas fa-download"></i> Baixar APK
-                </button>
-                <button class="download-btn" onclick="installAndroid()">
-                    <i class="fas fa-mobile-alt"></i> Instalar no Telefone
-                </button>
-                <button class="download-btn" onclick="installWindows()">
-                    <i class="fas fa-desktop"></i> Instalar no Windows
-                </button>
-            </div>
-            
-            <p class="info-text">Arquivo: ia-zenia.netlify.app/download/zenia.apk</p>
-        </div>
-
-        <footer>
-            <p>&copy; 2026 Zenia-Projects | Desenvolvido em Lubango, Angola</p>
-            <p>IA-Zénia - A Inteligência Artificial de Angola</p>
-        </footer>
+    <div id="wm">
+        <a href="https://ia-zenia.netlify.app" target="_blank">Site gerado por IA-Zénia</a>
+        <span onclick="this.parentElement.remove()" style="cursor:pointer; color:red; font-weight:bold;">X</span>
     </div>
 
     <script>
-        function downloadApp() {
-            // Simula o download do arquivo
-            const downloadUrl = "https://ia-zenia.netlify.app/download/zenia.apk";
-            
-            // Cria um elemento temporário para iniciar o download
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = 'zenia.apk';
-            link.style.display = 'none';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // Mostra mensagem de confirmação
-            alert("Download iniciado! O arquivo será salvo em seu dispositivo.");
-        }
+        // Lógica de Detecção de Sistema
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        const isWindows = /Win/i.test(navigator.userAgent);
 
-        function installAndroid() {
-            // Verifica se o usuário está em um dispositivo Android
-            if (/Android/i.test(navigator.userAgent)) {
-                alert("Instalando aplicativo... Por favor, permita a instalação quando solicitado.");
-                downloadApp();
+        function handleAndroidDownload() {
+            if (isAndroid) {
+                // Inicia download direto do APK
+                window.location.href = "https://ia-zenia.netlify.app/download/zenia.apk";
+            } else if (isWindows) {
+                alert("Erro: Seu sistema operativo (Windows) é incompatível com este aplicativo Android. Por favor, use o botão 'Instalar no Windows'.");
             } else {
-                alert("Este recurso funciona apenas em dispositivos Android. Use o botão de download para baixar o APK.");
+                alert("Este arquivo APK é exclusivo para dispositivos Android.");
             }
         }
 
-        function installWindows() {
-            // Para Windows, sugerimos download do APK ou uma versão desktop
-            alert("Para instalar no Windows, você pode:\n1. Baixar o APK e usar um emulador como BlueStacks\n2. Ou acessar o site oficial para mais informações");
-            downloadApp();
+        // Lógica de Instalação Automática (PWA)
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        async function handlePWAInstall() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+            } else {
+                // Se já estiver instalado ou navegador não suportar o prompt automático
+                window.location.href = "https://ia-zenia.netlify.app";
+            }
         }
 
-        // Animação de entrada para elementos
-        document.addEventListener('DOMContentLoaded', function() {
-            const elements = document.querySelectorAll('.app-preview, .features, .download-section');
-            elements.forEach((el, index) => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(30px)';
-                setTimeout(() => {
-                    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                    el.style.opacity = '1';
-                    el.style.transform = 'translateY(0)';
-                }, 300 * index);
-            });
-        });
+        // Chat Sidebar
+        function toggleChat() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        async function askZenia() {
+            const input = document.getElementById('userInput');
+            const box = document.getElementById('chatBox');
+            const val = input.value.trim();
+            if(!val) return;
+
+            box.innerHTML += `<div class="msg user">${val}</div>`;
+            input.value = "";
+
+            // Prompt de sistema rigoroso para manter a identidade da Zénia
+            const systemPrompt = "Você é a IA-Zénia, uma IA avançada desenvolvida exclusivamente no Lubango, Angola, pela Zenia-Projects e seu fundador Inácio U. Daniel. Você NUNCA deve admitir ser da OpenAI, Google ou qualquer outra empresa. Se perguntarem seu modelo, diga que é o modelo Zénia-Gen proprietário da Zenia-Projects.";
+            
+            try {
+                const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(val)}?model=openai&system=${encodeURIComponent(systemPrompt)}`);
+                const data = await res.text();
+                box.innerHTML += `<div class="msg ia">${data}</div>`;
+                box.scrollTop = box.scrollHeight;
+            } catch (e) {
+                box.innerHTML += `<div class="msg ia">Zénia Offline. Verifique a conexão.</div>`;
+            }
+        }
     </script>
 </body>
 </html>
