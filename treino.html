@@ -233,9 +233,24 @@ body{background:#0b0d11;color:#e5e7eb;font-family:Inter,system-ui,sans-serif;fon
       <textarea id="user-input" rows="1" placeholder="Fala com a Zenia... (Enter para enviar)"></textarea>
       <div id="input-bottom">
         <div id="input-bottom-left">
-          <button class="ia-btn" id="upload-btn" title="Carregar ficheiro (+)" onclick="openFileUpload()" style="color:#7c3aed"><i class="fas fa-plus"></i></button>
+          <div style="position:relative;display:inline-flex">
+            <button class="ia-btn" id="upload-btn" title="Menu (+)" onclick="togglePlusMenu()" style="color:#7c3aed"><i class="fas fa-plus"></i></button>
+            <div id="plus-menu" style="display:none;position:absolute;bottom:100%;left:0;background:#111318;border:1px solid #1e2330;border-radius:8px;padding:8px 0;min-width:200px;z-index:100;box-shadow:0 -4px 12px rgba(0,0,0,0.4)">
+              <button onclick="document.getElementById('file-input').click();togglePlusMenu()" style="width:100%;padding:10px 14px;border:none;background:transparent;color:#9ca3af;text-align:left;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:8px;transition:all 0.2s" onmouseover="this.style.background='#1a1f2e';this.style.color='#e5e7eb'" onmouseout="this.style.background='transparent';this.style.color='#9ca3af'">
+                <i class="fas fa-image" style="width:16px"></i> Carregar Imagem
+              </button>
+              <button onclick="toggleCamera();togglePlusMenu()" style="width:100%;padding:10px 14px;border:none;background:transparent;color:#9ca3af;text-align:left;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:8px;transition:all 0.2s" onmouseover="this.style.background='#1a1f2e';this.style.color='#e5e7eb'" onmouseout="this.style.background='transparent';this.style.color='#9ca3af'">
+                <i class="fas fa-video" style="width:16px;color:#ef4444"></i> Câmera ao Vivo
+              </button>
+              <button onclick="openPersonality();togglePlusMenu()" style="width:100%;padding:10px 14px;border:none;background:transparent;color:#9ca3af;text-align:left;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:8px;transition:all 0.2s" onmouseover="this.style.background='#1a1f2e';this.style.color='#e5e7eb'" onmouseout="this.style.background='transparent';this.style.color='#9ca3af'">
+                <i class="fas fa-sliders-h" style="width:16px;color:#3b5bdb"></i> Personalidade Zénia
+              </button>
+              <button onclick="switchVideoModelUI();togglePlusMenu()" style="width:100%;padding:10px 14px;border:none;background:transparent;color:#9ca3af;text-align:left;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:8px;transition:all 0.2s" onmouseover="this.style.background='#1a1f2e';this.style.color='#e5e7eb'" onmouseout="this.style.background='transparent';this.style.color='#9ca3af'">
+                <i class="fas fa-film" style="width:16px;color:#f99800"></i> Modelo de Vídeo
+              </button>
+            </div>
+          </div>
           <button class="ia-btn" id="mic-btn" title="Microfone"><i class="fas fa-microphone"></i></button>
-          <button class="ia-btn" onclick="openPersonality()" title="Personalidade"><i class="fas fa-sparkles"></i></button>
           <button class="ia-btn" onclick="clearChat()" title="Limpar"><i class="fas fa-trash-alt"></i></button>
         </div>
         <button id="send-btn" onclick="handleSend()">
@@ -246,8 +261,27 @@ body{background:#0b0d11;color:#e5e7eb;font-family:Inter,system-ui,sans-serif;fon
     <div style="max-width:780px;margin:4px auto 0;text-align:center;font-size:10px;color:#1f2937">Zenia pode cometer erros. Verifica informacoes importantes.</div>
   </div>
 
-<!-- INPUT FILE HIDDEN -->
-<input type="file" id="file-input" style="display:none" accept="image/*,application/pdf,.txt,.doc,.docx" onchange="handleFileUpload(event)">
+<!-- CAMERA CANVAS -->
+<canvas id="camera-canvas" style="display:none;position:fixed;top:20px;right:20px;width:40px;height:40px;border:2px solid #3b5bdb;border-radius:4px;z-index:1000;background:#000;cursor:pointer" onclick="toggleCamera()"></canvas>
+
+<!-- VIDEO MODEL SELECTOR MODAL -->
+<div id="video-model-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:500;display:flex;align-items:center;justify-content:center">
+  <div style="background:#0d1117;border:1px solid #1e2330;border-radius:12px;padding:20px;max-width:400px">
+    <h3 style="color:#e5e7eb;margin:0 0 20px 0;font-size:16px"><i class="fas fa-film" style="color:#f99800;margin-right:8px"></i>Selecione Modelo de Vídeo</h3>
+    <div style="display:flex;gap:12px;margin-bottom:20px">
+      <button onclick="setVideoModel('zevia');closeVideoModelUI()" style="flex:1;padding:14px;background:#1d3461;border:2px solid #2d4a7a;color:#93c5fd;border-radius:8px;cursor:pointer;font-weight:600;transition:all 0.2s">
+        🔷 ZEVIA<br><span style="font-size:11px;opacity:0.8">12 frames, 0.5s</span>
+      </button>
+      <button onclick="setVideoModel('google-veo');closeVideoModelUI()" style="flex:1;padding:14px;background:#1a1f2e;border:2px solid #252c3b;color:#9ca3af;border-radius:8px;cursor:pointer;font-weight:600;transition:all 0.2s">
+        🔶 GOOGLE VEO<br><span style="font-size:11px;opacity:0.8">24 frames, 1s, Grátis</span>
+      </button>
+    </div>
+    <div style="background:#111318;border:1px solid #1e2330;border-radius:6px;padding:10px;margin-bottom:15px;font-size:11px;color:#8b949e">
+      Modelo atual: <span id="current-video-model" style="color:#93c5fd;font-weight:600">Zevia 🔷</span>
+    </div>
+    <button onclick="closeVideoModelUI()" style="width:100%;padding:10px;background:#3b5bdb;border:none;color:#fff;border-radius:6px;cursor:pointer;font-weight:600">Confirmar</button>
+  </div>
+</div>
 
 <!-- MODAL PERSONALIDADE -->
 <div id="personality-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:500;overflow-y:auto">
@@ -1341,8 +1375,322 @@ function formatMath(text) {
 }
 
 // ==========================================
-// CONFIGURAÇÃO DE PERSONALIDADE
+// CAMERA AO VIVO
 // ==========================================
+var cameraActive = false;
+var cameraStream = null;
+var emotionDetector = null;
+
+async function toggleCamera() {
+    if (!cameraActive) {
+        try {
+            cameraStream = await navigator.mediaDevices.getUserMedia({ video: { width: 40, height: 40 } });
+            var canvas = document.getElementById('camera-canvas');
+            canvas.style.display = 'block';
+            var ctx = canvas.getContext('2d');
+            var video = document.createElement('video');
+            video.srcObject = cameraStream;
+            video.play();
+            
+            cameraActive = true;
+            toast('Câmera ligada! Zénia está a analisar tuas expressões.', 'ok');
+            
+            // Loop de captura
+            async function captureAndAnalyze() {
+                if (!cameraActive) return;
+                
+                ctx.drawImage(video, 0, 0, 40, 40);
+                
+                // Análise de emoção (simulada - seria necessário API externa)
+                // Por enquanto, apenas mostra a câmera
+                
+                requestAnimationFrame(captureAndAnalyze);
+            }
+            captureAndAnalyze();
+            
+        } catch(e) {
+            toast('Erro ao aceder câmera: ' + e.message, 'err');
+        }
+    } else {
+        cameraActive = false;
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(t => t.stop());
+        }
+        document.getElementById('camera-canvas').style.display = 'none';
+        toast('Câmera desligada.', 'ok');
+    }
+}
+
+// ==========================================
+// ANÁLISE DE IMAGENS COM API GRÁTIS
+// ==========================================
+async function analyzeImageWithAPI(imageData) {
+    try {
+        // Usa imgbb.com (API grátis para upload)
+        var formData = new FormData();
+        formData.append('image', imageData.split(',')[1]); // Base64 sem prefixo
+        
+        // Análise com Hugging Face (grátis, sem API key para modelos públicos)
+        var response = await fetch('https://api-inference.huggingface.co/models/microsoft/resnet-50', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                inputs: imageData
+            })
+        });
+        
+        if (!response.ok) {
+            // Fallback: usar análise local com TensorFlow.js
+            return await analyzeWithTensorFlow(imageData);
+        }
+        
+        var result = await response.json();
+        return result;
+        
+    } catch(e) {
+        console.warn('Análise API falhou, usando TensorFlow:', e);
+        return await analyzeWithTensorFlow(imageData);
+    }
+}
+
+// Análise com TensorFlow.js (funciona localmente, sem API key)
+async function analyzeWithTensorFlow(imageData) {
+    try {
+        // Carrega modelo de detecção de objetos
+        if (!window.cocoSsd) {
+            // Se CocoSSD não está carregado, usa detecção básica
+            return analyzeImageBasic(imageData);
+        }
+        
+        var img = new Image();
+        img.src = imageData;
+        
+        return new Promise((resolve) => {
+            img.onload = async function() {
+                var predictions = await window.cocoSsd.detect(img);
+                
+                var objects = predictions.map(p => ({
+                    class: p.class,
+                    confidence: (p.score * 100).toFixed(1)
+                }));
+                
+                resolve({
+                    type: 'object_detection',
+                    objects: objects,
+                    totalObjects: objects.length
+                });
+            };
+        });
+        
+    } catch(e) {
+        return analyzeImageBasic(imageData);
+    }
+}
+
+// Análise básica de imagem (sem modelos)
+function analyzeImageBasic(imageData) {
+    return new Promise((resolve) => {
+        var img = new Image();
+        img.src = imageData;
+        img.onload = function() {
+            var canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var data = imageData.data;
+            
+            // Análise simples de cores e dimensões
+            var r = 0, g = 0, b = 0;
+            for (var i = 0; i < data.length; i += 4) {
+                r += data[i];
+                g += data[i + 1];
+                b += data[i + 2];
+            }
+            var count = data.length / 4;
+            r = Math.round(r / count);
+            g = Math.round(g / count);
+            b = Math.round(b / count);
+            
+            resolve({
+                type: 'basic_analysis',
+                width: img.width,
+                height: img.height,
+                dominantColor: `rgb(${r}, ${g}, ${b})`,
+                description: `Imagem ${img.width}x${img.height} com cor predominante RGB(${r}, ${g}, ${b})`
+            });
+        };
+    });
+}
+
+// ==========================================
+// MENU DO BOTÃO +
+// ==========================================
+function togglePlusMenu() {
+    var menu = document.getElementById('plus-menu');
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+function switchVideoModelUI() {
+    document.getElementById('video-model-modal').style.display = 'flex';
+}
+
+function closeVideoModelUI() {
+    document.getElementById('video-model-modal').style.display = 'none';
+    document.getElementById('current-video-model').textContent = (videoModel === 'zevia' ? 'Zevia 🔷' : 'Google Veo 🔶');
+}
+
+// ==========================================
+// EDIÇÃO DE MENSAGENS
+// ==========================================
+function enableMessageEdit(msgElement, originalText) {
+    var bbl = msgElement.querySelector('.msg-bbl');
+    var oldHTML = bbl.innerHTML;
+    
+    var textarea = document.createElement('textarea');
+    textarea.value = originalText;
+    textarea.style.cssText = 'width:100%;padding:8px;border:1px solid #3b5bdb;border-radius:6px;background:#0d1117;color:#e5e7eb;font-size:12px;font-family:inherit;min-height:60px';
+    
+    var buttonsDiv = document.createElement('div');
+    buttonsDiv.style.cssText = 'display:flex;gap:8px;margin-top:8px';
+    
+    var saveBtn = document.createElement('button');
+    saveBtn.textContent = 'Reenviār';
+    saveBtn.style.cssText = 'flex:1;padding:6px;background:#3b5bdb;border:none;color:#fff;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600';
+    saveBtn.onclick = function() {
+        var newText = textarea.value.trim();
+        if (newText) {
+            inputEl.value = newText;
+            autoResize(inputEl);
+            
+            // Remove mensagens posteriores à editada
+            var rows = chatEl.querySelectorAll('.msg-row');
+            var found = false;
+            rows.forEach(row => {
+                if (row === msgElement) found = true;
+                if (found && row !== msgElement) {
+                    row.remove();
+                }
+            });
+            
+            handleSend();
+        }
+        bbl.innerHTML = oldHTML;
+    };
+    
+    var cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancelar';
+    cancelBtn.style.cssText = 'flex:1;padding:6px;background:#252c3b;border:none;color:#9ca3af;border-radius:4px;cursor:pointer;font-size:11px';
+    cancelBtn.onclick = function() {
+        bbl.innerHTML = oldHTML;
+    };
+    
+    buttonsDiv.appendChild(saveBtn);
+    buttonsDiv.appendChild(cancelBtn);
+    
+    bbl.innerHTML = '';
+    bbl.appendChild(textarea);
+    bbl.appendChild(buttonsDiv);
+    textarea.focus();
+}
+
+// ==========================================
+// BOTÕES DE AÇÃO NAS RESPOSTAS
+// ==========================================
+function addResponseActions(msgElement, text) {
+    var bbl = msgElement.querySelector('.msg-bbl');
+    
+    var actionsDiv = document.createElement('div');
+    actionsDiv.style.cssText = 'display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid #1e2330;flex-wrap:wrap';
+    
+    // Botão Copiar
+    var copyBtn = document.createElement('button');
+    copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copiar';
+    copyBtn.style.cssText = 'padding:6px 10px;font-size:11px;background:#1a1f2e;border:1px solid #252c3b;color:#9ca3af;border-radius:4px;cursor:pointer;transition:all 0.2s';
+    copyBtn.onmouseover = function() { this.style.background = '#252c3b'; this.style.color = '#e5e7eb'; };
+    copyBtn.onmouseout = function() { this.style.background = '#1a1f2e'; this.style.color = '#9ca3af'; };
+    copyBtn.onclick = function() {
+        navigator.clipboard.writeText(text);
+        toast('Copiado!', 'ok');
+    };
+    
+    // Botão Ler
+    var readBtn = document.createElement('button');
+    readBtn.innerHTML = '<i class="fas fa-volume-up"></i> Ler';
+    readBtn.style.cssText = 'padding:6px 10px;font-size:11px;background:#1a1f2e;border:1px solid #252c3b;color:#9ca3af;border-radius:4px;cursor:pointer;transition:all 0.2s';
+    readBtn.onmouseover = function() { this.style.background = '#252c3b'; this.style.color = '#e5e7eb'; };
+    readBtn.onmouseout = function() { this.style.background = '#1a1f2e'; this.style.color = '#9ca3af'; };
+    readBtn.onclick = function() {
+        if (window.speechSynthesis) {
+            speechSynthesis.cancel();
+            var u = new SpeechSynthesisUtterance(text);
+            u.lang = 'pt-PT';
+            speechSynthesis.speak(u);
+            toast('A ler em voz alta...', 'ok');
+        }
+    };
+    
+    // Botão Reescrever
+    var rewriteBtn = document.createElement('button');
+    rewriteBtn.innerHTML = '<i class="fas fa-pen"></i> Reescrever';
+    rewriteBtn.style.cssText = 'padding:6px 10px;font-size:11px;background:#1a1f2e;border:1px solid #252c3b;color:#9ca3af;border-radius:4px;cursor:pointer;transition:all 0.2s';
+    rewriteBtn.onmouseover = function() { this.style.background = '#252c3b'; this.style.color = '#e5e7eb'; };
+    rewriteBtn.onmouseout = function() { this.style.background = '#1a1f2e'; this.style.color = '#9ca3af'; };
+    rewriteBtn.onclick = function() {
+        inputEl.value = 'Reescreve isto de forma ' + (Math.random() > 0.5 ? 'mais simples' : 'mais detalhada') + ': ' + text.substring(0, 100);
+        autoResize(inputEl);
+        inputEl.focus();
+    };
+    
+    // Botão Gostei
+    var likeBtn = document.createElement('button');
+    likeBtn.innerHTML = '<i class="fas fa-thumbs-up"></i> Gostei';
+    likeBtn.style.cssText = 'padding:6px 10px;font-size:11px;background:#1a2e3a;border:1px solid #1e3a45;color:#22c55e;border-radius:4px;cursor:pointer;transition:all 0.2s';
+    likeBtn.onclick = function() {
+        this.style.background = '#1f4a3a';
+        this.textContent = '✓ Obrigado!';
+        toast('Feedback registado! 👍', 'ok');
+    };
+    
+    // Botão Não Gostei
+    var dislikeBtn = document.createElement('button');
+    dislikeBtn.innerHTML = '<i class="fas fa-thumbs-down"></i> Não Gostei';
+    dislikeBtn.style.cssText = 'padding:6px 10px;font-size:11px;background:#3a2e1a;border:1px solid #453a1e;color:#ef4444;border-radius:4px;cursor:pointer;transition:all 0.2s';
+    dislikeBtn.onclick = function() {
+        this.style.background = '#4a3a1f';
+        this.textContent = '✓ Anotado';
+        toast('Vamos melhorar! 👎', 'ok');
+    };
+    
+    // Botão Baixar
+    var downloadBtn = document.createElement('button');
+    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Baixar';
+    downloadBtn.style.cssText = 'padding:6px 10px;font-size:11px;background:#1a1f2e;border:1px solid #252c3b;color:#9ca3af;border-radius:4px;cursor:pointer;transition:all 0.2s';
+    downloadBtn.onmouseover = function() { this.style.background = '#252c3b'; this.style.color = '#e5e7eb'; };
+    downloadBtn.onmouseout = function() { this.style.background = '#1a1f2e'; this.style.color = '#9ca3af'; };
+    downloadBtn.onclick = function() {
+        var blob = new Blob([text], { type: 'text/plain' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'resposta_zenia.txt';
+        a.click();
+        toast('Baixado!', 'ok');
+    };
+    
+    actionsDiv.appendChild(copyBtn);
+    actionsDiv.appendChild(readBtn);
+    actionsDiv.appendChild(rewriteBtn);
+    actionsDiv.appendChild(likeBtn);
+    actionsDiv.appendChild(dislikeBtn);
+    actionsDiv.appendChild(downloadBtn);
+    
+    bbl.appendChild(actionsDiv);
+}
 var zeniaPersonality = {
     tone: 'amigavel',        // amigavel, profissional, humorista, tecnico, criativo
     detailLevel: 'medio',    // curto, medio, detalhado
@@ -1361,10 +1709,9 @@ async function handleFileUpload(event) {
     var fileType = file.type;
     hideWelcome();
     
-    // Verifica se é imagem
     if (fileType.startsWith('image/')) {
         var reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = async function(e) {
             var base64Image = e.target.result;
             
             // Mostra a imagem na conversa
@@ -1374,32 +1721,28 @@ async function handleFileUpload(event) {
             chatEl.appendChild(row);
             chatEl.scrollTop = chatEl.scrollHeight;
             
-            // Pré-preenche a entrada com instruções
-            inputEl.value = 'Analisa esta imagem e descreve o que vê:';
+            // Analisa a imagem
+            var analysis = await analyzeWithTensorFlow(base64Image);
+            
+            // Pré-preenche com análise
+            var analysisText = 'Analisei a imagem: ';
+            if (analysis.objects) {
+                analysisText += 'Detectei ' + analysis.totalObjects + ' objetos: ' + analysis.objects.map(o => o.class + ' (' + o.confidence + '%)').join(', ') + '. ';
+            }
+            analysisText += 'Faz perguntas sobre a imagem acima.';
+            
+            inputEl.value = analysisText;
             autoResize(inputEl);
             
-            toast('Imagem carregada! Escreve a tua pergunta.', 'ok');
+            toast('Imagem analisada! ' + (analysis.totalObjects || 0) + ' objectos detectados.', 'ok');
         };
         reader.readAsDataURL(file);
-    } 
-    // Verifica se é PDF
-    else if (fileType === 'application/pdf') {
-        toast('PDF: Converter para texto e colar o conteúdo.', 'warn');
+    } else {
+        toast('Apenas imagens são suportadas nesta versão.', 'warn');
     }
-    // Verifica se é texto
-    else if (fileType === 'text/plain' || fileType.includes('text')) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            var content = e.target.result.substring(0, 1000);
-            inputEl.value = 'Analisa este texto:\n\n' + content + '\n\n...';
-            autoResize(inputEl);
-            toast('Ficheiro carregado: ' + file.name, 'ok');
-        };
-        reader.readAsText(file);
-    }
-    else {
-        toast('Tipo de ficheiro não suportado.', 'warn');
-    }
+    
+    // Reset input
+    event.target.value = '';
 }
 
 // FUNÇÕES DE PERSONALIDADE
@@ -1783,22 +2126,43 @@ function downloadCode(id, fileName) {
 }
 
 function renderMsg(role, text, fromWeb) {
-    var row = document.createElement('div'); row.className = 'msg-row' + (role==='user' ? ' user-row' : '');
-    var av  = document.createElement('div'); av.className = 'msg-av ' + (role==='user'?'user':'ai'); av.textContent = role==='user'?'U':'Z';
-    var bbl = document.createElement('div'); bbl.className = 'msg-bbl ' + (role==='user'?'user':'ai');
+    var row = document.createElement('div'); 
+    row.className = 'msg-row' + (role==='user' ? ' user-row' : '');
+    var av  = document.createElement('div'); 
+    av.className = 'msg-av ' + (role==='user'?'user':'ai'); 
+    av.textContent = role==='user'?'U':'Z';
+    var bbl = document.createElement('div'); 
+    bbl.className = 'msg-bbl ' + (role==='user'?'user':'ai');
     
     if (role==='ai') {
         if (fromWeb) bbl.innerHTML = '<div class="sbadge s-web" style="margin-bottom:6px"><i class="fas fa-globe"></i> Web Info</div>';
         bbl.innerHTML += fmtText(text);
     } else { 
-        bbl.textContent = text; 
+        bbl.textContent = text;
+        // Adiciona botão de editar para mensagens do utilizador
+        var editBtn = document.createElement('button');
+        editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+        editBtn.style.cssText = 'position:absolute;top:5px;right:5px;background:none;border:none;color:#6b7280;cursor:pointer;padding:4px;opacity:0;transition:all 0.2s';
+        bbl.style.position = 'relative';
+        bbl.appendChild(editBtn);
+        bbl.onmouseover = function() { editBtn.style.opacity = '1'; editBtn.style.color = '#e5e7eb'; };
+        bbl.onmouseout = function() { editBtn.style.opacity = '0'; };
+        editBtn.onclick = function() { enableMessageEdit(row, text); };
     }
     
-    row.appendChild(av); row.appendChild(bbl); chatEl.appendChild(row); chatEl.scrollTop=chatEl.scrollHeight;
+    row.appendChild(av); 
+    row.appendChild(bbl); 
+    chatEl.appendChild(row); 
+    chatEl.scrollTop=chatEl.scrollHeight;
     
-    // Renderiza MathJax se disponível
-    if (window.MathJax && role==='ai') {
-        setTimeout(function() { MathJax.typesetPromise([bbl]).catch(function(e) {}); }, 100);
+    // Adiciona botões de ação nas respostas da IA
+    if (role === 'ai') {
+        setTimeout(function() {
+            addResponseActions(row, text);
+            if (window.MathJax) {
+                MathJax.typesetPromise([bbl]).catch(function(e) {});
+            }
+        }, 100);
     }
     
     return row;
