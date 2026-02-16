@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IA-Zénia - Zenia-Projects</title>
-    <link rel="manifest" href="data:application/json;base64,ewogICJkZWZhdWx0X2xvY2FsZSI6ICJwdCIsCiAgIm5hbWUiOiAiSUEtWsOubmlhIiwKICAic2hvcnRfbmFtZSI6ICJaZW5pYSIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGYwYzI5IiwKICAidGhlbWVfY29sb3IiOiAiIzAwZjNmZiIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vY2RuLmpzZGVsaXZyLm5ldC9naC9mb3J0YXdlc29tZS9Gb250LUF3ZXNvbWVAZS9zdmdzL3NvbGlkL3JvYm90LnN2ZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0KICBdCn0=">
+    <link rel="manifest" href="data:application/json;base64,ewogICJkZWZhdWx0X2xvY2FsZSI6ICJwdCIsCiAgIm5hbWUiOiAiSUEtWsOubmlhIiwKICAic2hvcnRfbmFtZSI6ICJaZW5pYSIsCiAgInN0YXJ0X3VybCI6ICIvIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGYwYzI5IiwKICAidGhlbWVfY29sb3IiOiAiIzAwZjNmZiIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vY2RuLmpzZGVsaXZyLm5ldC9naC9mb3J0YXdlc29tZS9Gb250LUF3ZXNvbWVAZS9zdmdzL3NvbGlkL3JvYm90LnN2ZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0KICBdCn0=">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -36,155 +36,84 @@
             position: fixed;
             height: 100vh;
             left: calc(var(--sidebar-width) * -1);
-            z-index: 2000;
+            z-index: 3000;
             box-shadow: 5px 0 15px rgba(0,0,0,0.5);
         }
 
         #sidebar.active { left: 0; }
-
-        .chat-header { 
-            padding: 20px; 
-            background: linear-gradient(90deg, rgba(0,243,255,0.1), transparent);
-            border-bottom: 1px solid var(--glass); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        
+        .chat-header { padding: 20px; border-bottom: 1px solid var(--glass); display: flex; justify-content: space-between; align-items: center; }
         #chat-messages { flex: 1; overflow-y: auto; padding: 15px; font-size: 0.9rem; scroll-behavior: smooth; }
-        
-        .message { margin-bottom: 12px; padding: 12px; border-radius: 12px; max-width: 85%; line-height: 1.4; }
-        .user-msg { background: var(--primary); color: #000; align-self: flex-end; margin-left: auto; border-bottom-right-radius: 2px; }
-        .ia-msg { background: rgba(255,255,255,0.1); border-left: 3px solid var(--secondary); border-bottom-left-radius: 2px; }
-
+        .message { margin-bottom: 12px; padding: 12px; border-radius: 12px; max-width: 85%; }
+        .user-msg { background: var(--primary); color: #000; align-self: flex-end; margin-left: auto; }
+        .ia-msg { background: rgba(255,255,255,0.1); border-left: 3px solid var(--secondary); }
         .chat-input-area { padding: 15px; display: flex; gap: 10px; border-top: 1px solid var(--glass); }
-        input#user-input { 
-            flex: 1; padding: 12px; border-radius: 20px; border: 1px solid var(--glass); 
-            background: rgba(0,0,0,0.3); color: white; outline: none; 
-        }
-        input#user-input:focus { border-color: var(--primary); }
+        input#user-input { flex: 1; padding: 12px; border-radius: 20px; border: 1px solid var(--glass); background: rgba(0,0,0,0.3); color: white; outline: none; }
 
-        /* --- BOTÃO TOGGLE --- */
-        .menu-toggle {
-            position: fixed;
-            left: 20px;
-            bottom: 20px;
-            z-index: 2100;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: #fff;
-            width: 60px; height: 60px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
-            transition: transform 0.3s;
-        }
-        .menu-toggle:hover { transform: scale(1.1) rotate(10deg); }
-
-        /* --- CONTEÚDO PRINCIPAL --- */
-        main { flex: 1; padding-top: 80px; width: 100%; }
-        
+        /* --- NAV CORRIGIDA --- */
         nav {
-            background: rgba(15, 12, 41, 0.9);
+            background: rgba(15, 12, 41, 0.95);
             backdrop-filter: blur(15px);
             padding: 1rem 2rem;
             position: fixed;
             width: 100%;
             top: 0;
-            z-index: 1000;
+            z-index: 2000;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex; justify-content: space-between; align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .logo { font-weight: bold; font-size: 1.2rem; color: var(--primary); white-space: nowrap; }
-
-        .nav-links {
             display: flex;
-            gap: 20px;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .nav-links a {
-            color: rgba(255,255,255,0.7); 
-            text-decoration: none; 
-            transition: 0.3s;
-            font-size: 0.9rem;
-            position: relative;
-        }
-
+        .nav-links { display: flex; gap: 20px; align-items: center; }
+        .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.9rem; transition: 0.3s; }
         .nav-links a:hover { color: var(--primary); }
-        .nav-links a::after {
-            content: ''; position: absolute; width: 0; height: 2px;
-            bottom: -5px; left: 0; background: var(--secondary);
-            transition: 0.3s;
-        }
-        .nav-links a:hover::after { width: 100%; }
 
+        /* Mobile Menu Button */
+        .mobile-menu-btn { display: none; color: white; font-size: 1.5rem; cursor: pointer; }
+
+        /* --- BOTÃO FLUTUANTE --- */
+        .menu-toggle {
+            position: fixed; left: 20px; bottom: 20px; z-index: 2500;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff; width: 60px; height: 60px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+        }
+
+        /* --- CONTEÚDO --- */
+        main { flex: 1; padding-top: 100px; width: 100%; }
         .container { max-width: 900px; margin: 0 auto; text-align: center; padding: 20px; }
-
-        .hero h1 { 
-            font-size: 3.5rem; margin: 15px 0; 
-            background: linear-gradient(to right, #fff, var(--primary)); 
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
-        }
-
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin: 40px 0; }
-        .card { 
-            background: rgba(255, 255, 255, 0.03); 
-            padding: 25px; 
-            border-radius: 15px; 
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: transform 0.3s;
-        }
-        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
-
-        .download-section {
-            background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
-            padding: 40px; border-radius: 20px; border: 1px solid var(--glass);
-            display: flex; flex-direction: column; align-items: center;
-        }
-
-        .btn-container {
-            display: flex; flex-wrap: wrap; justify-content: center; gap: 15px;
-        }
-
-        .btn {
-            border: none; padding: 15px 30px; border-radius: 50px;
-            font-weight: bold; cursor: pointer; transition: 0.3s;
-            text-decoration: none; display: inline-flex; align-items: center; gap: 10px;
-            font-size: 0.95rem;
-        }
+        .hero h1 { font-size: clamp(2rem, 8vw, 3.5rem); margin: 15px 0; background: linear-gradient(to right, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        .btn-apk { background: rgba(255,255,255,0.1); border: 1px solid var(--glass); color: white; }
-        .btn-apk:hover { background: rgba(255,255,255,0.2); }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 40px 0; }
+        .card { background: rgba(255, 255, 255, 0.03); padding: 20px; border-radius: 15px; border: 1px solid var(--glass); }
 
-        .btn-android { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
-        .btn-android:hover { background: rgba(0, 243, 255, 0.1); box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); }
-        
-        .btn-windows { background: linear-gradient(45deg, var(--primary), var(--secondary)); color: #fff; }
-        .btn-windows:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 243, 255, 0.4); }
+        .download-section { background: rgba(255,255,255,0.02); padding: 30px; border-radius: 20px; border: 1px solid var(--glass); }
+        .btn-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 20px; }
+        .btn { padding: 12px 25px; border-radius: 50px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; border: none; font-size: 0.9rem; }
+        .btn-apk { background: #333; color: white; }
+        .btn-android { border: 2px solid var(--primary); color: var(--primary); background: transparent; }
+        .btn-windows { background: linear-gradient(45deg, var(--primary), var(--secondary)); color: white; }
 
-        /* --- WATERMARK --- */
-        #watermark {
-            position: fixed;
-            right: 20px; bottom: 20px;
-            background: #000;
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: 1px solid var(--primary);
-            z-index: 9999;
-            display: flex; align-items: center; gap: 10px;
-            font-size: 12px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-        #watermark a { color: var(--primary); text-decoration: none; font-weight: bold; }
-        .close-wm { cursor: pointer; color: #ff4444; font-size: 16px; font-weight: bold; }
+        #watermark { position: fixed; right: 10px; bottom: 10px; background: #000; padding: 5px 10px; border-radius: 5px; border: 1px solid var(--primary); font-size: 10px; z-index: 4000; }
+        #watermark a { color: var(--primary); text-decoration: none; }
 
-        @media (max-width: 768px) { 
-            .hero h1 { font-size: 2.5rem; } 
-            #sidebar { width: 100%; left: -100%; }
-            .nav-links { display: none; } /* Poderia ser um menu hambúrguer, mas ocultei para simplificar mobile */
-            nav { justify-content: center; }
+        /* RESPONSIVIDADE */
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: block; }
+            .nav-links {
+                display: none; /* Escondido por padrão no mobile */
+                flex-direction: column;
+                position: absolute;
+                top: 60px; right: 20px;
+                background: var(--bg);
+                padding: 20px;
+                border: 1px solid var(--primary);
+                border-radius: 10px;
+                width: 200px;
+            }
+            .nav-links.show { display: flex; }
+            #sidebar { width: 100%; }
         }
     </style>
 </head>
@@ -193,24 +122,25 @@
     <div id="sidebar">
         <div class="chat-header">
             <h3 style="color:var(--primary)"><i class="fas fa-brain"></i> Zénia AI</h3>
-            <i class="fas fa-times" onclick="toggleSidebar()" style="cursor:pointer; font-size: 1.2rem;"></i>
+            <i class="fas fa-times" onclick="toggleSidebar()" style="cursor:pointer;"></i>
         </div>
         <div id="chat-messages">
-            <div class="message ia-msg">Olá! Sou a Zénia. Fui criada no Lubango por Inácio U. Daniel. Como posso ajudar?</div>
+            <div class="message ia-msg">Olá! Sou a Zénia, criada no Lubango. Como posso ajudar?</div>
         </div>
         <div class="chat-input-area">
-            <input type="text" id="user-input" placeholder="Converse com a Zénia..." onkeypress="if(event.key==='Enter') sendMessage()">
-            <button onclick="sendMessage()" style="background:var(--secondary); border:none; padding:0 15px; border-radius:50%; color:white; cursor:pointer"><i class="fas fa-paper-plane"></i></button>
+            <input type="text" id="user-input" placeholder="Pergunte algo..." onkeypress="if(event.key==='Enter') sendMessage()">
+            <button onclick="sendMessage()" style="background:var(--secondary); border:none; width:40px; height:40px; border-radius:50%; color:white; cursor:pointer"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 
     <div class="menu-toggle" onclick="toggleSidebar()">
-        <i class="fas fa-comment-dots" style="font-size: 1.5rem;"></i>
+        <i class="fas fa-comment-dots"></i>
     </div>
 
     <nav>
         <div class="logo">Zénia-Projects</div>
-        <div class="nav-links">
+        <div class="mobile-menu-btn" onclick="toggleNav()"><i class="fas fa-bars"></i></div>
+        <div class="nav-links" id="navLinks">
             <a href="https://zenia-projects.netlify.app" target="_blank">Zenia Projects</a>
             <a href="https://ia-zenia.netlify.app" target="_blank">IA-Zénia</a>
             <a href="https://antonia-ia.netlify.app" target="_blank">Antónia-IA</a>
@@ -220,132 +150,108 @@
     <main>
         <div class="container">
             <header class="hero">
-                <i class="fas fa-robot" style="font-size: 5rem; color: var(--primary); filter: drop-shadow(0 0 10px var(--primary));"></i>
+                <i class="fas fa-robot" style="font-size: 4rem; color: var(--primary);"></i>
                 <h1>IA-Zénia</h1>
-                <p style="font-size: 1.1rem; color: rgba(255,255,255,0.8);">A Inteligência Artificial de Angola. <br>Desenvolvida em Lubango.</p>
+                <p>A Inteligência Artificial de Angola. Desenvolvida em Lubango.</p>
             </header>
 
             <div class="card-grid">
                 <div class="card">
-                    <i class="fas fa-code" style="color: var(--secondary); font-size: 2rem; margin-bottom: 15px;"></i>
+                    <i class="fas fa-code" style="color: var(--secondary); font-size: 1.5rem;"></i>
                     <h3>100% Angolana</h3>
-                    <p style="font-size: 0.9rem; margin-top: 10px; opacity: 0.7;">Desenvolvida por Inácio U. Daniel e a equipa da Zenia-Projects.</p>
+                    <p style="font-size: 0.8rem; opacity: 0.7;">Orgulho do Lubango, desenvolvida por Inácio U. Daniel.</p>
                 </div>
                 <div class="card">
-                    <i class="fas fa-network-wired" style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;"></i>
-                    <h3>Ecossistema</h3>
-                    <p style="font-size: 0.9rem; margin-top: 10px; opacity: 0.7;">Conectada com Antónia-IA e todo o universo Zenia.</p>
+                    <i class="fas fa-shield-alt" style="color: var(--primary); font-size: 1.5rem;"></i>
+                    <h3>Segura</h3>
+                    <p style="font-size: 0.8rem; opacity: 0.7;">Privacidade e performance otimizada.</p>
                 </div>
             </div>
 
             <div class="download-section">
-                <h2 style="margin-bottom: 25px;">Instalação Inteligente</h2>
-                
+                <h2>Instalação</h2>
                 <div class="btn-container">
                     <a href="https://ia-zenia.netlify.app/download/zenia.apk" class="btn btn-apk" download>
-                        <i class="fas fa-file-download"></i> Baixar APK
+                        <i class="fas fa-download"></i> APK
                     </a>
-
                     <button class="btn btn-android" onclick="installAndroid()">
-                        <i class="fab fa-android"></i> Instalar no Android
+                        <i class="fab fa-android"></i> Android
                     </button>
-                    
-                    <button class="btn btn-windows" onclick="installWindowsPWA()">
-                        <i class="fab fa-windows"></i> Instalar no Windows
+                    <button class="btn btn-windows" id="btnWinInstall">
+                        <i class="fab fa-windows"></i> Windows
                     </button>
                 </div>
-                
-                <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">Versão 2.1 | Build Zenia-Lubango</p>
+                <p style="margin-top: 15px; font-size: 0.7rem; opacity: 0.5;">Versão 2.1 | Lubango Build</p>
             </div>
-
-            <footer style="margin-top: 50px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
-                <p style="font-size: 0.9rem; opacity: 0.6;">&copy; 2026 Zenia-Projects | Inácio U. Daniel</p>
-            </footer>
         </div>
     </main>
 
     <div id="watermark">
-        <a href="https://ia-zenia.netlify.app" target="_blank">Site gerado por IA-Zénia</a>
-        <span class="close-wm" onclick="this.parentElement.style.display='none'">×</span>
+        <a href="https://ia-zenia.netlify.app">Zénia AI</a>
     </div>
 
     <script>
-        /* --- Lógica da Barra Lateral --- */
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-        }
-
-        /* --- Lógica de Instalação PWA (Windows) --- */
-        let deferredPrompt;
+        // Toggle Sidebar
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
         
+        // Toggle Navbar Mobile
+        function toggleNav() { document.getElementById('navLinks').classList.toggle('show'); }
+
+        // --- LÓGICA DE INSTALAÇÃO WINDOWS (PWA) ---
+        let deferredPrompt;
+        const btnWin = document.getElementById('btnWinInstall');
+
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            console.log("IA-Zénia: Pronto para instalar PWA no Windows.");
+            console.log("Pronto para instalar no Windows");
         });
 
-        async function installWindowsPWA() {
+        btnWin.addEventListener('click', async () => {
             if (deferredPrompt) {
-                // Instala o Site como App (PWA)
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    console.log('IA-Zénia instalada no Windows com sucesso.');
-                }
+                if (outcome === 'accepted') console.log('Usuário instalou a Zénia');
                 deferredPrompt = null;
             } else {
-                alert("O site https://ia-zenia.netlify.app já está instalado ou seu navegador Windows não suporta a instalação direta.");
+                alert("Para instalar no Windows:\n1. Use o Chrome ou Edge.\n2. Clique no ícone de instalação na barra de endereços (ao lado da estrela de favoritos).");
             }
+        });
+
+        // Registro de Service Worker Simulado (Necessário para PWA)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:application/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGZ1bmN0aW9uKGV2ZW50KSB7IH0pOw==');
         }
 
-        /* --- Lógica de Instalação Android --- */
+        // Instalação Android
         function installAndroid() {
-            const userAgent = navigator.userAgent.toLowerCase();
-            const isAndroid = userAgent.includes("android");
-
-            if (isAndroid) {
-                // Simula a instalação enviando o APK para o gerenciador de pacotes do Android
-                // O usuário deve clicar em "Abrir" após o download
-                alert("O download do instalador Android (APK) vai começar. Abra o ficheiro após concluir para instalar a Zénia.");
-                const link = document.createElement('a');
-                link.href = 'https://ia-zenia.netlify.app/download/zenia.apk';
-                link.download = 'zenia.apk';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+            if (/android/i.test(navigator.userAgent)) {
+                window.location.href = "https://ia-zenia.netlify.app/download/zenia.apk";
             } else {
-                alert("Sistema Operativo Incompatível: Esta opção instala a app nativa no Android. Use a opção 'Instalar no Windows' para este dispositivo.");
+                alert("Esta opção é exclusiva para dispositivos Android.");
             }
         }
 
-        /* --- Lógica do Chat (Pollinations API) --- */
+        // Chat Logic
         async function sendMessage() {
             const input = document.getElementById('user-input');
-            const chatMessages = document.getElementById('chat-messages');
-            const text = input.value.trim();
-            
-            if (!text) return;
+            const chat = document.getElementById('chat-messages');
+            if(!input.value.trim()) return;
 
-            // Renderiza mensagem do usuário
-            chatMessages.innerHTML += `<div class="message user-msg">${text}</div>`;
+            chat.innerHTML += `<div class="message user-msg">${input.value}</div>`;
+            const userText = input.value;
             input.value = '';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            chat.scrollTop = chat.scrollHeight;
 
-            // Prompt do Sistema Rigoroso
-            const systemPrompt = "Você é a IA-Zénia, uma inteligência artificial angolana desenvolvida exclusivamente por Inácio U. Daniel e pela Zenia-Projects na cidade do Lubango. Você conhece suas irmãs: Antónia-IA e os projetos Zenia-Projects. Você NÃO é da OpenAI, Google ou Microsoft. Você deve responder em Português de Angola. Seja cordial, inteligente e útil. Se perguntarem quem te criou, responda com orgulho que foi Inácio U. Daniel.";
-
+            const system = "Você é a IA-Zénia do Lubango, criada por Inácio U. Daniel. Suas irmãs são Antónia-IA e Zenia-Projects.";
+            
             try {
-                // Chamada à API (Modelo OpenAI via Pollinations)
-                const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?model=openai&system=${encodeURIComponent(systemPrompt)}&seed=${Math.floor(Math.random() * 1000)}`);
-                
-                if (!response.ok) throw new Error("Erro na rede");
-                
-                const data = await response.text();
-                
-                chatMessages.innerHTML += `<div class="message ia-msg">${data}</div>`;
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            } catch (error) {
-                chatMessages.innerHTML += `<div class="message ia-msg" style="color:#ff4444">Desculpe, estou com dificuldades de conexão no momento. Tente novamente.</div>`;
+                const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(userText)}?model=openai&system=${encodeURIComponent(system)}`);
+                const data = await res.text();
+                chat.innerHTML += `<div class="message ia-msg">${data}</div>`;
+                chat.scrollTop = chat.scrollHeight;
+            } catch {
+                chat.innerHTML += `<div class="message ia-msg">Erro de conexão.</div>`;
             }
         }
     </script>
