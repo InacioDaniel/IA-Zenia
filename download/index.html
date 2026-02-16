@@ -21,6 +21,87 @@
             position: relative;
         }
 
+        /* Navbar Styles */
+        nav {
+            background: rgba(10, 10, 30, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            color: #00f3ff;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #00f3ff;
+            background: rgba(0, 243, 255, 0.1);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #00f3ff;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: transparent;
+            color: #00f3ff;
+            border: 1px solid #00f3ff;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 243, 255, 0.2);
+        }
+
+        /* Background Elements */
         .background-elements {
             position: absolute;
             top: 0;
@@ -34,7 +115,7 @@
         .circle {
             position: absolute;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(106, 27, 154, 0.3) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(106, 27, 154, 0.2) 0%, transparent 70%);
             animation: float 15s infinite ease-in-out;
         }
 
@@ -74,6 +155,7 @@
             margin: 0 auto;
             padding: 2rem;
             text-align: center;
+            margin-top: 80px;
         }
 
         header {
@@ -81,11 +163,11 @@
             animation: fadeInDown 1s ease;
         }
 
-        .logo {
+        .logo-header {
             font-size: 3rem;
             margin-bottom: 1rem;
             color: #00f3ff;
-            text-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
+            text-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
         }
 
         h1 {
@@ -169,25 +251,34 @@
             animation: fadeIn 1.5s ease;
         }
 
+        .download-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
         .download-btn {
             background: linear-gradient(45deg, #00f3ff, #ff00c8);
             color: white;
             border: none;
-            padding: 1.5rem 3rem;
-            font-size: 1.2rem;
+            padding: 1.2rem 2rem;
+            font-size: 1.1rem;
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 243, 255, 0.4);
+            box-shadow: 0 5px 15px rgba(0, 243, 255, 0.3);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 1rem;
+            gap: 0.8rem;
+            min-width: 220px;
         }
 
         .download-btn:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 243, 255, 0.6);
+            box-shadow: 0 10px 25px rgba(0, 243, 255, 0.5);
         }
 
         .download-btn:active {
@@ -210,13 +301,14 @@
             align-items: center;
             justify-content: center;
             font-size: 4rem;
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.5);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
         }
 
         footer {
             padding: 2rem 0;
             opacity: 0.7;
             font-size: 0.9rem;
+            margin-top: 2rem;
         }
 
         @keyframes fadeIn {
@@ -247,6 +339,16 @@
         }
 
         @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
             h1 {
                 font-size: 2.5rem;
             }
@@ -255,14 +357,36 @@
                 flex-direction: column;
             }
             
+            .download-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
             .download-btn {
                 width: 100%;
-                padding: 1.2rem;
+                max-width: 300px;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">IA-Zénia</div>
+            <div class="nav-links">
+                <a href="https://zenia-projects.netlify.app" target="_blank"><i class="fas fa-home"></i> Zenia-Projects</a>
+                <a href="https://ia-zenia.netlify.app" target="_blank"><i class="fas fa-robot"></i> IA-Zénia</a>
+                <a href="https://antonia-ia.netlify.app" target="_blank"><i class="fas fa-brain"></i> Antonia-IA</a>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="downloadApp()">
+                    <i class="fas fa-download"></i> Download APK
+                </button>
+            </div>
+        </div>
+    </nav>
+
     <div class="background-elements">
         <div class="circle"></div>
         <div class="circle"></div>
@@ -271,7 +395,7 @@
 
     <div class="container">
         <header>
-            <div class="logo">
+            <div class="logo-header">
                 <i class="fas fa-robot"></i>
             </div>
             <h1>IA-Zénia</h1>
@@ -305,9 +429,19 @@
         <div class="download-section">
             <h2>Baixe o Aplicativo</h2>
             <p>Obtenha a versão mais recente da IA-Zénia para Android</p>
-            <button class="download-btn" onclick="downloadApp()">
-                <i class="fas fa-download"></i> Baixar IA-Zénia APK
-            </button>
+            
+            <div class="download-buttons">
+                <button class="download-btn" onclick="downloadApp()">
+                    <i class="fas fa-download"></i> Baixar APK
+                </button>
+                <button class="download-btn" onclick="installAndroid()">
+                    <i class="fas fa-mobile-alt"></i> Instalar no Telefone
+                </button>
+                <button class="download-btn" onclick="installWindows()">
+                    <i class="fas fa-desktop"></i> Instalar no Windows
+                </button>
+            </div>
+            
             <p class="info-text">Arquivo: ia-zenia.netlify.app/download/zenia.apk</p>
         </div>
 
@@ -334,6 +468,22 @@
             
             // Mostra mensagem de confirmação
             alert("Download iniciado! O arquivo será salvo em seu dispositivo.");
+        }
+
+        function installAndroid() {
+            // Verifica se o usuário está em um dispositivo Android
+            if (/Android/i.test(navigator.userAgent)) {
+                alert("Instalando aplicativo... Por favor, permita a instalação quando solicitado.");
+                downloadApp();
+            } else {
+                alert("Este recurso funciona apenas em dispositivos Android. Use o botão de download para baixar o APK.");
+            }
+        }
+
+        function installWindows() {
+            // Para Windows, sugerimos download do APK ou uma versão desktop
+            alert("Para instalar no Windows, você pode:\n1. Baixar o APK e usar um emulador como BlueStacks\n2. Ou acessar o site oficial para mais informações");
+            downloadApp();
         }
 
         // Animação de entrada para elementos
