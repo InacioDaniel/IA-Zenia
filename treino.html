@@ -421,124 +421,118 @@ function renderHist(filter) {
 // GERAÇÃO DE MEDIA (VID, IMG, AUD)
 // ==========================================
 
-// 1. VÍDEO (Múltiplas Frames + Animação Frame-by-Frame em Canvas)
+// 1. VÍDEO (Múltiplas Frames + Animação Frame-by-Frame em Canvas) - VERSÃO MELHORADA
 async function genVid(prompt) {
     var row  = document.createElement('div'); row.className = 'msg-row';
     var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
     var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '600px';
     
-    card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A criar sequência de 6 frames (30fps)...</div>';
+    card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A criar vídeo com 12 frames (24fps suave)...</div>';
     row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
 
     try {
         var frames = [];
-        var frameCount = 6;
+        var frameCount = 12; // 12 frames = ~0.5 segundos a 24fps (mais suave)
         var loadedFrames = 0;
-        var safe = escHtml(prompt.substring(0,50));
+        var safe = escHtml(prompt.substring(0,60));
         var canvasId = 'vid-canvas-' + Date.now();
         var isPlayingGlobal = false;
         var currentFrameGlobal = 0;
         
-        // Prompts para cada frame com variação
-        var keyframes = [
-            'cinematic frame 1/6, introducao, setup: ' + prompt,
-            'cinematic frame 2/6, acao inicial: ' + prompt,
-            'cinematic frame 3/6, clímax: ' + prompt,
-            'cinematic frame 4/6, momentum: ' + prompt,
-            'cinematic frame 5/6, transicao: ' + prompt,
-            'cinematic frame 6/6, conclusao: ' + prompt
-        ];
+        // GERAÇÃO INTELIGENTE DE PROMPTS COM PROGRESSÃO NARRATIVA
+        // Cada frame é uma etapa específica e detalhada da ação
+        var keyframes = generateSmartKeyframes(prompt, 12);
 
         // Cria canvas
-        var canvasHtml = '<div style="position:relative;width:100%;background:#000;border-radius:8px;overflow:hidden;aspect-ratio:16/9">';
-        canvasHtml += '<canvas id="' + canvasId + '" style="width:100%;height:auto;display:block;background:#000;border-radius:8px" width="1280" height="720"></canvas>';
+        var canvasHtml = '<div style="position:relative;width:100%;background:#1a1a2e;border-radius:8px;overflow:hidden;aspect-ratio:16/9">';
+        canvasHtml += '<canvas id="' + canvasId + '" style="width:100%;height:auto;display:block;background:#1a1a2e;border-radius:8px" width="1280" height="720"></canvas>';
         canvasHtml += '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;z-index:5;pointer-events:none">';
-        canvasHtml += '<div style="font-size:48px;margin-bottom:10px;animation:pulse 1s infinite">●</div>';
-        canvasHtml += '<div style="font-size:12px;opacity:0.8">Carregando: <span id="load-progress">0</span>%</div>';
+        canvasHtml += '<div style="font-size:48px;margin-bottom:10px;animation:pulse 1s infinite">⚙</div>';
+        canvasHtml += '<div style="font-size:12px;opacity:0.8">Renderizando: <span id="load-progress">0</span>%</div>';
         canvasHtml += '</div></div>';
         
         card.innerHTML = canvasHtml;
 
-        // CSS para animação
-        var style = document.createElement('style');
-        style.textContent = '@keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }';
-        document.head.appendChild(style);
-
         var canvas = document.getElementById(canvasId);
         var ctx = canvas.getContext('2d');
 
-        // Carrega frames
+        // Carrega frames com delays para melhorar qualidade
         async function loadFrame(idx, framePrompt) {
             return new Promise(function(resolve) {
-                var ep = encodeURIComponent(framePrompt);
-                var seed = Math.floor(Math.random() * 999999);
-                var url = IMG_EP + ep + '?key=' + API_KEY + '&model=flux&width=1280&height=720&nologo=true&enhance=true&seed=' + seed;
+                // Delay progressivo para evitar rate limiting
+                var delayMs = idx * 200;
                 
-                var img = new Image();
-                img.crossOrigin = 'anonymous';
-                img.onload = function() {
-                    frames[idx] = img;
-                    loadedFrames++;
+                setTimeout(function() {
+                    var ep = encodeURIComponent(framePrompt);
+                    var seed = Math.floor(Math.random() * 999999);
+                    var url = IMG_EP + ep + '?key=' + API_KEY + '&model=flux&width=1280&height=720&nologo=true&enhance=true&seed=' + seed;
                     
-                    // Atualiza progresso
-                    var progress = Math.round((loadedFrames / frameCount) * 100);
-                    var progressEl = document.getElementById('load-progress');
-                    if (progressEl) progressEl.textContent = progress;
-                    
-                    // Desenha frame atual
-                    ctx.drawImage(img, 0, 0, 1280, 720);
-                    
-                    // Quando todos carregam
-                    if (loadedFrames === frameCount) {
-                        setupVideoPlayer();
-                    }
-                    resolve(true);
-                };
-                img.onerror = function() {
-                    console.warn('Frame falhou:', idx);
-                    loadedFrames++;
-                    if (loadedFrames === frameCount) {
-                        setupVideoPlayer();
-                    }
-                    resolve(false);
-                };
-                img.src = url;
+                    var img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.onload = function() {
+                        frames[idx] = img;
+                        loadedFrames++;
+                        
+                        // Atualiza progresso
+                        var progress = Math.round((loadedFrames / frameCount) * 100);
+                        var progressEl = document.getElementById('load-progress');
+                        if (progressEl) progressEl.textContent = progress;
+                        
+                        // Desenha frame atual
+                        ctx.drawImage(img, 0, 0, 1280, 720);
+                        
+                        // Quando todos carregam
+                        if (loadedFrames === frameCount) {
+                            setupVideoPlayer();
+                        }
+                        resolve(true);
+                    };
+                    img.onerror = function() {
+                        console.warn('Frame falhou:', idx);
+                        loadedFrames++;
+                        if (loadedFrames === frameCount) {
+                            setupVideoPlayer();
+                        }
+                        resolve(false);
+                    };
+                    img.src = url;
+                }, delayMs);
             });
         }
 
         // Setup do player de vídeo
         function setupVideoPlayer() {
-            var fps = 30;
+            var fps = 24; // 24fps é mais fluido que 30fps para animação
             var frameDelay = 1000 / fps;
             
-            var playerHtml = '<div style="position:relative;width:100%;background:#000;border-radius:8px;overflow:hidden">';
-            playerHtml += '<canvas id="' + canvasId + '" style="width:100%;height:auto;display:block;background:#000;border-radius:8px;cursor:pointer" width="1280" height="720"></canvas>';
+            var playerHtml = '<div style="position:relative;width:100%;background:#1a1a2e;border-radius:8px;overflow:hidden">';
+            playerHtml += '<canvas id="' + canvasId + '" style="width:100%;height:auto;display:block;background:#1a1a2e;border-radius:8px;cursor:pointer" width="1280" height="720"></canvas>';
             
             // Controles de reprodução
             playerHtml += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:10">';
-            playerHtml += '<div class="video-play-btn" style="width:70px;height:70px;background:rgba(0,0,0,0.7);border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #fff;cursor:pointer;pointer-events:all;transition:all 0.2s;hover:transform:scale(1.1)" onclick="toggleCanvasPlay(\'' + canvasId + '\')">';
+            playerHtml += '<div class="video-play-btn" style="width:70px;height:70px;background:rgba(59,91,219,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #fff;cursor:pointer;pointer-events:all;transition:all 0.2s;hover:transform:scale(1.1)" onclick="toggleCanvasPlay(\'' + canvasId + '\')">';
             playerHtml += '<i class="fas fa-play" id="play-icon-' + canvasId + '" style="color:#fff;font-size:28px;margin-left:4px"></i>';
             playerHtml += '</div>';
             playerHtml += '</div>';
             
             // HUD (informações)
             playerHtml += '<div style="position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.85);color:#fff;font-size:10px;padding:6px 12px;border-radius:5px;z-index:20;font-weight:600;font-family:monospace">';
-            playerHtml += '<span id="fps-display-' + canvasId + '">30</span>fps | <span id="frame-display-' + canvasId + '">0</span>/6';
+            playerHtml += '<span id="fps-display-' + canvasId + '">24</span>fps | <span id="frame-display-' + canvasId + '">0</span>/12';
             playerHtml += '</div>';
             
             // Timeline (progress bar)
-            playerHtml += '<div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,0.2);z-index:15">';
-            playerHtml += '<div id="timeline-' + canvasId + '" style="height:100%;background:#3b5bdb;width:0%;transition:width 0.1s linear"></div>';
+            playerHtml += '<div style="position:absolute;bottom:0;left:0;right:0;height:4px;background:rgba(255,255,255,0.2);z-index:15">';
+            playerHtml += '<div id="timeline-' + canvasId + '" style="height:100%;background:linear-gradient(90deg,#3b5bdb,#7c3aed);width:0%;transition:width 0.05s linear"></div>';
             playerHtml += '</div>';
             
             playerHtml += '</div>';
             
             // Footer com botões
             playerHtml += '<div class="media-foot" style="gap:3px;flex-wrap:wrap">';
-            playerHtml += '<span class="media-lbl"><i class="fas fa-video" style="color:#ef4444;margin-right:4px"></i>' + safe + ' (6 frames, 30fps)</span>';
+            playerHtml += '<span class="media-lbl"><i class="fas fa-video" style="color:#ef4444;margin-right:4px"></i>' + safe + ' (12 frames, 24fps, 0.5s)</span>';
             playerHtml += '<div style="display:flex;gap:4px;flex-wrap:wrap">';
             playerHtml += '<button class="mbtn" onclick="downloadVideoFrames(\'' + canvasId + '\')"><i class="fas fa-download"></i> Frames</button>';
-            playerHtml += '<button class="mbtn" onclick="downloadAsGifZip(\'' + canvasId + '\')"><i class="fas fa-image"></i> ZIP</button>';
+            playerHtml += '<button class="mbtn" onclick="downloadAsGifZip(\'' + canvasId + '\')"><i class="fas fa-file-archive"></i> ZIP</button>';
             playerHtml += '<button class="mbtn" onclick="showFFmpegTip()"><i class="fas fa-film"></i> MP4</button>';
             playerHtml += '</div>';
             playerHtml += '</div>';
@@ -560,7 +554,7 @@ async function genVid(prompt) {
             };
         }
 
-        // Carrega todos os frames
+        // Carrega todos os frames com delay
         var promises = [];
         for (var i = 0; i < frameCount; i++) {
             promises.push(loadFrame(i, keyframes[i]));
@@ -573,6 +567,97 @@ async function genVid(prompt) {
     }
 }
 
+// FUNÇÃO INTELIGENTE PARA GERAR PROMPTS COM PROGRESSÃO NARRATIVA
+function generateSmartKeyframes(prompt, count) {
+    // Remove preposições comuns
+    var cleanPrompt = prompt.replace(/\b(de|um|uma|o|a|e|ou|que|para)\b/gi, '').trim();
+    
+    // Detecta tipo de ação
+    var isAction = /\b(voando|correndo|pulando|caindo|explodindo|construindo|destruindo|transformando|lutando)\b/i.test(prompt);
+    var isNature = /\b(natureza|arvore|agua|ceu|nuvem|montanha|rio|praia|floresta)\b/i.test(prompt);
+    var isMagic = /\b(magia|feitiço|encantamento|cristal|brilho|luz|energia|poder)\b/i.test(prompt);
+    var isExplosion = /\b(explosao|bomba|fogo|incendio|destruicao|impacto|colisao)\b/i.test(prompt);
+    
+    var keyframes = [];
+    var fps = 24;
+    var totalDuration = count / fps; // em segundos
+    
+    if (isAction) {
+        // Sequência para ações dinâmicas
+        keyframes = [
+            `cinematic 4k, ultra HD, frame 0/12, ${totalDuration}s intro, setup parado, preparação, pose inicial: ${prompt}`,
+            `cinematic 4k, frame 1/12, início do movimento, tensão acumulada: ${prompt}`,
+            `cinematic 4k, frame 2/12, aceleração 20%, ação começando: ${prompt}`,
+            `cinematic 4k, frame 3/12, aceleração 40%, movimento evidente: ${prompt}`,
+            `cinematic 4k, frame 4/12, aceleração 60%, ação em progresso: ${prompt}`,
+            `cinematic 4k, frame 5/12, aceleração 80%, pico de movimento: ${prompt}`,
+            `cinematic 4k, frame 6/12, velocidade máxima, clímax da ação: ${prompt}`,
+            `cinematic 4k, frame 7/12, velocidade máxima, clímax intenso: ${prompt}`,
+            `cinematic 4k, frame 8/12, desaceleração 80%, ação finalizando: ${prompt}`,
+            `cinematic 4k, frame 9/12, desaceleração 60%, movimento reduzindo: ${prompt}`,
+            `cinematic 4k, frame 10/12, desaceleração 40%, movimento lento: ${prompt}`,
+            `cinematic 4k, frame 11/12, parada suave, pose final: ${prompt}`
+        ];
+    } else if (isExplosion) {
+        // Sequência para explosões e impactos
+        keyframes = [
+            `cinematic 4k, frame 0/12, antes da explosão, cena tranquila: ${prompt}`,
+            `cinematic 4k, frame 1/12, sinais de alerta, energia acumulando: ${prompt}`,
+            `cinematic 4k, frame 2/12, pré-impacto, tensão máxima: ${prompt}`,
+            `cinematic 4k, frame 3/12, 10% explosão, início do impacto: ${prompt}`,
+            `cinematic 4k, frame 4/12, 30% explosão, ondas de choque: ${prompt}`,
+            `cinematic 4k, frame 5/12, 50% explosão, pico de intensidade: ${prompt}`,
+            `cinematic 4k, frame 6/12, 70% explosão, máximo caos: ${prompt}`,
+            `cinematic 4k, frame 7/12, 90% explosão, auge da destruição: ${prompt}`,
+            `cinematic 4k, frame 8/12, 70% dissipação, fumaça se dissipando: ${prompt}`,
+            `cinematic 4k, frame 9/12, 50% dissipação, claridade retornando: ${prompt}`,
+            `cinematic 4k, frame 10/12, 20% dissipação, poeira assentando: ${prompt}`,
+            `cinematic 4k, frame 11/12, pós-explosão, cena calma: ${prompt}`
+        ];
+    } else if (isMagic) {
+        // Sequência para magia e efeitos sobrenaturais
+        keyframes = [
+            `cinematic 4k magical, frame 0/12, antes do feitiço, cena normal: ${prompt}`,
+            `cinematic 4k magical, frame 1/12, invocação inicial, energia bruta: ${prompt}`,
+            `cinematic 4k magical, frame 2/12, cristais luminosos formando: ${prompt}`,
+            `cinematic 4k magical, frame 3/12, aura de luz intensificando: ${prompt}`,
+            `cinematic 4k magical, frame 4/12, poder se materializando: ${prompt}`,
+            `cinematic 4k magical, frame 5/12, pico de magia, brilho ofuscante: ${prompt}`,
+            `cinematic 4k magical, frame 6/12, magia em seu auge, energia radiante: ${prompt}`,
+            `cinematic 4k magical, frame 7/12, poder máximo, transformação: ${prompt}`,
+            `cinematic 4k magical, frame 8/12, estabilização, brilho reduzindo: ${prompt}`,
+            `cinematic 4k magical, frame 9/12, dissipação lenta, efeitos sublimes: ${prompt}`,
+            `cinematic 4k magical, frame 10/12, magia enfraquecendo, encantamento residual: ${prompt}`,
+            `cinematic 4k magical, frame 11/12, feitiço completo, resultado final: ${prompt}`
+        ];
+    } else if (isNature) {
+        // Sequência para cenas naturais
+        keyframes = [
+            `cinematic 4k landscape, frame 0/12, cena panorâmica, visão geral: ${prompt}`,
+            `cinematic 4k landscape, frame 1/12, revelação lenta, detalhes emergindo: ${prompt}`,
+            `cinematic 4k landscape, frame 2/12, plano próximo, natureza em foco: ${prompt}`,
+            `cinematic 4k landscape, frame 3/12, close-up de elementos naturais: ${prompt}`,
+            `cinematic 4k landscape, frame 4/12, harmonia natural, beleza revelada: ${prompt}`,
+            `cinematic 4k landscape, frame 5/12, composição perfeita, auge visual: ${prompt}`,
+            `cinematic 4k landscape, frame 6/12, simetria natural, pico estético: ${prompt}`,
+            `cinematic 4k landscape, frame 7/12, transição suave, perspectiva mudando: ${prompt}`,
+            `cinematic 4k landscape, frame 8/12, novo ângulo, profundidade aparente: ${prompt}`,
+            `cinematic 4k landscape, frame 9/12, visão panorâmica novamente: ${prompt}`,
+            `cinematic 4k landscape, frame 10/12, recuo final, visão ampla: ${prompt}`,
+            `cinematic 4k landscape, frame 11/12, cena conclusiva, repouso visual: ${prompt}`
+        ];
+    } else {
+        // Sequência padrão genérica com transição suave
+        var stages = ['intro', 'setup inicial', 'desenvolvimento', 'progressão', 'aceleração', 'intensidade', 'clímax', 'pico', 'desaceleração', 'finalização lenta', 'repouso', 'conclusão'];
+        for (var i = 0; i < count; i++) {
+            var percentage = Math.round((i / count) * 100);
+            keyframes.push(`cinematic 4k detailed, frame ${i}/12 (${percentage}%), ${stages[i] || 'transição'}, progressão suave: ${prompt}`);
+        }
+    }
+    
+    return keyframes;
+}
+
 // Função para iniciar animação
 function startFrameAnimation(canvasId, frames, frameCount) {
     var canvas = document.getElementById(canvasId);
@@ -582,12 +667,18 @@ function startFrameAnimation(canvasId, frames, frameCount) {
     var data = window['vidData_' + canvasId];
     if (!data) return;
     
-    var fps = data.fps || 30;
+    var fps = data.fps || 24;
     var frameDelay = data.frameDelay || (1000 / fps);
     var currentFrame = 0;
+    var lastTime = Date.now();
+    var frameTime = 0;
     
     function animate() {
         if (!data.isPlaying) return;
+        
+        var currentTime = Date.now();
+        frameTime = currentTime - lastTime;
+        lastTime = currentTime;
         
         // Desenha frame
         if (frames[currentFrame]) {
@@ -599,7 +690,7 @@ function startFrameAnimation(canvasId, frames, frameCount) {
         var frameDisplay = document.getElementById('frame-display-' + canvasId);
         var timeline = document.getElementById('timeline-' + canvasId);
         
-        if (fpsDisplay) fpsDisplay.textContent = fps;
+        if (fpsDisplay) fpsDisplay.textContent = Math.round(1000 / frameTime);
         if (frameDisplay) frameDisplay.textContent = currentFrame + 1;
         if (timeline) timeline.style.width = ((currentFrame + 1) / frameCount * 100) + '%';
         
@@ -628,12 +719,12 @@ function toggleCanvasPlay(canvasId) {
     
     if (data.isPlaying) {
         icon.className = 'fas fa-pause';
-        btn.style.background = 'rgba(0,0,0,0.5)';
+        btn.style.background = 'rgba(59,91,219,0.7)';
         startFrameAnimation(canvasId, data.frames, data.frameCount);
     } else {
         icon.className = 'fas fa-play';
         icon.style.marginLeft = '4px';
-        btn.style.background = 'rgba(0,0,0,0.7)';
+        btn.style.background = 'rgba(59,91,219,0.85)';
     }
 }
 
@@ -656,7 +747,7 @@ function downloadVideoFrames(canvasId) {
         link.href = canvas.toDataURL('image/jpeg', 0.95);
         link.download = 'frame_' + String(idx + 1).padStart(2, '0') + '.jpg';
         
-        setTimeout(function() { link.click(); }, idx * 500);
+        setTimeout(function() { link.click(); }, idx * 300);
     });
     
     toast('Baixando ' + data.frames.length + ' frames...', 'ok');
@@ -670,12 +761,13 @@ function downloadAsGifZip(canvasId) {
 
 // Mostrar dica FFmpeg
 function showFFmpegTip() {
-    var msg = 'Para converter frames para MP4:\n\n'
-            + '1. Baixe os 6 frames\n'
+    var msg = 'Para converter frames para MP4 (24fps, 0.5s):\n\n'
+            + '1. Baixe os 12 frames\n'
             + '2. Coloque em uma pasta\n'
             + '3. Use FFmpeg:\n\n'
-            + 'ffmpeg -framerate 30 -i frame_%02d.jpg -c:v libx264 -pix_fmt yuv420p video.mp4\n\n'
-            + 'Baixar FFmpeg: https://ffmpeg.org/download.html';
+            + 'ffmpeg -framerate 24 -i frame_%02d.jpg -c:v libx264 -pix_fmt yuv420p -crf 18 video.mp4\n\n'
+            + 'Baixar FFmpeg: https://ffmpeg.org/download.html\n\n'
+            + 'Resultado: ~0.5 segundos de vídeo em 4K';
     alert(msg);
     toast('Tutorial MP4 exibido', 'ok');
 }
