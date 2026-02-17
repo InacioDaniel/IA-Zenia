@@ -1129,7 +1129,7 @@
 
         <!-- Footer -->
         <div class="footer">
-            Criado por <a href="#" target="_blank">Zénia Projects</a> - @inacio.u.daniel | Powered by Pollinations AI & Claude Large 🌸
+            Criado por <a href="#" target="_blank">Zénia Projects</a> - @inacio.u.daniel | Powered by Pollinations AI (OpenAI) 🌸
         </div>
     </div>
 
@@ -1143,7 +1143,7 @@
         // Pollinations API Configuration
         const POLLINATIONS_API_KEY = 'pk_7HHmBkBPEiNS5dyF';
         const POLLINATIONS_API_URL = 'https://gen.pollinations.ai/v1/chat/completions';
-        const CLAUDE_MODEL = 'claude-large';
+        const AI_MODEL = 'openai'; // Free model
 
         let currentCode = '';
         let currentLanguage = 'html';
@@ -1161,7 +1161,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: CLAUDE_MODEL,
+                        model: AI_MODEL,
                         messages: messages,
                         temperature: 0.7,
                         max_tokens: 4000
@@ -1194,7 +1194,7 @@
             const steps = [
                 { text: '🔍 Analisando requisitos do projeto...', type: 'analyzing', delay: 0 },
                 { text: '🎨 Planejando estrutura e design...', type: 'planning', delay: 400 },
-                { text: '⚡ Claude está processando com IA avançada...', type: 'generating', delay: 800 },
+                { text: '⚡ IA está processando sua solicitação...', type: 'generating', delay: 800 },
                 { text: '💻 Gerando código HTML, CSS e JavaScript...', type: 'generating', delay: 1200 },
                 { text: '🔧 Otimizando funcionalidades...', type: 'finalizing', delay: 1600 }
             ];
@@ -1444,7 +1444,7 @@ Lembre-se: retorne APENAS o código HTML completo, sem explicações.`;
                 // Extract code from response
                 let htmlCode = response.content.trim();
                 
-                addThinkingStep('✨ Código gerado por Claude! Processando...', 'finalizing', 2000);
+                addThinkingStep('✨ Código gerado pela IA! Processando...', 'finalizing', 2000);
                 
                 // Show code streaming
                 setTimeout(() => showCodeStream(htmlCode), 2200);
@@ -1480,7 +1480,7 @@ Lembre-se: retorne APENAS o código HTML completo, sem explicações.`;
                     // Also update code editor
                     updateCodeDisplay(htmlCode);
 
-                    addThinkingStep('✅ App gerado com sucesso pelo Claude!', 'finalizing', 0);
+                    addThinkingStep('✅ App gerado com sucesso pela IA!', 'finalizing', 0);
                     showSuccess('App gerado com sucesso!');
                     hideThinkingPanel();
                     closeMobileMenu();
@@ -1577,7 +1577,7 @@ REGRAS:
                     { role: 'user', content: `Escreva código ${language.toUpperCase()} completo e funcional para: "${description}"` }
                 ];
 
-                console.log(`🌸 Gerando código ${language} com Claude...`);
+                console.log(`🌸 Gerando código ${language} com IA...`);
 
                 const response = await callPollinationsAPI(messages);
 
