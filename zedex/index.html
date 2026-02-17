@@ -1129,7 +1129,7 @@
 
         <!-- Footer -->
         <div class="footer">
-            Criado por <a href="#" target="_blank">Zénia Projects</a> - @inacio.u.daniel | Powered by OpenRouter & GPT-5.1-Codex with Advanced Reasoning
+            Criado por <a href="#" target="_blank">Zénia Projects</a> - @inacio.u.daniel | Powered by Pollinations AI & Claude Large 🌸
         </div>
     </div>
 
@@ -1140,10 +1140,10 @@
     </div>
 
     <script>
-        // OpenRouter API Configuration
-        const OPENROUTER_API_KEY = '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';
-        const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-        const CODEX_MODEL = 'openai/gpt-5.1-codex';
+        // Pollinations API Configuration
+        const POLLINATIONS_API_KEY = 'pk_7HHmBkBPEiNS5dyF';
+        const POLLINATIONS_API_URL = 'https://gen.pollinations.ai/v1/chat/completions';
+        const CLAUDE_MODEL = 'claude-large';
 
         let currentCode = '';
         let currentLanguage = 'html';
@@ -1151,59 +1151,56 @@
         let currentTheme = 'system';
         let conversationHistory = [];
 
-        // OpenRouter API Call with Reasoning
-        async function callOpenRouterAPI(messages, enableReasoning = true) {
+        // Pollinations API Call
+        async function callPollinationsAPI(messages) {
             try {
-                const response = await fetch(OPENROUTER_API_URL, {
+                const response = await fetch(POLLINATIONS_API_URL, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-                        'Content-Type': 'application/json',
-                        'HTTP-Referer': window.location.href,
-                        'X-Title': 'Zedex - AI Web App Generator'
+                        'Authorization': `Bearer ${POLLINATIONS_API_KEY}`,
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: CODEX_MODEL,
+                        model: CLAUDE_MODEL,
                         messages: messages,
-                        reasoning: { enabled: enableReasoning },
                         temperature: 0.7,
                         max_tokens: 4000
                     })
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
+                    const errorData = await response.json().catch(() => ({}));
                     throw new Error(`API Error: ${errorData.error?.message || response.statusText}`);
                 }
 
                 const result = await response.json();
-                return result.choices[0].message;
+                
+                // Handle both OpenAI and Claude response formats
+                if (result.choices && result.choices[0]) {
+                    return result.choices[0].message;
+                } else if (result.content) {
+                    return { content: result.content };
+                } else {
+                    throw new Error('Formato de resposta inesperado');
+                }
             } catch (error) {
-                console.error('OpenRouter API Error:', error);
+                console.error('Pollinations API Error:', error);
                 throw error;
             }
         }
 
-        // Show reasoning steps from API
-        function displayReasoningSteps(reasoningDetails) {
-            if (!reasoningDetails || !reasoningDetails.reasoning) return;
-            
-            const reasoning = reasoningDetails.reasoning;
-            const steps = reasoning.split('\n').filter(step => step.trim());
-            
-            steps.forEach((step, index) => {
-                const delay = index * 300;
-                let type = 'planning';
-                
-                if (step.toLowerCase().includes('analys') || step.toLowerCase().includes('examin')) {
-                    type = 'analyzing';
-                } else if (step.toLowerCase().includes('generat') || step.toLowerCase().includes('creat')) {
-                    type = 'generating';
-                } else if (step.toLowerCase().includes('final') || step.toLowerCase().includes('complet')) {
-                    type = 'finalizing';
-                }
-                
-                addThinkingStep(step, type, delay);
+        // Simulate reasoning steps for better UX
+        function simulateReasoningSteps(prompt) {
+            const steps = [
+                { text: '🔍 Analisando requisitos do projeto...', type: 'analyzing', delay: 0 },
+                { text: '🎨 Planejando estrutura e design...', type: 'planning', delay: 400 },
+                { text: '⚡ Claude está processando com IA avançada...', type: 'generating', delay: 800 },
+                { text: '💻 Gerando código HTML, CSS e JavaScript...', type: 'generating', delay: 1200 },
+                { text: '🔧 Otimizando funcionalidades...', type: 'finalizing', delay: 1600 }
+            ];
+
+            steps.forEach(step => {
+                addThinkingStep(step.text, step.type, step.delay);
             });
         }
 
@@ -1390,7 +1387,7 @@
             document.getElementById('promptInput').value = text;
         }
 
-        // Generate app using OpenRouter API
+        // Generate app using Pollinations API with Claude
         async function generateApp() {
             const prompt = document.getElementById('promptInput').value.trim();
             
@@ -1410,50 +1407,47 @@
             
             // Show AI thinking panel
             showThinkingPanel();
-            addThinkingStep('🔍 Analisando sua solicitação...', 'analyzing', 0);
-            addThinkingStep('📋 Iniciando raciocínio da IA...', 'planning', 400);
+            simulateReasoningSteps(prompt);
 
             try {
-                const systemPrompt = `Você é um expert em desenvolvimento web. Crie aplicativos web completos e funcionais com HTML, CSS e JavaScript inline. 
-                
-REGRAS IMPORTANTES:
-1. Retorne APENAS código HTML completo
-2. Inclua CSS no <style> e JavaScript no <script>
-3. Use design moderno, responsivo e atraente
-4. Código deve ser totalmente funcional
-5. Comece com <!DOCTYPE html>
-6. NÃO inclua explicações ou markdown`;
+                const systemPrompt = `Você é um expert em desenvolvimento web full-stack. Crie aplicativos web completos, modernos e funcionais.
 
-                const userMessage = `Crie um aplicativo web completo baseado nesta descrição: "${prompt}"`;
+REGRAS CRÍTICAS:
+1. Retorne APENAS código HTML completo (sem markdown, sem explicações)
+2. Inclua TODO o CSS no <style> dentro do <head>
+3. Inclua TODO o JavaScript no <script> antes de </body>
+4. Design deve ser moderno, responsivo e atraente
+5. Código deve ser 100% funcional
+6. Comece sempre com <!DOCTYPE html>
+7. Use cores vibrantes e animações quando apropriado
+8. Inclua todos os recursos necessários (não use imports externos quando possível)`;
 
-                // Initial conversation
+                const userMessage = `Crie um aplicativo web completo e funcional baseado nesta descrição detalhada:
+
+"${prompt}"
+
+Lembre-se: retorne APENAS o código HTML completo, sem explicações.`;
+
+                // Build conversation
                 conversationHistory = [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userMessage }
                 ];
 
-                addThinkingStep('🤖 GPT-5.1-Codex processando com raciocínio avançado...', 'generating', 800);
-
-                console.log('Chamando OpenRouter API...');
+                console.log('🌸 Chamando Pollinations API com Claude...');
                 
-                // First API call with reasoning
-                const response = await callOpenRouterAPI(conversationHistory, true);
+                // Call Pollinations API
+                const response = await callPollinationsAPI(conversationHistory);
 
-                console.log('Resposta recebida:', response);
-
-                // Display reasoning steps if available
-                if (response.reasoning_details) {
-                    addThinkingStep('💡 Mostrando processo de raciocínio da IA...', 'analyzing', 1200);
-                    displayReasoningSteps(response.reasoning_details);
-                }
+                console.log('✅ Resposta recebida:', response);
 
                 // Extract code from response
                 let htmlCode = response.content.trim();
                 
-                addThinkingStep('✨ Código gerado! Processando...', 'finalizing', 0);
+                addThinkingStep('✨ Código gerado por Claude! Processando...', 'finalizing', 2000);
                 
                 // Show code streaming
-                showCodeStream(htmlCode);
+                setTimeout(() => showCodeStream(htmlCode), 2200);
                 
                 // Clean the response
                 htmlCode = htmlCode.replace(/```html\n?/g, '').replace(/```\n?/g, '');
@@ -1464,17 +1458,16 @@ REGRAS IMPORTANTES:
                     htmlCode = '<!DOCTYPE html>\n' + htmlCode;
                 }
                 
-                addThinkingStep('🔧 Otimizando e finalizando...', 'finalizing', 600);
+                addThinkingStep('🎨 Renderizando aplicativo...', 'finalizing', 2800);
 
                 // Store the code and conversation
                 appFiles.html = htmlCode;
                 currentCode = htmlCode;
                 
-                // Save conversation with reasoning for future refinements
+                // Save conversation for future refinements
                 conversationHistory.push({
                     role: 'assistant',
-                    content: response.content,
-                    reasoning_details: response.reasoning_details
+                    content: response.content
                 });
 
                 // Display in preview
@@ -1487,24 +1480,24 @@ REGRAS IMPORTANTES:
                     // Also update code editor
                     updateCodeDisplay(htmlCode);
 
-                    addThinkingStep('✅ App gerado com sucesso!', 'finalizing', 0);
+                    addThinkingStep('✅ App gerado com sucesso pelo Claude!', 'finalizing', 0);
                     showSuccess('App gerado com sucesso!');
                     hideThinkingPanel();
                     closeMobileMenu();
-                }, 1000);
+                }, 3500);
 
             } catch (error) {
-                console.error('Erro ao gerar app:', error);
+                console.error('❌ Erro ao gerar app:', error);
                 addThinkingStep('❌ Erro ao gerar o app', 'finalizing', 0);
                 
                 let errorMessage = 'Erro ao gerar o app. ';
                 
                 if (error && error.message) {
-                    if (error.message.includes('rate limit')) {
-                        errorMessage += 'Limite de requisições atingido. Aguarde um momento.';
-                    } else if (error.message.includes('API')) {
-                        errorMessage += error.message;
-                    } else if (error.message.includes('network')) {
+                    if (error.message.includes('rate limit') || error.message.includes('429')) {
+                        errorMessage += 'Limite de requisições atingido. Aguarde um momento e tente novamente.';
+                    } else if (error.message.includes('401') || error.message.includes('unauthorized')) {
+                        errorMessage += 'Erro de autenticação. Verifique a API key.';
+                    } else if (error.message.includes('network') || error.message.includes('fetch')) {
                         errorMessage += 'Erro de conexão. Verifique sua internet.';
                     } else {
                         errorMessage += error.message;
@@ -1570,30 +1563,25 @@ REGRAS IMPORTANTES:
             codeDisplay.style.display = 'none';
 
             try {
-                const systemPrompt = `Você é um expert em programação ${language.toUpperCase()}. 
+                const systemPrompt = `Você é um expert programador ${language.toUpperCase()} com anos de experiência.
                 
 REGRAS:
-1. Retorne APENAS código
+1. Retorne APENAS código puro (sem markdown, sem explicações)
 2. Código deve ser completo e funcional
-3. Use as melhores práticas da linguagem
-4. Inclua comentários úteis
-5. NÃO inclua explicações ou markdown`;
+3. Use as melhores práticas da linguagem ${language}
+4. Inclua comentários úteis no código
+5. Código deve ser production-ready`;
 
                 const messages = [
                     { role: 'system', content: systemPrompt },
-                    { role: 'user', content: `Escreva código ${language.toUpperCase()} para: "${description}"` }
+                    { role: 'user', content: `Escreva código ${language.toUpperCase()} completo e funcional para: "${description}"` }
                 ];
 
-                console.log(`Gerando código em ${language}...`);
+                console.log(`🌸 Gerando código ${language} com Claude...`);
 
-                const response = await callOpenRouterAPI(messages, true);
+                const response = await callPollinationsAPI(messages);
 
-                console.log('Código recebido:', response);
-
-                // Display reasoning if available
-                if (response.reasoning_details) {
-                    console.log('Raciocínio da IA:', response.reasoning_details);
-                }
+                console.log('✅ Código recebido:', response);
 
                 // Extract code from response
                 let code = response.content.trim();
@@ -1604,12 +1592,14 @@ REGRAS:
                 
                 showSuccess(`Código em ${language} gerado com sucesso!`);
             } catch (error) {
-                console.error('Erro ao gerar código:', error);
+                console.error('❌ Erro ao gerar código:', error);
                 let errorMessage = 'Erro ao gerar código. ';
                 
                 if (error && error.message) {
-                    if (error.message.includes('rate limit')) {
+                    if (error.message.includes('rate limit') || error.message.includes('429')) {
                         errorMessage += 'Limite de requisições atingido. Aguarde.';
+                    } else if (error.message.includes('401')) {
+                        errorMessage += 'Erro de autenticação. Verifique a API key.';
                     } else if (error.message.includes('network')) {
                         errorMessage += 'Verifique sua conexão com a internet.';
                     } else {
