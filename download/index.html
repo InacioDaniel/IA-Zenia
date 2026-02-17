@@ -152,6 +152,36 @@
             z-index: 2;
         }
 
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1rem 2rem;
+            text-align: center;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
         .download-section {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -489,6 +519,11 @@
             .sidebar {
                 width: 350px;
             }
+            
+            .stats-container {
+                flex-direction: column;
+                align-items: center;
+            }
         }
 
         @media (max-width: 992px) {
@@ -637,12 +672,24 @@
             <p>Obtenha os melhores softwares da Zénia Projects e Antonia AI</p>
         </div>
 
+        <!-- Stats Section -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-value" id="visitorCount">0</div>
+                <div class="stat-label">Visitantes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="downloadCount">0</div>
+                <div class="stat-label">Downloads</div>
+            </div>
+        </div>
+
         <div class="download-section">
             <div class="download-card">
                 <i class="fas fa-download"></i>
                 <h3>IA-Zénia APK</h3>
                 <p>Aplicativo completo para interação com inteligência artificial</p>
-                <a href="https://ia-zenia.netlify.app/download/zenia.apk" class="btn">
+                <a href="https://ia-zenia.netlify.app/download/zenia.apk" class="btn" onclick="updateDownloadCount()">
                     <i class="fas fa-arrow-down"></i> Baixar Zénia
                 </a>
             </div>
@@ -651,7 +698,7 @@
                 <i class="fas fa-code"></i>
                 <h3>Zedex Code APK</h3>
                 <p>Aplicativo de desenvolvimento com recursos avançados</p>
-                <a href="https://ia-zenia.netlify.app/download/zedex_code.apk" class="btn">
+                <a href="https://ia-zenia.netlify.app/download/zedex_code.apk" class="btn" onclick="updateDownloadCount()">
                     <i class="fas fa-arrow-down"></i> Baixar Zedex
                 </a>
             </div>
@@ -711,6 +758,47 @@
         const userInput = document.getElementById('userInput');
         const sendButton = document.getElementById('sendButton');
         const typingIndicator = document.getElementById('typingIndicator');
+        const visitorCountElement = document.getElementById('visitorCount');
+        const downloadCountElement = document.getElementById('downloadCount');
+
+        // Initialize counters
+        let visitorCount = 0;
+        let downloadCount = 0;
+
+        // Load counters from localStorage or initialize
+        function loadCounters() {
+            const savedVisitorCount = localStorage.getItem('zeniaVisitorCount');
+            const savedDownloadCount = localStorage.getItem('zeniaDownloadCount');
+            
+            if (savedVisitorCount !== null) {
+                visitorCount = parseInt(savedVisitorCount);
+            }
+            if (savedDownloadCount !== null) {
+                downloadCount = parseInt(savedDownloadCount);
+            }
+            
+            updateCounterDisplays();
+        }
+
+        // Update counter displays
+        function updateCounterDisplays() {
+            visitorCountElement.textContent = visitorCount.toLocaleString();
+            downloadCountElement.textContent = downloadCount.toLocaleString();
+        }
+
+        // Increment visitor count
+        function incrementVisitorCount() {
+            visitorCount++;
+            localStorage.setItem('zeniaVisitorCount', visitorCount.toString());
+            updateCounterDisplays();
+        }
+
+        // Increment download count
+        function updateDownloadCount() {
+            downloadCount++;
+            localStorage.setItem('zeniaDownloadCount', downloadCount.toString());
+            updateCounterDisplays();
+        }
 
         // API Configuration
         const API_KEY = "pk_7HHmBkBPEiNS5dyF";
@@ -800,6 +888,12 @@
                 chatSidebar.classList.contains('active')) {
                 chatSidebar.classList.remove('active');
             }
+        });
+
+        // Initialize counters and increment visitor count
+        window.addEventListener('load', () => {
+            loadCounters();
+            incrementVisitorCount();
         });
     </script>
 </body>
