@@ -596,18 +596,17 @@ function openThemeModal()  { document.getElementById('theme-modal').classList.ad
 function closeThemeModal() { document.getElementById('theme-modal').classList.remove('open'); }
 
 function completeSetup() {
-  var inputEl = document.getElementById('setup-name');
-  var name = (inputEl.value || '').trim();
+  var setupInput = document.getElementById('setup-name');
+  var name = (setupInput.value || '').trim();
   if (!name) {
-    // Feedback visual direto no input — não depende só do toast
-    inputEl.style.borderColor = '#ef4444';
-    inputEl.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.3)';
-    inputEl.placeholder = '⚠️ Escreve o teu nome aqui!';
-    inputEl.focus();
+    setupInput.style.borderColor = '#ef4444';
+    setupInput.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.3)';
+    setupInput.placeholder = '⚠️ Escreve o teu nome aqui!';
+    setupInput.focus();
     setTimeout(function() {
-      inputEl.style.borderColor = '';
-      inputEl.style.boxShadow = '';
-      inputEl.placeholder = 'Escreve o teu nome...';
+      setupInput.style.borderColor = '';
+      setupInput.style.boxShadow = '';
+      setupInput.placeholder = 'Escreve o teu nome...';
     }, 2500);
     return;
   }
