@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zedex - Gerador de Apps Web com IA</title>
-    <script src="https://js.puter.com/v2/"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -1129,7 +1129,7 @@
 
         <!-- Footer -->
         <div class="footer">
-            Criado por <a href="#" target="_blank">Zénia Projects</a> - @inacio.u.daniel | Powered by Puter.js & GPT-5.2-Codex
+            Criado por <a href="#" target="_blank">Zénia Projects</a> - @inacio.u.daniel | Powered by OpenRouter & GPT-5.1-Codex with Advanced Reasoning
         </div>
     </div>
 
@@ -1140,10 +1140,72 @@
     </div>
 
     <script>
+        // OpenRouter API Configuration
+        const OPENROUTER_API_KEY = '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';
+        const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+        const CODEX_MODEL = 'openai/gpt-5.1-codex';
+
         let currentCode = '';
         let currentLanguage = 'html';
         let appFiles = { html: '', css: '', js: '' };
         let currentTheme = 'system';
+        let conversationHistory = [];
+
+        // OpenRouter API Call with Reasoning
+        async function callOpenRouterAPI(messages, enableReasoning = true) {
+            try {
+                const response = await fetch(OPENROUTER_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                        'Content-Type': 'application/json',
+                        'HTTP-Referer': window.location.href,
+                        'X-Title': 'Zedex - AI Web App Generator'
+                    },
+                    body: JSON.stringify({
+                        model: CODEX_MODEL,
+                        messages: messages,
+                        reasoning: { enabled: enableReasoning },
+                        temperature: 0.7,
+                        max_tokens: 4000
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`API Error: ${errorData.error?.message || response.statusText}`);
+                }
+
+                const result = await response.json();
+                return result.choices[0].message;
+            } catch (error) {
+                console.error('OpenRouter API Error:', error);
+                throw error;
+            }
+        }
+
+        // Show reasoning steps from API
+        function displayReasoningSteps(reasoningDetails) {
+            if (!reasoningDetails || !reasoningDetails.reasoning) return;
+            
+            const reasoning = reasoningDetails.reasoning;
+            const steps = reasoning.split('\n').filter(step => step.trim());
+            
+            steps.forEach((step, index) => {
+                const delay = index * 300;
+                let type = 'planning';
+                
+                if (step.toLowerCase().includes('analys') || step.toLowerCase().includes('examin')) {
+                    type = 'analyzing';
+                } else if (step.toLowerCase().includes('generat') || step.toLowerCase().includes('creat')) {
+                    type = 'generating';
+                } else if (step.toLowerCase().includes('final') || step.toLowerCase().includes('complet')) {
+                    type = 'finalizing';
+                }
+                
+                addThinkingStep(step, type, delay);
+            });
+        }
 
         // Theme Management
         function setTheme(theme) {
@@ -1328,7 +1390,7 @@
             document.getElementById('promptInput').value = text;
         }
 
-        // Generate app using Puter AI
+        // Generate app using OpenRouter API
         async function generateApp() {
             const prompt = document.getElementById('promptInput').value.trim();
             
@@ -1348,52 +1410,52 @@
             
             // Show AI thinking panel
             showThinkingPanel();
-            addThinkingStep('Analisando sua solicitação...', 'analyzing', 0);
-            addThinkingStep('Planejando estrutura do aplicativo...', 'planning', 500);
-            addThinkingStep('Definindo componentes necessários...', 'planning', 1000);
-            addThinkingStep('Preparando geração de código...', 'generating', 1500);
+            addThinkingStep('🔍 Analisando sua solicitação...', 'analyzing', 0);
+            addThinkingStep('📋 Iniciando raciocínio da IA...', 'planning', 400);
 
             try {
-                // Generate complete HTML app
-                const fullPrompt = `Crie um aplicativo web completo e funcional baseado nesta descrição: "${prompt}"
-
-IMPORTANTE: Retorne APENAS o código HTML completo, incluindo CSS inline no <style> e JavaScript inline no <script>. 
-- Não adicione explicações, comentários externos ou markdown
-- Faça um app totalmente funcional e responsivo
-- Use design moderno e atraente
-- Inclua todas as funcionalidades necessárias
-- O código deve começar com <!DOCTYPE html>`;
-
-                console.log('Iniciando chamada à API Puter...');
+                const systemPrompt = `Você é um expert em desenvolvimento web. Crie aplicativos web completos e funcionais com HTML, CSS e JavaScript inline. 
                 
-                addThinkingStep('Conectando com GPT-5.2-Codex...', 'generating', 2000);
+REGRAS IMPORTANTES:
+1. Retorne APENAS código HTML completo
+2. Inclua CSS no <style> e JavaScript no <script>
+3. Use design moderno, responsivo e atraente
+4. Código deve ser totalmente funcional
+5. Comece com <!DOCTYPE html>
+6. NÃO inclua explicações ou markdown`;
+
+                const userMessage = `Crie um aplicativo web completo baseado nesta descrição: "${prompt}"`;
+
+                // Initial conversation
+                conversationHistory = [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userMessage }
+                ];
+
+                addThinkingStep('🤖 GPT-5.1-Codex processando com raciocínio avançado...', 'generating', 800);
+
+                console.log('Chamando OpenRouter API...');
                 
-                const response = await puter.ai.chat(fullPrompt, {
-                    model: "openai/gpt-5.2-codex"
-                });
+                // First API call with reasoning
+                const response = await callOpenRouterAPI(conversationHistory, true);
 
                 console.log('Resposta recebida:', response);
-                
-                addThinkingStep('Código gerado! Processando resposta...', 'finalizing', 0);
 
-                // Extract text from response object
-                let htmlCode = '';
-                if (response.message && response.message.content) {
-                    htmlCode = response.message.content;
-                } else if (typeof response === 'string') {
-                    htmlCode = response;
-                } else {
-                    throw new Error('Formato de resposta inesperado');
+                // Display reasoning steps if available
+                if (response.reasoning_details) {
+                    addThinkingStep('💡 Mostrando processo de raciocínio da IA...', 'analyzing', 1200);
+                    displayReasoningSteps(response.reasoning_details);
                 }
 
-                htmlCode = htmlCode.trim();
+                // Extract code from response
+                let htmlCode = response.content.trim();
                 
-                addThinkingStep('Limpando e otimizando código...', 'finalizing', 100);
+                addThinkingStep('✨ Código gerado! Processando...', 'finalizing', 0);
                 
                 // Show code streaming
                 showCodeStream(htmlCode);
                 
-                // Remove markdown code blocks if present
+                // Clean the response
                 htmlCode = htmlCode.replace(/```html\n?/g, '').replace(/```\n?/g, '');
                 htmlCode = htmlCode.replace(/```/g, '');
                 
@@ -1402,11 +1464,18 @@ IMPORTANTE: Retorne APENAS o código HTML completo, incluindo CSS inline no <sty
                     htmlCode = '<!DOCTYPE html>\n' + htmlCode;
                 }
                 
-                addThinkingStep('Renderizando aplicativo...', 'finalizing', 600);
+                addThinkingStep('🔧 Otimizando e finalizando...', 'finalizing', 600);
 
-                // Store the code
+                // Store the code and conversation
                 appFiles.html = htmlCode;
                 currentCode = htmlCode;
+                
+                // Save conversation with reasoning for future refinements
+                conversationHistory.push({
+                    role: 'assistant',
+                    content: response.content,
+                    reasoning_details: response.reasoning_details
+                });
 
                 // Display in preview
                 setTimeout(() => {
@@ -1421,7 +1490,7 @@ IMPORTANTE: Retorne APENAS o código HTML completo, incluindo CSS inline no <sty
                     addThinkingStep('✅ App gerado com sucesso!', 'finalizing', 0);
                     showSuccess('App gerado com sucesso!');
                     hideThinkingPanel();
-                    closeMobileMenu(); // Close mobile menu after generation
+                    closeMobileMenu();
                 }, 1000);
 
             } catch (error) {
@@ -1431,10 +1500,12 @@ IMPORTANTE: Retorne APENAS o código HTML completo, incluindo CSS inline no <sty
                 let errorMessage = 'Erro ao gerar o app. ';
                 
                 if (error && error.message) {
-                    if (error.message.includes('connection')) {
-                        errorMessage += 'Verifique sua conexão com a internet e tente novamente.';
+                    if (error.message.includes('rate limit')) {
+                        errorMessage += 'Limite de requisições atingido. Aguarde um momento.';
                     } else if (error.message.includes('API')) {
-                        errorMessage += 'Erro na API. Tente novamente em alguns segundos.';
+                        errorMessage += error.message;
+                    } else if (error.message.includes('network')) {
+                        errorMessage += 'Erro de conexão. Verifique sua internet.';
                     } else {
                         errorMessage += error.message;
                     }
@@ -1499,33 +1570,33 @@ IMPORTANTE: Retorne APENAS o código HTML completo, incluindo CSS inline no <sty
             codeDisplay.style.display = 'none';
 
             try {
-                const fullPrompt = `Escreva um código completo e funcional em ${language.toUpperCase()} para: "${description}"
+                const systemPrompt = `Você é um expert em programação ${language.toUpperCase()}. 
+                
+REGRAS:
+1. Retorne APENAS código
+2. Código deve ser completo e funcional
+3. Use as melhores práticas da linguagem
+4. Inclua comentários úteis
+5. NÃO inclua explicações ou markdown`;
 
-IMPORTANTE: 
-- Retorne APENAS o código, sem explicações ou markdown
-- Código deve ser completo e funcional
-- Inclua comentários quando necessário
-- Use as melhores práticas da linguagem`;
+                const messages = [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: `Escreva código ${language.toUpperCase()} para: "${description}"` }
+                ];
 
-                console.log('Gerando código em ' + language + '...');
+                console.log(`Gerando código em ${language}...`);
 
-                const response = await puter.ai.chat(fullPrompt, {
-                    model: "openai/gpt-5.2-codex"
-                });
+                const response = await callOpenRouterAPI(messages, true);
 
                 console.log('Código recebido:', response);
 
-                // Extract text from response object
-                let code = '';
-                if (response.message && response.message.content) {
-                    code = response.message.content;
-                } else if (typeof response === 'string') {
-                    code = response;
-                } else {
-                    throw new Error('Formato de resposta inesperado');
+                // Display reasoning if available
+                if (response.reasoning_details) {
+                    console.log('Raciocínio da IA:', response.reasoning_details);
                 }
 
-                code = code.trim();
+                // Extract code from response
+                let code = response.content.trim();
                 code = code.replace(/```[\w]*\n?/g, '').replace(/```\n?/g, '');
                 
                 currentCode = code;
@@ -1537,10 +1608,10 @@ IMPORTANTE:
                 let errorMessage = 'Erro ao gerar código. ';
                 
                 if (error && error.message) {
-                    if (error.message.includes('connection')) {
+                    if (error.message.includes('rate limit')) {
+                        errorMessage += 'Limite de requisições atingido. Aguarde.';
+                    } else if (error.message.includes('network')) {
                         errorMessage += 'Verifique sua conexão com a internet.';
-                    } else if (error.message.includes('API')) {
-                        errorMessage += 'Erro na API. Tente novamente.';
                     } else {
                         errorMessage += error.message;
                     }
