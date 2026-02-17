@@ -244,7 +244,7 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
     <div class="setup-tagline">Antes de começarmos, deixa-me conhecer-te<br>e escolher como preferes que eu apareça.</div>
     <div style="margin-bottom:20px;text-align:left">
       <label class="setup-label">Como te chamas?</label>
-      <input class="setup-input" id="setup-name" type="text" placeholder="Escreve o teu nome..." maxlength="30" autofocus>
+      <input class="setup-input" id="setup-name" type="text" placeholder="Escreve o teu nome..." maxlength="30" autofocus onkeydown="if(event.key==='Enter'){completeSetup();}">
       <div style="font-size:11px;color:var(--text-muted);margin-top:5px">A Zenia vai chamar-te por este nome nas conversas.</div>
     </div>
     <div style="margin-bottom:20px;text-align:left">
@@ -543,6 +543,19 @@ var inputEl = document.getElementById('user-input');
 var sendBtn = document.getElementById('send-btn');
 var sendIc  = document.getElementById('send-ic');
 
+// Verificação IMEDIATA — esconde o setup antes de qualquer render
+// Evita flash e loop mesmo se o window.load demorar
+(function() {
+  var savedName = localStorage.getItem('zn_username') || '';
+  if (savedName) {
+    var ss = document.getElementById('setup-screen');
+    if (ss) ss.style.display = 'none';
+  } else {
+    var ss = document.getElementById('setup-screen');
+    if (ss) ss.style.display = 'flex';
+  }
+})();
+
 var VID_RX  = /\b(gera|cria|faz|mostra|quero\s+ver|faz-me)\s+um?\s*(video|filme|clip|animacao|gif|cena|movie|cinematic|scene)\b/i;
 var AUD_RX  = /\b(gera|cria|faz|toca|compoe|quero\s+ouvir|sintetiza|narra|fala|canta)\s+um?a?\s*(musica|audio|som|song|beat|trilha|melodia|faixa|track|instrumental|voz|discurso|podcast)\b/i;
 var IMG_RX  = /\b(gera|cria|faz|desenha|pinta|mostra|quero\s+ver|faz-me|ilustra)\s+um?a?\s*(imagem|foto|image|picture|desenho|wallpaper|arte|avatar|paisagem|retrato|fotografia|quadro|pintura|ilustracao)\b/i;
@@ -583,8 +596,21 @@ function openThemeModal()  { document.getElementById('theme-modal').classList.ad
 function closeThemeModal() { document.getElementById('theme-modal').classList.remove('open'); }
 
 function completeSetup() {
-  var name = document.getElementById('setup-name').value.trim();
-  if (!name) { toast('Escreve o teu nome para continuar!','warn'); return; }
+  var inputEl = document.getElementById('setup-name');
+  var name = (inputEl.value || '').trim();
+  if (!name) {
+    // Feedback visual direto no input — não depende só do toast
+    inputEl.style.borderColor = '#ef4444';
+    inputEl.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.3)';
+    inputEl.placeholder = '⚠️ Escreve o teu nome aqui!';
+    inputEl.focus();
+    setTimeout(function() {
+      inputEl.style.borderColor = '';
+      inputEl.style.boxShadow = '';
+      inputEl.placeholder = 'Escreve o teu nome...';
+    }, 2500);
+    return;
+  }
   userName = name;
   localStorage.setItem('zn_username', name);
   applyTheme(selectedSetupTheme);
