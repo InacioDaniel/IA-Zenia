@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zedex - Gerador de Apps Web com IA</title>
+    <script src="https://js.puter.com/v2/"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+        }
+
+        .logo i {
+            font-size: 32px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .logo span {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .tab.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-bottom-color: #667eea;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Prompt Section */
+        .prompt-section {
+            width: 380px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .prompt-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .prompt-section h2 i {
+            color: #667eea;
+        }
+
+        .prompt-input {
+            flex: 1;
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .prompt-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .examples {
+            margin-bottom: 15px;
+        }
+
+        .examples h3 {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .example-btn {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 6px;
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            text-align: left;
+            transition: all 0.3s;
+            color: #555;
+        }
+
+        .example-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .generate-btn {
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .generate-btn i {
+            font-size: 18px;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            flex: 1;
+            display: none;
+            background: white;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Visual Editor Tab */
+        .editor-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .editor-toolbar {
+            background: #f5f5f5;
+            padding: 10px 15px;
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .toolbar-btn {
+            padding: 8px 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .toolbar-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .preview-frame {
+            flex: 1;
+            border: none;
+            background: white;
+        }
+
+        /* Code Editor Tab */
+        .code-editor-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #1e1e1e;
+        }
+
+        .code-toolbar {
+            background: #252526;
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #3e3e42;
+        }
+
+        .language-selector {
+            display: flex;
+            gap: 5px;
+        }
+
+        .lang-btn {
+            padding: 6px 12px;
+            background: #3e3e42;
+            color: #cccccc;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        .lang-btn:hover {
+            background: #4e4e52;
+        }
+
+        .lang-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .code-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .code-action-btn {
+            padding: 6px 12px;
+            background: #3e3e42;
+            color: #cccccc;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .code-action-btn:hover {
+            background: #667eea;
+        }
+
+        .code-editor {
+            flex: 1;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            padding: 20px;
+            overflow: auto;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .code-editor textarea {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            color: #d4d4d4;
+            border: none;
+            outline: none;
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
+            resize: none;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .loading i {
+            font-size: 48px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            margin-top: 15px;
+            font-size: 16px;
+            color: #666;
+        }
+
+        /* Syntax Highlighting */
+        .code-display {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .keyword { color: #569cd6; }
+        .string { color: #ce9178; }
+        .comment { color: #6a9955; }
+        .function { color: #dcdcaa; }
+        .number { color: #b5cea8; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .prompt-section {
+                width: 100%;
+                max-width: 380px;
+            }
+            
+            .main-content {
+                flex-direction: column;
+            }
+        }
+
+        /* Success Message */
+        .success-message {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .success-message.show {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+                <div>
+                    <h1>Zedex</h1>
+                    <span>Gerador de Apps Web com IA</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('visual')">
+                <i class="fas fa-eye"></i>
+                Editor Visual
+            </button>
+            <button class="tab" onclick="switchTab('code')">
+                <i class="fas fa-code"></i>
+                Só Código
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Prompt Section -->
+            <div class="prompt-section">
+                <h2>
+                    <i class="fas fa-magic"></i>
+                    Descreva seu App
+                </h2>
+                
+                <textarea 
+                    class="prompt-input" 
+                    id="promptInput" 
+                    placeholder="Descreva o aplicativo web que você quer criar...&#10;&#10;Exemplo: 'Crie um calculadora simples com design moderno'"></textarea>
+                
+                <div class="examples">
+                    <h3>Exemplos Rápidos:</h3>
+                    <button class="example-btn" onclick="setPrompt('Crie uma landing page moderna para um app de fitness com seção hero, recursos e call-to-action')">
+                        🏋️ Landing Page de Fitness
+                    </button>
+                    <button class="example-btn" onclick="setPrompt('Desenvolva um dashboard administrativo com gráficos, tabelas e cards de estatísticas')">
+                        📊 Dashboard Admin
+                    </button>
+                    <button class="example-btn" onclick="setPrompt('Crie uma calculadora científica funcional com design moderno e responsivo')">
+                        🧮 Calculadora Científica
+                    </button>
+                    <button class="example-btn" onclick="setPrompt('Faça um portfólio pessoal com seções de projetos, sobre mim e contato')">
+                        💼 Portfólio Pessoal
+                    </button>
+                    <button class="example-btn" onclick="setPrompt('Crie um timer pomodoro com controles e estatísticas de produtividade')">
+                        ⏱️ Timer Pomodoro
+                    </button>
+                </div>
+
+                <button class="generate-btn" id="generateBtn" onclick="generateApp()">
+                    <i class="fas fa-magic"></i>
+                    Gerar App
+                </button>
+            </div>
+
+            <!-- Visual Editor Tab -->
+            <div class="tab-content active" id="visualTab">
+                <div class="editor-container">
+                    <div class="editor-toolbar">
+                        <button class="toolbar-btn" onclick="editApp()">
+                            <i class="fas fa-edit"></i>
+                            Editar
+                        </button>
+                        <button class="toolbar-btn" onclick="refreshPreview()">
+                            <i class="fas fa-sync"></i>
+                            Atualizar
+                        </button>
+                        <button class="toolbar-btn" onclick="downloadApp()">
+                            <i class="fas fa-download"></i>
+                            Baixar
+                        </button>
+                    </div>
+                    
+                    <div class="loading" id="loadingVisual">
+                        <i class="fas fa-cog"></i>
+                        <p>Zedex está gerando seu app...</p>
+                    </div>
+                    
+                    <iframe class="preview-frame" id="previewFrame"></iframe>
+                </div>
+            </div>
+
+            <!-- Code Editor Tab -->
+            <div class="tab-content" id="codeTab">
+                <div class="code-editor-container">
+                    <div class="code-toolbar">
+                        <div class="language-selector">
+                            <button class="lang-btn active" onclick="switchLanguage('html')">HTML</button>
+                            <button class="lang-btn" onclick="switchLanguage('css')">CSS</button>
+                            <button class="lang-btn" onclick="switchLanguage('javascript')">JavaScript</button>
+                            <button class="lang-btn" onclick="switchLanguage('python')">Python</button>
+                            <button class="lang-btn" onclick="switchLanguage('java')">Java</button>
+                            <button class="lang-btn" onclick="switchLanguage('custom')">Customizar</button>
+                        </div>
+                        <div class="code-actions">
+                            <button class="code-action-btn" onclick="copyCode()">
+                                <i class="fas fa-copy"></i>
+                                Copiar
+                            </button>
+                            <button class="code-action-btn" onclick="downloadCode()">
+                                <i class="fas fa-download"></i>
+                                Baixar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="loading" id="loadingCode">
+                        <i class="fas fa-cog"></i>
+                        <p>Gerando código...</p>
+                    </div>
+                    
+                    <div class="code-editor" id="codeEditor">
+                        <div class="code-display" id="codeDisplay">// Seu código aparecerá aqui após a geração...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage">
+        <i class="fas fa-check-circle"></i>
+        <span id="successText">App gerado com sucesso!</span>
+    </div>
+
+    <script>
+        let currentCode = '';
+        let currentLanguage = 'html';
+        let appFiles = { html: '', css: '', js: '' };
+
+        // Switch between tabs
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+            
+            if (tab === 'visual') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('visualTab').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('codeTab').classList.add('active');
+            }
+        }
+
+        // Set prompt from examples
+        function setPrompt(text) {
+            document.getElementById('promptInput').value = text;
+        }
+
+        // Generate app using Puter AI
+        async function generateApp() {
+            const prompt = document.getElementById('promptInput').value.trim();
+            
+            if (!prompt) {
+                alert('Por favor, descreva o app que você quer criar!');
+                return;
+            }
+
+            const generateBtn = document.getElementById('generateBtn');
+            const loadingVisual = document.getElementById('loadingVisual');
+            const previewFrame = document.getElementById('previewFrame');
+            
+            generateBtn.disabled = true;
+            loadingVisual.classList.add('active');
+            previewFrame.style.display = 'none';
+
+            try {
+                // Generate complete HTML app
+                const fullPrompt = `Crie um aplicativo web completo e funcional baseado nesta descrição: "${prompt}"
+
+IMPORTANTE: Retorne APENAS o código HTML completo, incluindo CSS inline no <style> e JavaScript inline no <script>. 
+- Não adicione explicações, comentários externos ou markdown
+- Faça um app totalmente funcional e responsivo
+- Use design moderno e atraente
+- Inclua todas as funcionalidades necessárias
+- O código deve começar com <!DOCTYPE html>`;
+
+                const response = await puter.ai.chat(fullPrompt, {
+                    model: "openrouter:openai/gpt-5.1-codex"
+                });
+
+                // Clean the response
+                let htmlCode = response.trim();
+                
+                // Remove markdown code blocks if present
+                htmlCode = htmlCode.replace(/```html\n?/g, '').replace(/```\n?/g, '');
+                
+                // Ensure it starts with DOCTYPE
+                if (!htmlCode.toLowerCase().includes('<!doctype html>')) {
+                    htmlCode = '<!DOCTYPE html>\n' + htmlCode;
+                }
+
+                // Store the code
+                appFiles.html = htmlCode;
+                currentCode = htmlCode;
+
+                // Display in preview
+                const blob = new Blob([htmlCode], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                previewFrame.src = url;
+                previewFrame.style.display = 'block';
+
+                // Also update code editor
+                updateCodeDisplay(htmlCode);
+
+                showSuccess('App gerado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao gerar app:', error);
+                alert('Erro ao gerar o app. Tente novamente!');
+            } finally {
+                generateBtn.disabled = false;
+                loadingVisual.classList.remove('active');
+            }
+        }
+
+        // Switch language in code editor
+        async function switchLanguage(lang) {
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            currentLanguage = lang;
+
+            if (lang === 'custom') {
+                const customLang = prompt('Digite a linguagem que você quer usar (ex: Python, Java, C++, Ruby, etc.):');
+                if (!customLang) return;
+                
+                const customPrompt = prompt(`Digite o que você quer em ${customLang}:`);
+                if (!customPrompt) return;
+
+                await generateCodeForLanguage(customLang, customPrompt);
+            } else if (['html', 'css', 'javascript'].includes(lang)) {
+                // Show existing app code
+                if (appFiles.html) {
+                    let code = '';
+                    if (lang === 'html') {
+                        code = appFiles.html;
+                    } else if (lang === 'css') {
+                        const cssMatch = appFiles.html.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+                        code = cssMatch ? cssMatch[1].trim() : '/* Nenhum CSS encontrado */';
+                    } else if (lang === 'javascript') {
+                        const jsMatch = appFiles.html.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
+                        code = jsMatch ? jsMatch[1].trim() : '// Nenhum JavaScript encontrado';
+                    }
+                    updateCodeDisplay(code);
+                }
+            } else {
+                // Generate code for other languages
+                const prompt = document.getElementById('promptInput').value.trim();
+                if (prompt) {
+                    await generateCodeForLanguage(lang, prompt);
+                }
+            }
+        }
+
+        // Generate code for specific language
+        async function generateCodeForLanguage(language, description) {
+            const loadingCode = document.getElementById('loadingCode');
+            const codeDisplay = document.getElementById('codeDisplay');
+            
+            loadingCode.classList.add('active');
+            codeDisplay.style.display = 'none';
+
+            try {
+                const fullPrompt = `Escreva um código completo e funcional em ${language.toUpperCase()} para: "${description}"
+
+IMPORTANTE: 
+- Retorne APENAS o código, sem explicações ou markdown
+- Código deve ser completo e funcional
+- Inclua comentários quando necessário
+- Use as melhores práticas da linguagem`;
+
+                const response = await puter.ai.chat(fullPrompt, {
+                    model: "openrouter:openai/gpt-5.1-codex"
+                });
+
+                let code = response.trim();
+                code = code.replace(/```[\w]*\n?/g, '').replace(/```\n?/g, '');
+                
+                currentCode = code;
+                updateCodeDisplay(code);
+                
+                showSuccess(`Código em ${language} gerado com sucesso!`);
+            } catch (error) {
+                console.error('Erro ao gerar código:', error);
+                alert('Erro ao gerar código. Tente novamente!');
+            } finally {
+                loadingCode.classList.remove('active');
+                codeDisplay.style.display = 'block';
+            }
+        }
+
+        // Update code display
+        function updateCodeDisplay(code) {
+            const codeDisplay = document.getElementById('codeDisplay');
+            codeDisplay.textContent = code;
+            currentCode = code;
+        }
+
+        // Copy code to clipboard
+        function copyCode() {
+            if (!currentCode) {
+                alert('Nenhum código para copiar!');
+                return;
+            }
+
+            navigator.clipboard.writeText(currentCode).then(() => {
+                showSuccess('Código copiado para a área de transferência!');
+            }).catch(err => {
+                alert('Erro ao copiar código!');
+            });
+        }
+
+        // Download code
+        function downloadCode() {
+            if (!currentCode) {
+                alert('Nenhum código para baixar!');
+                return;
+            }
+
+            const extensions = {
+                html: 'html',
+                css: 'css',
+                javascript: 'js',
+                python: 'py',
+                java: 'java'
+            };
+
+            const extension = extensions[currentLanguage] || 'txt';
+            const blob = new Blob([currentCode], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `zedex-code.${extension}`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showSuccess('Código baixado com sucesso!');
+        }
+
+        // Edit app (simplified - allows user to edit in code view)
+        function editApp() {
+            switchTab('code');
+            switchLanguage('html');
+            showSuccess('Edite o código na aba "Só Código" e clique em Atualizar');
+        }
+
+        // Refresh preview
+        function refreshPreview() {
+            if (appFiles.html) {
+                const previewFrame = document.getElementById('previewFrame');
+                const blob = new Blob([appFiles.html], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                previewFrame.src = url;
+                showSuccess('Preview atualizado!');
+            }
+        }
+
+        // Download complete app
+        function downloadApp() {
+            if (!appFiles.html) {
+                alert('Gere um app primeiro!');
+                return;
+            }
+
+            const blob = new Blob([appFiles.html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'zedex-app.html';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showSuccess('App baixado com sucesso!');
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            const successText = document.getElementById('successText');
+            successText.textContent = message;
+            successMessage.classList.add('show');
+            
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
