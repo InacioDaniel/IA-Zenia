@@ -1129,7 +1129,7 @@
 
         <!-- Footer -->
         <div class="footer">
-            Criado por <a href="#" target="_blank">Zénia Projects</a> - @inacio.u.daniel | Powered by Pollinations AI (Mistral Large) 🌸🚀
+            Criado por <a href="#" target="_blank">Zénia Projects</a> - @inacio.u.daniel | Powered by Pollinations AI (Qwen-Coder) 🌸💻
         </div>
     </div>
 
@@ -1143,7 +1143,7 @@
         // Pollinations API Configuration
         const POLLINATIONS_API_KEY = 'pk_7HHmBkBPEiNS5dyF';
         const POLLINATIONS_API_URL = 'https://gen.pollinations.ai/v1/chat/completions';
-        const AI_MODEL = 'mistral-large'; // Powerful free model for coding
+        const AI_MODEL = 'qwen-coder'; // Specialized coding model with large context
 
         let currentCode = '';
         let currentLanguage = 'html';
@@ -1164,7 +1164,7 @@
                         model: AI_MODEL,
                         messages: messages,
                         temperature: 0.7,
-                        max_tokens: 8000
+                        max_tokens: 16000
                     })
                 });
 
@@ -1197,10 +1197,10 @@
         function simulateReasoningSteps(prompt) {
             const steps = [
                 { text: '🔍 Analisando requisitos do projeto...', type: 'analyzing', delay: 0 },
-                { text: '🎨 Planejando arquitetura e design...', type: 'planning', delay: 400 },
-                { text: '⚡ Mistral Large processando com IA avançada...', type: 'generating', delay: 800 },
-                { text: '💻 Gerando código HTML, CSS e JavaScript completo...', type: 'generating', delay: 1200 },
-                { text: '🔧 Otimizando e adicionando funcionalidades...', type: 'finalizing', delay: 1600 }
+                { text: '🎨 Planejando arquitetura completa...', type: 'planning', delay: 400 },
+                { text: '⚡ Qwen-Coder processando com especialização em código...', type: 'generating', delay: 800 },
+                { text: '💻 Gerando código completo: HTML + CSS + JavaScript...', type: 'generating', delay: 1200 },
+                { text: '🔧 Otimizando performance e funcionalidades...', type: 'finalizing', delay: 1600 }
             ];
 
             steps.forEach(step => {
@@ -1438,7 +1438,7 @@ Lembre-se: retorne APENAS o código HTML completo, sem explicações.`;
                     { role: 'user', content: userMessage }
                 ];
 
-                console.log('🌸 Chamando Pollinations API com Mistral Large...');
+                console.log('🌸 Chamando Pollinations API com Qwen-Coder...');
                 
                 // Call Pollinations API
                 const response = await callPollinationsAPI(conversationHistory);
@@ -1581,7 +1581,7 @@ REGRAS:
                     { role: 'user', content: `Escreva código ${language.toUpperCase()} completo e funcional para: "${description}"` }
                 ];
 
-                console.log(`🌸 Gerando código ${language} com Mistral Large...`);
+                console.log(`🌸 Gerando código ${language} com Qwen-Coder...`);
 
                 const response = await callPollinationsAPI(messages);
 
