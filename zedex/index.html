@@ -7,1541 +7,1043 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 /* ═══════════════════════════════════════
-   ZEDEX — by Zénia Projects
+   ZEDEX v3 — by Zénia Projects
    @inacio.u.daniel
 ═══════════════════════════════════════ */
-
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
-/* ─── THEME VARIABLES ─── */
-:root {
-  --accent: #7c6af7;
-  --accent2: #f06292;
-  --radius: 8px;
-  --font-ui: 'Segoe UI', system-ui, sans-serif;
-  --font-code: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
-  --transition: 0.25s ease;
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --accent:#7c6af7;--accent2:#f06292;
+  --font-ui:'Segoe UI',system-ui,sans-serif;
+  --font-code:'JetBrains Mono','Fira Code','Consolas',monospace;
+  --tr:0.22s ease;
 }
 
-/* DARK (default) */
-[data-theme="dark"] {
-  --bg-app:    #0d0d0f;
-  --bg-panel:  #13131a;
-  --bg-side:   #111118;
-  --bg-card:   #1a1a24;
-  --bg-hover:  #22223a;
-  --bg-input:  #191924;
-  --border:    #2a2a3d;
-  --text1:     #e8e8ff;
-  --text2:     #9898b8;
-  --text3:     #5a5a78;
-  --header-bg: rgba(13,13,15,0.95);
-  --tab-bar:   #0f0f16;
-  --editor-bg: #0d0d0f;
-  --line-num:  #3a3a5c;
-  --gutter:    #151520;
-  --selection: rgba(124,106,247,0.25);
-  --scrollbar: #2a2a3d;
-}
-/* LIGHT */
-[data-theme="light"] {
-  --bg-app:    #f0f0f7;
-  --bg-panel:  #ffffff;
-  --bg-side:   #f5f5fc;
-  --bg-card:   #e8e8f5;
-  --bg-hover:  #dcdcf0;
-  --bg-input:  #f8f8ff;
-  --border:    #d0d0e8;
-  --text1:     #1a1a2e;
-  --text2:     #5050a0;
-  --text3:     #8080b0;
-  --header-bg: rgba(240,240,247,0.95);
-  --tab-bar:   #e8e8f5;
-  --editor-bg: #fafafe;
-  --line-num:  #b0b0d0;
-  --gutter:    #f0f0fa;
-  --selection: rgba(124,106,247,0.2);
-  --scrollbar: #c8c8e8;
-}
-/* NORD */
-[data-theme="nord"] {
-  --bg-app:    #242933;
-  --bg-panel:  #2e3440;
-  --bg-side:   #272c36;
-  --bg-card:   #3b4252;
-  --bg-hover:  #434c5e;
-  --bg-input:  #2e3440;
-  --border:    #434c5e;
-  --text1:     #eceff4;
-  --text2:     #d8dee9;
-  --text3:     #81a1c1;
-  --header-bg: rgba(36,41,51,0.97);
-  --tab-bar:   #2e3440;
-  --editor-bg: #2e3440;
-  --line-num:  #4c566a;
-  --gutter:    #2a3040;
-  --selection: rgba(129,161,193,0.25);
-  --scrollbar: #4c566a;
-  --accent:    #88c0d0;
-  --accent2:   #bf616a;
-}
-/* DRACULA */
-[data-theme="dracula"] {
-  --bg-app:    #1e1f29;
-  --bg-panel:  #282a36;
-  --bg-side:   #21222c;
-  --bg-card:   #313341;
-  --bg-hover:  #393b4d;
-  --bg-input:  #282a36;
-  --border:    #44475a;
-  --text1:     #f8f8f2;
-  --text2:     #bd93f9;
-  --text3:     #6272a4;
-  --header-bg: rgba(30,31,41,0.97);
-  --tab-bar:   #21222c;
-  --editor-bg: #282a36;
-  --line-num:  #6272a4;
-  --gutter:    #21222c;
-  --selection: rgba(189,147,249,0.2);
-  --scrollbar: #44475a;
-  --accent:    #bd93f9;
-  --accent2:   #ff79c6;
-}
-/* SOLARIZED */
-[data-theme="solarized"] {
-  --bg-app:    #002b36;
-  --bg-panel:  #073642;
-  --bg-side:   #00303d;
-  --bg-card:   #094652;
-  --bg-hover:  #0d5260;
-  --bg-input:  #073642;
-  --border:    #0d5260;
-  --text1:     #fdf6e3;
-  --text2:     #93a1a1;
-  --text3:     #586e75;
-  --header-bg: rgba(0,43,54,0.97);
-  --tab-bar:   #073642;
-  --editor-bg: #002b36;
-  --line-num:  #2a6e7b;
-  --gutter:    #06303a;
-  --selection: rgba(181,137,0,0.2);
-  --scrollbar: #0d5260;
-  --accent:    #268bd2;
-  --accent2:   #cb4b16;
-}
-/* MONOKAI */
-[data-theme="monokai"] {
-  --bg-app:    #1c1c1e;
-  --bg-panel:  #272822;
-  --bg-side:   #1e1e20;
-  --bg-card:   #2f3025;
-  --bg-hover:  #3a3b30;
-  --bg-input:  #272822;
-  --border:    #383830;
-  --text1:     #f8f8f2;
-  --text2:     #a8a8a2;
-  --text3:     #75715e;
-  --header-bg: rgba(28,28,30,0.97);
-  --tab-bar:   #1e1e20;
-  --editor-bg: #272822;
-  --line-num:  #52524a;
-  --gutter:    #222220;
-  --selection: rgba(102,217,239,0.15);
-  --scrollbar: #383830;
-  --accent:    #a6e22e;
-  --accent2:   #f92672;
-}
-/* NEON */
-[data-theme="neon"] {
-  --bg-app:    #050510;
-  --bg-panel:  #0a0a1a;
-  --bg-side:   #07070f;
-  --bg-card:   #0f0f22;
-  --bg-hover:  #161630;
-  --bg-input:  #0a0a1a;
-  --border:    #1a1a40;
-  --text1:     #e0e0ff;
-  --text2:     #8080d0;
-  --text3:     #4040a0;
-  --header-bg: rgba(5,5,16,0.97);
-  --tab-bar:   #07070f;
-  --editor-bg: #050510;
-  --line-num:  #303080;
-  --gutter:    #080818;
-  --selection: rgba(0,255,200,0.12);
-  --scrollbar: #1a1a40;
-  --accent:    #00ffc8;
-  --accent2:   #ff00aa;
-}
-/* ONE DARK */
-[data-theme="onedark"] {
-  --bg-app:    #21252b;
-  --bg-panel:  #282c34;
-  --bg-side:   #21252b;
-  --bg-card:   #2c313c;
-  --bg-hover:  #333842;
-  --bg-input:  #282c34;
-  --border:    #3a3f4b;
-  --text1:     #abb2bf;
-  --text2:     #636d83;
-  --text3:     #4b5263;
-  --header-bg: rgba(33,37,43,0.97);
-  --tab-bar:   #21252b;
-  --editor-bg: #282c34;
-  --line-num:  #4b5263;
-  --gutter:    #21252b;
-  --selection: rgba(97,175,239,0.2);
-  --scrollbar: #3a3f4b;
-  --accent:    #61afef;
-  --accent2:   #e06c75;
-}
-/* GITHUB DARK */
-[data-theme="github"] {
-  --bg-app:    #0d1117;
-  --bg-panel:  #161b22;
-  --bg-side:   #0d1117;
-  --bg-card:   #1c2128;
-  --bg-hover:  #22272e;
-  --bg-input:  #161b22;
-  --border:    #30363d;
-  --text1:     #e6edf3;
-  --text2:     #848d97;
-  --text3:     #484f58;
-  --header-bg: rgba(13,17,23,0.97);
-  --tab-bar:   #0d1117;
-  --editor-bg: #0d1117;
-  --line-num:  #484f58;
-  --gutter:    #0d1117;
-  --selection: rgba(56,139,253,0.2);
-  --scrollbar: #30363d;
-  --accent:    #388bfd;
-  --accent2:   #f78166;
-}
+/* ── THEMES ── */
+[data-theme="dark"]{--bg:#0d0d0f;--panel:#13131a;--side:#111118;--card:#1a1a24;--hov:#22223a;--inp:#191924;--brd:#2a2a3d;--t1:#e8e8ff;--t2:#9898b8;--t3:#5a5a78;--hdr:rgba(13,13,15,.95);--tbar:#0f0f16;--ed:#0d0d0f;--ln:#3a3a5c;--gut:#151520;--scr:#2a2a3d}
+[data-theme="light"]{--bg:#f0f0f7;--panel:#fff;--side:#f5f5fc;--card:#e8e8f5;--hov:#dcdcf0;--inp:#f8f8ff;--brd:#d0d0e8;--t1:#1a1a2e;--t2:#5050a0;--t3:#8080b0;--hdr:rgba(240,240,247,.95);--tbar:#e8e8f5;--ed:#fafafe;--ln:#b0b0d0;--gut:#f0f0fa;--scr:#c8c8e8}
+[data-theme="nord"]{--bg:#242933;--panel:#2e3440;--side:#272c36;--card:#3b4252;--hov:#434c5e;--inp:#2e3440;--brd:#434c5e;--t1:#eceff4;--t2:#d8dee9;--t3:#81a1c1;--hdr:rgba(36,41,51,.97);--tbar:#2e3440;--ed:#2e3440;--ln:#4c566a;--gut:#2a3040;--scr:#4c566a;--accent:#88c0d0;--accent2:#bf616a}
+[data-theme="dracula"]{--bg:#1e1f29;--panel:#282a36;--side:#21222c;--card:#313341;--hov:#393b4d;--inp:#282a36;--brd:#44475a;--t1:#f8f8f2;--t2:#bd93f9;--t3:#6272a4;--hdr:rgba(30,31,41,.97);--tbar:#21222c;--ed:#282a36;--ln:#6272a4;--gut:#21222c;--scr:#44475a;--accent:#bd93f9;--accent2:#ff79c6}
+[data-theme="monokai"]{--bg:#1c1c1e;--panel:#272822;--side:#1e1e20;--card:#2f3025;--hov:#3a3b30;--inp:#272822;--brd:#383830;--t1:#f8f8f2;--t2:#a8a8a2;--t3:#75715e;--hdr:rgba(28,28,30,.97);--tbar:#1e1e20;--ed:#272822;--ln:#52524a;--gut:#222220;--scr:#383830;--accent:#a6e22e;--accent2:#f92672}
+[data-theme="neon"]{--bg:#050510;--panel:#0a0a1a;--side:#07070f;--card:#0f0f22;--hov:#161630;--inp:#0a0a1a;--brd:#1a1a40;--t1:#e0e0ff;--t2:#8080d0;--t3:#4040a0;--hdr:rgba(5,5,16,.97);--tbar:#07070f;--ed:#050510;--ln:#303080;--gut:#080818;--scr:#1a1a40;--accent:#00ffc8;--accent2:#ff00aa}
+[data-theme="onedark"]{--bg:#21252b;--panel:#282c34;--side:#21252b;--card:#2c313c;--hov:#333842;--inp:#282c34;--brd:#3a3f4b;--t1:#abb2bf;--t2:#636d83;--t3:#4b5263;--hdr:rgba(33,37,43,.97);--tbar:#21252b;--ed:#282c34;--ln:#4b5263;--gut:#21252b;--scr:#3a3f4b;--accent:#61afef;--accent2:#e06c75}
+[data-theme="github"]{--bg:#0d1117;--panel:#161b22;--side:#0d1117;--card:#1c2128;--hov:#22272e;--inp:#161b22;--brd:#30363d;--t1:#e6edf3;--t2:#848d97;--t3:#484f58;--hdr:rgba(13,17,23,.97);--tbar:#0d1117;--ed:#0d1117;--ln:#484f58;--gut:#0d1117;--scr:#30363d;--accent:#388bfd;--accent2:#f78166}
+[data-theme="solarized"]{--bg:#002b36;--panel:#073642;--side:#00303d;--card:#094652;--hov:#0d5260;--inp:#073642;--brd:#0d5260;--t1:#fdf6e3;--t2:#93a1a1;--t3:#586e75;--hdr:rgba(0,43,54,.97);--tbar:#073642;--ed:#002b36;--ln:#2a6e7b;--gut:#06303a;--scr:#0d5260;--accent:#268bd2;--accent2:#cb4b16}
 
-/* ─── SYNTAX HIGHLIGHT PALETTES per theme ─── */
-[data-theme="dark"]     { --s-keyword:#c792ea; --s-string:#c3e88d; --s-comment:#546e7a; --s-function:#82aaff; --s-number:#f78c6c; --s-tag:#f07178; --s-attr:#ffcb6b; --s-value:#c3e88d; --s-class:#ffcb6b; --s-operator:#89ddff; --s-var:#f07178; --s-prop:#80cbc4; --s-sel:#c3e88d; --s-type:#82aaff; --s-const:#f78c6c; }
-[data-theme="light"]    { --s-keyword:#7c4dff; --s-string:#2e7d32; --s-comment:#90a4ae; --s-function:#1565c0; --s-number:#e64a19; --s-tag:#c62828; --s-attr:#6d4c41; --s-value:#2e7d32; --s-class:#00695c; --s-operator:#0097a7; --s-var:#c62828; --s-prop:#00695c; --s-sel:#2e7d32; --s-type:#1565c0; --s-const:#e64a19; }
-[data-theme="nord"]     { --s-keyword:#81a1c1; --s-string:#a3be8c; --s-comment:#4c566a; --s-function:#88c0d0; --s-number:#b48ead; --s-tag:#bf616a; --s-attr:#d08770; --s-value:#a3be8c; --s-class:#ebcb8b; --s-operator:#81a1c1; --s-var:#bf616a; --s-prop:#8fbcbb; --s-sel:#a3be8c; --s-type:#88c0d0; --s-const:#b48ead; }
-[data-theme="dracula"]  { --s-keyword:#ff79c6; --s-string:#f1fa8c; --s-comment:#6272a4; --s-function:#50fa7b; --s-number:#bd93f9; --s-tag:#ff5555; --s-attr:#ffb86c; --s-value:#f1fa8c; --s-class:#ffb86c; --s-operator:#ff79c6; --s-var:#ff5555; --s-prop:#8be9fd; --s-sel:#f1fa8c; --s-type:#8be9fd; --s-const:#bd93f9; }
-[data-theme="solarized"]{ --s-keyword:#859900; --s-string:#2aa198; --s-comment:#586e75; --s-function:#268bd2; --s-number:#d33682; --s-tag:#dc322f; --s-attr:#b58900; --s-value:#2aa198; --s-class:#b58900; --s-operator:#6c71c4; --s-var:#dc322f; --s-prop:#2aa198; --s-sel:#2aa198; --s-type:#268bd2; --s-const:#d33682; }
-[data-theme="monokai"]  { --s-keyword:#f92672; --s-string:#e6db74; --s-comment:#75715e; --s-function:#a6e22e; --s-number:#ae81ff; --s-tag:#f92672; --s-attr:#a6e22e; --s-value:#e6db74; --s-class:#66d9e8; --s-operator:#f92672; --s-var:#f92672; --s-prop:#66d9e8; --s-sel:#e6db74; --s-type:#66d9e8; --s-const:#ae81ff; }
-[data-theme="neon"]     { --s-keyword:#ff00aa; --s-string:#00ffc8; --s-comment:#304080; --s-function:#00d4ff; --s-number:#ff8c00; --s-tag:#ff0055; --s-attr:#ffdc00; --s-value:#00ffc8; --s-class:#ffdc00; --s-operator:#ff00aa; --s-var:#ff0055; --s-prop:#00e5ff; --s-sel:#00ffc8; --s-type:#00d4ff; --s-const:#ff8c00; }
-[data-theme="onedark"]  { --s-keyword:#c678dd; --s-string:#98c379; --s-comment:#5c6370; --s-function:#61afef; --s-number:#d19a66; --s-tag:#e06c75; --s-attr:#d19a66; --s-value:#98c379; --s-class:#e5c07b; --s-operator:#56b6c2; --s-var:#e06c75; --s-prop:#56b6c2; --s-sel:#98c379; --s-type:#e5c07b; --s-const:#d19a66; }
-[data-theme="github"]   { --s-keyword:#ff7b72; --s-string:#a5d6ff; --s-comment:#8b949e; --s-function:#d2a8ff; --s-number:#79c0ff; --s-tag:#ff7b72; --s-attr:#79c0ff; --s-value:#a5d6ff; --s-class:#ffa657; --s-operator:#ff7b72; --s-var:#ff7b72; --s-prop:#79c0ff; --s-sel:#a5d6ff; --s-type:#ffa657; --s-const:#79c0ff; }
+/* ── SYNTAX per theme ── */
+[data-theme="dark"]{--sk:#c792ea;--ss:#c3e88d;--sc:#546e7a;--sf:#82aaff;--sn:#f78c6c;--stg:#f07178;--sa:#ffcb6b;--sv:#c3e88d;--scl:#ffcb6b;--so:#89ddff;--svr:#f07178;--sp:#80cbc4}
+[data-theme="light"]{--sk:#7c4dff;--ss:#2e7d32;--sc:#90a4ae;--sf:#1565c0;--sn:#e64a19;--stg:#c62828;--sa:#6d4c41;--sv:#2e7d32;--scl:#00695c;--so:#0097a7;--svr:#c62828;--sp:#00695c}
+[data-theme="nord"]{--sk:#81a1c1;--ss:#a3be8c;--sc:#4c566a;--sf:#88c0d0;--sn:#b48ead;--stg:#bf616a;--sa:#d08770;--sv:#a3be8c;--scl:#ebcb8b;--so:#81a1c1;--svr:#bf616a;--sp:#8fbcbb}
+[data-theme="dracula"]{--sk:#ff79c6;--ss:#f1fa8c;--sc:#6272a4;--sf:#50fa7b;--sn:#bd93f9;--stg:#ff5555;--sa:#ffb86c;--sv:#f1fa8c;--scl:#ffb86c;--so:#ff79c6;--svr:#ff5555;--sp:#8be9fd}
+[data-theme="monokai"]{--sk:#f92672;--ss:#e6db74;--sc:#75715e;--sf:#a6e22e;--sn:#ae81ff;--stg:#f92672;--sa:#a6e22e;--sv:#e6db74;--scl:#66d9e8;--so:#f92672;--svr:#f92672;--sp:#66d9e8}
+[data-theme="neon"]{--sk:#ff00aa;--ss:#00ffc8;--sc:#304080;--sf:#00d4ff;--sn:#ff8c00;--stg:#ff0055;--sa:#ffdc00;--sv:#00ffc8;--scl:#ffdc00;--so:#ff00aa;--svr:#ff0055;--sp:#00e5ff}
+[data-theme="onedark"]{--sk:#c678dd;--ss:#98c379;--sc:#5c6370;--sf:#61afef;--sn:#d19a66;--stg:#e06c75;--sa:#d19a66;--sv:#98c379;--scl:#e5c07b;--so:#56b6c2;--svr:#e06c75;--sp:#56b6c2}
+[data-theme="github"]{--sk:#ff7b72;--ss:#a5d6ff;--sc:#8b949e;--sf:#d2a8ff;--sn:#79c0ff;--stg:#ff7b72;--sa:#79c0ff;--sv:#a5d6ff;--scl:#ffa657;--so:#ff7b72;--svr:#ff7b72;--sp:#79c0ff}
+[data-theme="solarized"]{--sk:#859900;--ss:#2aa198;--sc:#586e75;--sf:#268bd2;--sn:#d33682;--stg:#dc322f;--sa:#b58900;--sv:#2aa198;--scl:#b58900;--so:#6c71c4;--svr:#dc322f;--sp:#2aa198}
 
-/* ─── GLOBAL ─── */
-body {
-  font-family: var(--font-ui);
-  background: var(--bg-app);
-  color: var(--text1);
-  height: 100dvh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: background var(--transition), color var(--transition);
-}
+/* ── BASE ── */
+body{font-family:var(--font-ui);background:var(--bg);color:var(--t1);height:100dvh;overflow:hidden;display:flex;flex-direction:column;transition:background var(--tr),color var(--tr)}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--scr);border-radius:4px}::-webkit-scrollbar-thumb:hover{background:var(--accent)}
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-app); }
-::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+/* ── HEADER ── */
+.hdr{background:var(--hdr);backdrop-filter:blur(20px);border-bottom:1px solid var(--brd);padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:200;position:relative}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-ic{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;box-shadow:0 0 20px color-mix(in srgb,var(--accent) 40%,transparent)}
+.logo h1{font-size:18px;font-weight:700;color:var(--t1);line-height:1}
+.logo span{font-size:10px;color:var(--t3)}
+.hdr-r{display:flex;align-items:center;gap:8px}
+.tbtn-hdr{background:var(--card);border:1px solid var(--brd);color:var(--t2);padding:7px 13px;border-radius:6px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:5px;transition:all var(--tr);font-family:var(--font-ui)}.tbtn-hdr:hover{border-color:var(--accent);color:var(--t1)}
+.ham{display:none;background:var(--card);border:1px solid var(--brd);color:var(--t2);width:38px;height:38px;border-radius:8px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;transition:all var(--tr)}.ham:hover{color:var(--t1);border-color:var(--accent)}
 
-/* ─── HEADER ─── */
-.header {
-  background: var(--header-bg);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  padding: 0 20px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
-  z-index: 100;
-}
+/* ── THEME DROPDOWN ── */
+.tdrop{position:absolute;top:58px;right:20px;background:var(--panel);border:1px solid var(--brd);border-radius:12px;padding:8px;display:none;grid-template-columns:repeat(3,1fr);gap:6px;z-index:999;box-shadow:0 20px 60px rgba(0,0,0,.5);min-width:285px}
+.tdrop.open{display:grid;animation:dropIn .18s ease}
+@keyframes dropIn{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:translateY(0)}}
+.topt{padding:7px 10px;border-radius:8px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:6px;color:var(--t2);transition:all var(--tr);border:1px solid transparent;white-space:nowrap}.topt:hover{background:var(--hov);color:var(--t1);border-color:var(--brd)}.topt.on{background:color-mix(in srgb,var(--accent) 15%,transparent);border-color:var(--accent);color:var(--t1)}
+.tsw{width:15px;height:15px;border-radius:3px;flex-shrink:0;border:1px solid rgba(255,255,255,.12)}
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  text-decoration: none;
-}
+/* ── TABS BAR ── */
+.tabbar{background:var(--tbar);border-bottom:1px solid var(--brd);display:flex;align-items:center;height:42px;padding:0 6px;gap:2px;flex-shrink:0}
+.pagetab{padding:0 18px;height:34px;background:transparent;border:1px solid transparent;border-radius:6px;color:var(--t3);cursor:pointer;font-size:13px;font-family:var(--font-ui);display:flex;align-items:center;gap:7px;transition:all var(--tr);white-space:nowrap}.pagetab:hover{background:var(--hov);color:var(--t2)}.pagetab.on{background:color-mix(in srgb,var(--accent) 12%,transparent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);color:var(--t1);font-weight:600}
+.pulsedot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:none;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-.logo-icon {
-  width: 36px; height: 36px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; color: #fff;
-  box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 40%, transparent);
-}
+/* ── WORKSPACE ── */
+.ws{flex:1;display:flex;overflow:hidden}
+.pg{display:none;flex:1;flex-direction:column;overflow:hidden}.pg.on{display:flex}
 
-.logo-text h1 { font-size: 18px; font-weight: 700; color: var(--text1); line-height: 1; }
-.logo-text span { font-size: 11px; color: var(--text3); }
+/* ── SIDEBAR ── */
+.sb{width:330px;background:var(--side);border-right:1px solid var(--brd);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:transform var(--tr)}
+.sbh{padding:15px 16px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:9px}.sbh h2{font-size:14px;font-weight:600;color:var(--t1)}.sbh i{color:var(--accent);font-size:15px}
+.sbb{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:12px}
+.lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);margin-bottom:4px}
+.ta{background:var(--inp);border:1px solid var(--brd);border-radius:10px;padding:12px;font-family:var(--font-ui);font-size:13px;color:var(--t1);resize:none;outline:none;min-height:115px;width:100%;transition:border-color var(--tr);line-height:1.6}.ta:focus{border-color:var(--accent)}.ta::placeholder{color:var(--t3)}
+.chips{display:flex;flex-direction:column;gap:5px}
+.chip{padding:8px 12px;background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--t2);cursor:pointer;font-size:12px;text-align:left;transition:all var(--tr);font-family:var(--font-ui)}.chip:hover{background:var(--hov);border-color:var(--accent);color:var(--t1);transform:translateX(3px)}
+.genbtn{width:100%;padding:13px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-ui);transition:all var(--tr);box-shadow:0 4px 20px color-mix(in srgb,var(--accent) 35%,transparent)}.genbtn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px color-mix(in srgb,var(--accent) 50%,transparent)}.genbtn:disabled{opacity:.5;cursor:not-allowed;transform:none}
 
-.header-right { display: flex; align-items: center; gap: 10px; }
+/* ── CONTENT ── */
+.cnt{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
 
-.theme-picker-btn {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  color: var(--text2);
-  padding: 7px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  display: flex; align-items: center; gap: 6px;
-  transition: all var(--transition);
-  font-family: var(--font-ui);
-}
-.theme-picker-btn:hover { border-color: var(--accent); color: var(--text1); }
+/* ── THINKING ── */
+.tkp{background:var(--panel);border-bottom:1px solid var(--brd);padding:11px 15px;font-size:12px;max-height:220px;overflow-y:auto;display:none;font-family:var(--font-code)}
+.tkp.show{display:block;animation:sld .28s ease}@keyframes sld{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.trow{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid color-mix(in srgb,var(--brd) 40%,transparent);animation:fr .35s ease}.trow:last-child{border:none}
+@keyframes fr{from{opacity:0;transform:translateX(-9px)}to{opacity:1;transform:translateX(0)}}
+.tt{line-height:1.5;color:var(--t2)}.trow.plan .tt{color:#ffcb6b}.trow.ana .tt{color:#82aaff}.trow.gen .tt{color:var(--accent)}.trow.fin .tt{color:#c3e88d}
+.csm{margin-top:8px;background:var(--ed);border-radius:6px;padding:9px;font-size:11px;max-height:110px;overflow:hidden}
+.sl{color:var(--t2);line-height:1.65;animation:ftl .07s ease}@keyframes ftl{from{opacity:0}to{opacity:1}}
 
-/* Theme dropdown */
-.theme-dropdown {
-  position: absolute;
-  top: 62px; right: 20px;
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 8px;
-  display: none;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  z-index: 999;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  min-width: 280px;
-}
-.theme-dropdown.open { display: grid; animation: dropIn .2s ease; }
+/* ── VISUAL TOOLBAR ── */
+.vtb{background:var(--panel);border-bottom:1px solid var(--brd);padding:8px 12px;display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap}
+.vbtn{padding:7px 13px;background:var(--card);border:1px solid var(--brd);border-radius:6px;color:var(--t2);cursor:pointer;font-size:12px;font-family:var(--font-ui);display:flex;align-items:center;gap:5px;transition:all var(--tr)}.vbtn:hover{background:var(--hov);border-color:var(--accent);color:var(--t1)}.vbtn.on{background:color-mix(in srgb,var(--accent) 15%,transparent);border-color:var(--accent);color:var(--accent)}
 
-@keyframes dropIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+/* ── PREVIEW ── */
+.pvwrap{flex:1;display:flex;overflow:hidden;position:relative}
+.pvframe{flex:1;border:none;background:#fff;display:none}
+.pvempty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--t3);pointer-events:none}
+.pvempty i{font-size:60px;opacity:.15}.pvempty p{font-size:14px}.pvempty small{font-size:11px;opacity:.55}
 
-.theme-option {
-  padding: 8px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 12px;
-  display: flex; align-items: center; gap: 7px;
-  color: var(--text2);
-  transition: all var(--transition);
-  border: 1px solid transparent;
-  white-space: nowrap;
-}
-.theme-option:hover { background: var(--bg-hover); color: var(--text1); border-color: var(--border); }
-.theme-option.active { background: color-mix(in srgb, var(--accent) 15%, transparent); border-color: var(--accent); color: var(--text1); }
+/* ══════════════════════════════
+   NO-CODE VISUAL EDITOR PANEL
+══════════════════════════════ */
+.ncpanel{width:0;background:var(--side);border-left:1px solid var(--brd);overflow:hidden;transition:width .3s ease;flex-shrink:0;display:flex;flex-direction:column;position:relative}
+.ncpanel.open{width:290px}
+.nchdr{padding:12px 14px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.nchdr-title{font-size:13px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:7px}.nchdr-title i{color:var(--accent)}
+.nc-close{background:none;border:none;color:var(--t3);cursor:pointer;font-size:16px;transition:color var(--tr)}.nc-close:hover{color:var(--t1)}
+.ncbody{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
 
-.theme-swatch {
-  width: 16px; height: 16px;
-  border-radius: 4px;
-  flex-shrink: 0;
-  border: 1px solid rgba(255,255,255,0.1);
-}
+/* No-code groups */
+.ncg{background:var(--card);border:1px solid var(--brd);border-radius:9px;overflow:hidden}
+.ncg-title{padding:9px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t2);border-bottom:1px solid var(--brd);background:color-mix(in srgb,var(--accent) 8%,transparent);display:flex;align-items:center;gap:6px}
+.ncg-title i{color:var(--accent);font-size:11px}
+.ncprop{padding:9px 12px;display:flex;flex-direction:column;gap:5px;border-bottom:1px solid color-mix(in srgb,var(--brd) 50%,transparent)}.ncprop:last-child{border:none}
+.ncprop label{font-size:11px;color:var(--t3);font-weight:500}
+.ncprop input,.ncprop select,.ncprop textarea{background:var(--inp);border:1px solid var(--brd);border-radius:6px;padding:6px 9px;color:var(--t1);font-family:var(--font-ui);font-size:12px;outline:none;width:100%;transition:border-color var(--tr)}.ncprop input:focus,.ncprop select:focus,.ncprop textarea:focus{border-color:var(--accent)}
+.ncprop input[type=color]{height:32px;padding:2px 4px;cursor:pointer}
+.ncprop textarea{resize:none;min-height:55px;line-height:1.5}
+.ncprop select option{background:var(--panel);color:var(--t1)}
+.nc-row{display:flex;gap:7px}.nc-row input{flex:1}
+/* Quick action btns */
+.qa-btn{width:100%;padding:9px 12px;background:var(--card);border:1px solid var(--brd);border-radius:7px;color:var(--t2);cursor:pointer;font-size:12px;font-family:var(--font-ui);display:flex;align-items:center;gap:8px;transition:all var(--tr);text-align:left}.qa-btn:hover{background:var(--hov);border-color:var(--accent);color:var(--t1)}
+.qa-btn i{color:var(--accent);font-size:12px;width:16px;text-align:center}
+/* Apply btn */
+.nc-apply{width:100%;padding:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;font-family:var(--font-ui);transition:all var(--tr);display:flex;align-items:center;justify-content:center;gap:7px}.nc-apply:hover:not(:disabled){opacity:.9;transform:translateY(-1px)}.nc-apply:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.nc-info{font-size:11px;color:var(--t3);text-align:center;padding:14px;line-height:1.5}
 
-.ham-btn {
-  display: none;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  color: var(--text2);
-  width: 38px; height: 38px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  align-items: center; justify-content: center;
-  transition: all var(--transition);
-}
-.ham-btn:hover { color: var(--text1); border-color: var(--accent); }
+/* ══════════════════════════════
+   AI ITERATIVE CHAT PANEL
+══════════════════════════════ */
+.aichat{border-top:1px solid var(--brd);background:var(--panel);display:none;flex-direction:column;max-height:290px;flex-shrink:0}
+.aichat.show{display:flex}
+.aichat-hdr{padding:9px 14px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.aichat-title{font-size:12px;font-weight:600;color:var(--t1);display:flex;align-items:center;gap:7px}
+.aichat-title i{color:var(--accent)}
+.aichat-title .badge{background:color-mix(in srgb,var(--accent) 15%,transparent);border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);color:var(--accent);font-size:10px;padding:2px 7px;border-radius:20px}
+.done-btn{padding:5px 12px;background:color-mix(in srgb,#50fa7b 12%,transparent);border:1px solid color-mix(in srgb,#50fa7b 50%,transparent);border-radius:6px;color:#50fa7b;cursor:pointer;font-size:11px;font-family:var(--font-ui);font-weight:600;transition:all var(--tr);display:flex;align-items:center;gap:5px}.done-btn:hover{background:color-mix(in srgb,#50fa7b 22%,transparent)}
+.msgs{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:8px;min-height:90px}
+.msg{padding:9px 12px;border-radius:9px;font-size:12px;line-height:1.55;max-width:88%;animation:msgIn .2s ease;word-break:break-word}
+@keyframes msgIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{background:color-mix(in srgb,var(--accent) 18%,transparent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);color:var(--t1);align-self:flex-end}
+.msg.ai{background:var(--card);border:1px solid var(--brd);color:var(--t2);align-self:flex-start}
+.msg.ai.loading{color:var(--accent);font-style:italic}
+.msg.ai.loading::after{content:'...';animation:dots 1.2s infinite}
+@keyframes dots{0%{content:''}33%{content:'.'}66%{content:'..'}100%{content:'...'}}
+.chat-inp-row{padding:9px 12px;border-top:1px solid var(--brd);display:flex;gap:7px;align-items:center;flex-shrink:0}
+.chat-inp{flex:1;background:var(--inp);border:1px solid var(--brd);border-radius:8px;padding:8px 12px;color:var(--t1);font-family:var(--font-ui);font-size:12px;outline:none;transition:border-color var(--tr)}.chat-inp:focus{border-color:var(--accent)}.chat-inp::placeholder{color:var(--t3)}
+.chat-send{padding:8px 15px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-family:var(--font-ui);font-weight:600;display:flex;align-items:center;gap:5px;transition:all var(--tr)}.chat-send:hover{opacity:.9;transform:translateY(-1px)}.chat-send:disabled{opacity:.4;cursor:not-allowed;transform:none}
 
-/* ─── TABS BAR ─── */
-.tabs-bar {
-  background: var(--tab-bar);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  height: 42px;
-  padding: 0 6px;
-  gap: 2px;
-  flex-shrink: 0;
-}
+/* ══════════════════════════════
+   CODE EDITOR PAGE
+══════════════════════════════ */
+.cdl{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.cdhdr{background:color-mix(in srgb,var(--panel) 95%,var(--accent) 5%);border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;padding:0 12px;height:40px;flex-shrink:0}
+.cdtabs{display:flex;align-items:center;gap:2px;overflow-x:auto;flex:1}.cdtabs::-webkit-scrollbar{height:2px}
+.cdtab{padding:0 14px;height:32px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--t3);cursor:pointer;font-size:12px;font-family:var(--font-code);display:flex;align-items:center;gap:5px;transition:all var(--tr);white-space:nowrap;flex-shrink:0}.cdtab:hover{color:var(--t2);background:var(--hov)}.cdtab.on{color:var(--t1);border-bottom-color:var(--accent);background:var(--ed)}
+.ehtml{color:#e34c26!important}.ecss{color:#1572b6!important}.ejs{color:#f7df1e!important}.epy{color:#3572a5!important}.ejv{color:#b07219!important}.ets{color:#2b7489!important}.ephp{color:#4f5d95!important}.ecpp{color:#f34b7d!important}.erb{color:#701516!important}.ego{color:#00add8!important}.ers{color:#dea584!important}
+.cdactions{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.cdabtn{padding:5px 10px;background:var(--card);border:1px solid var(--brd);border-radius:5px;color:var(--t2);cursor:pointer;font-size:11px;font-family:var(--font-ui);display:flex;align-items:center;gap:4px;transition:all var(--tr)}.cdabtn:hover{background:var(--hov);color:var(--t1);border-color:var(--accent)}.cdabtn.run{border-color:color-mix(in srgb,var(--accent) 50%,transparent);color:var(--accent)}
+.lbar{background:var(--gut);border-bottom:1px solid var(--brd);padding:5px 12px;display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto;flex-shrink:0}.lbar::-webkit-scrollbar{height:2px}
+.lp{padding:4px 10px;border-radius:20px;border:1px solid var(--brd);background:transparent;color:var(--t3);font-size:11px;font-family:var(--font-code);cursor:pointer;transition:all var(--tr);white-space:nowrap;flex-shrink:0}.lp:hover{color:var(--t2);border-color:var(--t3)}.lp.on{background:color-mix(in srgb,var(--accent) 15%,transparent);border-color:var(--accent);color:var(--accent)}
+.edm{flex:1;display:flex;overflow:hidden;background:var(--ed)}
+.lns{background:var(--gut);border-right:1px solid var(--brd);padding:16px 0;min-width:52px;overflow:hidden;flex-shrink:0;user-select:none;text-align:right}
+.ln{font-family:var(--font-code);font-size:13px;line-height:1.7;color:var(--ln);padding:0 12px 0 6px;height:22.1px}
+.cc{flex:1;overflow:auto;padding:16px;font-family:var(--font-code);font-size:13px;line-height:1.7;color:var(--t1);white-space:pre;tab-size:2;background:var(--ed)}
+.cc .sk{color:var(--sk);font-weight:600}.cc .ss{color:var(--ss)}.cc .sc{color:var(--sc);font-style:italic}.cc .sf{color:var(--sf)}.cc .sn{color:var(--sn)}.cc .stg{color:var(--stg)}.cc .sa{color:var(--sa)}.cc .sv{color:var(--sv)}.cc .scl{color:var(--scl);font-weight:600}.cc .so{color:var(--so)}.cc .svr{color:var(--svr)}.cc .sp{color:var(--sp)}
+.mmap{width:80px;background:var(--gut);border-left:1px solid var(--brd);overflow:hidden;flex-shrink:0;opacity:.55}
+.mmap canvas{display:block;width:100%;height:100%}
+.stbar{background:var(--accent);color:rgba(255,255,255,.9);padding:3px 14px;display:flex;align-items:center;justify-content:space-between;font-size:11px;font-family:var(--font-code);flex-shrink:0;gap:12px}
+.stl,.str{display:flex;align-items:center;gap:14px}
+.sti{display:flex;align-items:center;gap:4px;opacity:.9;white-space:nowrap}.sti i{font-size:9px}
+.caibar{background:var(--panel);border-top:1px solid var(--brd);padding:10px 12px;display:flex;gap:8px;align-items:center;flex-shrink:0}
+.cai-in{flex:1;background:var(--inp);border:1px solid var(--brd);border-radius:8px;padding:8px 12px;color:var(--t1);font-family:var(--font-ui);font-size:13px;outline:none;transition:border-color var(--tr)}.cai-in:focus{border-color:var(--accent)}.cai-in::placeholder{color:var(--t3)}
+.cai-btn{padding:8px 16px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-family:var(--font-ui);font-weight:600;display:flex;align-items:center;gap:6px;transition:all var(--tr)}.cai-btn:hover{opacity:.9;transform:translateY(-1px)}.cai-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
 
-.tab-btn {
-  padding: 0 18px;
-  height: 34px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  color: var(--text3);
-  cursor: pointer;
-  font-size: 13px;
-  font-family: var(--font-ui);
-  display: flex; align-items: center; gap: 7px;
-  transition: all var(--transition);
-  white-space: nowrap;
-}
-.tab-btn:hover { background: var(--bg-hover); color: var(--text2); }
-.tab-btn.active {
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
-  color: var(--text1);
-  font-weight: 600;
-}
-.tab-btn .dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-  display: inline-block;
-}
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--panel);border:1px solid var(--brd);border-left:3px solid var(--accent);color:var(--t1);padding:11px 17px;border-radius:8px;font-size:12px;display:none;align-items:center;gap:9px;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.4);animation:tin .25s ease;max-width:320px}
+.toast.show{display:flex}.toast.err{border-left-color:#ff5555}.toast.ok{border-left-color:#50fa7b}
+@keyframes tin{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}
 
-/* ─── LAYOUT ─── */
-.workspace {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-}
+/* ── OVERLAY ── */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:490;backdrop-filter:blur(2px)}.ov.show{display:block}
 
-/* ─── SIDEBAR / PROMPT ─── */
-.sidebar {
-  width: 340px;
-  background: var(--bg-side);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  overflow: hidden;
-  transition: transform var(--transition);
-}
+/* ── FOOTER ── */
+.ftr{background:var(--panel);border-top:1px solid var(--brd);padding:8px 20px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--t3);flex-shrink:0;gap:10px;flex-wrap:wrap}
+.ftr a{color:var(--accent);text-decoration:none;transition:color var(--tr)}.ftr a:hover{color:var(--accent2)}
+.flinks{display:flex;gap:14px;flex-wrap:wrap}
 
-.sidebar-header {
-  padding: 16px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 10px;
-}
-.sidebar-header h2 { font-size: 14px; font-weight: 600; color: var(--text1); }
-.sidebar-header i { color: var(--accent); font-size: 15px; }
-
-.sidebar-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.prompt-area {
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px;
-  font-family: var(--font-ui);
-  font-size: 13px;
-  color: var(--text1);
-  resize: none;
-  outline: none;
-  min-height: 120px;
-  width: 100%;
-  transition: border-color var(--transition);
-  line-height: 1.6;
-}
-.prompt-area:focus { border-color: var(--accent); }
-.prompt-area::placeholder { color: var(--text3); }
-
-.label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; color: var(--text3); margin-bottom: 4px; }
-
-.examples-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-.example-chip {
-  padding: 9px 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text2);
-  cursor: pointer;
-  font-size: 12px;
-  text-align: left;
-  transition: all var(--transition);
-  font-family: var(--font-ui);
-  display: flex; align-items: center; gap: 8px;
-}
-.example-chip:hover {
-  background: var(--bg-hover);
-  border-color: var(--accent);
-  color: var(--text1);
-  transform: translateX(3px);
-}
-
-.generate-btn {
-  width: 100%;
-  padding: 13px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  font-family: var(--font-ui);
-  transition: all var(--transition);
-  box-shadow: 0 4px 20px color-mix(in srgb, var(--accent) 35%, transparent);
-  letter-spacing: .3px;
-}
-.generate-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 28px color-mix(in srgb, var(--accent) 50%, transparent);
-}
-.generate-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-
-/* ─── CONTENT AREA ─── */
-.content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: var(--bg-app);
-}
-
-/* Tab Pages */
-.page { display: none; flex: 1; flex-direction: column; overflow: hidden; }
-.page.active { display: flex; }
-
-/* ─── THINKING PANEL ─── */
-.thinking-panel {
-  background: var(--bg-panel);
-  border-bottom: 1px solid var(--border);
-  padding: 12px 16px;
-  font-size: 12px;
-  max-height: 220px;
-  overflow-y: auto;
-  display: none;
-  font-family: var(--font-code);
-}
-.thinking-panel.show { display: block; animation: slideDown .3s ease; }
-@keyframes slideDown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
-
-.think-row {
-  display: flex; align-items: flex-start; gap: 8px;
-  padding: 5px 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
-  animation: fadeRow .4s ease;
-}
-@keyframes fadeRow { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
-.think-row:last-child { border-bottom: none; }
-.think-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
-.think-text { color: var(--text2); line-height: 1.5; }
-.think-row.plan .think-text  { color: #ffcb6b; }
-.think-row.ana  .think-text  { color: #82aaff; }
-.think-row.gen  .think-text  { color: var(--accent); }
-.think-row.fin  .think-text  { color: #c3e88d; }
-
-.code-stream-mini {
-  margin-top: 8px;
-  background: var(--editor-bg);
-  border-radius: 6px;
-  padding: 10px;
-  font-size: 11px;
-  max-height: 120px;
-  overflow: hidden;
-}
-.stream-line {
-  color: var(--text2);
-  line-height: 1.7;
-  animation: typeLine .08s ease;
-}
-@keyframes typeLine { from{opacity:0} to{opacity:1} }
-.stream-line .s-k { color: var(--s-keyword); }
-.stream-line .s-s { color: var(--s-string); }
-.stream-line .s-c { color: var(--s-comment); font-style: italic; }
-.stream-line .s-f { color: var(--s-function); }
-.stream-line .s-n { color: var(--s-number); }
-
-/* ─── VISUAL EDITOR ─── */
-.editor-toolbar {
-  background: var(--bg-panel);
-  border-bottom: 1px solid var(--border);
-  padding: 8px 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-  flex-wrap: wrap;
-}
-
-.tool-btn {
-  padding: 7px 14px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text2);
-  cursor: pointer;
-  font-size: 12px;
-  font-family: var(--font-ui);
-  display: flex; align-items: center; gap: 5px;
-  transition: all var(--transition);
-}
-.tool-btn:hover { background: var(--bg-hover); border-color: var(--accent); color: var(--text1); }
-.tool-btn i { font-size: 13px; }
-
-.preview-wrap {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-}
-.preview-frame {
-  width: 100%; height: 100%;
-  border: none;
-  background: #fff;
-}
-.preview-empty {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 16px; color: var(--text3);
-}
-.preview-empty i { font-size: 64px; opacity: .2; }
-.preview-empty p { font-size: 15px; }
-.preview-empty small { font-size: 12px; opacity: .6; }
-
-/* ─── CODE EDITOR ─── */
-.code-page-layout {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* VS Code-like title bar */
-.code-titlebar {
-  background: color-mix(in srgb, var(--bg-panel) 95%, var(--accent) 5%);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 12px;
-  height: 40px;
-  flex-shrink: 0;
-}
-
-.code-tabs-row {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  overflow-x: auto;
-  flex: 1;
-}
-.code-tabs-row::-webkit-scrollbar { height: 2px; }
-
-.code-file-tab {
-  padding: 0 14px;
-  height: 32px;
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: var(--text3);
-  cursor: pointer;
-  font-size: 12px;
-  font-family: var(--font-code);
-  display: flex; align-items: center; gap: 6px;
-  transition: all var(--transition);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.code-file-tab:hover { color: var(--text2); background: var(--bg-hover); }
-.code-file-tab.active {
-  color: var(--text1);
-  border-bottom-color: var(--accent);
-  background: var(--editor-bg);
-}
-.code-file-tab .tab-icon { font-size: 13px; }
-.ext-html { color: #e34c26 !important; }
-.ext-css  { color: #1572b6 !important; }
-.ext-js   { color: #f7df1e !important; }
-.ext-py   { color: #3572a5 !important; }
-.ext-java { color: #b07219 !important; }
-.ext-ts   { color: #2b7489 !important; }
-.ext-php  { color: #4f5d95 !important; }
-.ext-cpp  { color: #f34b7d !important; }
-.ext-rb   { color: #701516 !important; }
-.ext-go   { color: #00add8 !important; }
-.ext-rs   { color: #dea584 !important; }
-
-.code-actions-row {
-  display: flex; align-items: center; gap: 6px;
-}
-.code-act-btn {
-  padding: 5px 10px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  color: var(--text2);
-  cursor: pointer;
-  font-size: 11px;
-  font-family: var(--font-ui);
-  display: flex; align-items: center; gap: 4px;
-  transition: all var(--transition);
-}
-.code-act-btn:hover { background: var(--bg-hover); color: var(--text1); border-color: var(--accent); }
-.code-act-btn.run { border-color: color-mix(in srgb, var(--accent) 50%, transparent); color: var(--accent); }
-
-/* AI Chat for code editor */
-.code-ai-bar {
-  background: var(--bg-panel);
-  border-top: 1px solid var(--border);
-  padding: 10px 12px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-shrink: 0;
-}
-.code-ai-input {
-  flex: 1;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 12px;
-  color: var(--text1);
-  font-family: var(--font-ui);
-  font-size: 13px;
-  outline: none;
-  transition: border-color var(--transition);
-}
-.code-ai-input:focus { border-color: var(--accent); }
-.code-ai-input::placeholder { color: var(--text3); }
-.code-ai-send {
-  padding: 8px 16px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  font-family: var(--font-ui);
-  font-weight: 600;
-  display: flex; align-items: center; gap: 6px;
-  transition: all var(--transition);
-}
-.code-ai-send:hover { opacity: .9; transform: translateY(-1px); }
-.code-ai-send:disabled { opacity: .4; cursor: not-allowed; transform: none; }
-
-/* Language selector bar */
-.lang-selector-bar {
-  background: var(--gutter);
-  border-bottom: 1px solid var(--border);
-  padding: 6px 12px;
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-  flex-shrink: 0;
-}
-.lang-pill {
-  padding: 4px 10px;
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text3);
-  font-size: 11px;
-  font-family: var(--font-code);
-  cursor: pointer;
-  transition: all var(--transition);
-}
-.lang-pill:hover { color: var(--text2); border-color: var(--text3); }
-.lang-pill.active { background: color-mix(in srgb, var(--accent) 15%, transparent); border-color: var(--accent); color: var(--accent); }
-
-/* Code editor main area */
-.editor-main {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-  background: var(--editor-bg);
-}
-
-.line-numbers {
-  background: var(--gutter);
-  border-right: 1px solid var(--border);
-  padding: 16px 0;
-  min-width: 52px;
-  overflow: hidden;
-  flex-shrink: 0;
-  user-select: none;
-  text-align: right;
-}
-.line-num-item {
-  font-family: var(--font-code);
-  font-size: 13px;
-  line-height: 1.7;
-  color: var(--line-num);
-  padding: 0 12px 0 6px;
-  height: 22.1px;
-}
-.line-num-item.active { color: var(--accent); }
-
-.code-content {
-  flex: 1;
-  overflow: auto;
-  padding: 16px;
-  font-family: var(--font-code);
-  font-size: 13px;
-  line-height: 1.7;
-  color: var(--text1);
-  white-space: pre;
-  tab-size: 2;
-  cursor: text;
-  background: var(--editor-bg);
-  position: relative;
-}
-.code-content::selection { background: var(--selection); }
-
-/* Minimap */
-.minimap {
-  width: 80px;
-  background: var(--gutter);
-  border-left: 1px solid var(--border);
-  overflow: hidden;
-  position: relative;
-  flex-shrink: 0;
-  opacity: .6;
-}
-.minimap canvas { display: block; width: 100%; height: 100%; }
-
-/* Status bar */
-.status-bar {
-  background: var(--accent);
-  color: rgba(255,255,255,0.9);
-  padding: 3px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-  font-family: var(--font-code);
-  flex-shrink: 0;
-  gap: 12px;
-}
-.status-left, .status-right { display: flex; align-items: center; gap: 14px; }
-.status-item { display: flex; align-items: center; gap: 4px; opacity: .9; white-space: nowrap; }
-.status-item i { font-size: 10px; }
-
-/* ─── TOAST ─── */
-.toast {
-  position: fixed;
-  bottom: 20px; right: 20px;
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
-  color: var(--text1);
-  padding: 12px 18px;
-  border-radius: 8px;
-  font-size: 13px;
-  display: none;
-  align-items: center;
-  gap: 10px;
-  z-index: 9999;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-  animation: toastIn .3s ease;
-  max-width: 320px;
-}
-.toast.show { display: flex; }
-.toast.error { border-left-color: #ff5555; }
-.toast.success { border-left-color: #50fa7b; }
-@keyframes toastIn { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:translateX(0)} }
-
-/* ─── OVERLAY ─── */
-.overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,.6);
-  z-index: 490; backdrop-filter: blur(2px);
-}
-.overlay.show { display: block; }
-
-/* ─── SYNTAX COLORING SPANS ─── */
-.code-content .s-keyword  { color: var(--s-keyword);  font-weight: 600; }
-.code-content .s-string   { color: var(--s-string); }
-.code-content .s-comment  { color: var(--s-comment); font-style: italic; }
-.code-content .s-function { color: var(--s-function); }
-.code-content .s-number   { color: var(--s-number); }
-.code-content .s-tag      { color: var(--s-tag); }
-.code-content .s-attr     { color: var(--s-attr); }
-.code-content .s-value    { color: var(--s-value); }
-.code-content .s-class    { color: var(--s-class); font-weight: 600; }
-.code-content .s-operator { color: var(--s-operator); }
-.code-content .s-var      { color: var(--s-var); }
-.code-content .s-prop     { color: var(--s-prop); }
-.code-content .s-sel      { color: var(--s-sel); }
-.code-content .s-type     { color: var(--s-type); }
-.code-content .s-const    { color: var(--s-const); font-weight: 600; }
-
-/* ─── FOOTER ─── */
-.footer {
-  background: var(--bg-panel);
-  border-top: 1px solid var(--border);
-  padding: 8px 20px;
-  display: flex; align-items: center; justify-content: space-between;
-  font-size: 11px; color: var(--text3);
-  flex-shrink: 0;
-  gap: 10px; flex-wrap: wrap;
-}
-.footer a { color: var(--accent); text-decoration: none; transition: color var(--transition); }
-.footer a:hover { color: var(--accent2); }
-.footer-links { display: flex; gap: 14px; flex-wrap: wrap; }
-
-/* ─── RESPONSIVE ─── */
-@media (max-width: 900px) {
-  .minimap { display: none; }
-  .sidebar { width: 300px; }
-}
-@media (max-width: 768px) {
-  .ham-btn { display: flex; }
-  .sidebar {
-    position: fixed; top: 0; left: 0; bottom: 0;
-    width: 300px; z-index: 500;
-    transform: translateX(-100%);
-  }
-  .sidebar.open { transform: translateX(0); }
-  .lang-selector-bar { flex-wrap: nowrap; overflow-x: auto; }
-  .lang-pill { flex-shrink: 0; }
-  .status-right .status-item:not(:first-child) { display: none; }
-  .code-tabs-row .code-file-tab .tab-icon + span:not(.active) { display: none; }
-}
-@media (max-width: 480px) {
-  .header { padding: 0 12px; }
-  .logo-text span { display: none; }
-  .editor-toolbar { padding: 6px 8px; }
-  .tool-btn span { display: none; }
-  .code-titlebar { padding: 0 8px; }
-}
-@supports (-webkit-touch-callout: none) {
-  body { height: -webkit-fill-available; }
-}
+/* ── RESPONSIVE ── */
+@media(max-width:900px){.mmap{display:none}.sb{width:300px}.ncpanel.open{width:250px}}
+@media(max-width:768px){.ham{display:flex}.sb{position:fixed;top:0;left:0;bottom:0;width:300px;z-index:500;transform:translateX(-100%)}.sb.open{transform:translateX(0)}.ncpanel.open{width:220px}.str .sti:not(:first-child){display:none}}
+@media(max-width:480px){.hdr{padding:0 12px}.vtb{padding:6px 8px}.vbtn span{display:none}.cdhdr{padding:0 8px}}
+@supports(-webkit-touch-callout:none){body{height:-webkit-fill-available}}
 </style>
 </head>
 <body>
 
 <!-- HEADER -->
-<header class="header">
+<header class="hdr">
   <div class="logo">
-    <div class="logo-icon"><i class="fas fa-bolt"></i></div>
-    <div class="logo-text">
-      <h1>Zedex</h1>
-      <span>AI Web App Generator</span>
-    </div>
+    <div class="logo-ic"><i class="fas fa-bolt"></i></div>
+    <div><h1>Zedex</h1><span>AI Web App Generator</span></div>
   </div>
-  <div class="header-right">
-    <button class="theme-picker-btn" onclick="toggleThemeDropdown()">
-      <i class="fas fa-palette"></i>
-      <span id="themeLabel">Dark</span>
-      <i class="fas fa-chevron-down" style="font-size:10px;opacity:.6"></i>
+  <div class="hdr-r">
+    <button class="tbtn-hdr" onclick="toggleTdrop()">
+      <i class="fas fa-palette"></i><span id="tlbl">Dark</span>
+      <i class="fas fa-chevron-down" style="font-size:9px;opacity:.5"></i>
     </button>
-    <button class="ham-btn" onclick="toggleSidebar()" id="hamBtn"><i class="fas fa-bars"></i></button>
+    <button class="ham" onclick="toggleSb()"><i class="fas fa-bars"></i></button>
   </div>
 </header>
 
 <!-- THEME DROPDOWN -->
-<div class="theme-dropdown" id="themeDropdown">
-  <div class="theme-option active" data-theme="dark"    onclick="setTheme('dark','Dark')">    <div class="theme-swatch" style="background:#0d0d0f;border-color:#7c6af7"></div>Dark</div>
-  <div class="theme-option"        data-theme="light"   onclick="setTheme('light','Light')">  <div class="theme-swatch" style="background:#f0f0f7;border-color:#7c4dff"></div>Light</div>
-  <div class="theme-option"        data-theme="nord"    onclick="setTheme('nord','Nord')">    <div class="theme-swatch" style="background:#2e3440;border-color:#88c0d0"></div>Nord</div>
-  <div class="theme-option"        data-theme="dracula" onclick="setTheme('dracula','Dracula')"><div class="theme-swatch" style="background:#282a36;border-color:#bd93f9"></div>Dracula</div>
-  <div class="theme-option"        data-theme="solarized" onclick="setTheme('solarized','Solarized')"><div class="theme-swatch" style="background:#002b36;border-color:#268bd2"></div>Solarized</div>
-  <div class="theme-option"        data-theme="monokai" onclick="setTheme('monokai','Monokai')"><div class="theme-swatch" style="background:#272822;border-color:#a6e22e"></div>Monokai</div>
-  <div class="theme-option"        data-theme="neon"    onclick="setTheme('neon','Neon')">    <div class="theme-swatch" style="background:#050510;border-color:#00ffc8"></div>Neon</div>
-  <div class="theme-option"        data-theme="onedark" onclick="setTheme('onedark','One Dark')"><div class="theme-swatch" style="background:#282c34;border-color:#61afef"></div>One Dark</div>
-  <div class="theme-option"        data-theme="github"  onclick="setTheme('github','GitHub')"><div class="theme-swatch" style="background:#0d1117;border-color:#388bfd"></div>GitHub</div>
+<div class="tdrop" id="tdrop">
+  <div class="topt on" data-t="dark"      onclick="setTheme('dark','Dark')">       <div class="tsw" style="background:#0d0d0f;border-color:#7c6af7"></div>Dark</div>
+  <div class="topt"    data-t="light"     onclick="setTheme('light','Light')">     <div class="tsw" style="background:#f0f0f7;border-color:#7c4dff"></div>Light</div>
+  <div class="topt"    data-t="nord"      onclick="setTheme('nord','Nord')">       <div class="tsw" style="background:#2e3440;border-color:#88c0d0"></div>Nord</div>
+  <div class="topt"    data-t="dracula"   onclick="setTheme('dracula','Dracula')"> <div class="tsw" style="background:#282a36;border-color:#bd93f9"></div>Dracula</div>
+  <div class="topt"    data-t="monokai"   onclick="setTheme('monokai','Monokai')"> <div class="tsw" style="background:#272822;border-color:#a6e22e"></div>Monokai</div>
+  <div class="topt"    data-t="neon"      onclick="setTheme('neon','Neon')">       <div class="tsw" style="background:#050510;border-color:#00ffc8"></div>Neon</div>
+  <div class="topt"    data-t="onedark"   onclick="setTheme('onedark','One Dark')"><div class="tsw" style="background:#282c34;border-color:#61afef"></div>One Dark</div>
+  <div class="topt"    data-t="github"    onclick="setTheme('github','GitHub')">   <div class="tsw" style="background:#0d1117;border-color:#388bfd"></div>GitHub</div>
+  <div class="topt"    data-t="solarized" onclick="setTheme('solarized','Solarized')"><div class="tsw" style="background:#002b36;border-color:#268bd2"></div>Solarized</div>
 </div>
 
 <!-- TABS BAR -->
-<div class="tabs-bar">
-  <button class="tab-btn active" id="tab-visual" onclick="switchPage('visual')">
-    <i class="fas fa-eye"></i> Editor Visual
-  </button>
-  <button class="tab-btn" id="tab-code" onclick="switchPage('code')">
-    <i class="fas fa-code"></i> Só Código <span class="dot" id="codeDot" style="display:none"></span>
-  </button>
+<div class="tabbar">
+  <button class="pagetab on" id="tab-v" onclick="switchPg('v')"><i class="fas fa-eye"></i> Editor Visual</button>
+  <button class="pagetab"    id="tab-c" onclick="switchPg('c')"><i class="fas fa-code"></i> Só Código <span class="pulsedot" id="cdot"></span></button>
 </div>
 
-<!-- OVERLAY (mobile) -->
-<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<div class="ov" id="ov" onclick="closeSb()"></div>
 
 <!-- WORKSPACE -->
-<div class="workspace">
+<div class="ws">
 
   <!-- SIDEBAR -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <i class="fas fa-wand-magic-sparkles"></i>
-      <h2>Descreva seu App</h2>
-    </div>
-    <div class="sidebar-body">
-      <textarea class="prompt-area" id="promptInput" placeholder="Ex: Crie um dashboard financeiro com gráficos, cards de estatísticas, tabela de transações e design dark moderno..."></textarea>
-
+  <aside class="sb" id="sb">
+    <div class="sbh"><i class="fas fa-wand-magic-sparkles"></i><h2>Descreva seu App</h2></div>
+    <div class="sbb">
+      <textarea class="ta" id="pi" placeholder="Ex: Dashboard financeiro dark mode com gráficos Chart.js, cards KPI, tabela de transações e sidebar navegável..."></textarea>
       <div>
-        <div class="label">Exemplos rápidos</div>
-        <div class="examples-grid">
-          <button class="example-chip" onclick="setPrompt('Landing page moderna para startup de tecnologia com hero animado, features, pricing e CTA')">🚀 Landing Page Startup</button>
-          <button class="example-chip" onclick="setPrompt('Dashboard administrativo com gráficos de barras e linhas, cards de estatísticas e tabela de dados')">📊 Dashboard Admin</button>
-          <button class="example-chip" onclick="setPrompt('Calculadora científica funcional com histórico de operações e design premium')">🧮 Calculadora Científica</button>
-          <button class="example-chip" onclick="setPrompt('Jogo Snake completo em canvas com pontuação, níveis e efeitos visuais')">🐍 Jogo Snake</button>
-          <button class="example-chip" onclick="setPrompt('App de tarefas (Todo) com drag and drop, categorias, prioridades e animações')">✅ Todo App Premium</button>
-          <button class="example-chip" onclick="setPrompt('Player de música com visualizador de ondas, playlist e controles animados')">🎵 Music Player</button>
+        <div class="lbl">Exemplos rápidos</div>
+        <div class="chips">
+          <button class="chip" onclick="sp('Landing page para startup de tecnologia com hero animado, seção de features, pricing cards e CTA')">🚀 Landing Page Startup</button>
+          <button class="chip" onclick="sp('Dashboard admin com gráficos de barras e linhas, cards KPI animados e tabela de dados')">📊 Dashboard Admin</button>
+          <button class="chip" onclick="sp('Calculadora científica com histórico completo, funções trig e design glassmorphism')">🧮 Calculadora Premium</button>
+          <button class="chip" onclick="sp('Jogo Snake em canvas com pontuação, níveis progressivos, power-ups e efeitos neon')">🐍 Snake Neon Game</button>
+          <button class="chip" onclick="sp('App de tarefas com drag and drop, categorias coloridas, filtros e animações fluidas')">✅ Todo App Pro</button>
+          <button class="chip" onclick="sp('Player de música com visualizador de frequências em canvas, playlist e equalizer animado')">🎵 Music Player</button>
         </div>
       </div>
-
-      <button class="generate-btn" id="generateBtn" onclick="generateApp()">
-        <i class="fas fa-bolt" id="genIcon"></i>
-        <span id="genText">Gerar App</span>
+      <button class="genbtn" id="gbtn" onclick="genApp()">
+        <i class="fas fa-bolt" id="gi"></i><span id="gt">Gerar App</span>
       </button>
     </div>
   </aside>
 
   <!-- CONTENT -->
-  <div class="content">
+  <div class="cnt">
 
-    <!-- ═══ PAGE: VISUAL ═══ -->
-    <div class="page active" id="page-visual">
+    <!-- ══ VISUAL PAGE ══ -->
+    <div class="pg on" id="pg-v">
 
-      <!-- AI Thinking -->
-      <div class="thinking-panel" id="thinkingPanel"></div>
+      <!-- Thinking panel -->
+      <div class="tkp" id="tkp"></div>
 
-      <!-- Toolbar -->
-      <div class="editor-toolbar">
-        <button class="tool-btn" onclick="refreshPreview()"><i class="fas fa-rotate-right"></i><span>Atualizar</span></button>
-        <button class="tool-btn" onclick="downloadApp()"><i class="fas fa-download"></i><span>Baixar HTML</span></button>
-        <button class="tool-btn" onclick="openFullscreen()"><i class="fas fa-expand"></i><span>Fullscreen</span></button>
-        <button class="tool-btn" onclick="switchPage('code');showHtmlCode()"><i class="fas fa-code"></i><span>Ver Código</span></button>
+      <!-- ═══ AI ITERATIVE CHAT ═══ -->
+      <div class="aichat" id="aichat">
+        <div class="aichat-hdr">
+          <div class="aichat-title">
+            <i class="fas fa-robot"></i>
+            IA Assistindo seu App
+            <span class="badge">Chat Iterativo</span>
+          </div>
+          <button class="done-btn" onclick="doneApp()">
+            <i class="fas fa-check-circle"></i> Está Pronto!
+          </button>
+        </div>
+        <div class="msgs" id="msgs"></div>
+        <div class="chat-inp-row">
+          <input class="chat-inp" id="chatinp" placeholder='Diga o que ajustar: "Muda o fundo para azul escuro", "Adiciona botão de WhatsApp", "Remove a seção de preços"...' onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}">
+          <button class="chat-send" id="csend" onclick="sendChat()">
+            <i class="fas fa-paper-plane"></i> Enviar
+          </button>
+        </div>
       </div>
 
-      <!-- Preview -->
-      <div class="preview-wrap">
-        <div class="preview-empty" id="previewEmpty">
+      <!-- Toolbar -->
+      <div class="vtb">
+        <button class="vbtn" onclick="refreshPv()"><i class="fas fa-rotate-right"></i><span>Atualizar</span></button>
+        <button class="vbtn" onclick="dlApp()"><i class="fas fa-download"></i><span>Baixar HTML</span></button>
+        <button class="vbtn" onclick="openFs()"><i class="fas fa-expand"></i><span>Fullscreen</span></button>
+        <button class="vbtn" onclick="switchPg('c');showHtml()"><i class="fas fa-code"></i><span>Ver Código</span></button>
+        <button class="vbtn on" id="ncbtn" onclick="toggleNc()"><i class="fas fa-paintbrush"></i><span>Editor Visual</span></button>
+      </div>
+
+      <!-- Preview + No-Code Panel side by side -->
+      <div class="pvwrap">
+        <div class="pvempty" id="pve">
           <i class="fas fa-bolt"></i>
           <p>Seu app aparecerá aqui</p>
           <small>Descreva o que quer criar e clique em Gerar App</small>
         </div>
-        <iframe class="preview-frame" id="previewFrame" style="display:none"></iframe>
+        <iframe class="pvframe" id="pvf"></iframe>
+
+        <!-- ══════════════════════
+             NO-CODE PANEL
+        ══════════════════════ -->
+        <div class="ncpanel" id="ncp">
+          <div class="nchdr">
+            <div class="nchdr-title"><i class="fas fa-paintbrush"></i> Editor Visual</div>
+            <button class="nc-close" onclick="toggleNc()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="ncbody" id="ncbody">
+            <div class="nc-info">
+              <i class="fas fa-arrow-left" style="color:var(--accent)"></i><br><br>
+              Gere um app primeiro para poder editá-lo aqui sem escrever código!
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- ═══ PAGE: CODE ═══ -->
-    <div class="page" id="page-code">
-      <div class="code-page-layout">
+    <!-- ══ CODE PAGE ══ -->
+    <div class="pg" id="pg-c">
+      <div class="cdl">
 
-        <!-- VS Code Title Bar -->
-        <div class="code-titlebar">
-          <div class="code-tabs-row" id="codeTabs">
-            <!-- tabs injected by JS -->
-          </div>
-          <div class="code-actions-row">
-            <button class="code-act-btn" onclick="copyCode()"><i class="fas fa-copy"></i> Copiar</button>
-            <button class="code-act-btn" onclick="downloadCode()"><i class="fas fa-download"></i> Baixar</button>
-            <button class="code-act-btn run" onclick="generateCodeForCurrentLang()"><i class="fas fa-wand-magic-sparkles"></i> Gerar</button>
+        <!-- Titlebar -->
+        <div class="cdhdr">
+          <div class="cdtabs" id="cdtabs"></div>
+          <div class="cdactions">
+            <button class="cdabtn" onclick="cpCode()"><i class="fas fa-copy"></i> Copiar</button>
+            <button class="cdabtn" onclick="dlCode()"><i class="fas fa-download"></i> Baixar</button>
+            <button class="cdabtn run" onclick="genCodeLang()"><i class="fas fa-wand-magic-sparkles"></i> Gerar</button>
           </div>
         </div>
 
-        <!-- Language pills -->
-        <div class="lang-selector-bar" id="langBar">
-          <button class="lang-pill active" onclick="selectLang('html')"  data-lang="html">HTML</button>
-          <button class="lang-pill"        onclick="selectLang('css')"   data-lang="css">CSS</button>
-          <button class="lang-pill"        onclick="selectLang('js')"    data-lang="js">JavaScript</button>
-          <button class="lang-pill"        onclick="selectLang('ts')"    data-lang="ts">TypeScript</button>
-          <button class="lang-pill"        onclick="selectLang('python')"data-lang="python">Python</button>
-          <button class="lang-pill"        onclick="selectLang('java')"  data-lang="java">Java</button>
-          <button class="lang-pill"        onclick="selectLang('cpp')"   data-lang="cpp">C++</button>
-          <button class="lang-pill"        onclick="selectLang('php')"   data-lang="php">PHP</button>
-          <button class="lang-pill"        onclick="selectLang('rb')"    data-lang="rb">Ruby</button>
-          <button class="lang-pill"        onclick="selectLang('go')"    data-lang="go">Go</button>
-          <button class="lang-pill"        onclick="selectLang('rs')"    data-lang="rs">Rust</button>
-          <button class="lang-pill"        onclick="selectLang('custom')"data-lang="custom">+ Custom</button>
+        <!-- Lang pills -->
+        <div class="lbar">
+          <button class="lp on" onclick="selLang('html')"   data-l="html">HTML</button>
+          <button class="lp"    onclick="selLang('css')"    data-l="css">CSS</button>
+          <button class="lp"    onclick="selLang('js')"     data-l="js">JavaScript</button>
+          <button class="lp"    onclick="selLang('ts')"     data-l="ts">TypeScript</button>
+          <button class="lp"    onclick="selLang('python')" data-l="python">Python</button>
+          <button class="lp"    onclick="selLang('java')"   data-l="java">Java</button>
+          <button class="lp"    onclick="selLang('cpp')"    data-l="cpp">C++</button>
+          <button class="lp"    onclick="selLang('php')"    data-l="php">PHP</button>
+          <button class="lp"    onclick="selLang('rb')"     data-l="rb">Ruby</button>
+          <button class="lp"    onclick="selLang('go')"     data-l="go">Go</button>
+          <button class="lp"    onclick="selLang('rs')"     data-l="rs">Rust</button>
+          <button class="lp"    onclick="selLang('custom')" data-l="custom">+ Custom</button>
         </div>
 
-        <!-- Editor -->
-        <div class="editor-main">
-          <div class="line-numbers" id="lineNumbers"></div>
-          <div class="code-content" id="codeContent" onclick="codeClicked()">
-            <span style="color:var(--text3);font-style:italic">// O código gerado aparecerá aqui com syntax highlight completo...</span>
-          </div>
-          <div class="minimap" id="minimap"><canvas id="minimapCanvas"></canvas></div>
+        <!-- Editor area -->
+        <div class="edm">
+          <div class="lns" id="lns"></div>
+          <div class="cc" id="cc"><span style="color:var(--t3);font-style:italic">// Código aparecerá aqui com syntax highlight completo...</span></div>
+          <div class="mmap" id="mmap"><canvas id="mc"></canvas></div>
         </div>
 
-        <!-- AI Chat Bar -->
-        <div class="code-ai-bar">
+        <!-- AI bar -->
+        <div class="caibar">
           <i class="fas fa-robot" style="color:var(--accent);font-size:16px;flex-shrink:0"></i>
-          <input class="code-ai-input" id="codeAiInput" placeholder="Peça à IA: Ex: 'Crie uma API REST em Node.js com autenticação JWT'..." onkeydown="if(event.key==='Enter')generateCodeForCurrentLang()">
-          <button class="code-ai-send" id="codeAiBtn" onclick="generateCodeForCurrentLang()">
-            <i class="fas fa-paper-plane"></i> Gerar
-          </button>
+          <input class="cai-in" id="cain" placeholder="Peça à IA: 'API REST em Node.js com JWT', 'Script Python para análise de dados'..." onkeydown="if(event.key==='Enter')genCodeLang()">
+          <button class="cai-btn" id="caibtn" onclick="genCodeLang()"><i class="fas fa-paper-plane"></i> Gerar</button>
         </div>
 
-        <!-- Status Bar -->
-        <div class="status-bar">
-          <div class="status-left">
-            <div class="status-item"><i class="fas fa-code-branch"></i><span id="statusLang">HTML</span></div>
-            <div class="status-item"><i class="fas fa-lines-leaning"></i><span id="statusLines">0 linhas</span></div>
-            <div class="status-item"><i class="fas fa-robot"></i><span>Qwen-Coder via Pollinations</span></div>
+        <!-- Status bar -->
+        <div class="stbar">
+          <div class="stl">
+            <div class="sti"><i class="fas fa-code-branch"></i><span id="stlang">HTML</span></div>
+            <div class="sti"><i class="fas fa-lines-leaning"></i><span id="stlines">0 linhas</span></div>
+            <div class="sti"><i class="fas fa-robot"></i><span>Qwen-Coder</span></div>
           </div>
-          <div class="status-right">
-            <div class="status-item"><i class="fas fa-check-circle"></i><span>UTF-8</span></div>
-            <div class="status-item"><i class="fas fa-indent"></i><span>Espaços: 2</span></div>
-            <div class="status-item">Zedex</div>
+          <div class="str">
+            <div class="sti"><i class="fas fa-check-circle"></i><span>UTF-8</span></div>
+            <div class="sti"><i class="fas fa-indent"></i><span>Spaces: 2</span></div>
+            <div class="sti">Zedex</div>
           </div>
         </div>
       </div>
     </div>
 
-  </div>
-</div>
+  </div><!-- /cnt -->
+</div><!-- /ws -->
 
 <!-- FOOTER -->
-<footer class="footer">
+<footer class="ftr">
   <div>© 2025 <a href="https://zenia-projects.netlify.app" target="_blank">Zénia Projects</a> | <a href="https://ia-zenia.netlify.app" target="_blank">IA-Zénia</a> | <a href="https://instagram.com/inacio.u.daniel" target="_blank">@inacio.u.daniel</a></div>
-  <div class="footer-links">
+  <div class="flinks">
     <a href="https://zenia-projects.netlify.app" target="_blank">🌐 Zénia Projects</a>
     <a href="https://ia-zenia.netlify.app" target="_blank">🤖 IA-Zénia</a>
   </div>
 </footer>
 
-<!-- TOAST -->
-<div class="toast" id="toast"><i class="fas fa-circle-check" id="toastIcon"></i><span id="toastMsg"></span></div>
+<div class="toast" id="toast"><i class="fas fa-circle-check" id="tic"></i><span id="tmsg"></span></div>
 
 <script>
-/* ═══════════════════════════════════
-   ZEDEX CORE — by Zénia Projects
-═══════════════════════════════════ */
+/* ══════════════════════════════════
+   ZEDEX v3 CORE — by Zénia Projects
+   @inacio.u.daniel
+══════════════════════════════════ */
 
-// ─── CONFIG ───
-const API_KEY  = 'pk_7HHmBkBPEiNS5dyF';
-const API_URL  = 'https://gen.pollinations.ai/v1/chat/completions';
-const AI_MODEL = 'qwen-coder';
+const API_KEY = 'pk_7HHmBkBPEiNS5dyF';
+const API_URL = 'https://gen.pollinations.ai/v1/chat/completions';
+const MODEL   = 'qwen-coder';
 
-// ─── STATE ───
-let state = {
-  currentLang: 'html',
-  currentCode: '',
-  appHtml: '',
-  rawCode: '',
-  generating: false
+/* ── STATE ── */
+const S = {
+  lang: 'html', html: '', raw: '', busy: false,
+  hist: []  // conversation history for iterative chat
 };
 
-// ─── API ───
-async function callAPI(messages) {
-  const res = await fetch(API_URL, {
+/* ════════════════════════════
+   API CALL
+════════════════════════════ */
+async function api(msgs) {
+  const r = await fetch(API_URL, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: AI_MODEL, messages, temperature: 0.7, max_tokens: 16000 })
+    body: JSON.stringify({ model: MODEL, messages: msgs, temperature: 0.7, max_tokens: 16000 })
   });
-  if (!res.ok) {
-    const e = await res.text();
-    throw new Error(`(${res.status}) ${e}`);
-  }
-  const j = await res.json();
-  if (j.choices?.[0]?.message) return j.choices[0].message.content;
+  if (!r.ok) { const e = await r.text(); throw new Error(`(${r.status}) ${e}`); }
+  const j = await r.json();
+  if (j.choices?.[0]?.message?.content) return j.choices[0].message.content;
   if (j.content) return j.content;
-  if (typeof j === 'string') return j;
-  throw new Error('Resposta inesperada: ' + JSON.stringify(j));
+  throw new Error('Resposta inesperada da API');
 }
 
-// ─── GENERATE APP ───
-async function generateApp() {
-  const prompt = document.getElementById('promptInput').value.trim();
-  if (!prompt) { showToast('Descreva o app primeiro!','error'); return; }
-  if (state.generating) return;
-  state.generating = true;
+/* ════════════════════════════
+   GENERATE APP
+════════════════════════════ */
+async function genApp() {
+  const prompt = document.getElementById('pi').value.trim();
+  if (!prompt) { toast('Descreva o app primeiro!', 'err'); return; }
+  if (S.busy) return;
+  S.busy = true;
+  setBtn(true);
+  showTk();
 
-  setBtnLoading(true);
-  showThinking();
+  think('🔍 Analisando requisitos do projeto...', 'ana', 0);
+  think('🏗️ Planejando arquitetura e componentes...', 'plan', 450);
+  think('⚡ Qwen-Coder processando...', 'gen', 900);
+  think('🎨 Aplicando design moderno e responsivo...', 'gen', 1350);
+  think('🔧 Otimizando performance...', 'fin', 1800);
 
-  addThought('🔍 Analisando requisitos do projeto...','ana', 0);
-  addThought('🏗️ Planejando arquitetura e componentes...','plan', 500);
-  addThought('⚡ Qwen-Coder gerando código completo...','gen', 1000);
-  addThought('🎨 Aplicando design e estilos modernos...','gen', 1500);
-  addThought('🔧 Otimizando performance e responsividade...','fin', 2000);
+  const SYS = `Você é um especialista em desenvolvimento web full-stack de última geração.
+
+REGRAS ABSOLUTAS:
+- Retorne APENAS código HTML puro. ZERO markdown, ZERO explicações, ZERO blocos de código.
+- Todo CSS em <style> no <head>. Todo JS em <script> antes de </body>.
+- Design ULTRA moderno: gradientes, glassmorphism, animações CSS/JS, micro-interações.
+- 100% funcional e completo. SEMPRE comece com <!DOCTYPE html>.
+- Use Font Awesome CDN (https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css).
+- Use Google Fonts via CDN quando adequado.
+- Faça apps que IMPRESSIONEM visualmente e funcionalmente.
+- Inclua TODAS as funcionalidades pedidas sem truncar.`;
 
   try {
-    const sysPrompt = `Você é um especialista em desenvolvimento web full-stack. Crie aplicativos web completos, modernos e altamente funcionais.
+    // Reset history for new app
+    S.hist = [
+      { role: 'system', content: SYS },
+      { role: 'user', content: `Crie um aplicativo web completo para: "${prompt}"\n\nApenas código HTML. Nenhum texto extra.` }
+    ];
 
-REGRAS CRÍTICAS:
-- Retorne APENAS código HTML puro, sem markdown, sem explicações, sem \`\`\`
-- Todo CSS dentro de <style> no <head>
-- Todo JavaScript dentro de <script> antes de </body>
-- Design ultra-moderno, responsivo, com gradientes e animações
-- Código 100% funcional e completo
-- Inicie SEMPRE com <!DOCTYPE html>
-- Inclua todas as funcionalidades pedidas
-- Use emojis e ícones (Font Awesome CDN se necessário)
-- Faça apps que impressionem visualmente`;
+    const content = await api(S.hist);
+    let html = cleanCode(content);
 
-    const content = await callAPI([
-      { role: 'system', content: sysPrompt },
-      { role: 'user', content: `Crie um aplicativo web completo para: "${prompt}"\n\nLembre: apenas código HTML, sem qualquer texto extra.` }
-    ]);
+    // Save assistant response in history
+    S.hist.push({ role: 'assistant', content: html });
+    S.html = html; S.raw = html;
 
-    let html = content.trim().replace(/^```html\n?/i,'').replace(/^```\n?/,'').replace(/```$/,'').trim();
-    if (!html.toLowerCase().includes('<!doctype')) html = '<!DOCTYPE html>\n' + html;
-
-    state.appHtml = html;
-    state.rawCode = html;
-    state.currentCode = html;
-    state.currentLang = 'html';
-
-    addThought('✅ App gerado com sucesso!','fin', 500);
-    setTimeout(() => showCodeStream(html), 600);
+    think('✅ App gerado! Use o chat abaixo para ajustar ⬇️', 'fin', 300);
+    setTimeout(() => streamCode(html), 500);
 
     setTimeout(() => {
-      renderPreview(html);
-      updateCodeEditor(html, 'html');
-      document.getElementById('codeDot').style.display = 'inline-block';
-      hideThinking();
-      showToast('App gerado com sucesso! 🎉','success');
-    }, 2200);
+      renderPv(html);
+      updCode(html, 'html');
+      document.getElementById('cdot').style.display = 'inline-block';
+      hideTk();
+      toast('App gerado! Ajuste com o chat abaixo 🎉', 'ok');
+      // Start iterative chat
+      startChat(prompt);
+    }, 2300);
 
-  } catch(err) {
-    console.error(err);
-    addThought('❌ Erro: ' + (err.message || err), 'fin', 0);
-    showToast('Erro: ' + (err.message || 'Tente novamente'), 'error');
-    hideThinking();
+  } catch(e) {
+    think('❌ Erro: ' + e.message, 'fin', 0);
+    toast('Erro: ' + (e.message || 'Tente novamente'), 'err');
+    hideTk();
   } finally {
-    state.generating = false;
-    setBtnLoading(false);
+    S.busy = false;
+    setBtn(false);
   }
 }
 
-// ─── GENERATE CODE FOR LANG ───
-async function generateCodeForCurrentLang() {
-  const input = document.getElementById('codeAiInput').value.trim();
-  const prompt = input || document.getElementById('promptInput').value.trim();
-  if (!prompt) { showToast('Escreva o que deseja na barra de IA abaixo!','error'); return; }
+function cleanCode(c) {
+  let h = c.trim()
+    .replace(/^```html\s*/i, '').replace(/^```\s*/, '').replace(/```\s*$/, '').trim();
+  if (!h.toLowerCase().includes('<!doctype')) h = '<!DOCTYPE html>\n' + h;
+  return h;
+}
 
-  const btn = document.getElementById('codeAiBtn');
+/* ════════════════════════════
+   ITERATIVE AI CHAT
+════════════════════════════ */
+function startChat(prompt) {
+  const chat = document.getElementById('aichat');
+  document.getElementById('msgs').innerHTML = '';
+  chat.classList.add('show');
+
+  addMsg('ai',
+    `✅ App criado com base em: <strong>"${prompt.substring(0,60)}${prompt.length>60?'...':''}"</strong><br><br>` +
+    `Não está perfeito? Sou todo ouvidos! Me diz o que mudar — cores, textos, layout, botões, funcionalidades — qualquer coisa!<br><br>` +
+    `Quando estiver satisfeito clica em <strong>✅ Está Pronto!</strong>`,
+    false, true
+  );
+}
+
+async function sendChat() {
+  if (S.busy) return;
+  const inp = document.getElementById('chatinp');
+  const msg = inp.value.trim();
+  if (!msg) { toast('Escreva o que deseja ajustar!', 'err'); return; }
+  if (!S.html) { toast('Gere um app primeiro!', 'err'); return; }
+
+  inp.value = '';
+  addMsg('user', msg);
+  const thinking = addMsg('ai', 'Aplicando ajuste', false, false, true);
+  document.getElementById('csend').disabled = true;
+  S.busy = true;
+
+  try {
+    S.hist.push({
+      role: 'user',
+      content: `Pedido de ajuste: "${msg}"\n\nRetorne APENAS o HTML completo e atualizado. Zero texto extra, zero markdown.`
+    });
+
+    const content = await api(S.hist);
+    const html = cleanCode(content);
+
+    S.hist.push({ role: 'assistant', content: html });
+    S.html = html; S.raw = html;
+
+    // Update preview and code
+    renderPv(html);
+    updCode(html, 'html');
+    rebuildNcPanel(); // refresh no-code panel
+
+    // Update the thinking bubble
+    thinking.classList.remove('loading');
+    thinking.innerHTML = `✅ Feito! <em>"${msg.substring(0,50)}"</em> — Confira no preview. Precisa de mais alguma coisa?`;
+
+    toast('Ajuste aplicado! ✨', 'ok');
+
+  } catch(e) {
+    thinking.classList.remove('loading');
+    thinking.textContent = '❌ Erro ao aplicar: ' + (e.message || 'Tente novamente');
+    toast('Erro', 'err');
+  } finally {
+    S.busy = false;
+    document.getElementById('csend').disabled = false;
+    document.getElementById('chatinp').focus();
+  }
+}
+
+function addMsg(role, html, raw=false, isHtml=false, loading=false) {
+  const msgs = document.getElementById('msgs');
+  const d = document.createElement('div');
+  d.className = `msg ${role}${loading ? ' loading' : ''}`;
+  if (isHtml) d.innerHTML = html;
+  else d.textContent = html;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+  return d;
+}
+
+function doneApp() {
+  document.getElementById('aichat').classList.remove('show');
+  toast('🎉 App finalizado! Pode baixar quando quiser.', 'ok');
+}
+
+/* ════════════════════════════
+   NO-CODE VISUAL EDITOR
+════════════════════════════ */
+let ncOpen = false;
+
+function toggleNc() {
+  ncOpen = !ncOpen;
+  document.getElementById('ncp').classList.toggle('open', ncOpen);
+  document.getElementById('ncbtn').classList.toggle('on', ncOpen);
+  if (ncOpen) rebuildNcPanel();
+}
+
+function rebuildNcPanel() {
+  if (!S.html) return;
+  const body = document.getElementById('ncbody');
+  body.innerHTML = `
+
+    <!-- CORES -->
+    <div class="ncg">
+      <div class="ncg-title"><i class="fas fa-palette"></i> Cores & Fontes</div>
+      <div class="ncprop">
+        <label>Cor Principal (ex: botões, links)</label>
+        <input type="color" id="nc_c1" value="#7c6af7">
+      </div>
+      <div class="ncprop">
+        <label>Cor Secundária (destaques)</label>
+        <input type="color" id="nc_c2" value="#f06292">
+      </div>
+      <div class="ncprop">
+        <label>Cor de Fundo</label>
+        <input type="color" id="nc_bg" value="#0d0d0f">
+      </div>
+      <div class="ncprop">
+        <label>Cor do Texto</label>
+        <input type="color" id="nc_tc" value="#e8e8ff">
+      </div>
+      <div class="ncprop">
+        <label>Família de Fonte</label>
+        <select id="nc_font">
+          <option value="'Segoe UI', sans-serif">Segoe UI</option>
+          <option value="'Inter', sans-serif">Inter</option>
+          <option value="'Roboto', sans-serif">Roboto</option>
+          <option value="'Poppins', sans-serif">Poppins</option>
+          <option value="'Montserrat', sans-serif">Montserrat</option>
+          <option value="'Open Sans', sans-serif">Open Sans</option>
+          <option value="'Raleway', sans-serif">Raleway</option>
+          <option value="'Nunito', sans-serif">Nunito</option>
+        </select>
+      </div>
+      <div class="ncprop">
+        <label>Tamanho base da fonte</label>
+        <select id="nc_fsize">
+          <option value="14px">Pequena — 14px</option>
+          <option value="16px" selected>Normal — 16px</option>
+          <option value="18px">Grande — 18px</option>
+          <option value="20px">Extra grande — 20px</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- TEXTOS -->
+    <div class="ncg">
+      <div class="ncg-title"><i class="fas fa-text-height"></i> Textos Principais</div>
+      <div class="ncprop">
+        <label>Título / Nome do App</label>
+        <input type="text" id="nc_title" placeholder="Ex: Meu App Incrível">
+      </div>
+      <div class="ncprop">
+        <label>Subtítulo / Slogan</label>
+        <input type="text" id="nc_sub" placeholder="Ex: A solução mais completa">
+      </div>
+      <div class="ncprop">
+        <label>Texto do Botão Principal</label>
+        <input type="text" id="nc_btnlbl" placeholder="Ex: Começar Agora">
+      </div>
+      <div class="ncprop">
+        <label>Texto do Rodapé</label>
+        <input type="text" id="nc_footer" placeholder="Ex: © 2025 Minha Empresa">
+      </div>
+    </div>
+
+    <!-- PEÇA À IA -->
+    <div class="ncg">
+      <div class="ncg-title"><i class="fas fa-wand-magic-sparkles"></i> Pedir à IA</div>
+      <div class="ncprop">
+        <label>Descreva qualquer alteração</label>
+        <textarea id="nc_ai" placeholder='Exemplos:
+• "Adiciona um formulário de contacto"
+• "Remove a seção de preços"  
+• "Adiciona um botão flutuante de WhatsApp"
+• "Muda o layout para 3 colunas"
+• "Adiciona contador regressivo"
+• "Muda as animações para mais suaves"'></textarea>
+      </div>
+      <button class="nc-apply" id="ncapplybtn" onclick="ncApplyAi()">
+        <i class="fas fa-wand-magic-sparkles"></i> Aplicar com IA
+      </button>
+    </div>
+
+    <!-- AÇÕES RÁPIDAS -->
+    <div class="ncg">
+      <div class="ncg-title"><i class="fas fa-bolt"></i> Ações Rápidas com 1 Clique</div>
+      <button class="qa-btn" onclick="quickAi('Adiciona botão de toggle dark/light mode no canto superior direito')">
+        <i class="fas fa-moon"></i> Adicionar Dark Mode
+      </button>
+      <button class="qa-btn" onclick="quickAi('Torna o app 100% responsivo para mobile com menu hambúrguer se necessário')">
+        <i class="fas fa-mobile-alt"></i> Melhorar Mobile
+      </button>
+      <button class="qa-btn" onclick="quickAi('Adiciona animações suaves de entrada (fade-in, slide-up) nos elementos principais')">
+        <i class="fas fa-magic"></i> Adicionar Animações
+      </button>
+      <button class="qa-btn" onclick="quickAi('Aplica efeito glassmorphism moderno nos cards, painéis e componentes principais')">
+        <i class="fas fa-circle-half-stroke"></i> Glassmorphism
+      </button>
+      <button class="qa-btn" onclick="quickAi('Adiciona um botão flutuante de WhatsApp no canto inferior direito')">
+        <i class="fab fa-whatsapp"></i> Botão WhatsApp
+      </button>
+      <button class="qa-btn" onclick="quickAi('Adiciona rodapé profissional com links, redes sociais e copyright')">
+        <i class="fas fa-shoe-prints"></i> Adicionar Footer
+      </button>
+      <button class="qa-btn" onclick="quickAi('Melhora as cores e o contraste para ficar mais vibrante e moderno')">
+        <i class="fas fa-droplet"></i> Melhorar Cores
+      </button>
+      <button class="qa-btn" onclick="quickAi('Adiciona micro-interações nos botões e elementos clicáveis (hover, click effects)')">
+        <i class="fas fa-hand-pointer"></i> Micro-interações
+      </button>
+      <button class="qa-btn" onclick="quickAi('Adiciona loading skeleton nos cards e conteúdos para melhor UX')">
+        <i class="fas fa-spinner"></i> Loading States
+      </button>
+      <button class="qa-btn" onclick="quickAi('Adiciona scroll suave e botão de volta ao topo')">
+        <i class="fas fa-arrow-up"></i> Scroll ao Topo
+      </button>
+    </div>
+
+    <!-- ESTRUTURA -->
+    <div class="ncg">
+      <div class="ncg-title"><i class="fas fa-layer-group"></i> Adicionar Secções</div>
+      <button class="qa-btn" onclick="quickAi('Adiciona uma seção hero moderna com imagem de fundo, título grande e CTA button')">
+        <i class="fas fa-star"></i> Seção Hero
+      </button>
+      <button class="qa-btn" onclick="quickAi('Adiciona seção de depoimentos/testimonials com cards de clientes e estrelas de avaliação')">
+        <i class="fas fa-quote-right"></i> Depoimentos
+      </button>
+      <button class="qa-btn" onclick="quickAi('Adiciona seção de FAQ acordeão com as perguntas mais comuns')">
+        <i class="fas fa-question-circle"></i> FAQ Acordeão
+      </button>
+      <button class="qa-btn" onclick="quickAi('Adiciona galeria de imagens com grid responsivo e lightbox ao clicar')">
+        <i class="fas fa-images"></i> Galeria
+      </button>
+      <button class="qa-btn" onclick="quickAi('Adiciona barra de navegação sticky com logo, links e botão CTA')">
+        <i class="fas fa-bars"></i> Navbar Sticky
+      </button>
+    </div>
+  `;
+}
+
+async function ncApplyAi() {
+  const req = document.getElementById('nc_ai')?.value.trim();
+  if (!req) { toast('Descreva a alteração!', 'err'); return; }
+  if (!S.html) { toast('Gere um app primeiro!', 'err'); return; }
+  await quickAi(req);
+  document.getElementById('nc_ai').value = '';
+}
+
+async function quickAi(req) {
+  if (S.busy) { toast('Aguarde a operação atual...', 'err'); return; }
+  if (!S.html) { toast('Gere um app primeiro!', 'err'); return; }
+
+  // Show chat and add messages
+  document.getElementById('aichat').classList.add('show');
+  addMsg('user', req);
+  const thinking = addMsg('ai', 'Aplicando', false, false, true);
+  S.busy = true;
+
+  // Disable no-code apply button
+  const applybtn = document.getElementById('ncapplybtn');
+  if (applybtn) { applybtn.disabled = true; applybtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> A processar...'; }
+
+  try {
+    S.hist.push({
+      role: 'user',
+      content: `${req}\n\nRetorne APENAS o HTML completo. Zero texto extra.`
+    });
+
+    const content = await api(S.hist);
+    const html = cleanCode(content);
+
+    S.hist.push({ role: 'assistant', content: html });
+    S.html = html; S.raw = html;
+
+    renderPv(html);
+    updCode(html, 'html');
+
+    thinking.classList.remove('loading');
+    thinking.textContent = '✅ Pronto! ' + req.substring(0, 60);
+    toast('Aplicado! ✨', 'ok');
+
+  } catch(e) {
+    thinking.classList.remove('loading');
+    thinking.textContent = '❌ Erro: ' + e.message;
+    toast('Erro', 'err');
+  } finally {
+    S.busy = false;
+    if (applybtn) { applybtn.disabled = false; applybtn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> Aplicar com IA'; }
+  }
+}
+
+/* ════════════════════════════
+   CODE GENERATION
+════════════════════════════ */
+async function genCodeLang() {
+  const inp = document.getElementById('cain').value.trim() || document.getElementById('pi').value.trim();
+  if (!inp) { toast('Escreva o que deseja!', 'err'); return; }
+  const btn = document.getElementById('caibtn');
   btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-  const langNames = { html:'HTML',css:'CSS',js:'JavaScript',ts:'TypeScript',python:'Python',java:'Java',cpp:'C++',php:'PHP',rb:'Ruby',go:'Go',rs:'Rust',custom:'código' };
-  const lang = state.currentLang === 'custom' ? (prompt.split(' ')[0] || 'código') : (langNames[state.currentLang] || state.currentLang);
-
+  const nm = {html:'HTML',css:'CSS',js:'JavaScript',ts:'TypeScript',python:'Python',java:'Java',cpp:'C++',php:'PHP',rb:'Ruby',go:'Go',rs:'Rust',custom:'código'};
+  const l = S.lang === 'custom' ? (inp.split(' ')[0]||'código') : (nm[S.lang]||S.lang);
   try {
-    const content = await callAPI([
-      { role:'system', content:`Você é um especialista em ${lang}. Retorne APENAS código ${lang} puro, sem markdown, sem explicações. Código completo, funcional e com comentários úteis.` },
-      { role:'user', content:`Crie código ${lang} para: "${prompt}"` }
+    const c = await api([
+      { role:'system', content:`Expert em ${l}. Retorne APENAS código ${l} limpo, sem markdown, sem explicações. Completo, funcional e bem comentado.` },
+      { role:'user', content:`Crie código ${l} para: "${inp}"` }
     ]);
-
-    let code = content.trim().replace(/^```[\w]*\n?/,'').replace(/```$/,'').trim();
-    state.currentCode = code;
-    state.rawCode = code;
-    updateCodeEditor(code, state.currentLang);
-    showToast(`Código ${lang} gerado! 🚀`,'success');
-  } catch(err) {
-    showToast('Erro: ' + (err.message || 'Tente novamente'),'error');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Gerar';
-  }
+    const code = c.trim().replace(/^```[\w]*\n?/,'').replace(/```$/,'').trim();
+    S.raw = code;
+    updCode(code, S.lang);
+    toast(`Código ${l} gerado! 🚀`, 'ok');
+  } catch(e) { toast('Erro: ' + e.message, 'err'); }
+  finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Gerar'; }
 }
 
-// ─── SYNTAX HIGHLIGHT ───
-function highlight(code, lang) {
-  let esc = code
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;');
+/* ════════════════════════════
+   SYNTAX HIGHLIGHT
+════════════════════════════ */
+function hl(code, lang) {
+  let e = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-  if (lang === 'html') {
-    return esc
-      .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="s-comment">$1</span>')
-      .replace(/(&lt;\/?)([\w-]+)/g, '$1<span class="s-tag">$2</span>')
-      .replace(/([\w:-]+)(=)(&quot;[^&]*&quot;|'[^']*')/g, '<span class="s-attr">$1</span><span class="s-operator">$2</span><span class="s-value">$3</span>')
-      .replace(/(&lt;!DOCTYPE[^&]*&gt;)/gi, '<span class="s-comment">$1</span>');
-  }
-  if (lang === 'css') {
-    return esc
-      .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="s-comment">$1</span>')
-      .replace(/([.#:[\w][^{]*?)(\{)/g, '<span class="s-sel">$1</span>$2')
-      .replace(/([\w-]+)(\s*:)/g, '<span class="s-prop">$1</span>$2')
-      .replace(/:\s*(#[0-9a-fA-F]{3,8}|[\d.]+(?:px|em|rem|vh|vw|%))/g, ': <span class="s-value">$1</span>');
-  }
-  const jsLike = (esc) => esc
-    .replace(/(\/\/[^\n]*)/g, '<span class="s-comment">$1</span>')
-    .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="s-comment">$1</span>')
-    .replace(/\b(function|const|let|var|if|else|for|while|return|class|import|export|async|await|try|catch|throw|new|this|typeof|instanceof|switch|case|break|continue|default|extends|super|yield|static|get|set|from|of|in|do)\b/g, '<span class="s-keyword">$1</span>')
-    .replace(/\b(true|false|null|undefined|NaN|Infinity)\b/g,'<span class="s-const">$1</span>')
-    .replace(/(&quot;(?:[^&]|&(?!quot;))*&quot;|&#x27;(?:[^&]|&(?!#x27;))*&#x27;|`[^`]*`)/g, '<span class="s-string">$1</span>')
-    .replace(/\b(\d+\.?\d*)\b/g, '<span class="s-number">$1</span>')
-    .replace(/\b([A-Z][a-zA-Z0-9_]*)\b/g, '<span class="s-class">$1</span>')
-    .replace(/\b([a-z_$][a-z0-9_$]*)(?=\s*\()/g, '<span class="s-function">$1</span>');
+  if (lang === 'html') return e
+    .replace(/(&lt;!--[\s\S]*?--&gt;)/g,'<span class="sc">$1</span>')
+    .replace(/(&lt;!DOCTYPE[^&]*&gt;)/gi,'<span class="sc">$1</span>')
+    .replace(/(&lt;\/?)([\w-]+)/g,'$1<span class="stg">$2</span>')
+    .replace(/([\w:-]+)(=)(&quot;[^"]*&quot;)/g,'<span class="sa">$1</span><span class="so">$2</span><span class="sv">$3</span>');
 
-  if (['js','ts'].includes(lang)) return jsLike(esc);
+  if (lang === 'css') return e
+    .replace(/(\/\*[\s\S]*?\*\/)/g,'<span class="sc">$1</span>')
+    .replace(/([.#:[\w][^{,]*?)(\{)/g,'<span class="sv">$1</span>$2')
+    .replace(/([\w-]+)(\s*:)(?![^{]*\{)/g,'<span class="sp">$1</span>$2')
+    .replace(/:\s*(#[0-9a-fA-F]{3,8}|rgba?\([^)]+\)|[\d.]+(?:px|em|rem|vh|vw|%|s|ms))/g,': <span class="sn">$1</span>');
 
-  if (lang === 'python') return esc
-    .replace(/(#[^\n]*)/g,'<span class="s-comment">$1</span>')
-    .replace(/("""[\s\S]*?"""|\'\'\'[\s\S]*?\'\'\')/g,'<span class="s-string">$1</span>')
-    .replace(/\b(def|class|if|elif|else|for|while|return|import|from|try|except|with|as|lambda|yield|async|await|pass|raise|global|nonlocal|del|assert|in|is|not|and|or)\b/g,'<span class="s-keyword">$1</span>')
-    .replace(/\b(True|False|None)\b/g,'<span class="s-const">$1</span>')
-    .replace(/(&quot;[^&]*&quot;|&#x27;[^&#]*&#x27;)/g,'<span class="s-string">$1</span>')
-    .replace(/\b(\d+\.?\d*)\b/g,'<span class="s-number">$1</span>')
-    .replace(/\b([A-Z][a-zA-Z0-9_]*)\b/g,'<span class="s-class">$1</span>')
-    .replace(/\b([a-z_][a-z0-9_]*)(?=\s*\()/g,'<span class="s-function">$1</span>');
+  const jsLike = s => s
+    .replace(/(\/\/[^\n]*)/g,'<span class="sc">$1</span>')
+    .replace(/(\/\*[\s\S]*?\*\/)/g,'<span class="sc">$1</span>')
+    .replace(/\b(function|const|let|var|if|else|for|while|return|class|import|export|async|await|try|catch|throw|new|this|typeof|instanceof|switch|case|break|continue|default|extends|super|yield|static|get|set|from|of|in|do|delete|void|debugger)\b/g,'<span class="sk">$1</span>')
+    .replace(/\b(true|false|null|undefined|NaN|Infinity)\b/g,'<span class="scl">$1</span>')
+    .replace(/(&quot;(?:[^&]|&(?!quot;))*&quot;|&#x27;[^&#]*&#x27;|`[^`]*`)/g,'<span class="ss">$1</span>')
+    .replace(/\b(\d+\.?\d*[eE]?[+-]?\d*)\b/g,'<span class="sn">$1</span>')
+    .replace(/\b([A-Z][a-zA-Z0-9_]*)\b/g,'<span class="scl">$1</span>')
+    .replace(/\b([a-z_$][a-z0-9_$]*)(?=\s*\()/g,'<span class="sf">$1</span>');
 
-  if (lang === 'java' || lang === 'cpp') return esc
-    .replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/)/g,'<span class="s-comment">$1</span>')
-    .replace(/\b(public|private|protected|static|final|class|interface|extends|implements|import|package|void|int|String|boolean|float|double|char|long|byte|short|new|return|if|else|for|while|try|catch|throw|throws|this|super|abstract|enum|synchronized|volatile)\b/g,'<span class="s-keyword">$1</span>')
-    .replace(/\b(true|false|null)\b/g,'<span class="s-const">$1</span>')
-    .replace(/(&quot;[^&]*&quot;)/g,'<span class="s-string">$1</span>')
-    .replace(/\b(\d+\.?\d*[fFdDlL]?)\b/g,'<span class="s-number">$1</span>')
-    .replace(/\b([A-Z][a-zA-Z0-9_]*)\b/g,'<span class="s-class">$1</span>')
-    .replace(/\b([a-z_][a-z0-9_]*)(?=\s*\()/g,'<span class="s-function">$1</span>');
+  if (['js','ts'].includes(lang)) return jsLike(e);
 
-  if (lang === 'php') return esc
-    .replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/#)/g,'<span class="s-comment">$1</span>')
-    .replace(/\b(function|class|if|else|foreach|for|while|return|echo|print|include|require|extends|implements|public|private|protected|static|new|namespace|use|try|catch|throw)\b/g,'<span class="s-keyword">$1</span>')
-    .replace(/(\$[a-zA-Z_][a-zA-Z0-9_]*)/g,'<span class="s-var">$1</span>')
-    .replace(/(&quot;[^&]*&quot;|&#x27;[^&#]*&#x27;)/g,'<span class="s-string">$1</span>')
-    .replace(/\b(\d+)\b/g,'<span class="s-number">$1</span>');
+  if (lang === 'python') return e
+    .replace(/(#[^\n]*)/g,'<span class="sc">$1</span>')
+    .replace(/("""[\s\S]*?"""|\'\'\'[\s\S]*?\'\'\')/g,'<span class="ss">$1</span>')
+    .replace(/\b(def|class|if|elif|else|for|while|return|import|from|try|except|finally|with|as|lambda|yield|async|await|pass|raise|global|nonlocal|del|assert|in|is|not|and|or)\b/g,'<span class="sk">$1</span>')
+    .replace(/\b(True|False|None|self|cls)\b/g,'<span class="scl">$1</span>')
+    .replace(/(&quot;[^&]*&quot;|&#x27;[^&#]*&#x27;)/g,'<span class="ss">$1</span>')
+    .replace(/\b(\d+\.?\d*)\b/g,'<span class="sn">$1</span>')
+    .replace(/\b([a-z_][a-z0-9_]*)(?=\s*\()/g,'<span class="sf">$1</span>');
 
-  if (['rb','go','rs'].includes(lang)) return jsLike(esc);
-  return esc;
+  if (['java','cpp'].includes(lang)) return e
+    .replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/)/g,'<span class="sc">$1</span>')
+    .replace(/\b(public|private|protected|static|final|abstract|class|interface|enum|extends|implements|import|package|void|int|long|double|float|boolean|char|byte|short|String|return|if|else|for|while|do|try|catch|throw|throws|new|this|super|synchronized|volatile|transient|native)\b/g,'<span class="sk">$1</span>')
+    .replace(/\b(true|false|null)\b/g,'<span class="scl">$1</span>')
+    .replace(/(&quot;[^&]*&quot;|&#x27;.&#x27;)/g,'<span class="ss">$1</span>')
+    .replace(/\b(\d+\.?\d*[fFdDlL]?)\b/g,'<span class="sn">$1</span>')
+    .replace(/\b([A-Z][a-zA-Z0-9_]*)\b/g,'<span class="scl">$1</span>')
+    .replace(/\b([a-z_][a-z0-9_]*)(?=\s*\()/g,'<span class="sf">$1</span>');
+
+  if (lang === 'php') return e
+    .replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/|#[^\n]*)/g,'<span class="sc">$1</span>')
+    .replace(/\b(function|class|if|else|elseif|foreach|for|while|return|echo|print|include|require|extends|implements|public|private|protected|static|new|namespace|use|try|catch|throw|array|match)\b/g,'<span class="sk">$1</span>')
+    .replace(/(\$[a-zA-Z_][a-zA-Z0-9_]*)/g,'<span class="svr">$1</span>')
+    .replace(/(&quot;[^&]*&quot;|&#x27;[^&#]*&#x27;)/g,'<span class="ss">$1</span>')
+    .replace(/\b(\d+)\b/g,'<span class="sn">$1</span>');
+
+  if (['rb','go','rs'].includes(lang)) return jsLike(e);
+  return e;
 }
 
-// ─── UPDATE CODE EDITOR ───
-function updateCodeEditor(code, lang) {
-  state.rawCode = code;
-  state.currentCode = code;
-
-  const lines = code.split('\n');
-  // Line numbers
-  const ln = document.getElementById('lineNumbers');
-  ln.innerHTML = lines.map((_, i) => `<div class="line-num-item">${i+1}</div>`).join('');
-  // Highlighted code
-  document.getElementById('codeContent').innerHTML = highlight(code, lang);
-  // Status
-  document.getElementById('statusLines').textContent = lines.length + ' linhas';
-  document.getElementById('statusLang').textContent = lang.toUpperCase();
-  // File tabs
-  buildCodeTabs(lang);
-  // Minimap
-  drawMinimap(code);
-}
-
-// ─── CODE TABS ───
-const langMeta = {
-  html:   { icon:'fab fa-html5',   ext:'index.html',   cls:'ext-html' },
-  css:    { icon:'fab fa-css3-alt', ext:'style.css',    cls:'ext-css'  },
-  js:     { icon:'fab fa-js-square',ext:'script.js',    cls:'ext-js'   },
-  ts:     { icon:'fas fa-code',     ext:'index.ts',     cls:'ext-ts'   },
-  python: { icon:'fab fa-python',   ext:'main.py',      cls:'ext-py'   },
-  java:   { icon:'fab fa-java',     ext:'Main.java',    cls:'ext-java' },
-  cpp:    { icon:'fas fa-c',        ext:'main.cpp',     cls:'ext-cpp'  },
-  php:    { icon:'fab fa-php',      ext:'index.php',    cls:'ext-php'  },
-  rb:     { icon:'fas fa-gem',      ext:'app.rb',       cls:'ext-rb'   },
-  go:     { icon:'fas fa-code',     ext:'main.go',      cls:'ext-go'   },
-  rs:     { icon:'fas fa-code',     ext:'main.rs',      cls:'ext-rs'   },
-  custom: { icon:'fas fa-file-code',ext:'arquivo',      cls:''         }
+/* ════════════════════════════
+   CODE EDITOR
+════════════════════════════ */
+const LM = {
+  html:{ic:'fab fa-html5',ext:'index.html',c:'ehtml'},css:{ic:'fab fa-css3-alt',ext:'style.css',c:'ecss'},
+  js:{ic:'fab fa-js-square',ext:'script.js',c:'ejs'},ts:{ic:'fas fa-code',ext:'index.ts',c:'ets'},
+  python:{ic:'fab fa-python',ext:'main.py',c:'epy'},java:{ic:'fab fa-java',ext:'Main.java',c:'ejv'},
+  cpp:{ic:'fas fa-c',ext:'main.cpp',c:'ecpp'},php:{ic:'fab fa-php',ext:'index.php',c:'ephp'},
+  rb:{ic:'fas fa-gem',ext:'app.rb',c:'erb'},go:{ic:'fas fa-code',ext:'main.go',c:'ego'},
+  rs:{ic:'fas fa-code',ext:'main.rs',c:'ers'},custom:{ic:'fas fa-file-code',ext:'arquivo.txt',c:''}
 };
-function buildCodeTabs(active) {
-  const m = langMeta[active] || langMeta.custom;
-  document.getElementById('codeTabs').innerHTML = `
-    <button class="code-file-tab active">
-      <i class="tab-icon ${m.icon} ${m.cls}"></i>
-      <span>${m.ext}</span>
-    </button>`;
+
+function updCode(code, lang) {
+  S.raw = code;
+  const lines = code.split('\n');
+  document.getElementById('lns').innerHTML = lines.map((_,i) => `<div class="ln">${i+1}</div>`).join('');
+  document.getElementById('cc').innerHTML = hl(code, lang);
+  document.getElementById('stlines').textContent = lines.length + ' linhas';
+  document.getElementById('stlang').textContent = lang.toUpperCase();
+  buildCdTabs(lang);
+  drawMmap(code);
 }
 
-// ─── SHOW HTML CODE ───
-function showHtmlCode() {
-  if (state.appHtml) updateCodeEditor(state.appHtml, 'html');
+function buildCdTabs(l) {
+  const m = LM[l] || LM.custom;
+  document.getElementById('cdtabs').innerHTML =
+    `<button class="cdtab on"><i class="${m.ic} ${m.c}" style="font-size:13px"></i><span>${m.ext}</span></button>`;
 }
 
-// ─── SELECT LANG ───
-function selectLang(lang) {
-  state.currentLang = lang;
-  document.querySelectorAll('.lang-pill').forEach(p => p.classList.remove('active'));
-  document.querySelector(`[data-lang="${lang}"]`)?.classList.add('active');
+function showHtml() { if (S.html) updCode(S.html, 'html'); }
 
-  if (lang === 'custom') {
-    document.getElementById('codeAiInput').placeholder = 'Diga a linguagem e o que criar. Ex: "Rust: servidor HTTP básico"';
-    document.getElementById('codeAiInput').focus();
-    return;
+function selLang(l) {
+  S.lang = l;
+  document.querySelectorAll('.lp').forEach(p => p.classList.remove('on'));
+  document.querySelector(`[data-l="${l}"]`)?.classList.add('on');
+  if (l === 'custom') {
+    document.getElementById('cain').placeholder = 'Ex: "Rust: servidor HTTP", "Bash: script de backup"...';
+    document.getElementById('cain').focus(); return;
   }
-
-  // If we have app html, extract
-  if (state.appHtml) {
-    if (lang === 'html') { updateCodeEditor(state.appHtml, 'html'); return; }
-    if (lang === 'css') {
-      const m = state.appHtml.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
-      if (m) { updateCodeEditor(m[1].trim(), 'css'); return; }
-    }
-    if (lang === 'js') {
-      const m = state.appHtml.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
-      if (m) { updateCodeEditor(m[1].trim(), 'js'); return; }
-    }
+  if (S.html) {
+    if (l === 'html') { updCode(S.html, 'html'); return; }
+    if (l === 'css') { const m = S.html.match(/<style[^>]*>([\s\S]*?)<\/style>/i); if (m) { updCode(m[1].trim(), 'css'); return; } }
+    if (l === 'js')  { const m = S.html.match(/<script[^>]*>([\s\S]*?)<\/script>/i); if (m) { updCode(m[1].trim(), 'js'); return; } }
   }
-
-  // Otherwise prompt for generation
-  const langNames = { css:'CSS',js:'JavaScript',ts:'TypeScript',python:'Python',java:'Java',cpp:'C++',php:'PHP',rb:'Ruby',go:'Go',rs:'Rust' };
-  document.getElementById('codeAiInput').placeholder = `Descreva o que criar em ${langNames[lang] || lang}...`;
-  document.getElementById('codeAiInput').focus();
-  updateCodeEditor(`// Peça à IA para gerar código ${langNames[lang] || lang} na barra abaixo...`, lang);
-  document.getElementById('statusLang').textContent = lang.toUpperCase();
+  const nm = {css:'CSS',js:'JavaScript',ts:'TypeScript',python:'Python',java:'Java',cpp:'C++',php:'PHP',rb:'Ruby',go:'Go',rs:'Rust'};
+  document.getElementById('cain').placeholder = `Descreva o que criar em ${nm[l]||l}...`;
+  document.getElementById('cain').focus();
+  updCode(`// Peça à IA para gerar código ${nm[l]||l} na barra abaixo...`, l);
 }
 
-// ─── MINIMAP ───
-function drawMinimap(code) {
-  const canvas = document.getElementById('minimapCanvas');
-  const container = document.getElementById('minimap');
-  const W = container.offsetWidth;
-  const lines = code.split('\n').slice(0, 200);
-  const H = Math.min(lines.length * 3, container.offsetHeight);
-  canvas.width = W; canvas.height = H || 300;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,W,H);
-  lines.forEach((line,i) => {
-    const brightness = Math.min(line.length / 80, 1);
-    ctx.fillStyle = `rgba(124,106,247,${brightness * 0.5})`;
-    ctx.fillRect(0, i*3, W * brightness, 2);
+/* ── MINIMAP ── */
+function drawMmap(code) {
+  const cv = document.getElementById('mc'), c = document.getElementById('mmap');
+  const W = c.offsetWidth, lines = code.split('\n').slice(0, 200);
+  const H = Math.min(lines.length * 3, c.offsetHeight) || 300;
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d'); ctx.clearRect(0, 0, W, H);
+  lines.forEach((l, i) => {
+    const b = Math.min(l.length / 80, 1);
+    ctx.fillStyle = `rgba(124,106,247,${b * 0.5})`;
+    ctx.fillRect(0, i * 3, W * b, 2);
   });
 }
 
-// ─── THINKING PANEL ───
-function showThinking() {
-  const p = document.getElementById('thinkingPanel');
-  p.innerHTML = '';
-  p.classList.add('show');
-}
-function hideThinking() {
+/* ── THINKING ── */
+function showTk() { const p = document.getElementById('tkp'); p.innerHTML = ''; p.classList.add('show'); }
+function hideTk() { setTimeout(() => document.getElementById('tkp').classList.remove('show'), 2800); }
+function think(txt, t='gen', d=0) {
   setTimeout(() => {
-    document.getElementById('thinkingPanel').classList.remove('show');
-  }, 2500);
+    const p = document.getElementById('tkp');
+    const r = document.createElement('div'); r.className = `trow ${t}`;
+    r.innerHTML = `<span class="tt">${txt}</span>`;
+    p.appendChild(r); p.scrollTop = p.scrollHeight;
+  }, d);
 }
-function addThought(text, type='gen', delay=0) {
-  setTimeout(() => {
-    const p = document.getElementById('thinkingPanel');
-    const row = document.createElement('div');
-    row.className = `think-row ${type}`;
-    row.innerHTML = `<span class="think-text">${text}</span>`;
-    p.appendChild(row);
-    p.scrollTop = p.scrollHeight;
-  }, delay);
-}
-function showCodeStream(code) {
-  const p = document.getElementById('thinkingPanel');
-  const wrap = document.createElement('div');
-  wrap.className = 'code-stream-mini';
-  p.appendChild(wrap);
-  const lines = code.split('\n').filter(l => l.trim()).slice(0, 18);
-  lines.forEach((line, i) => {
+function streamCode(code) {
+  const p = document.getElementById('tkp');
+  const w = document.createElement('div'); w.className = 'csm'; p.appendChild(w);
+  code.split('\n').filter(l => l.trim()).slice(0, 16).forEach((l, i) => {
     setTimeout(() => {
-      const d = document.createElement('div');
-      d.className = 'stream-line';
-      d.textContent = line.substring(0, 70) + (line.length > 70 ? '…' : '');
-      wrap.appendChild(d);
-      wrap.scrollTop = wrap.scrollHeight;
-    }, i * 80);
+      const d = document.createElement('div'); d.className = 'sl';
+      d.textContent = l.substring(0, 68) + (l.length > 68 ? '…' : '');
+      w.appendChild(d); w.scrollTop = w.scrollHeight;
+    }, i * 75);
   });
 }
 
-// ─── RENDER PREVIEW ───
-function renderPreview(html) {
-  const frame = document.getElementById('previewFrame');
-  document.getElementById('previewEmpty').style.display = 'none';
-  frame.style.display = 'block';
-  const blob = new Blob([html], { type: 'text/html' });
-  frame.src = URL.createObjectURL(blob);
+/* ── PREVIEW ── */
+function renderPv(html) {
+  const f = document.getElementById('pvf');
+  document.getElementById('pve').style.display = 'none';
+  f.style.display = 'block';
+  f.src = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
 }
-function refreshPreview() {
-  if (state.appHtml) renderPreview(state.appHtml);
-  else showToast('Gere um app primeiro!','error');
+function refreshPv() { if (S.html) renderPv(S.html); else toast('Gere um app primeiro!', 'err'); }
+function openFs() {
+  if (!S.html) { toast('Gere um app primeiro!', 'err'); return; }
+  const w = window.open(''); w.document.write(S.html); w.document.close();
 }
-function openFullscreen() {
-  if (!state.appHtml) { showToast('Gere um app primeiro!','error'); return; }
-  const w = window.open('');
-  w.document.write(state.appHtml); w.document.close();
-}
-function downloadApp() {
-  if (!state.appHtml) { showToast('Gere um app primeiro!','error'); return; }
-  download('zedex-app.html', state.appHtml, 'text/html');
-  showToast('App baixado!','success');
+function dlApp() {
+  if (!S.html) { toast('Gere um app primeiro!', 'err'); return; }
+  dl('zedex-app.html', S.html, 'text/html'); toast('App baixado! 📥', 'ok');
 }
 
-// ─── COPY / DOWNLOAD CODE ───
-function copyCode() {
-  if (!state.rawCode) { showToast('Nenhum código disponível!','error'); return; }
-  navigator.clipboard.writeText(state.rawCode).then(() => showToast('Código copiado!','success'));
+/* ── COPY / DL CODE ── */
+function cpCode() {
+  if (!S.raw) { toast('Sem código!', 'err'); return; }
+  navigator.clipboard.writeText(S.raw).then(() => toast('Copiado! 📋', 'ok'));
 }
-function downloadCode() {
-  if (!state.rawCode) { showToast('Nenhum código disponível!','error'); return; }
-  const m = langMeta[state.currentLang] || langMeta.custom;
-  download(m.ext, state.rawCode, 'text/plain');
-  showToast('Arquivo baixado!','success');
+function dlCode() {
+  if (!S.raw) { toast('Sem código!', 'err'); return; }
+  const m = LM[S.lang] || LM.custom;
+  dl(m.ext, S.raw, 'text/plain'); toast('Baixado! 📥', 'ok');
 }
-function download(name, content, type) {
+function dl(name, content, type) {
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([content],{type}));
+  a.href = URL.createObjectURL(new Blob([content], { type }));
   a.download = name; a.click();
 }
 
-// ─── UI HELPERS ───
-function setPrompt(t) { document.getElementById('promptInput').value = t; closeSidebar(); }
-function codeClicked() {}
-
-function switchPage(p) {
-  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById('page-' + p).classList.add('active');
-  document.getElementById('tab-' + p).classList.add('active');
+/* ── UI HELPERS ── */
+function sp(t) { document.getElementById('pi').value = t; closeSb(); }
+function setBtn(on) {
+  document.getElementById('gbtn').disabled = on;
+  document.getElementById('gi').className = on ? 'fas fa-spinner fa-spin' : 'fas fa-bolt';
+  document.getElementById('gt').textContent = on ? 'Gerando...' : 'Gerar App';
 }
-
-function setBtnLoading(on) {
-  const btn = document.getElementById('generateBtn');
-  const icon = document.getElementById('genIcon');
-  const text = document.getElementById('genText');
-  btn.disabled = on;
-  icon.className = on ? 'fas fa-spinner fa-spin' : 'fas fa-bolt';
-  text.textContent = on ? 'Gerando...' : 'Gerar App';
+function switchPg(p) {
+  document.querySelectorAll('.pg').forEach(e => e.classList.remove('on'));
+  document.querySelectorAll('.pagetab').forEach(e => e.classList.remove('on'));
+  document.getElementById('pg-' + p).classList.add('on');
+  document.getElementById('tab-' + p).classList.add('on');
 }
-
-function showToast(msg, type='success') {
-  const t = document.getElementById('toast');
-  const i = document.getElementById('toastIcon');
-  const m = document.getElementById('toastMsg');
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast'), i = document.getElementById('tic'), m = document.getElementById('tmsg');
   t.className = `toast show ${type}`;
-  i.className = type === 'error' ? 'fas fa-circle-xmark' : 'fas fa-circle-check';
+  i.className = type === 'err' ? 'fas fa-circle-xmark' : 'fas fa-circle-check';
   m.textContent = msg;
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.className = 'toast', 3500);
+  clearTimeout(t._t); t._t = setTimeout(() => t.className = 'toast', 3500);
 }
 
-// ─── THEME ───
-function toggleThemeDropdown() {
-  document.getElementById('themeDropdown').classList.toggle('open');
-}
-function setTheme(t, label) {
+/* ── THEME ── */
+function toggleTdrop() { document.getElementById('tdrop').classList.toggle('open'); }
+function setTheme(t, l) {
   document.documentElement.setAttribute('data-theme', t);
-  document.getElementById('themeLabel').textContent = label;
-  document.querySelectorAll('.theme-option').forEach(o => o.classList.toggle('active', o.dataset.theme === t));
-  document.getElementById('themeDropdown').classList.remove('open');
-  localStorage.setItem('zedex-theme', t);
-  localStorage.setItem('zedex-theme-label', label);
-  if (state.rawCode) drawMinimap(state.rawCode);
+  document.getElementById('tlbl').textContent = l;
+  document.querySelectorAll('.topt').forEach(o => o.classList.toggle('on', o.dataset.t === t));
+  document.getElementById('tdrop').classList.remove('open');
+  localStorage.setItem('zt', t); localStorage.setItem('ztl', l);
+  if (S.raw) drawMmap(S.raw);
 }
 document.addEventListener('click', e => {
-  if (!e.target.closest('.theme-picker-btn') && !e.target.closest('.theme-dropdown')) {
-    document.getElementById('themeDropdown').classList.remove('open');
-  }
+  if (!e.target.closest('.tbtn-hdr') && !e.target.closest('.tdrop'))
+    document.getElementById('tdrop').classList.remove('open');
 });
 
-// ─── SIDEBAR (mobile) ───
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('overlay').classList.toggle('show');
-}
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('overlay').classList.remove('show');
-}
+/* ── SIDEBAR ── */
+function toggleSb() { document.getElementById('sb').classList.toggle('open'); document.getElementById('ov').classList.toggle('show'); }
+function closeSb() { document.getElementById('sb').classList.remove('open'); document.getElementById('ov').classList.remove('show'); }
 
-// ─── INIT ───
-(function init() {
-  const t = localStorage.getItem('zedex-theme') || 'dark';
-  const l = localStorage.getItem('zedex-theme-label') || 'Dark';
+/* ── INIT ── */
+(function() {
+  const t = localStorage.getItem('zt') || 'dark';
+  const l = localStorage.getItem('ztl') || 'Dark';
   document.documentElement.setAttribute('data-theme', t);
-  document.getElementById('themeLabel').textContent = l;
-  document.querySelectorAll('.theme-option').forEach(o => o.classList.toggle('active', o.dataset.theme === t));
-  buildCodeTabs('html');
-  drawMinimap('');
+  document.getElementById('tlbl').textContent = l;
+  document.querySelectorAll('.topt').forEach(o => o.classList.toggle('on', o.dataset.t === t));
+  buildCdTabs('html');
+  drawMmap('');
 })();
 </script>
 </body>
