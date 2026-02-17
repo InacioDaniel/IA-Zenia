@@ -726,6 +726,59 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
 var API_KEY   = "pk_urEpxcajGs5TF9Fs";
 var VEO3_KEY  = "sk-e186d16eaf8242e283233714196d7bdc";
 var VEO3_BASE = "https://veo3api.com";
+
+// Proxies CORS públicos (tenta em cascata se um falhar)
+var CORS_PROXIES = [
+    "https://corsproxy.io/?",
+    "https://api.allorigins.win/raw?url=",
+    "https://cors-anywhere.herokuapp.com/"
+];
+var activeProxy = 0;
+
+// Constrói URL com proxy CORS
+function proxyUrl(url) {
+    return CORS_PROXIES[activeProxy] + encodeURIComponent(url);
+}
+
+// Fetch com proxy CORS + fallback automático entre proxies
+async function corsGet(url, headers) {
+    for (var i = 0; i < CORS_PROXIES.length; i++) {
+        try {
+            var proxyEndpoint = CORS_PROXIES[i] + encodeURIComponent(url);
+            var resp = await fetch(proxyEndpoint, {
+                method: 'GET',
+                headers: headers || {},
+                signal: AbortSignal.timeout(15000)
+            });
+            if (resp.ok) { activeProxy = i; return resp; }
+        } catch(e) { /* tenta próximo proxy */ }
+    }
+    // Última tentativa: direto (pode falhar por CORS)
+    return fetch(url, { method: 'GET', headers: headers || {}, signal: AbortSignal.timeout(15000) });
+}
+
+async function corsPost(url, headers, body) {
+    for (var i = 0; i < CORS_PROXIES.length; i++) {
+        try {
+            var proxyEndpoint = CORS_PROXIES[i] + encodeURIComponent(url);
+            var resp = await fetch(proxyEndpoint, {
+                method: 'POST',
+                headers: Object.assign({'Content-Type':'application/json'}, headers || {}),
+                body: typeof body === 'string' ? body : JSON.stringify(body),
+                signal: AbortSignal.timeout(20000)
+            });
+            if (resp.ok) { activeProxy = i; return resp; }
+        } catch(e) { /* tenta próximo proxy */ }
+    }
+    // Última tentativa: direto
+    return fetch(url, {
+        method: 'POST',
+        headers: Object.assign({'Content-Type':'application/json'}, headers || {}),
+        body: typeof body === 'string' ? body : JSON.stringify(body),
+        signal: AbortSignal.timeout(20000)
+    });
+}
+
 var IMG_EP    = "https://gen.pollinations.ai/image/";
 var IMG_EP2   = "https://image.pollinations.ai/prompt/";
 var CHAT_EP   = "https://gen.pollinations.ai/v1/chat/completions";
@@ -1052,23 +1105,22 @@ async function genVid(prompt) {
     try {
         // 1. SUBMETE O PEDIDO DE GERAÇÃO
         setVeoStatus(statusId, '🚀 A submeter para Google Veo 3...', 10);
-        var genResp = await fetch(VEO3_BASE + '/generate', {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + VEO3_KEY,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
+        var genResp = await corsPost(
+            VEO3_BASE + '/generate',
+            { 'Authorization': 'Bearer ' + VEO3_KEY },
+            {
                 prompt: 'cinematic, 4k, ultra-realistic: ' + prompt,
                 model: 'veo3-fast',
                 aspect_ratio: '16:9',
                 watermark: null
-            })
-        });
+            }
+        );
 
         if (!genResp.ok) {
-            var errData = await genResp.json().catch(() => ({}));
-            throw new Error('Veo 3 API: ' + (errData.message || genResp.status));
+            var errText = await genResp.text().catch(() => '');
+            var errData = {};
+            try { errData = JSON.parse(errText); } catch(e) {}
+            throw new Error('Veo 3: ' + (errData.message || errData.error || ('HTTP ' + genResp.status + (errText ? ' — ' + errText.substring(0,80) : ''))));
         }
 
         var genData = await genResp.json();
@@ -1090,13 +1142,22 @@ async function genVid(prompt) {
         showVeoPlayer(card, hdUrl || videoUrl, prompt, taskId);
 
     } catch(e) {
+        var isCors = e.message.toLowerCase().includes('fetch') || e.message.toLowerCase().includes('network') || e.message.toLowerCase().includes('cors') || e.message.toLowerCase().includes('failed');
         card.innerHTML = '<div style="padding:16px">'
-            + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'
+            + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
             + '<div style="width:36px;height:36px;background:rgba(239,68,68,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i></div>'
             + '<div><div style="font-size:13px;font-weight:600;color:#ef4444">Erro ao gerar vídeo</div>'
             + '<div style="font-size:11px;color:var(--text-muted);margin-top:2px">' + escHtml(e.message) + '</div></div></div>'
-            + '<button onclick="genVid(\'' + escHtml(prompt.replace(/'/g,"\\'")) + '\')" style="padding:7px 14px;background:var(--send-btn);border:none;color:#fff;border-radius:7px;font-size:12px;cursor:pointer;font-family:var(--font-ui)"><i class="fas fa-redo"></i> Tentar novamente</button>'
+            + (isCors ? '<div style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:8px;padding:10px;margin-bottom:12px;font-size:11px;color:#fbbf24">'
+                + '<i class="fas fa-info-circle"></i> <strong>Possível bloqueio CORS</strong> — O browser está a bloquear o pedido. '
+                + 'A Zenia vai tentar automaticamente com um proxy diferente na próxima tentativa.</div>' : '')
+            + '<button onclick="genVid(\'' + escHtml(prompt.replace(/'/g,"\\'").replace(/\n/g,' ')) + '\')" '
+            + 'style="padding:7px 14px;background:var(--send-btn);border:none;color:#fff;border-radius:7px;font-size:12px;cursor:pointer;font-family:var(--font-ui)">'
+            + '<i class="fas fa-redo"></i> Tentar novamente (proxy ' + ((activeProxy + 1) % CORS_PROXIES.length + 1) + '/' + CORS_PROXIES.length + ')'
+            + '</button>'
             + '</div>';
+        // Avança para próximo proxy na próxima tentativa
+        activeProxy = (activeProxy + 1) % CORS_PROXIES.length;
     }
 }
 
@@ -1141,9 +1202,10 @@ async function pollVeoTask(taskId, statusId) {
         );
 
         try {
-            var resp = await fetch(VEO3_BASE + '/feed?task_id=' + encodeURIComponent(taskId), {
-                headers: { 'Authorization': 'Bearer ' + VEO3_KEY }
-            });
+            var resp = await corsGet(
+                VEO3_BASE + '/feed?task_id=' + encodeURIComponent(taskId),
+                { 'Authorization': 'Bearer ' + VEO3_KEY }
+            );
 
             if (!resp.ok) continue;
 
@@ -1173,9 +1235,10 @@ async function pollVeoTask(taskId, statusId) {
 
 async function getVeo1080p(taskId) {
     try {
-        var resp = await fetch(VEO3_BASE + '/get-1080p?task_id=' + encodeURIComponent(taskId), {
-            headers: { 'Authorization': 'Bearer ' + VEO3_KEY }
-        });
+        var resp = await corsGet(
+            VEO3_BASE + '/get-1080p?task_id=' + encodeURIComponent(taskId),
+            { 'Authorization': 'Bearer ' + VEO3_KEY }
+        );
         if (!resp.ok) return null;
         var data = await resp.json();
         return data.data?.result_url || null;
@@ -1211,18 +1274,15 @@ async function extendVeoVideo(originalTaskId, originalPrompt) {
     toast('A estender vídeo com Veo 3...', 'ok');
 
     try {
-        var resp = await fetch(VEO3_BASE + '/extend', {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + VEO3_KEY,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
+        var resp = await corsPost(
+            VEO3_BASE + '/extend',
+            { 'Authorization': 'Bearer ' + VEO3_KEY },
+            {
                 task_id: originalTaskId,
                 prompt: newPrompt,
                 watermark: null
-            })
-        });
+            }
+        );
 
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
         var data = await resp.json();
