@@ -1,5 +1,1 @@
-# Proxy Netlify → veo3api.com (server-side, sem CORS)
-/api/veo3/generate    https://veo3api.com/generate    200
-/api/veo3/feed        https://veo3api.com/feed         200
-/api/veo3/extend      https://veo3api.com/extend       200
 /api/veo3/get-1080p   https://veo3api.com/get-1080p    200
