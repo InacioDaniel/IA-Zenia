@@ -657,8 +657,17 @@ IMPORTANTE: Retorne APENAS o código HTML completo, incluindo CSS inline no <sty
 
                 console.log('Resposta recebida:', response);
 
-                // Clean the response
-                let htmlCode = response.trim();
+                // Extract text from response object
+                let htmlCode = '';
+                if (response.message && response.message.content) {
+                    htmlCode = response.message.content;
+                } else if (typeof response === 'string') {
+                    htmlCode = response;
+                } else {
+                    throw new Error('Formato de resposta inesperado');
+                }
+
+                htmlCode = htmlCode.trim();
                 
                 // Remove markdown code blocks if present
                 htmlCode = htmlCode.replace(/```html\n?/g, '').replace(/```\n?/g, '');
@@ -767,7 +776,17 @@ IMPORTANTE:
 
                 console.log('Código recebido:', response);
 
-                let code = response.trim();
+                // Extract text from response object
+                let code = '';
+                if (response.message && response.message.content) {
+                    code = response.message.content;
+                } else if (typeof response === 'string') {
+                    code = response;
+                } else {
+                    throw new Error('Formato de resposta inesperado');
+                }
+
+                code = code.trim();
                 code = code.replace(/```[\w]*\n?/g, '').replace(/```\n?/g, '');
                 
                 currentCode = code;
