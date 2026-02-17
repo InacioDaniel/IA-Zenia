@@ -1142,7 +1142,7 @@
     <script>
         // Pollinations API Configuration
         const POLLINATIONS_API_KEY = 'pk_7HHmBkBPEiNS5dyF';
-        const POLLINATIONS_API_URL = 'https://text.pollinations.ai';
+        const POLLINATIONS_API_URL = 'https://gen.pollinations.ai/v1/chat/completions';
         const AI_MODEL = 'mistral-large'; // Powerful free model for coding
 
         let currentCode = '';
@@ -1151,44 +1151,42 @@
         let currentTheme = 'system';
         let conversationHistory = [];
 
-        // Pollinations API Call (using their text endpoint)
+        // Pollinations API Call
         async function callPollinationsAPI(messages) {
             try {
-                // Build the prompt from messages
-                let fullPrompt = '';
-                messages.forEach(msg => {
-                    if (msg.role === 'system') {
-                        fullPrompt += msg.content + '\n\n';
-                    } else if (msg.role === 'user') {
-                        fullPrompt += 'User: ' + msg.content + '\n\n';
-                    } else if (msg.role === 'assistant') {
-                        fullPrompt += 'Assistant: ' + msg.content + '\n\n';
-                    }
-                });
-
-                const url = `${POLLINATIONS_API_URL}/${AI_MODEL}`;
-                
-                const response = await fetch(url, {
+                const response = await fetch(POLLINATIONS_API_URL, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${POLLINATIONS_API_KEY}`
+                        'Authorization': `Bearer ${POLLINATIONS_API_KEY}`,
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        messages: messages,
                         model: AI_MODEL,
+                        messages: messages,
                         temperature: 0.7,
                         max_tokens: 8000
                     })
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(`API Error: ${errorData.error?.message || response.statusText}`);
+                    const errorText = await response.text();
+                    console.error('API Response:', errorText);
+                    throw new Error(`API Error (${response.status}): ${errorText || response.statusText}`);
                 }
 
-                const text = await response.text();
-                return { content: text };
+                const result = await response.json();
+                console.log('API Response:', result);
+                
+                // Handle response format
+                if (result.choices && result.choices[0] && result.choices[0].message) {
+                    return result.choices[0].message;
+                } else if (result.content) {
+                    return { content: result.content };
+                } else if (typeof result === 'string') {
+                    return { content: result };
+                } else {
+                    throw new Error('Formato de resposta inesperado: ' + JSON.stringify(result));
+                }
             } catch (error) {
                 console.error('Pollinations API Error:', error);
                 throw error;
