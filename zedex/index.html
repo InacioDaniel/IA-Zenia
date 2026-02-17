@@ -142,6 +142,80 @@
             color: white;
         }
 
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: var(--text-inverse);
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            .prompt-section {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                height: 100vh;
+                z-index: 1000;
+                transition: left 0.3s ease;
+                box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+            }
+            
+            .prompt-section.mobile-open {
+                left: 0;
+            }
+            
+            .examples {
+                display: block;
+            }
+        }
+
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .mobile-overlay.active {
+            display: block;
+        }
+
+        .close-mobile-menu {
+            display: none;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--accent-color);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .close-mobile-menu {
+                display: flex;
+            }
+        }
+
         /* Tabs */
         .tabs {
             display: flex;
@@ -586,14 +660,263 @@
         .property { color: #9cdcfe; }
 
         /* Responsive */
-        @media (max-width: 768px) {
+        @media (max-width: 1200px) {
             .prompt-section {
-                width: 100%;
-                max-width: 380px;
+                width: 320px;
+            }
+            
+            .logo h1 {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .header {
+                padding: 12px 20px;
+            }
+            
+            .logo h1 {
+                font-size: 20px;
+            }
+            
+            .logo span {
+                display: none;
+            }
+            
+            .theme-selector {
+                gap: 5px;
+            }
+            
+            .theme-btn {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+            
+            .theme-btn span {
+                display: none;
+            }
+            
+            .prompt-section {
+                width: 280px;
+            }
+            
+            .tab {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                height: 100vh;
+                overflow: hidden;
+            }
+            
+            .header {
+                padding: 10px 15px;
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+            
+            .logo {
+                justify-content: center;
+            }
+            
+            .theme-selector {
+                justify-content: center;
             }
             
             .main-content {
                 flex-direction: column;
+                height: calc(100vh - 140px);
+            }
+            
+            .prompt-section {
+                width: 100%;
+                max-height: 40vh;
+                padding: 15px;
+                overflow-y: auto;
+            }
+            
+            .prompt-input {
+                min-height: 80px;
+                font-size: 13px;
+            }
+            
+            .examples {
+                display: none;
+            }
+            
+            .tab-content {
+                height: 60vh;
+            }
+            
+            .ai-thinking-panel {
+                max-height: 150px;
+                font-size: 11px;
+                padding: 10px;
+            }
+            
+            .thinking-step {
+                padding: 6px;
+                font-size: 11px;
+            }
+            
+            .code-stream {
+                padding: 8px;
+                font-size: 10px;
+                max-height: 100px;
+            }
+            
+            .editor-toolbar {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            
+            .toolbar-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            
+            .code-toolbar {
+                flex-direction: column;
+                gap: 8px;
+                padding: 10px;
+            }
+            
+            .language-selector {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .lang-btn {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+            
+            .code-editor {
+                font-size: 12px;
+                padding: 12px;
+            }
+            
+            .footer {
+                font-size: 10px;
+                padding: 8px 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo h1 {
+                font-size: 18px;
+            }
+            
+            .logo i {
+                font-size: 24px;
+            }
+            
+            .tab {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+            
+            .tab i {
+                font-size: 12px;
+            }
+            
+            .prompt-section {
+                padding: 12px;
+            }
+            
+            .prompt-section h2 {
+                font-size: 16px;
+            }
+            
+            .generate-btn {
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            .toolbar-btn, .code-action-btn {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+            
+            .lang-btn {
+                padding: 4px 8px;
+                font-size: 10px;
+            }
+            
+            .code-editor {
+                font-size: 11px;
+                padding: 10px;
+            }
+            
+            .ai-thinking-panel {
+                font-size: 10px;
+                padding: 8px;
+            }
+            
+            .thinking-step {
+                padding: 5px;
+                font-size: 10px;
+            }
+            
+            .footer {
+                font-size: 9px;
+                padding: 6px 10px;
+            }
+        }
+
+        /* iOS specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            .container {
+                height: -webkit-fill-available;
+            }
+            
+            .main-content {
+                height: -webkit-fill-available;
+            }
+            
+            .prompt-input {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+        }
+
+        /* Landscape mode adjustments */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .prompt-section {
+                max-height: 30vh;
+            }
+            
+            .tab-content {
+                height: 70vh;
+            }
+            
+            .ai-thinking-panel {
+                max-height: 100px;
+            }
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .tab, .toolbar-btn, .lang-btn, .code-action-btn, .theme-btn, .example-btn {
+                min-height: 44px; /* iOS touch target size */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .generate-btn {
+                min-height: 48px;
+            }
+        }
+
+        /* High DPI screens */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .code-editor, .code-display, .ai-thinking-panel {
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
             }
         }
 
@@ -655,6 +978,9 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
             <div class="logo">
                 <i class="fas fa-robot"></i>
                 <div>
@@ -665,15 +991,15 @@
             <div class="theme-selector">
                 <button class="theme-btn" onclick="setTheme('light')">
                     <i class="fas fa-sun"></i>
-                    Light
+                    <span>Light</span>
                 </button>
                 <button class="theme-btn" onclick="setTheme('dark')">
                     <i class="fas fa-moon"></i>
-                    Dark
+                    <span>Dark</span>
                 </button>
                 <button class="theme-btn active" onclick="setTheme('system')">
                     <i class="fas fa-desktop"></i>
-                    System
+                    <span>System</span>
                 </button>
             </div>
         </div>
@@ -692,8 +1018,14 @@
 
         <!-- Main Content -->
         <div class="main-content">
+            <!-- Mobile Overlay -->
+            <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+            
             <!-- Prompt Section -->
-            <div class="prompt-section">
+            <div class="prompt-section" id="promptSection">
+                <button class="close-mobile-menu" onclick="closeMobileMenu()">
+                    <i class="fas fa-times"></i>
+                </button>
                 <h2>
                     <i class="fas fa-magic"></i>
                     Descreva seu App
@@ -969,6 +1301,26 @@
                 document.querySelectorAll('.tab')[1].classList.add('active');
                 document.getElementById('codeTab').classList.add('active');
             }
+            
+            // Close mobile menu on tab switch
+            closeMobileMenu();
+        }
+
+        // Mobile menu functions
+        function toggleMobileMenu() {
+            const promptSection = document.getElementById('promptSection');
+            const overlay = document.getElementById('mobileOverlay');
+            promptSection.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = promptSection.classList.contains('mobile-open') ? 'hidden' : '';
+        }
+
+        function closeMobileMenu() {
+            const promptSection = document.getElementById('promptSection');
+            const overlay = document.getElementById('mobileOverlay');
+            promptSection.classList.remove('mobile-open');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
         }
 
         // Set prompt from examples
@@ -1069,6 +1421,7 @@ IMPORTANTE: Retorne APENAS o código HTML completo, incluindo CSS inline no <sty
                     addThinkingStep('✅ App gerado com sucesso!', 'finalizing', 0);
                     showSuccess('App gerado com sucesso!');
                     hideThinkingPanel();
+                    closeMobileMenu(); // Close mobile menu after generation
                 }, 1000);
 
             } catch (error) {
@@ -1077,12 +1430,16 @@ IMPORTANTE: Retorne APENAS o código HTML completo, incluindo CSS inline no <sty
                 
                 let errorMessage = 'Erro ao gerar o app. ';
                 
-                if (error.message.includes('connection')) {
-                    errorMessage += 'Verifique sua conexão com a internet e tente novamente.';
-                } else if (error.message.includes('API')) {
-                    errorMessage += 'Erro na API. Tente novamente em alguns segundos.';
+                if (error && error.message) {
+                    if (error.message.includes('connection')) {
+                        errorMessage += 'Verifique sua conexão com a internet e tente novamente.';
+                    } else if (error.message.includes('API')) {
+                        errorMessage += 'Erro na API. Tente novamente em alguns segundos.';
+                    } else {
+                        errorMessage += error.message;
+                    }
                 } else {
-                    errorMessage += error.message || 'Tente novamente!';
+                    errorMessage += 'Tente novamente!';
                 }
                 
                 alert(errorMessage);
@@ -1179,12 +1536,16 @@ IMPORTANTE:
                 console.error('Erro ao gerar código:', error);
                 let errorMessage = 'Erro ao gerar código. ';
                 
-                if (error.message.includes('connection')) {
-                    errorMessage += 'Verifique sua conexão com a internet.';
-                } else if (error.message.includes('API')) {
-                    errorMessage += 'Erro na API. Tente novamente.';
+                if (error && error.message) {
+                    if (error.message.includes('connection')) {
+                        errorMessage += 'Verifique sua conexão com a internet.';
+                    } else if (error.message.includes('API')) {
+                        errorMessage += 'Erro na API. Tente novamente.';
+                    } else {
+                        errorMessage += error.message;
+                    }
                 } else {
-                    errorMessage += error.message || 'Tente novamente!';
+                    errorMessage += 'Tente novamente!';
                 }
                 
                 alert(errorMessage);
