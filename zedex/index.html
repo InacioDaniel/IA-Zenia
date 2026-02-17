@@ -623,7 +623,7 @@ IMPORTANTE: Retorne APENAS o código HTML completo, incluindo CSS inline no <sty
 - O código deve começar com <!DOCTYPE html>`;
 
                 const response = await puter.ai.chat(fullPrompt, {
-                    model: "openrouter:openai/gpt-5.1-codex"
+                    model: "openai/gpt-5.2-codex"
                 });
 
                 // Clean the response
@@ -717,7 +717,7 @@ IMPORTANTE:
 - Use as melhores práticas da linguagem`;
 
                 const response = await puter.ai.chat(fullPrompt, {
-                    model: "openrouter:openai/gpt-5.1-codex"
+                    model: "openai/gpt-5.2-codex"
                 });
 
                 let code = response.trim();
