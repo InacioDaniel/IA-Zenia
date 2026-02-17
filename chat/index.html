@@ -237,7 +237,7 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
 <body data-theme="dark">
 
 <!-- SETUP SCREEN -->
-<div id="setup-screen">
+<div id="setup-screen" style="display:none">
   <div class="setup-card">
     <div class="setup-logo">Z</div>
     <div style="font-size:22px;font-weight:800;margin-bottom:4px">Bem-vindo à IA-Zenia</div>
@@ -587,7 +587,6 @@ function completeSetup() {
   if (!name) { toast('Escreve o teu nome para continuar!','warn'); return; }
   userName = name;
   localStorage.setItem('zn_username', name);
-  localStorage.setItem('zn_setup_done', '1');
   applyTheme(selectedSetupTheme);
   document.getElementById('setup-screen').style.display = 'none';
   initApp();
@@ -610,8 +609,8 @@ function initApp() {
 
 window.addEventListener('load', function() {
   applyTheme(currentTheme);
-  var setupDone = localStorage.getItem('zn_setup_done');
-  if (setupDone && userName) {
+  // userName é a única fonte da verdade — se existe, setup já foi feito
+  if (userName) {
     document.getElementById('setup-screen').style.display = 'none';
     initApp();
   } else {
@@ -1234,7 +1233,7 @@ function renderAdvBody(){
     h+='</div><button class="adv-btn" style="color:#ef4444" onclick="limparMem()">Apagar Tudo</button>';
   }else if(advTab==='conv'){
     h+='<div class="adv-s"><h4>Backup & Dados</h4><button class="adv-btn" onclick="backupAll()"><i class="fas fa-download"></i> Fazer Backup</button><button class="adv-btn" onclick="restoreAll()"><i class="fas fa-upload"></i> Restaurar</button></div>'
-      +'<div class="adv-s"><h4>Utilizador</h4><input class="adv-in" id="uname-edit" value="'+escHtml(userName||'')+'" placeholder="O teu nome"><button class="adv-btn" onclick="var n=document.getElementById(\'uname-edit\').value.trim();if(n){userName=n;localStorage.setItem(\'zn_username\',n);initApp();toast(\'Nome atualizado!\',\'ok\');}">Atualizar Nome</button></div>';
+      +'<div class="adv-s"><h4>Utilizador</h4><input class="adv-in" id="uname-edit" value="'+escHtml(userName||'')+'" placeholder="O teu nome"><button class="adv-btn" onclick="var n=document.getElementById(\'uname-edit\').value.trim();if(n){userName=n;localStorage.setItem(\'zn_username\',n);document.getElementById(\'uname\').textContent=n;document.getElementById(\'user-initial\').textContent=n.charAt(0).toUpperCase();document.getElementById(\'welcome-name\').textContent=n;toast(\'Nome atualizado!\',\'ok\');}">Atualizar Nome</button></div>';
   }else if(advTab==='gal'){
     h+='<div class="adv-s"><h4>Galeria</h4>';
     var found=false;
