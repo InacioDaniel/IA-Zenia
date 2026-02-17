@@ -2,2216 +2,733 @@
 <html lang="pt-PT">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>IA-Zenia</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-<!-- MATH SUPPORT (LaTeX) -->
-<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA-Zenia 2.0 — Atualização Disponível</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;padding:0;overflow:hidden}
-body{background:#0b0d11;color:#e5e7eb;font-family:Inter,system-ui,sans-serif;font-size:14px}
-#app{display:flex;height:100vh;width:100%;overflow:hidden;position:relative}
-#sidebar{width:260px;min-width:260px;background:#111318;border-right:1px solid #1e2330;display:flex;flex-direction:column;height:100vh;transition:all .3s ease;overflow:hidden;z-index:100;position:relative;flex-shrink:0}
-#sidebar.collapsed{width:0;min-width:0;border:none}
-#sidebar-inner{width:260px;min-width:260px;display:flex;flex-direction:column;height:100%;overflow:hidden}
-#sidebar-scroll{flex:1;overflow-y:auto;overflow-x:hidden}
-#sidebar-scroll::-webkit-scrollbar{width:4px}
-#sidebar-scroll::-webkit-scrollbar-thumb{background:#252c3b;border-radius:4px}
-#sidebar-toggle{position:absolute;top:50%;right:-17px;transform:translateY(-50%);background:#1a1f2e;border:1px solid #1e2330;width:17px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:101;border-radius:0 7px 7px 0;color:#6b7280;transition:background .2s;flex-shrink:0}
-#sidebar-toggle:hover{background:#252c3b;color:#e5e7eb}
-#sidebar.collapsed #sidebar-toggle{right:-17px}
-#mob-toggle{display:none;position:fixed;top:10px;left:10px;z-index:300;background:#1a1f2e;border:1px solid #1e2330;width:36px;height:36px;border-radius:9px;align-items:center;justify-content:center;cursor:pointer;color:#9ca3af}
-#mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:190}
-#main{flex:1;display:flex;flex-direction:column;min-width:0;height:100vh;overflow:hidden}
-#topbar{height:50px;border-bottom:1px solid #1e2330;display:flex;align-items:center;justify-content:space-between;padding:0 14px;gap:8px;flex-shrink:0;background:#0f1117}
-.tbLeft{display:flex;align-items:center;gap:7px;flex-wrap:nowrap;min-width:0;overflow:hidden}
-.tbRight{display:flex;align-items:center;gap:7px;flex-shrink:0}
-#chat-window{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
-#chat-window::-webkit-scrollbar{width:4px}
-#chat-window::-webkit-scrollbar-thumb{background:#1e2330;border-radius:4px}
-#input-area{border-top:1px solid #1e2330;padding:9px 12px;background:#0f1117;flex-shrink:0}
-#input-wrap{max-width:780px;margin:0 auto;background:#151c2e;border:1px solid #252c3b;border-radius:14px;overflow:hidden;transition:border-color .2s}
-#input-wrap:focus-within{border-color:#3b5bdb}
-#user-input{width:100%;background:transparent;border:none;outline:none;color:#e5e7eb;font-size:14px;padding:11px 13px 4px;resize:none;max-height:120px;line-height:1.5}
-#input-bottom{display:flex;align-items:center;padding:4px 7px 7px;gap:5px}
-#input-bottom-left{display:flex;align-items:center;gap:3px;flex:1}
-.ia-btn{background:transparent;border:none;cursor:pointer;color:#6b7280;padding:5px 7px;border-radius:7px;font-size:13px;transition:all .2s;display:flex;align-items:center;gap:4px}
-.ia-btn:hover{background:#252c3b;color:#e5e7eb}
-#send-btn{background:#3b5bdb;border:none;cursor:pointer;color:#fff;padding:7px 14px;border-radius:9px;font-size:13px;font-weight:600;transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
-#send-btn:hover{background:#4c6ef5}
-#send-btn:disabled{opacity:.4;cursor:not-allowed}
-.spin{width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-radius:50%;border-top-color:#fff;animation:spin 1s linear infinite;display:inline-block}
-@keyframes spin{to{transform:rotate(360deg)}}
-.msg-row{display:flex;gap:9px;max-width:780px;width:100%;margin:0 auto}
-.msg-row.user-row{flex-direction:row-reverse}
-.msg-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px}
-.msg-av.ai{background:linear-gradient(135deg,#3b5bdb,#7c3aed)}
-.msg-av.user{background:#1e3a5f}
-.msg-bbl{max-width:calc(100% - 46px);padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.6;word-break:break-word}
-.msg-bbl.ai{background:#151b2d;border:1px solid #1e2330;border-radius:4px 14px 14px 14px}
-.msg-bbl.user{background:#1d3461;color:#e8f0fe;border-radius:14px 4px 14px 14px}
-.code-block{background:#0d1117;border:1px solid #21262d;border-radius:9px;margin:8px 0;overflow:hidden}
-.code-hdr{display:flex;align-items:center;justify-content:space-between;background:#161b22;border-bottom:1px solid #21262d;padding:4px 11px}
-.code-lang{font-family:monospace;font-size:11px;text-transform:uppercase;color:#58a6ff;font-weight:700}
-.copy-btn{background:#21262d;border:1px solid #30363d;color:#8b949e;border-radius:5px;padding:2px 7px;font-size:11px;cursor:pointer}
-.copy-btn:hover{background:#30363d;color:#e6edf3}
-.code-block pre{margin:0;padding:13px 15px;overflow-x:auto;font-size:13px;line-height:1.6;background:transparent}
-.code-block pre code{background:transparent!important;padding:0!important}
-.err-line{background:rgba(251,191,36,.07);display:block}
-.err-line span{color:#fbbf24!important}
-.inline-code{background:rgba(110,118,129,.2);border-radius:4px;padding:1px 5px;font-family:monospace;font-size:12px}
-.err-marker{color:#fbbf24;font-weight:700}
-.media-card{background:#0f1520;border:1px solid #1e2d45;border-radius:11px;overflow:hidden;margin:6px 0;max-width:100%}
-.media-card img{width:100%;display:block;max-height:380px;object-fit:cover}
-.media-foot{display:flex;align-items:center;justify-content:space-between;padding:7px 11px;background:#111827;border-top:1px solid #1e2d45;gap:8px}
-.media-lbl{font-size:11px;color:#6b7280;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mbtn{font-size:11px;padding:3px 8px;border-radius:5px;cursor:pointer;border:1px solid #252c3b;background:#1a1f2e;color:#9ca3af;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:all .2s}
-.mbtn:hover{background:#252c3b;color:#e5e7eb}
-.sbadge{font-size:11px;padding:3px 7px;border-radius:18px;border:1px solid;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
-.s-ok{color:#22c55e;border-color:#22c55e40}
-.s-err{color:#ef4444;border-color:#ef444440}
-.s-wait{color:#9ca3af;border-color:#4b556340}
-.s-web{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.3);color:#60a5fa}
-.s-creator{background:linear-gradient(90deg,#7c3aed,#db2777);color:#fff;font-size:10px;padding:2px 7px;border-radius:18px;font-weight:700}
-.creator-mode #topbar{background:linear-gradient(90deg,#0f1117,#1a0a2e)}
-#welcome-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;gap:10px;opacity:.5;padding:20px}
-.tdot{width:6px;height:6px;background:#6b7280;border-radius:50%;animation:tdot 1.2s infinite}
-.tdot:nth-child(2){animation-delay:.2s}
-.tdot:nth-child(3){animation-delay:.4s}
-@keyframes tdot{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
-/* ADV PANEL */
-.adv-panel{position:fixed;top:0;right:0;width:370px;max-width:100vw;height:100vh;background:#0d1117;border-left:1px solid #1e2330;z-index:400;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease}
-.adv-panel.open{transform:translateX(0)}
-.adv-tab{display:flex;border-bottom:1px solid #1e2330;flex-shrink:0;overflow-x:auto}
-.adv-tab::-webkit-scrollbar{height:0}
-.adv-tab button{flex:1;min-width:40px;padding:9px 3px;font-size:11px;color:#6b7280;border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent}
-.adv-tab button.active{color:#60a5fa;border-bottom-color:#3b5bdb;background:rgba(59,130,246,.05)}
-.adv-body{flex:1;overflow-y:auto;padding:13px}
-.adv-s{margin-bottom:16px}
-.adv-s h4{font-size:11px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;padding-bottom:4px;border-bottom:1px solid #1e2330}
-.adv-btn{display:flex;align-items:center;gap:7px;width:100%;padding:7px 10px;border-radius:7px;border:1px solid #1e2330;background:#111318;color:#c9d1d9;font-size:12px;cursor:pointer;transition:all .2s;margin-bottom:5px;text-align:left}
-.adv-btn:hover{background:#1a1f2e;border-color:#3b5bdb;color:#e6edf3}
-.adv-btn .ic{width:17px;text-align:center;flex-shrink:0}
-.adv-btn .dsc{font-size:10px;color:#6b7280;display:block}
-.adv-in{width:100%;background:#0d1117;border:1px solid #1e2330;border-radius:6px;padding:6px 9px;font-size:12px;color:#e6edf3;outline:none;margin-bottom:6px}
-.adv-in:focus{border-color:#3b5bdb}
-.toast{position:fixed;bottom:18px;right:18px;background:#111318;border:1px solid #1e2330;border-radius:9px;padding:9px 14px;font-size:13px;color:#e6edf3;z-index:9999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;max-width:290px}
-.toast.show{opacity:1;transform:translateY(0)}
-.toast.ok{border-color:#22c55e40;color:#22c55e}
-.toast.err{border-color:#ef444440;color:#ef4444}
-.toast.warn{border-color:#fbbf2440;color:#fbbf24}
-.mrow{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #1e2330;font-size:12px}
-.mrow:last-child{border:none}
-.mlbl{color:#8b949e}.mval{color:#58a6ff;font-weight:600}
-.mem-item{display:flex;align-items:flex-start;gap:6px;padding:6px 8px;background:#111318;border:1px solid #1e2330;border-radius:7px;margin-bottom:4px;font-size:12px}
-.mem-key{color:#58a6ff;font-weight:600;min-width:65px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mem-val{color:#c9d1d9;flex:1;word-break:break-word;overflow:hidden;max-height:38px}
-.mem-del{color:#374151;cursor:pointer;flex-shrink:0;background:none;border:none;padding:1px 3px}
-.mem-del:hover{color:#ef4444}
-.adv-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:390}
-.adv-ov.show{display:block}
-/* MATH FORMATTING */
-.math-block{background:rgba(59,91,219,.1);border-left:3px solid #3b5bdb;padding:10px;margin:8px 0;border-radius:6px;overflow-x:auto}
-/* VIDEO PLAYER */
-#vid-canvas{border-radius:8px;cursor:pointer}
-.video-play-btn{cursor:pointer}
-.video-play-btn.playing{opacity:0.5}
-/* RESPONSIVE */
-@media(max-width:768px){
-  #sidebar{position:fixed;left:0;top:0;height:100%;transform:translateX(-100%);z-index:200;width:270px;min-width:270px}
-  #sidebar.mob-open{transform:translateX(0)}
-  #sidebar.collapsed{transform:translateX(-100%)}
-  #sidebar-toggle{display:none}
-  #mob-toggle{display:flex}
-  #mob-overlay.show{display:block}
-  #main{width:100%}
-  .msg-bbl{font-size:13px;padding:8px 11px}
-  #topbar{padding:0 9px 0 50px;height:46px}
-  .adv-panel{width:100vw}
-  #input-area{padding:7px 8px}
-  .tbRight .sbadge{display:none}
-}
-@media(max-width:360px){
-  .msg-bbl{font-size:12px;padding:7px 9px}
-  #chat-window{padding:8px}
-  #user-input{font-size:13px}
-}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --z: #3b5bdb;
+    --z2: #7c3aed;
+    --z-glow: rgba(59,91,219,0.4);
+    --z2-glow: rgba(124,58,237,0.3);
+    --bg: #07080d;
+    --bg2: #0d0f17;
+    --text: #e8eaf6;
+    --muted: #6b7280;
+    --border: rgba(59,91,219,0.2);
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID DE FUNDO ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(59,91,219,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,91,219,0.04) 1px, transparent 1px);
+    background-size: 44px 44px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── BRILHOS AMBIENTE ── */
+  .glow-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+  .orb-1 {
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, var(--z) 0%, transparent 70%);
+    top: -200px; left: -150px;
+    animation: orbFloat 12s ease-in-out infinite alternate;
+  }
+  .orb-2 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, var(--z2) 0%, transparent 70%);
+    bottom: -150px; right: -100px;
+    animation: orbFloat 15s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes orbFloat {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(30px, 20px) scale(1.08); }
+  }
+
+  /* ── WRAPPER ── */
+  .page {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 0;
+  }
+
+  /* ── TOPO: BADGE VERSÃO ── */
+  .version-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(59,91,219,0.12);
+    border: 1px solid rgba(59,91,219,0.35);
+    border-radius: 30px;
+    padding: 6px 16px;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #818cf8;
+    margin-bottom: 36px;
+    animation: fadeDown 0.6s ease both;
+  }
+  .version-tag .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px #22c55e;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(0.75); }
+  }
+
+  /* ── LOGO Z ── */
+  .logo-wrap {
+    position: relative;
+    margin-bottom: 28px;
+    animation: fadeDown 0.7s ease both 0.1s;
+  }
+  .logo-ring {
+    width: 110px; height: 110px;
+    border-radius: 28px;
+    background: linear-gradient(135deg, var(--z), var(--z2));
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    box-shadow: 0 0 60px var(--z-glow), 0 0 120px var(--z2-glow);
+    animation: logoGlow 4s ease-in-out infinite;
+  }
+  @keyframes logoGlow {
+    0%, 100% { box-shadow: 0 0 60px var(--z-glow), 0 0 120px var(--z2-glow); }
+    50%       { box-shadow: 0 0 100px var(--z-glow), 0 0 200px var(--z2-glow); }
+  }
+  .logo-ring::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 31px;
+    background: linear-gradient(135deg, var(--z), var(--z2), var(--z));
+    z-index: -1;
+    opacity: 0.6;
+    animation: spin 6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .logo-z {
+    font-family: 'Orbitron', monospace;
+    font-size: 56px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+    position: relative;
+    z-index: 1;
+  }
+  .logo-v2 {
+    position: absolute;
+    bottom: -10px; right: -10px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 3px 8px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    box-shadow: 0 0 16px rgba(34,197,94,0.5);
+  }
+
+  /* ── TÍTULO ── */
+  .headline {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(28px, 6vw, 52px);
+    font-weight: 900;
+    text-align: center;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 10px;
+    animation: fadeDown 0.8s ease both 0.15s;
+  }
+  .headline .grad {
+    background: linear-gradient(90deg, #818cf8, #a78bfa, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    font-size: clamp(14px, 2.5vw, 18px);
+    color: var(--muted);
+    text-align: center;
+    max-width: 520px;
+    line-height: 1.7;
+    margin-bottom: 48px;
+    animation: fadeDown 0.9s ease both 0.2s;
+  }
+  .subtitle strong { color: #a78bfa; font-weight: 600; }
+
+  /* ── CARD CENTRAL ── */
+  .card {
+    width: 100%;
+    max-width: 480px;
+    background: rgba(13,15,23,0.85);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 32px 28px;
+    backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 1s ease both 0.25s;
+    margin-bottom: 32px;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--z), var(--z2), transparent);
+  }
+
+  /* ── SEPARADOR OU ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .divider-text {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ── NOVIDADES ── */
+  .whats-new {
+    margin-bottom: 28px;
+  }
+  .whats-new-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+  }
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .feature-item:last-child { border-bottom: none; }
+  .feature-icon {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .feature-text { flex: 1; }
+  .feature-text strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .feature-text span {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ── BOTÕES ── */
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, var(--z), var(--z2));
+    border: none;
+    border-radius: 14px;
+    color: #fff;
+    font-family: 'Sora', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px var(--z-glow);
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 48px var(--z-glow); }
+  .btn-primary:hover::before { opacity: 1; }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 15px 24px;
+    background: transparent;
+    border: 1px solid rgba(99,102,241,0.4);
+    border-radius: 14px;
+    color: #818cf8;
+    font-family: 'Sora', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s;
+  }
+  .btn-secondary:hover {
+    background: rgba(99,102,241,0.1);
+    border-color: rgba(99,102,241,0.7);
+    color: #a5b4fc;
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px 24px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    color: var(--muted);
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s;
+  }
+  .btn-ghost:hover {
+    background: rgba(255,255,255,0.06);
+    color: var(--text);
+  }
+
+  /* ── BADGE NOVO ── */
+  .badge-new {
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-left: auto;
+  }
+
+  /* ── PROGRESS BAR (install) ── */
+  #install-progress {
+    display: none;
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(34,197,94,0.06);
+    border: 1px solid rgba(34,197,94,0.2);
+    border-radius: 12px;
+  }
+  .progress-label {
+    font-size: 12px;
+    color: #22c55e;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .progress-bar-track {
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+    border-radius: 99px;
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+  .progress-note {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  /* ── LINK CHAT ── */
+  .chat-link-box {
+    width: 100%;
+    max-width: 480px;
+    background: rgba(59,91,219,0.07);
+    border: 1px solid rgba(59,91,219,0.2);
+    border-radius: 16px;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    animation: fadeUp 1s ease both 0.4s;
+    margin-bottom: 28px;
+  }
+  .chat-link-icon {
+    width: 40px; height: 40px;
+    background: rgba(59,91,219,0.2);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .chat-link-info { flex: 1; min-width: 0; }
+  .chat-link-info strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+  .chat-link-info a {
+    font-size: 12px;
+    color: #818cf8;
+    text-decoration: none;
+    word-break: break-all;
+  }
+  .chat-link-info a:hover { text-decoration: underline; }
+  .chat-open-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: rgba(59,91,219,0.2);
+    border: 1px solid rgba(59,91,219,0.4);
+    border-radius: 8px;
+    color: #818cf8;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .chat-open-btn:hover {
+    background: rgba(59,91,219,0.35);
+    color: #a5b4fc;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    animation: fadeUp 1s ease both 0.5s;
+    line-height: 1.7;
+  }
+  .footer a { color: #6366f1; text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  /* ── SCANNER LINE ── */
+  @keyframes scan {
+    from { top: -2px; }
+    to   { top: calc(100% + 2px); }
+  }
+  .card-scanner {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(99,102,241,0.6), transparent);
+    animation: scan 4s linear infinite;
+    pointer-events: none;
+  }
+
+  /* ── ANIMAÇÕES ENTRADA ── */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── PARTICLES ── */
+  .particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: rgba(99,102,241,0.6);
+    border-radius: 50%;
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    from { opacity: 0; transform: translateY(100vh) scale(0); }
+    10%  { opacity: 1; }
+    90%  { opacity: 0.5; }
+    to   { opacity: 0; transform: translateY(-10vh) scale(1.5); }
+  }
+
+  /* ── RESPONSIVO ── */
+  @media (max-width: 520px) {
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .chat-link-box { padding: 14px 16px; gap: 10px; }
+    .btn-primary, .btn-secondary, .btn-ghost { font-size: 14px; padding: 14px 18px; }
+  }
 </style>
 </head>
 <body>
-<div id="app">
 
-<!-- SIDEBAR -->
-<div id="sidebar">
-  <button id="sidebar-toggle" onclick="toggleSidebar()">
-    <i class="fas fa-chevron-left" id="stg-ic" style="font-size:9px"></i>
-  </button>
-  <div id="sidebar-inner">
-    <div style="padding:14px 13px 9px;flex-shrink:0;border-bottom:1px solid #1e2330">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-        <div style="width:31px;height:31px;background:linear-gradient(135deg,#3b5bdb,#7c3aed);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0">Z</div>
-        <div><div style="font-weight:700;font-size:14px;color:#e5e7eb">IA-Zenia</div><div style="font-size:10px;color:#6b7280">by Zenia-Projects</div></div>
-      </div>
-      <button onclick="startNew()" style="width:100%;background:#1d3461;border:1px solid #2d4a7a;color:#90b4f0;padding:6px;border-radius:8px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-        <i class="fas fa-plus"></i> Nova Conversa
-      </button>
-    </div>
-    <div id="sidebar-scroll">
-      <div style="padding:9px 10px 3px">
-        <p style="font-size:10px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;padding:0 3px">Recursos</p>
-        <button onclick="openAdv()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:#9ca3af;font-size:12px;text-align:left">
-          <i class="fas fa-sliders-h" style="color:#3b5bdb;width:15px"></i> Ferramentas Avancadas
-        </button>
-        <button onclick="openGallery()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:#9ca3af;font-size:12px;text-align:left">
-          <i class="fas fa-images" style="color:#db2777;width:15px"></i> Galeria
-        </button>
-      </div>
-      <div style="padding:9px 10px 3px">
-        <p style="font-size:10px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;padding:0 3px">Aplicativos</p>
-        <a href="https://antonia-ia.netlify.app" target="_blank" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;text-decoration:none;color:#9ca3af;font-size:12px">
-          <i class="fas fa-comment-dots" style="color:#10b981;width:15px"></i> Antonia IA
-        </a>
-        <a href="https://zenia-projects.netlify.app" target="_blank" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;text-decoration:none;color:#9ca3af;font-size:12px">
-          <i class="fas fa-project-diagram" style="color:#f59e0b;width:15px"></i> Zenia Projects
-        </a>
-      </div>
-      <div style="padding:9px 10px">
-        <p style="font-size:10px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;padding:0 3px">Historico</p>
-        <input id="search-in" type="text" placeholder="Pesquisar..." oninput="filterHist(this.value)" style="width:100%;background:#0d1117;border:1px solid #1e2330;border-radius:7px;padding:5px 9px;font-size:12px;color:#e5e7eb;outline:none;margin-bottom:6px">
-        <div id="hist-list"></div>
-      </div>
-    </div>
-    <div style="padding:9px 13px;border-top:1px solid #1e2330;flex-shrink:0;display:flex;align-items:center;gap:7px">
-      <div style="width:28px;height:28px;background:#1d3461;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">U</div>
-      <div style="flex:1;overflow:hidden"><div id="uname" style="font-size:12px;font-weight:600;color:#e5e7eb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Utilizador</div><div style="font-size:10px;color:#22c55e">Online</div></div>
-    </div>
-  </div>
-</div>
+<div class="glow-orb orb-1"></div>
+<div class="glow-orb orb-2"></div>
 
-<!-- MOB TOGGLE -->
-<button id="mob-toggle" onclick="toggleMob()"><i class="fas fa-bars" style="font-size:14px"></i></button>
-<div id="mob-overlay" onclick="toggleMob()"></div>
+<!-- Partículas -->
+<div class="particles" id="particles"></div>
 
-<!-- MAIN -->
-<div id="main">
-  <div id="topbar">
-    <div class="tbLeft">
-      <select id="model-sel" style="background:#111318;border:1px solid #1e2330;color:#93c5fd;font-size:11px;border-radius:6px;padding:3px 5px;outline:none;cursor:pointer;max-width:110px">
-        <option value="openai">openai</option>
-        <option value="qwen-coder" selected>qwen-coder</option>
-        <option value="openai-large">openai-large</option>
-        <option value="mistral">mistral</option>
-        <option value="deepseek">deepseek</option>
-      </select>
-      <span id="api-st" class="sbadge s-wait" style="cursor:default"><i class="fas fa-circle" style="font-size:6px"></i> API</span>
-      <span id="web-st" class="sbadge s-web" style="display:none"><i class="fas fa-globe"></i> Web</span>
-      <span id="creator-badge" class="s-creator" style="display:none">CRIADOR</span>
-    </div>
-    <div class="tbRight">
-      <button id="voice-btn" onclick="toggleVoice()" class="sbadge s-wait" style="cursor:pointer;background:transparent;border:1px solid #4b556340">
-        <i class="fas fa-headset"></i>
-      </button>
-    </div>
+<div class="page">
+
+  <!-- Badge versão -->
+  <div class="version-tag">
+    <span class="dot"></span>
+    ATUALIZAÇÃO DISPONÍVEL — v2.0
   </div>
 
-  <div id="chat-window">
-    <div id="welcome-msg">
-      <div style="font-size:44px;font-weight:900;color:#3b5bdb">Z</div>
-      <div style="font-size:19px;font-weight:700;color:#e5e7eb">Ola, sou a Zenia.</div>
-      <div style="font-size:13px;color:#6b7280;max-width:340px;line-height:1.6">Fala comigo em portugues.<br>Podes pedir imagens, musica, codigo ou qualquer coisa.<br><br><span style="color:#374151;font-size:12px">Ex: "gera uma imagem de um leao africano"<br>"cria musica lofi chill"<br>"mostra um video de um dragon"</span></div>
+  <!-- Logo -->
+  <div class="logo-wrap">
+    <div class="logo-ring">
+      <span class="logo-z">Z</span>
     </div>
+    <span class="logo-v2">v2.0</span>
   </div>
 
-  <div id="input-area">
-    <div id="input-wrap">
-      <textarea id="user-input" rows="1" placeholder="Fala com a Zenia... (Enter para enviar)"></textarea>
-      <div id="input-bottom">
-        <div id="input-bottom-left">
-          <div style="position:relative;display:inline-flex">
-            <button class="ia-btn" id="upload-btn" title="Menu (+)" onclick="togglePlusMenu()" style="color:#7c3aed"><i class="fas fa-plus"></i></button>
-            <div id="plus-menu" style="display:none;position:absolute;bottom:100%;left:0;background:#111318;border:1px solid #1e2330;border-radius:8px;padding:8px 0;min-width:200px;z-index:100;box-shadow:0 -4px 12px rgba(0,0,0,0.4)">
-              <button onclick="document.getElementById('file-input').click();togglePlusMenu()" style="width:100%;padding:10px 14px;border:none;background:transparent;color:#9ca3af;text-align:left;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:8px;transition:all 0.2s" onmouseover="this.style.background='#1a1f2e';this.style.color='#e5e7eb'" onmouseout="this.style.background='transparent';this.style.color='#9ca3af'">
-                <i class="fas fa-image" style="width:16px"></i> Carregar Imagem
-              </button>
-              <button onclick="toggleCamera();togglePlusMenu()" style="width:100%;padding:10px 14px;border:none;background:transparent;color:#9ca3af;text-align:left;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:8px;transition:all 0.2s" onmouseover="this.style.background='#1a1f2e';this.style.color='#e5e7eb'" onmouseout="this.style.background='transparent';this.style.color='#9ca3af'">
-                <i class="fas fa-video" style="width:16px;color:#ef4444"></i> Câmera ao Vivo
-              </button>
-              <button onclick="openPersonality();togglePlusMenu()" style="width:100%;padding:10px 14px;border:none;background:transparent;color:#9ca3af;text-align:left;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:8px;transition:all 0.2s" onmouseover="this.style.background='#1a1f2e';this.style.color='#e5e7eb'" onmouseout="this.style.background='transparent';this.style.color='#9ca3af'">
-                <i class="fas fa-sliders-h" style="width:16px;color:#3b5bdb"></i> Personalidade Zénia
-              </button>
-            </div>
-          </div>
-          <button class="ia-btn" id="mic-btn" title="Microfone"><i class="fas fa-microphone"></i></button>
-          <button class="ia-btn" onclick="clearChat()" title="Limpar"><i class="fas fa-trash-alt"></i></button>
+  <!-- Título -->
+  <h1 class="headline">
+    <span class="grad">IA-Zenia</span> evoluiu.
+  </h1>
+  <p class="subtitle">
+    A Zenia foi completamente renovada na versão <strong>2.0</strong>.<br>
+    Para continuar a usar todas as funcionalidades, atualiza a aplicação<br>
+    ou acede diretamente pelo navegador.
+  </p>
+
+  <!-- Card principal -->
+  <div class="card">
+    <div class="card-scanner"></div>
+
+    <!-- Novidades -->
+    <div class="whats-new">
+      <div class="whats-new-title">O que há de novo</div>
+
+      <div class="feature-item">
+        <div class="feature-icon" style="background:rgba(99,102,241,0.15)">🎬</div>
+        <div class="feature-text">
+          <strong>Geração de Vídeo Google Veo 3</strong>
+          <span>Cria vídeos cinematográficos com IA diretamente no chat.</span>
         </div>
-        <button id="send-btn" onclick="handleSend()">
-          <i class="fas fa-paper-plane" id="send-ic"></i>
-        </button>
-      </div>
-    </div>
-    <div style="max-width:780px;margin:4px auto 0;text-align:center;font-size:10px;color:#1f2937">Zenia pode cometer erros. Verifica informacoes importantes.</div>
-  </div>
-
-<!-- CAMERA CANVAS -->
-<canvas id="camera-canvas" style="display:none;position:fixed;top:20px;right:20px;width:40px;height:40px;border:2px solid #3b5bdb;border-radius:4px;z-index:1000;background:#000;cursor:pointer" onclick="toggleCamera()"></canvas>
-
-<!-- VIDEO MODEL SELECTOR MODAL -->
-<!-- MODAL PERSONALIDADE -->
-<div id="personality-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:500;overflow-y:auto">
-  <div style="max-width:500px;margin:40px auto;background:#0d1117;border:1px solid #1e2330;border-radius:12px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,0.8)">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <h2 style="color:#e5e7eb;margin:0;font-size:18px"><i class="fas fa-sparkles" style="color:#7c3aed;margin-right:8px"></i>Personalidade da Zénia</h2>
-      <button onclick="closePersonality()" style="background:none;border:none;color:#6b7280;font-size:20px;cursor:pointer;padding:0">&times;</button>
-    </div>
-    
-    <div style="margin-bottom:20px">
-      <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:8px;font-weight:600;text-transform:uppercase">Tom de Conversa</label>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button onclick="setPersonality('amigavel')" class="personality-btn" data-tone="amigavel" style="padding:8px 14px;border-radius:6px;background:#1d3461;color:#93c5fd;border:1px solid #2d4a7a;cursor:pointer;font-size:12px;transition:all 0.2s">
-          <i class="fas fa-smile"></i> Amigável
-        </button>
-        <button onclick="setPersonality('profissional')" class="personality-btn" data-tone="profissional" style="padding:8px 14px;border-radius:6px;background:#1a1f2e;color:#9ca3af;border:1px solid #252c3b;cursor:pointer;font-size:12px;transition:all 0.2s">
-          <i class="fas fa-briefcase"></i> Profissional
-        </button>
-        <button onclick="setPersonality('humorista')" class="personality-btn" data-tone="humorista" style="padding:8px 14px;border-radius:6px;background:#1a1f2e;color:#9ca3af;border:1px solid #252c3b;cursor:pointer;font-size:12px;transition:all 0.2s">
-          <i class="fas fa-laugh"></i> Humorista
-        </button>
-        <button onclick="setPersonality('tecnico')" class="personality-btn" data-tone="tecnico" style="padding:8px 14px;border-radius:6px;background:#1a1f2e;color:#9ca3af;border:1px solid #252c3b;cursor:pointer;font-size:12px;transition:all 0.2s">
-          <i class="fas fa-cog"></i> Técnico
-        </button>
-        <button onclick="setPersonality('criativo')" class="personality-btn" data-tone="criativo" style="padding:8px 14px;border-radius:6px;background:#1a1f2e;color:#9ca3af;border:1px solid #252c3b;cursor:pointer;font-size:12px;transition:all 0.2s">
-          <i class="fas fa-palette"></i> Criativo
-        </button>
-      </div>
-    </div>
-    
-    <div style="margin-bottom:20px">
-      <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:8px;font-weight:600;text-transform:uppercase">Nível de Detalhe</label>
-      <div style="display:flex;gap:8px">
-        <button onclick="setDetailLevel('curto')" class="detail-btn" data-level="curto" style="flex:1;padding:8px;border-radius:6px;background:#1a1f2e;color:#9ca3af;border:1px solid #252c3b;cursor:pointer;font-size:12px">Curto</button>
-        <button onclick="setDetailLevel('medio')" class="detail-btn" data-level="medio" style="flex:1;padding:8px;border-radius:6px;background:#1d3461;color:#93c5fd;border:1px solid #2d4a7a;cursor:pointer;font-size:12px">Médio</button>
-        <button onclick="setDetailLevel('detalhado')" class="detail-btn" data-level="detalhado" style="flex:1;padding:8px;border-radius:6px;background:#1a1f2e;color:#9ca3af;border:1px solid #252c3b;cursor:pointer;font-size:12px">Detalhado</button>
+        <span class="badge-new">Novo</span>
       </div>
 
-    <div style="background:#111318;border:1px solid #1e2330;border-radius:6px;padding:12px;margin-bottom:20px">
-      <div style="font-size:12px;color:#8b949e;margin-bottom:8px">Configuração Atual:</div>
-      <div style="font-size:11px;color:#c9d1d9">
-        <div>Tom: <span id="current-tone" style="color:#93c5fd;font-weight:600">Amigável</span></div>
-        <div>Detalhe: <span id="current-detail" style="color:#93c5fd;font-weight:600">Médio</span></div>
+      <div class="feature-item">
+        <div class="feature-icon" style="background:rgba(16,185,129,0.15)">👁️</div>
+        <div class="feature-text">
+          <strong>Visão Computacional</strong>
+          <span>Analisa imagens com IA — descreve, identifica e responde.</span>
+        </div>
+        <span class="badge-new">Novo</span>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon" style="background:rgba(245,158,11,0.15)">🎨</div>
+        <div class="feature-text">
+          <strong>5 Temas Visuais</strong>
+          <span>Dark, Cyberpunk, Aurora, Solar e Blood Moon.</span>
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon" style="background:rgba(239,68,68,0.15)">⚡</div>
+        <div class="feature-text">
+          <strong>Interface completamente redesenhada</strong>
+          <span>Mais rápida, mais estável e com melhor experiência.</span>
+        </div>
       </div>
     </div>
 
-    <button onclick="closePersonality()" style="width:100%;padding:10px;background:#3b5bdb;border:none;color:#fff;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s">
-      ✓ Confirmar
-    </button>
-  </div>
-</div>
-</div>
-</div>
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-text">Escolhe como queres continuar</div>
+      <div class="divider-line"></div>
+    </div>
 
-<!-- ADV PANEL -->
-<div class="adv-ov" id="adv-ov" onclick="closeAdv()"></div>
-<div class="adv-panel" id="adv-panel">
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 13px;border-bottom:1px solid #1e2330;flex-shrink:0">
-    <span style="font-size:14px;font-weight:700;color:#e5e7eb"><i class="fas fa-sliders-h" style="color:#3b5bdb;margin-right:7px"></i>Ferramentas</span>
-    <button onclick="closeAdv()" style="background:none;border:none;cursor:pointer;color:#6b7280;font-size:18px;line-height:1">&times;</button>
+    <!-- Botões -->
+    <div class="btn-group">
+      <a href="https://ia-zenia.netlify.app/download/Zenia.apk" class="btn-primary" download>
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Baixar Zenia 2.0 (.apk)
+      </a>
+
+      <button class="btn-secondary" onclick="instalarAPK()">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="8 12 12 16 16 12"/><line x1="12" y1="8" x2="12" y2="16"/></svg>
+        Atualizar Automaticamente
+      </button>
+
+      <!-- Barra de progresso da instalação -->
+      <div id="install-progress">
+        <div class="progress-label">
+          <svg width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/></svg>
+          <span id="progress-label-text">A preparar download...</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-note" id="progress-note">O ficheiro será descarregado. Abre-o para instalar a Zenia 2.0 no teu telemóvel.</div>
+      </div>
+    </div>
   </div>
-  <div class="adv-tab" id="adv-tabs">
-    <button onclick="switchTab('mem')" class="active">Mem.</button>
-    <button onclick="switchTab('conv')">Conv.</button>
-    <button onclick="switchTab('media')">Media</button>
-    <button onclick="switchTab('gal')">Gal.</button>
-    <button onclick="switchTab('kb')">KB</button>
-    <button onclick="switchTab('sys')">Sist.</button>
-    <button onclick="switchTab('sec')">Seg.</button>
+
+  <!-- Caixa de acesso via browser -->
+  <div class="chat-link-box">
+    <div class="chat-link-icon">🌐</div>
+    <div class="chat-link-info">
+      <strong>Preferes usar no navegador?</strong>
+      <a href="https://ia-zenia.netlify.app/chat">ia-zenia.netlify.app/chat</a>
+    </div>
+    <a href="https://ia-zenia.netlify.app/chat" class="chat-open-btn">
+      Abrir
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
   </div>
-  <div class="adv-body" id="adv-body"></div>
+
+  <!-- Footer -->
+  <div class="footer">
+    IA-Zenia v2.0 · by <a href="https://zenia-projects.netlify.app">Zenia Projects</a> · Lubango, Angola<br>
+    <a href="https://ia-zenia.netlify.app/chat">Usar no navegador</a> &nbsp;·&nbsp;
+    <a href="https://ia-zenia.netlify.app/download/Zenia.apk" download>Baixar .apk</a>
+  </div>
+
 </div>
-<div class="toast" id="toast"></div>
 
 <script>
-// ==========================================
-// CONFIGURAÇÃO GLOBAL - APIs e Endpoints
-// ==========================================
-var API_KEY       = "pk_urEpxcajGs5TF9Fs";
-var IMG_EP        = "https://gen.pollinations.ai/image/";
-var IMG_EP2       = "https://image.pollinations.ai/prompt/";
-var CHAT_EP       = "https://gen.pollinations.ai/v1/chat/completions";
-var TTS_EP        = "https://api.elevenlabs.io/v1/text-to-speech/";
-var TTS_ALT       = "https://tts.api.ai-apis.com/tts";
-
-// APIs de Conteúdo Externo (SEM KEY)
-var WIKIPEDIA_API = "https://pt.wikipedia.org/w/api.php";
-var WIKIDATA_API   = "https://www.wikidata.org/w/api.php";
-var GITHUB_API     = "https://api.github.com";
-var ARXIV_API      = "https://export.arxiv.org/api/query";
-
-// Google Veo Video Generation (Vertex AI)
-var GOOGLE_VEO_ENDPOINT = "https://us-central1-aiplatform.googleapis.com/v1/projects/YOUR_PROJECT_ID/locations/us-central1/models/veo-001:predict";
-var GOOGLE_VEO_KEY = "AIzaSyDf-bNMU7-VxNJ_d6gvY7YV7YcZvE9p0pg"; // Chave pública
-
-// Seleção de modelo padrão
-var videoModel = 'google-veo-real'; // 'google-veo-real' usa Vertex AI
-
-// ==========================================
-// CONHECIMENTO ANGOLA - 21 PROVÍNCIAS
-// ==========================================
-var angolaProvincias = {
-    "Bengo": "Capital: Caxito | Região: Norte | População: ~400k",
-    "Benguela": "Capital: Benguela | Região: Centro | Pop: ~2.2M | Porto comercial importante",
-    "Bié": "Capital: Kuito | Região: Centro | Pop: ~1.4M | Platô central",
-    "Cabinda": "Capital: Cabinda | Região: Norte | Pop: ~800k | Enclave petrolífero",
-    "Cuando": "Capital: Menongue | Região: Leste | Pop: ~500k",
-    "Cuanza Norte": "Capital: N'Dalatando | Região: Norte | Pop: ~600k | Agricultura",
-    "Cuanza Sul": "Capital: Sumbe | Região: Centro | Pop: ~1.1M | Pescas",
-    "Cunene": "Capital: Ondjiva | Região: Sul | Pop: ~600k | Fronteira com Namíbia",
-    "Huambo": "Capital: Huambo | Região: Centro | Pop: ~2.3M | Planalto central",
-    "Huíla": "Capital: Lubango | Região: Sul | Pop: ~1.5M | Clima temperado, montanhoso",
-    "Cubango": "Capital:  | Região: Leste | Pop: ~500k | Savana",
-    "Lunda Norte": "Capital: Dundo | Região: Nordeste | Pop: ~600k | Mineração de diamantes",
-    "Lunda Sul": "Capital: Saurimo | Região: Nordeste | Pop: ~600k | Diamantes, florestas",
-    "Luanda": "Capital: Luanda | Região: Costa | Pop: ~8.3M | CAPITAL NACIONAL",
-    "Malange": "Capital: Malange | Região: Norte | Pop: ~1.2M | Agricultura e mineração",
-    "Moxico": "Capital: Luena | Região: Leste | Pop: ~600k | Savana e florestas",
-    "Namibe": "Capital: Namibe | Região: Sul | Pop: ~500k | Deserto do Namibe",
-    "Uíge": "Capital: Uíge | Região: Nordeste | Pop: ~1.1M | Café, florestas tropicais",
-    "Zaire": "Capital: M'Banza Congo | Região: Noroeste | Pop: ~300k | História colonial",
-    "ícolo e Bengo": "Capital:  | Região: Centro | Pop: ~1.1M",
-    "Cabinda": "Capital: Cabinda | Região: Nordeste | Pop: ~800k | Enclave autónomo"
-};
-
-// Informações gerais de Angola
-var angolaInfo = {
-    capital: "Luanda",
-    populacao: "~35 milhões (2024)",
-    moeda: "Kwanza Angolano (AOA)",
-    lingua: "Português",
-    independencia: "11 de Novembro de 1975",
-    presidente: "João Lourenço (desde 2017)",
-    recursosPrincipais: ["Petróleo", "Diamantes", "Café", "Peixes"],
-    numProvincias: 21
-};
-
-function getAngolaInfo() {
-    var info = "📍 INFORMAÇÃO SOBRE ANGOLA (Atualizado 2024+):\n";
-    info += "═════════════════════════════════════════════\n\n";
-    info += "DADOS GERAIS:\n";
-    info += "• Capital: " + angolaInfo.capital + "\n";
-    info += "• População: " + angolaInfo.populacao + "\n";
-    info += "• Moeda: " + angolaInfo.moeda + "\n";
-    info += "• Língua Oficial: " + angolaInfo.lingua + "\n";
-    info += "• Presidente: " + angolaInfo.presidente + "\n";
-    info += "• Independência: " + angolaInfo.independencia + "\n";
-    info += "• Recursos Principais: " + angolaInfo.recursosPrincipais.join(", ") + "\n\n";
-    
-    info += angolaInfo.numProvincias + " PROVÍNCIAS:\n";
-    info += "─────────────────────────────────────────────\n\n";
-    
-    Object.keys(angolaProvincias).forEach(function(prov, idx) {
-        info += (idx+1) + ". 📌 " + prov + "\n";
-        info += "    " + angolaProvincias[prov] + "\n\n";
-    });
-    
-    return info;
-}
-
-// ==========================================
-// ACESSO A APIs EXTERNAS (Wikipedia, Wikidata, etc)
-// ==========================================
-
-async function searchWikipedia(query) {
-    try {
-        var response = await fetch(WIKIPEDIA_API + '?action=query&format=json&srsearch=' + encodeURIComponent(query) + '&srlimit=3&srprop=snippet', {
-            method: 'GET'
-        });
-        
-        if (!response.ok) return null;
-        
-        var data = await response.json();
-        if (!data.query || !data.query.search.length) return null;
-        
-        var result = {
-            titulo: query,
-            resultados: []
-        };
-        
-        data.query.search.forEach(function(item) {
-            result.resultados.push({
-                titulo: item.title,
-                resumo: item.snippet.replace(/<[^>]*>/g, '').substring(0, 200)
-            });
-        });
-        
-        return result;
-        
-    } catch(e) {
-        console.warn('Wikipedia search falhou:', e);
-        return null;
-    }
-}
-
-async function getWikipediaContent(titulo) {
-    try {
-        var response = await fetch(WIKIPEDIA_API + '?action=query&format=json&titles=' + encodeURIComponent(titulo) + '&prop=extracts&explaintext=true&exlimit=1', {
-            method: 'GET'
-        });
-        
-        if (!response.ok) return null;
-        
-        var data = await response.json();
-        var pages = data.query.pages;
-        var pageId = Object.keys(pages)[0];
-        
-        if (pageId === '-1') return null;
-        
-        return {
-            titulo: pages[pageId].title,
-            conteudo: pages[pageId].extract.substring(0, 500) + '...'
-        };
-        
-    } catch(e) {
-        console.warn('Wikipedia fetch falhou:', e);
-        return null;
-    }
-}
-
-async function searchOnline(query) {
-    // Primeiro tenta Wikipedia
-    var wikiResult = await searchWikipedia(query);
-    if (wikiResult && wikiResult.resultados.length > 0) {
-        return {
-            fonte: 'Wikipedia',
-            dados: wikiResult
-        };
-    }
-    
-    // Se não encontrar e for sobre Angola, usa conhecimento local
-    if (query.toLowerCase().includes('angola') || query.toLowerCase().includes('provincias') || query.toLowerCase().includes('provinces')) {
-        return {
-            fonte: '📍 Base de Dados Local - Angola',
-            dados: getAngolaInfo()
-        };
-    }
-    
-    // Fallback para GitHub API (para código)
-    if (query.toLowerCase().includes('github') || query.toLowerCase().includes('repositório')) {
-        return {
-            fonte: 'GitHub API',
-            dados: 'Acesso a repositórios públicos disponível'
-        };
-    }
-    
-    return null;
-}
-
-// ==========================================
-// GERAÇÃO DE VÍDEO - GOOGLE VEO (Vertex AI)
-// ==========================================
-async function genVid(prompt) {
-    var row  = document.createElement('div'); row.className = 'msg-row';
-    var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
-    var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '600px';
-    
-    card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> Zevia: Gerando vídeo cinematográfico...</div>';
-    row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
-
-    try {
-        // Usa Hugging Face Inference API (GRÁTIS, SEM KEY) para gerar vídeo
-        // Ou fallback para imagens em sequência
-        var videoUrl = await generateVideoWithHF(prompt);
-        
-        if (!videoUrl) {
-            // Fallback: Gera 6 imagens em sequência
-            var frames = [];
-            var framePrompts = generateSmartKeyframes(prompt, 6);
-            
-            for (var i = 0; i < 6; i++) {
-                var ep = encodeURIComponent(framePrompts[i]);
-                var seed = Math.floor(Math.random() * 999999);
-                var url = IMG_EP + ep + '?key=' + API_KEY + '&model=flux&width=1280&height=720&nologo=true&enhance=true&seed=' + seed;
-                frames.push(url);
-            }
-            
-            showVideoPlayer(card, frames, prompt);
-            return;
-        }
-        
-        // Se conseguir vídeo real, mostra
-        showRealVideoPlayer(card, videoUrl, prompt);
-        
-    } catch(e) {
-        card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px"><i class="fas fa-exclamation-triangle"></i> Erro ao gerar vídeo: ' + e.message + '</div>';
-    }
-}
-
-// Gera vídeo real usando HuggingFace Inference (GRÁTIS, SEM API KEY)
-async function generateVideoWithHF(prompt) {
-    try {
-        // Tenta usar modelo de geração de vídeo do HF
-        var response = await fetch('https://api-inference.huggingface.co/models/damo-vilab/text-to-video-ms-1.7b', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                inputs: 'cinematic, 4k, professional: ' + prompt,
-                parameters: {
-                    max_length: 300
-                }
-            })
-        });
-        
-        if (response.ok) {
-            var blob = await response.blob();
-            return URL.createObjectURL(blob);
-        }
-        return null;
-        
-    } catch(e) {
-        console.warn('HF Video API indisponível, usando fallback de frames');
-        return null;
-    }
-}
-
-// Mostra player de vídeo real
-function showRealVideoPlayer(card, videoUrl, prompt) {
-    var safe = escHtml(prompt.substring(0, 50));
-    var playerHtml = '<div style="position:relative;width:100%;background:#1a1a2e;border-radius:8px;overflow:hidden">';
-    playerHtml += '<video width="100%" height="auto" controls style="display:block;border-radius:8px" src="' + videoUrl + '"></video>';
-    playerHtml += '<div style="position:absolute;top:12px;left:12px;background:rgba(79,129,240,0.8);color:#fff;font-size:10px;padding:4px 10px;border-radius:4px;z-index:20;font-weight:600;border:1px solid #5f81f0">';
-    playerHtml += '🔷 ZEVIA (Vídeo Real)';
-    playerHtml += '</div>';
-    playerHtml += '</div>';
-    playerHtml += '<div class="media-foot" style="gap:3px;flex-wrap:wrap">';
-    playerHtml += '<span class="media-lbl"><i class="fas fa-video" style="color:#4f81f0;margin-right:4px"></i>' + safe + ' (Vídeo Real)</span>';
-    playerHtml += '<div style="display:flex;gap:4px;flex-wrap:wrap">';
-    playerHtml += '<a href="' + videoUrl + '" download="zevia-video.mp4" class="mbtn"><i class="fas fa-download"></i> Baixar MP4</a>';
-    playerHtml += '</div>';
-    playerHtml += '</div>';
-    
-    card.innerHTML = playerHtml;
-}
-
-// Mostra player de frames (fallback)
-function showVideoPlayer(card, frames, prompt) {
-    var safe = escHtml(prompt.substring(0, 50));
-    var canvasId = 'vid-canvas-' + Date.now();
-    
-    var playerHtml = '<div style="position:relative;width:100%;background:#1a1a2e;border-radius:8px;overflow:hidden;aspect-ratio:16/9">';
-    playerHtml += '<canvas id="' + canvasId + '" style="width:100%;height:auto;display:block;background:#1a1a2e;border-radius:8px;cursor:pointer" width="1280" height="720"></canvas>';
-    playerHtml += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:10">';
-    playerHtml += '<div style="width:70px;height:70px;background:rgba(79,129,240,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #fff;cursor:pointer;pointer-events:all;transition:all 0.2s" onclick="toggleCanvasPlay(\'' + canvasId + '\')">';
-    playerHtml += '<i class="fas fa-play" id="play-icon-' + canvasId + '" style="color:#fff;font-size:28px;margin-left:4px"></i>';
-    playerHtml += '</div>';
-    playerHtml += '</div>';
-    playerHtml += '<div style="position:absolute;top:12px;left:12px;background:rgba(79,129,240,0.8);color:#fff;font-size:10px;padding:4px 10px;border-radius:4px;z-index:20;font-weight:600;border:1px solid #5f81f0">';
-    playerHtml += '🔷 ZEVIA (6 frames, 24fps)';
-    playerHtml += '</div>';
-    playerHtml += '<div style="position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.85);color:#fff;font-size:10px;padding:6px 12px;border-radius:5px;z-index:20;font-weight:600;font-family:monospace">';
-    playerHtml += '<span id="fps-display-' + canvasId + '">24</span>fps | <span id="frame-display-' + canvasId + '">0</span>/6';
-    playerHtml += '</div>';
-    playerHtml += '<div style="position:absolute;bottom:0;left:0;right:0;height:4px;background:rgba(255,255,255,0.2);z-index:15">';
-    playerHtml += '<div id="timeline-' + canvasId + '" style="height:100%;background:linear-gradient(90deg,#4f81f0,#7c3aed);width:0%;transition:width 0.05s linear"></div>';
-    playerHtml += '</div>';
-    playerHtml += '</div>';
-    playerHtml += '<div class="media-foot" style="gap:3px;flex-wrap:wrap">';
-    playerHtml += '<span class="media-lbl"><i class="fas fa-video" style="color:#4f81f0;margin-right:4px"></i>' + safe + ' (Zevia: 6 frames, 0.25s)</span>';
-    playerHtml += '<div style="display:flex;gap:4px;flex-wrap:wrap">';
-    playerHtml += '<button class="mbtn" onclick="downloadVideoFrames(\'' + canvasId + '\')"><i class="fas fa-download"></i> Frames</button>';
-    playerHtml += '</div>';
-    playerHtml += '</div>';
-    
-    var div = document.createElement('div');
-    div.innerHTML = playerHtml;
-    chatEl.removeChild(chatEl.lastChild);
-    chatEl.appendChild(div);
-    
-    // Carrega frames
-    var loadedFrames = 0;
-    var imageFrames = [];
-    
-    frames.forEach(function(url, idx) {
-        var img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = function() {
-            imageFrames[idx] = img;
-            loadedFrames++;
-            
-            if (loadedFrames === frames.length) {
-                setTimeout(function() {
-                    startFrameAnimation(canvasId, imageFrames, frames.length);
-                }, 100);
-            }
-        };
-        img.src = url;
-    });
-}
-
-// MODELO 1: ZEVIA (12 frames frame-by-frame com progressão narrativa)
-// Elementos DOM
-var chatEl   = document.getElementById('chat-window');
-var inputEl  = document.getElementById('user-input');
-var sendBtn  = document.getElementById('send-btn');
-var sendIc   = document.getElementById('send-ic');
-
-// Estado da Aplicação
-var convs       = JSON.parse(localStorage.getItem('zn_convs') || '[]');
-var curConvId   = null;
-var voiceOn     = false;
-var creatorMode = false;
-var advTab      = 'mem'; // Aba ativa no painel avançado
-var sbColl      = false;
-var sbMobOpen   = false;
-
-// ==========================================
-// REGEX DE DETECÇÃO (ORDEM IMPORTA!)
-// ==========================================
-// ORDEM CRÍTICA: VIDEO > AUDIO > IMAGEM (evita conflitos de sobreposição)
-
-// 1. Detecta Vídeo (PRIORITÁRIO - PRIMEIRO)
-var VID_RX  = /\b(gera|cria|faz|mostra|quero\s+ver|faz-me)\s+um?\s*(video|filme|clip|animacao|gif|cena|movie|cinematic|scene)\b/i;
-
-// 2. Detecta Áudio/Música (ANTES de imagem, pois podem sobrepor-se)
-var AUD_RX  = /\b(gera|cria|faz|toca|compoe|quero\s+ouvir|faz-me|sintetiza|narra|fala|canta)\s+um?a?\s*(musica|audio|som|song|beat|trilha|melodia|faixa|track|instrumental|voz|discurso|podcast|voice)\b/i;
-
-// 3. Detecta Imagem (DEPOIS de audio/video para evitar falsos positivos)
-var IMG_RX  = /\b(gera|cria|faz|desenha|pinta|mostra|quero\s+ver|faz-me|ilustra)\s+um?a?\s*(imagem|foto|image|picture|desenho|wallpaper|arte|avatar|paisagem|retrato|fotografia|quadro|pintura|ilustracao)\b/i;
-
-// 4. Detecta Código (não interfere com os anteriores)
-var CODE_RX = /\b(codigo|code|script|funcao|function|html|css|javascript|python|java|typescript|sql|php|bash|react|vue|angular|api|algoritmo|classe|array|loop|def|const|let|import|component|bug|debug)\b/i;
-
-// 5. Detecta exercícios matemáticos (para formatação especial)
-var MATH_RX = /\b(exercicio|problema|calcular|resolver|simplificar|derivada|integral|fracao|divisao|multiplicacao|raiz|potencia|equacao|sistema|matriz)\b/i;
-
-// ==========================================
-// FUNÇÕES DE UI (SIDEBAR & PAINÉIS)
-// ==========================================
-function toggleSidebar() {
-    sbColl = !sbColl;
-    var sb = document.getElementById('sidebar');
-    var ic = document.getElementById('stg-ic');
-    sb.classList.toggle('collapsed', sbColl);
-    ic.className = 'fas fa-chevron-' + (sbColl ? 'right' : 'left') + ' ';
-    ic.style.fontSize = '9px';
-}
-
-function toggleMob() {
-    sbMobOpen = !sbMobOpen;
-    document.getElementById('sidebar').classList.toggle('mob-open', sbMobOpen);
-    document.getElementById('mob-overlay').classList.toggle('show', sbMobOpen);
-}
-
-function showWelcome() { var w=document.getElementById('welcome-msg'); if(w) w.style.display='flex'; }
-function hideWelcome() { var w=document.getElementById('welcome-msg'); if(w) w.style.display='none'; }
-function autoResize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
-
-function openGallery() { openAdv(); switchTab('gal'); }
-function openAdv(){ document.getElementById('adv-panel').classList.add('open'); document.getElementById('adv-ov').classList.add('show'); renderAdvBody(); }
-function closeAdv(){ document.getElementById('adv-panel').classList.remove('open'); document.getElementById('adv-ov').classList.remove('show'); }
-
-function switchTab(t){
-    advTab=t; 
-    var tabs=['mem','conv','media','gal','kb','sys','sec'];
-    document.querySelectorAll('#adv-tabs button').forEach(function(b,i){
-        b.classList.toggle('active', tabs[i] === t || (b.innerText.toLowerCase().includes(t)));
-    });
-    renderAdvBody();
-}
-
-function toast(msg, type){
-    var el=document.getElementById('toast'); if(!el)return;
-    el.textContent=msg; el.className='toast show '+(type||'ok');
-    clearTimeout(el._t); el._t=setTimeout(function(){el.classList.remove('show');},3200);
-}
-
-// ==========================================
-// GESTÃO DE CONVERSAS (HISTORY)
-// ==========================================
-function createConv(title) {
-    var c = { id: Date.now().toString(), title: (title||'Conversa').substring(0,40), messages: [] };
-    convs.unshift(c); curConvId = c.id; saveConvs(); renderHist(); return c;
-}
-function getConv() { return convs.find(function(c) { return c.id === curConvId; }) || null; }
-function saveConvs() { localStorage.setItem('zn_convs', JSON.stringify(convs)); }
-
-function startNew() {
-    curConvId = null; chatEl.innerHTML = ''; showWelcome(); renderHist();
-    if (window.innerWidth < 768 && sbMobOpen) toggleMob();
-}
-
-function loadConv(id) {
-    curConvId = id; chatEl.innerHTML = '';
-    var c = getConv(); if (!c) return;
-    c.messages.forEach(function(m) { 
-        if (m.role==='user') renderMsg('user',m.content); 
-        else if (m.role==='assistant') renderMsg('ai',m.content); 
-    });
-    renderHist(); chatEl.scrollTop = chatEl.scrollHeight;
-    if (window.innerWidth < 768 && sbMobOpen) toggleMob();
-}
-
-function delConv(id, ev) {
-    if (ev) ev.stopPropagation();
-    convs = convs.filter(function(c) { return c.id !== id; }); saveConvs();
-    if (curConvId === id) startNew(); else renderHist();
-}
-
-function filterHist(v) { renderHist(v); }
-
-function renderHist(filter) {
-    var el = document.getElementById('hist-list'); filter = (filter||'').toLowerCase();
-    var list = filter ? convs.filter(function(c) { return c.title.toLowerCase().includes(filter); }) : convs;
-    el.innerHTML = '';
-    
-    if (!list.length) { 
-        el.innerHTML = '<p style="font-size:11px;color:#374151;padding:3px 5px;font-style:italic">' + (filter ? 'Sem resultados.' : 'Sem conversas.') + '</p>'; return; 
-    }
-    
-    list.forEach(function(c) {
-        var active = c.id === curConvId;
-        var div = document.createElement('div');
-        div.style.cssText = 'display:flex;align-items:center;gap:4px;padding:5px 7px;border-radius:7px;cursor:pointer;' + (active ? 'background:#1d3461' : '');
-        
-        var span = document.createElement('span');
-        span.style.cssText = 'flex:1;font-size:12px;color:' + (active ? '#93c5fd' : '#9ca3af') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
-        span.textContent = c.title;
-        span.onclick = function() { loadConv(c.id); };
-        
-        var del = document.createElement('button');
-        del.innerHTML = '<i class="fas fa-trash" style="font-size:9px"></i>';
-        del.style.cssText = 'background:none;border:none;cursor:pointer;color:#374151;padding:2px 3px;border-radius:3px;flex-shrink:0';
-        del.onclick = function(e) { delConv(c.id, e); };
-        
-        div.appendChild(span); div.appendChild(del); el.appendChild(div);
-    });
-}
-
-// ==========================================
-// GERAÇÃO DE MEDIA (VID, IMG, AUD)
-// ==========================================
-
-// 1. VÍDEO (Múltiplas Frames + Animação Frame-by-Frame em Canvas) - VERSÃO MELHORADA
-async function genVid(prompt) {
-    var row  = document.createElement('div'); row.className = 'msg-row';
-    var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
-    var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '600px';
-    
-    card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A criar vídeo com 12 frames (24fps suave)...</div>';
-    row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
-
-    try {
-        var frames = [];
-        var frameCount = 12; // 12 frames = ~0.5 segundos a 24fps (mais suave)
-        var loadedFrames = 0;
-        var safe = escHtml(prompt.substring(0,60));
-        var canvasId = 'vid-canvas-' + Date.now();
-        var isPlayingGlobal = false;
-        var currentFrameGlobal = 0;
-        
-        // GERAÇÃO INTELIGENTE DE PROMPTS COM PROGRESSÃO NARRATIVA
-        // Cada frame é uma etapa específica e detalhada da ação
-        var keyframes = generateSmartKeyframes(prompt, 12);
-
-        // Cria canvas
-        var canvasHtml = '<div style="position:relative;width:100%;background:#1a1a2e;border-radius:8px;overflow:hidden;aspect-ratio:16/9">';
-        canvasHtml += '<canvas id="' + canvasId + '" style="width:100%;height:auto;display:block;background:#1a1a2e;border-radius:8px" width="1280" height="720"></canvas>';
-        canvasHtml += '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;z-index:5;pointer-events:none">';
-        canvasHtml += '<div style="font-size:48px;margin-bottom:10px;animation:pulse 1s infinite">⚙</div>';
-        canvasHtml += '<div style="font-size:12px;opacity:0.8">Renderizando: <span id="load-progress">0</span>%</div>';
-        canvasHtml += '</div></div>';
-        
-        card.innerHTML = canvasHtml;
-
-        var canvas = document.getElementById(canvasId);
-        var ctx = canvas.getContext('2d');
-
-        // Carrega frames com delays para melhorar qualidade
-        async function loadFrame(idx, framePrompt) {
-            return new Promise(function(resolve) {
-                // Delay progressivo para evitar rate limiting
-                var delayMs = idx * 200;
-                
-                setTimeout(function() {
-                    var ep = encodeURIComponent(framePrompt);
-                    var seed = Math.floor(Math.random() * 999999);
-                    var url = IMG_EP + ep + '?key=' + API_KEY + '&model=flux&width=1280&height=720&nologo=true&enhance=true&seed=' + seed;
-                    
-                    var img = new Image();
-                    img.crossOrigin = 'anonymous';
-                    img.onload = function() {
-                        frames[idx] = img;
-                        loadedFrames++;
-                        
-                        // Atualiza progresso
-                        var progress = Math.round((loadedFrames / frameCount) * 100);
-                        var progressEl = document.getElementById('load-progress');
-                        if (progressEl) progressEl.textContent = progress;
-                        
-                        // Desenha frame atual
-                        ctx.drawImage(img, 0, 0, 1280, 720);
-                        
-                        // Quando todos carregam
-                        if (loadedFrames === frameCount) {
-                            setupVideoPlayer();
-                        }
-                        resolve(true);
-                    };
-                    img.onerror = function() {
-                        console.warn('Frame falhou:', idx);
-                        loadedFrames++;
-                        if (loadedFrames === frameCount) {
-                            setupVideoPlayer();
-                        }
-                        resolve(false);
-                    };
-                    img.src = url;
-                }, delayMs);
-            });
-        }
-
-        // Setup do player de vídeo
-        function setupVideoPlayer() {
-            var fps = 24; // 24fps é mais fluido que 30fps para animação
-            var frameDelay = 1000 / fps;
-            
-            var playerHtml = '<div style="position:relative;width:100%;background:#1a1a2e;border-radius:8px;overflow:hidden">';
-            playerHtml += '<canvas id="' + canvasId + '" style="width:100%;height:auto;display:block;background:#1a1a2e;border-radius:8px;cursor:pointer" width="1280" height="720"></canvas>';
-            
-            // Controles de reprodução
-            playerHtml += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:10">';
-            playerHtml += '<div class="video-play-btn" style="width:70px;height:70px;background:rgba(59,91,219,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #fff;cursor:pointer;pointer-events:all;transition:all 0.2s;hover:transform:scale(1.1)" onclick="toggleCanvasPlay(\'' + canvasId + '\')">';
-            playerHtml += '<i class="fas fa-play" id="play-icon-' + canvasId + '" style="color:#fff;font-size:28px;margin-left:4px"></i>';
-            playerHtml += '</div>';
-            playerHtml += '</div>';
-            
-            // HUD (informações)
-            playerHtml += '<div style="position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.85);color:#fff;font-size:10px;padding:6px 12px;border-radius:5px;z-index:20;font-weight:600;font-family:monospace">';
-            playerHtml += '<span id="fps-display-' + canvasId + '">24</span>fps | <span id="frame-display-' + canvasId + '">0</span>/12';
-            playerHtml += '</div>';
-            
-            // Timeline (progress bar)
-            playerHtml += '<div style="position:absolute;bottom:0;left:0;right:0;height:4px;background:rgba(255,255,255,0.2);z-index:15">';
-            playerHtml += '<div id="timeline-' + canvasId + '" style="height:100%;background:linear-gradient(90deg,#3b5bdb,#7c3aed);width:0%;transition:width 0.05s linear"></div>';
-            playerHtml += '</div>';
-            
-            playerHtml += '</div>';
-            
-            // Footer com botões
-            playerHtml += '<div class="media-foot" style="gap:3px;flex-wrap:wrap">';
-            playerHtml += '<span class="media-lbl"><i class="fas fa-video" style="color:#ef4444;margin-right:4px"></i>' + safe + ' (12 frames, 24fps, 0.5s)</span>';
-            playerHtml += '<div style="display:flex;gap:4px;flex-wrap:wrap">';
-            playerHtml += '<button class="mbtn" onclick="downloadVideoFrames(\'' + canvasId + '\')"><i class="fas fa-download"></i> Frames</button>';
-            playerHtml += '<button class="mbtn" onclick="downloadAsGifZip(\'' + canvasId + '\')"><i class="fas fa-file-archive"></i> ZIP</button>';
-            playerHtml += '<button class="mbtn" onclick="showFFmpegTip()"><i class="fas fa-film"></i> MP4</button>';
-            playerHtml += '</div>';
-            playerHtml += '</div>';
-
-            card.innerHTML = playerHtml;
-            
-            // Inicia animação
-            startFrameAnimation(canvasId, frames, frameCount);
-            
-            // Armazena dados
-            window['vidData_' + canvasId] = {
-                frames: frames,
-                frameCount: frameCount,
-                prompt: safe,
-                fps: fps,
-                frameDelay: frameDelay,
-                isPlaying: false,
-                currentFrame: 0
-            };
-        }
-
-        // Carrega todos os frames com delay
-        var promises = [];
-        for (var i = 0; i < frameCount; i++) {
-            promises.push(loadFrame(i, keyframes[i]));
-        }
-        
-        await Promise.all(promises);
-
-    } catch(e) {
-        card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px"><i class="fas fa-exclamation-triangle"></i> Erro: ' + e.message + '</div>';
-    }
-}
-
-// FUNÇÃO INTELIGENTE PARA GERAR PROMPTS COM PROGRESSÃO NARRATIVA
-function generateSmartKeyframes(prompt, count) {
-    // Remove preposições comuns
-    var cleanPrompt = prompt.replace(/\b(de|um|uma|o|a|e|ou|que|para)\b/gi, '').trim();
-    
-    // Detecta tipo de ação
-    var isAction = /\b(voando|correndo|pulando|caindo|explodindo|construindo|destruindo|transformando|lutando)\b/i.test(prompt);
-    var isNature = /\b(natureza|arvore|agua|ceu|nuvem|montanha|rio|praia|floresta)\b/i.test(prompt);
-    var isMagic = /\b(magia|feitiço|encantamento|cristal|brilho|luz|energia|poder)\b/i.test(prompt);
-    var isExplosion = /\b(explosao|bomba|fogo|incendio|destruicao|impacto|colisao)\b/i.test(prompt);
-    
-    var keyframes = [];
-    var fps = 24;
-    var totalDuration = count / fps; // em segundos
-    
-    if (isAction) {
-        // Sequência para ações dinâmicas
-        keyframes = [
-            `cinematic 4k, ultra HD, frame 0/12, ${totalDuration}s intro, setup parado, preparação, pose inicial: ${prompt}`,
-            `cinematic 4k, frame 1/12, início do movimento, tensão acumulada: ${prompt}`,
-            `cinematic 4k, frame 2/12, aceleração 20%, ação começando: ${prompt}`,
-            `cinematic 4k, frame 3/12, aceleração 40%, movimento evidente: ${prompt}`,
-            `cinematic 4k, frame 4/12, aceleração 60%, ação em progresso: ${prompt}`,
-            `cinematic 4k, frame 5/12, aceleração 80%, pico de movimento: ${prompt}`,
-            `cinematic 4k, frame 6/12, velocidade máxima, clímax da ação: ${prompt}`,
-            `cinematic 4k, frame 7/12, velocidade máxima, clímax intenso: ${prompt}`,
-            `cinematic 4k, frame 8/12, desaceleração 80%, ação finalizando: ${prompt}`,
-            `cinematic 4k, frame 9/12, desaceleração 60%, movimento reduzindo: ${prompt}`,
-            `cinematic 4k, frame 10/12, desaceleração 40%, movimento lento: ${prompt}`,
-            `cinematic 4k, frame 11/12, parada suave, pose final: ${prompt}`
-        ];
-    } else if (isExplosion) {
-        // Sequência para explosões e impactos
-        keyframes = [
-            `cinematic 4k, frame 0/12, antes da explosão, cena tranquila: ${prompt}`,
-            `cinematic 4k, frame 1/12, sinais de alerta, energia acumulando: ${prompt}`,
-            `cinematic 4k, frame 2/12, pré-impacto, tensão máxima: ${prompt}`,
-            `cinematic 4k, frame 3/12, 10% explosão, início do impacto: ${prompt}`,
-            `cinematic 4k, frame 4/12, 30% explosão, ondas de choque: ${prompt}`,
-            `cinematic 4k, frame 5/12, 50% explosão, pico de intensidade: ${prompt}`,
-            `cinematic 4k, frame 6/12, 70% explosão, máximo caos: ${prompt}`,
-            `cinematic 4k, frame 7/12, 90% explosão, auge da destruição: ${prompt}`,
-            `cinematic 4k, frame 8/12, 70% dissipação, fumaça se dissipando: ${prompt}`,
-            `cinematic 4k, frame 9/12, 50% dissipação, claridade retornando: ${prompt}`,
-            `cinematic 4k, frame 10/12, 20% dissipação, poeira assentando: ${prompt}`,
-            `cinematic 4k, frame 11/12, pós-explosão, cena calma: ${prompt}`
-        ];
-    } else if (isMagic) {
-        // Sequência para magia e efeitos sobrenaturais
-        keyframes = [
-            `cinematic 4k magical, frame 0/12, antes do feitiço, cena normal: ${prompt}`,
-            `cinematic 4k magical, frame 1/12, invocação inicial, energia bruta: ${prompt}`,
-            `cinematic 4k magical, frame 2/12, cristais luminosos formando: ${prompt}`,
-            `cinematic 4k magical, frame 3/12, aura de luz intensificando: ${prompt}`,
-            `cinematic 4k magical, frame 4/12, poder se materializando: ${prompt}`,
-            `cinematic 4k magical, frame 5/12, pico de magia, brilho ofuscante: ${prompt}`,
-            `cinematic 4k magical, frame 6/12, magia em seu auge, energia radiante: ${prompt}`,
-            `cinematic 4k magical, frame 7/12, poder máximo, transformação: ${prompt}`,
-            `cinematic 4k magical, frame 8/12, estabilização, brilho reduzindo: ${prompt}`,
-            `cinematic 4k magical, frame 9/12, dissipação lenta, efeitos sublimes: ${prompt}`,
-            `cinematic 4k magical, frame 10/12, magia enfraquecendo, encantamento residual: ${prompt}`,
-            `cinematic 4k magical, frame 11/12, feitiço completo, resultado final: ${prompt}`
-        ];
-    } else if (isNature) {
-        // Sequência para cenas naturais
-        keyframes = [
-            `cinematic 4k landscape, frame 0/12, cena panorâmica, visão geral: ${prompt}`,
-            `cinematic 4k landscape, frame 1/12, revelação lenta, detalhes emergindo: ${prompt}`,
-            `cinematic 4k landscape, frame 2/12, plano próximo, natureza em foco: ${prompt}`,
-            `cinematic 4k landscape, frame 3/12, close-up de elementos naturais: ${prompt}`,
-            `cinematic 4k landscape, frame 4/12, harmonia natural, beleza revelada: ${prompt}`,
-            `cinematic 4k landscape, frame 5/12, composição perfeita, auge visual: ${prompt}`,
-            `cinematic 4k landscape, frame 6/12, simetria natural, pico estético: ${prompt}`,
-            `cinematic 4k landscape, frame 7/12, transição suave, perspectiva mudando: ${prompt}`,
-            `cinematic 4k landscape, frame 8/12, novo ângulo, profundidade aparente: ${prompt}`,
-            `cinematic 4k landscape, frame 9/12, visão panorâmica novamente: ${prompt}`,
-            `cinematic 4k landscape, frame 10/12, recuo final, visão ampla: ${prompt}`,
-            `cinematic 4k landscape, frame 11/12, cena conclusiva, repouso visual: ${prompt}`
-        ];
-    } else {
-        // Sequência padrão genérica com transição suave
-        var stages = ['intro', 'setup inicial', 'desenvolvimento', 'progressão', 'aceleração', 'intensidade', 'clímax', 'pico', 'desaceleração', 'finalização lenta', 'repouso', 'conclusão'];
-        for (var i = 0; i < count; i++) {
-            var percentage = Math.round((i / count) * 100);
-            keyframes.push(`cinematic 4k detailed, frame ${i}/12 (${percentage}%), ${stages[i] || 'transição'}, progressão suave: ${prompt}`);
-        }
-    }
-    
-    return keyframes;
-}
-
-// Função para iniciar animação
-function startFrameAnimation(canvasId, frames, frameCount) {
-    var canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-    
-    var ctx = canvas.getContext('2d');
-    var data = window['vidData_' + canvasId];
-    if (!data) return;
-    
-    var fps = data.fps || 24;
-    var frameDelay = data.frameDelay || (1000 / fps);
-    var currentFrame = 0;
-    var lastTime = Date.now();
-    var frameTime = 0;
-    
-    function animate() {
-        if (!data.isPlaying) return;
-        
-        var currentTime = Date.now();
-        frameTime = currentTime - lastTime;
-        lastTime = currentTime;
-        
-        // Desenha frame
-        if (frames[currentFrame]) {
-            ctx.drawImage(frames[currentFrame], 0, 0, 1280, 720);
-        }
-        
-        // Atualiza HUD
-        var fpsDisplay = document.getElementById('fps-display-' + canvasId);
-        var frameDisplay = document.getElementById('frame-display-' + canvasId);
-        var timeline = document.getElementById('timeline-' + canvasId);
-        
-        if (fpsDisplay) fpsDisplay.textContent = Math.round(1000 / frameTime);
-        if (frameDisplay) frameDisplay.textContent = currentFrame + 1;
-        if (timeline) timeline.style.width = ((currentFrame + 1) / frameCount * 100) + '%';
-        
-        // Próximo frame
-        currentFrame = (currentFrame + 1) % frameCount;
-        
-        if (data.isPlaying) {
-            setTimeout(animate, frameDelay);
-        }
-    }
-    
-    // Inicia automaticamente
-    data.isPlaying = true;
-    animate();
-}
-
-// Toggle play/pause
-function toggleCanvasPlay(canvasId) {
-    var data = window['vidData_' + canvasId];
-    if (!data) return;
-    
-    var icon = document.getElementById('play-icon-' + canvasId);
-    var btn = icon.parentElement;
-    
-    data.isPlaying = !data.isPlaying;
-    
-    if (data.isPlaying) {
-        icon.className = 'fas fa-pause';
-        btn.style.background = 'rgba(59,91,219,0.7)';
-        startFrameAnimation(canvasId, data.frames, data.frameCount);
-    } else {
-        icon.className = 'fas fa-play';
-        icon.style.marginLeft = '4px';
-        btn.style.background = 'rgba(59,91,219,0.85)';
-    }
-}
-
-// Download frames
-function downloadVideoFrames(canvasId) {
-    var data = window['vidData_' + canvasId];
-    if (!data || !data.frames.length) {
-        toast('Sem frames para baixar', 'err');
-        return;
-    }
-    
-    data.frames.forEach(function(img, idx) {
-        var canvas = document.createElement('canvas');
-        canvas.width = 1280;
-        canvas.height = 720;
-        var ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        
-        var link = document.createElement('a');
-        link.href = canvas.toDataURL('image/jpeg', 0.95);
-        link.download = 'frame_' + String(idx + 1).padStart(2, '0') + '.jpg';
-        
-        setTimeout(function() { link.click(); }, idx * 300);
-    });
-    
-    toast('Baixando ' + data.frames.length + ' frames...', 'ok');
-}
-
-// Download como ZIP
-function downloadAsGifZip(canvasId) {
-    toast('Frames em ZIP (use FFmpeg para converter para MP4)', 'ok');
-    downloadVideoFrames(canvasId);
-}
-
-// Mostrar dica FFmpeg
-function showFFmpegTip() {
-    var msg = 'Para converter frames para MP4 (24fps, 0.5s):\n\n'
-            + '1. Baixe os 12 frames\n'
-            + '2. Coloque em uma pasta\n'
-            + '3. Use FFmpeg:\n\n'
-            + 'ffmpeg -framerate 24 -i frame_%02d.jpg -c:v libx264 -pix_fmt yuv420p -crf 18 video.mp4\n\n'
-            + 'Baixar FFmpeg: https://ffmpeg.org/download.html\n\n'
-            + 'Resultado: ~0.5 segundos de vídeo em 4K';
-    alert(msg);
-    toast('Tutorial MP4 exibido', 'ok');
-}
-
-// 2. IMAGEM (mantém versão anterior)
-async function genImg(prompt) {
-    var ep   = encodeURIComponent(prompt);
-    var seed = Math.floor(Math.random()*999999);
-    var url1 = IMG_EP + ep + '?key=' + API_KEY + '&model=flux&seed=' + seed + '&width=768&height=512&nologo=true&enhance=true';
-    var url2 = IMG_EP2 + ep + '?seed=' + seed + '&width=768&height=512&nologo=true';
-
-    var row  = document.createElement('div'); row.className = 'msg-row';
-    var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
-    var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '480px';
-    
-    card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A gerar imagem...</div>';
-    row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
-
-    function showCard(imgUrl) {
-        var safe = escHtml(prompt.substring(0,55)) + (prompt.length>55?'...':'');
-        card.innerHTML = '<img src="' + imgUrl + '" alt="Imagem gerada" loading="lazy">'
-          + '<div class="media-foot"><span class="media-lbl"><i class="fas fa-image" style="margin-right:4px;color:#7c3aed"></i>' + safe + '</span>'
-          + '<div style="display:flex;gap:5px"><a href="' + imgUrl + '" target="_blank" rel="noopener" class="mbtn"><i class="fas fa-external-link-alt"></i></a>'
-          + '<a href="' + imgUrl + '" download="zenia-img.jpg" class="mbtn"><i class="fas fa-download"></i></a></div></div>';
-        chatEl.scrollTop = chatEl.scrollHeight;
-    }
-
-    return new Promise(function(resolve) {
-        var tout = setTimeout(function() {
-            card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px"><i class="fas fa-exclamation-triangle"></i> Demorou demasiado.</div>';
-            resolve(null);
-        }, 35000);
-
-        var img1 = new Image();
-        img1.onload = function() { clearTimeout(tout); showCard(url1); resolve(url1); };
-        img1.onerror = function() {
-            var img2 = new Image();
-            img2.onload = function() { clearTimeout(tout); showCard(url2); resolve(url2); };
-            img2.onerror = function() {
-                clearTimeout(tout);
-                card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px">Falha ao gerar imagem. Tente inglês.</div>';
-                resolve(null);
-            };
-            img2.src = url2;
-        };
-        img1.src = url1;
-    });
-}
-
-// 3. ÁUDIO/MÚSICA (CORRIGIDO - com múltiplas APIs)
-async function genAud(prompt) {
-    var isMusic = /\b(musica|beat|som|song|melodia|instrumental)\b/i.test(prompt);
-    var row  = document.createElement('div'); row.className = 'msg-row';
-    var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
-    var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '480px';
-    
-    card.innerHTML = '<div style="padding:13px;display:flex;align-items:center;gap:9px;color:#6b7280;font-size:13px"><span class="spin"></span> A criar '+(isMusic?'música':'áudio')+'...</div>';
-    row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
-
-    try {
-        // Usa TTS alternativas gratis
-        var txt = encodeURIComponent(prompt.substring(0, 200));
-        
-        // Array de endpoints TTS gratuitos alternativos
-        var ttsUrls = [
-            'https://api.unspeech.com/tts?text=' + txt + '&voice=pt-PT-RaquelNeural&format=audio/mpeg',
-            'https://tts-api.com/api/generate?text=' + txt + '&voice=pt-PT&format=mp3',
-            'https://google-tts.herokuapp.com/api/tts?text=' + txt + '&lang=pt'
-        ];
-
-        // Cria um áudio visualizador
-        var waveUrl = IMG_EP2 + encodeURIComponent(isMusic ? 'music equalizer neon audio waves spectrum' : 'sound wave visualization frequency') + '?width=580&height=100&nologo=true&seed=' + Date.now();
-
-        var audioHtml = '<div style="position:relative;background:linear-gradient(90deg,#1a3a52,#2d5a8c);border-radius:9px;overflow:hidden;padding:12px">';
-        audioHtml += '<img src="' + waveUrl + '" style="width:100%;height:70px;object-fit:cover;display:block;opacity:0.9;border-radius:6px;margin-bottom:8px">';
-        
-        // Adiciona múltiplas fontes de áudio (fallback)
-        audioHtml += '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">';
-        ttsUrls.forEach(function(url, idx) {
-            audioHtml += '<audio controls style="width:100%;border-radius:6px;height:34px;flex:1;min-width:200px"><source src="' + url + '" type="audio/mpeg">Seu navegador não suporta áudio.</audio>';
-        });
-        audioHtml += '</div>';
-        
-        audioHtml += '<div style="font-size:11px;color:#22c55e;margin-bottom:5px"><i class="fas fa-'+(isMusic?'music':'volume-up')+'"></i> ' + escHtml(prompt.substring(0,50)) + '</div>';
-        audioHtml += '<div class="media-foot" style="border-top:1px solid #1e2d45;padding-top:8px">';
-        audioHtml += '<span class="media-lbl">Gerado por Zenia</span>';
-        audioHtml += '<a href="' + ttsUrls[0] + '" download="zenia-audio.mp3" class="mbtn"><i class="fas fa-download"></i> Baixar</a>';
-        audioHtml += '</div></div>';
-
-        setTimeout(function() {
-            card.innerHTML = audioHtml;
-            chatEl.scrollTop = chatEl.scrollHeight;
-            
-            // Tenta reproduzir o primeiro áudio
-            var audios = card.querySelectorAll('audio');
-            if (audios.length > 0) {
-                audios[0].play().catch(function(e) {
-                    console.log('Autoplay bloqueado:', e);
-                });
-            }
-        }, 1000);
-
-    } catch(e) {
-        card.innerHTML = '<div style="padding:13px;color:#fbbf24;font-size:13px">Erro ao gerar áudio: ' + e.message + '</div>';
-    }
-}
-
-// ==========================================
-// WEB SEARCH & FETCH AI
-// ==========================================
-function needsWeb(text) {
-    return /\b(2024|2025|2026|agora|hoje|atual|atualiz|recente|latest|current|versao|preco|quem e|presidente|noticia|news|lancamento|update)\b/i.test(text);
-}
-
-async function webSearch(query) {
-    document.getElementById('web-st').style.display = 'inline-flex';
-    try {
-        var r = await fetch('https://api.duckduckgo.com/?q=' + encodeURIComponent(query) + '&format=json&no_html=1&skip_disambig=1');
-        var d = await r.json(); var parts = [];
-        if (d.Answer) parts.push('Resposta: ' + d.Answer);
-        if (d.AbstractText) parts.push(d.AbstractText);
-        if (d.RelatedTopics) d.RelatedTopics.slice(0,3).forEach(function(t) { if(t.Text) parts.push('- '+t.Text); });
-        
-        document.getElementById('web-st').style.display = 'none';
-        var dt = new Date().toLocaleDateString('pt-PT');
-        return parts.length ? '[PESQUISA WEB - ' + dt + ' - "' + query + '"]:\n' + parts.join('\n') : '';
-    } catch(e) { document.getElementById('web-st').style.display = 'none'; return ''; }
-}
-
-async function fetchAI(msgs, model, attempt) {
-    attempt = attempt||1; var MAX = 3;
-    var ctrl = new AbortController();
-    var t = setTimeout(function() { ctrl.abort(); }, 60000);
-    
-    try {
-        var r = await fetch(CHAT_EP, {
-            method: 'POST', signal: ctrl.signal,
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_KEY },
-            body: JSON.stringify({ messages: msgs, model: model, max_tokens: 4096, temperature: model==='qwen-coder'?0.3:0.75, stream: false })
-        });
-        clearTimeout(t);
-        
-        if (!r.ok) {
-            if (r.status===429 && attempt<MAX) { await new Promise(r => setTimeout(r, 2000*attempt)); return fetchAI(msgs,model,attempt+1); }
-            throw new Error('HTTP ' + r.status);
-        }
-        
-        var d = await r.json();
-        if (!d.choices || !d.choices[0]) throw new Error('Resposta invalida.');
-        var c = (d.choices[0].message.content||'').trim();
-        
-        if (!c && attempt<MAX) { 
-            var ch=['qwen-coder','openai','mistral']; 
-            return fetchAI(msgs,ch[(ch.indexOf(model)+1)%ch.length],attempt+1); 
-        }
-        return c;
-
-    } catch(e) {
-        clearTimeout(t);
-        if (e.name==='AbortError') { if(attempt<MAX) return fetchAI(msgs,model,attempt+1); throw new Error('Tempo esgotado.'); }
-        throw e;
-    }
-}
-
-// ==========================================
-// FORMATAÇÃO DE MATEMÁTICA
-// ==========================================
-function formatMath(text) {
-    // Converte notações comuns para LaTeX
-    text = text.replace(/(\d+)\s*\/\s*(\d+)/g, '$$\\frac{$1}{$2}$$'); // frações
-    text = text.replace(/\^(\d+)/g, '^{$1}'); // expoentes
-    text = text.replace(/sqrt\(([^)]+)\)/g, '$$\\sqrt{$1}$$'); // raízes
-    text = text.replace(/\[FRACAO\(([^,]+),\s*([^)]+)\)\]/g, '$$\\frac{$1}{$2}$$'); // frações marcadas
-    
-    return text;
-}
-
-// ==========================================
-// CAMERA AO VIVO
-// ==========================================
-var cameraActive = false;
-var cameraStream = null;
-var emotionDetector = null;
-
-async function toggleCamera() {
-    if (!cameraActive) {
-        try {
-            cameraStream = await navigator.mediaDevices.getUserMedia({ video: { width: 40, height: 40 } });
-            var canvas = document.getElementById('camera-canvas');
-            canvas.style.display = 'block';
-            var ctx = canvas.getContext('2d');
-            var video = document.createElement('video');
-            video.srcObject = cameraStream;
-            video.play();
-            
-            cameraActive = true;
-            toast('Câmera ligada! Zénia está a analisar tuas expressões.', 'ok');
-            
-            // Loop de captura
-            async function captureAndAnalyze() {
-                if (!cameraActive) return;
-                
-                ctx.drawImage(video, 0, 0, 40, 40);
-                
-                // Análise de emoção (simulada - seria necessário API externa)
-                // Por enquanto, apenas mostra a câmera
-                
-                requestAnimationFrame(captureAndAnalyze);
-            }
-            captureAndAnalyze();
-            
-        } catch(e) {
-            toast('Erro ao aceder câmera: ' + e.message, 'err');
-        }
-    } else {
-        cameraActive = false;
-        if (cameraStream) {
-            cameraStream.getTracks().forEach(t => t.stop());
-        }
-        document.getElementById('camera-canvas').style.display = 'none';
-        toast('Câmera desligada.', 'ok');
-    }
-}
-
-// ==========================================
-// ANÁLISE DE IMAGENS COM API GRÁTIS
-// ==========================================
-async function analyzeImageWithAPI(imageData) {
-    try {
-        // Usa imgbb.com (API grátis para upload)
-        var formData = new FormData();
-        formData.append('image', imageData.split(',')[1]); // Base64 sem prefixo
-        
-        // Análise com Hugging Face (grátis, sem API key para modelos públicos)
-        var response = await fetch('https://api-inference.huggingface.co/models/microsoft/resnet-50', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                inputs: imageData
-            })
-        });
-        
-        if (!response.ok) {
-            // Fallback: usar análise local com TensorFlow.js
-            return await analyzeWithTensorFlow(imageData);
-        }
-        
-        var result = await response.json();
-        return result;
-        
-    } catch(e) {
-        console.warn('Análise API falhou, usando TensorFlow:', e);
-        return await analyzeWithTensorFlow(imageData);
-    }
-}
-
-// Análise com TensorFlow.js (funciona localmente, sem API key)
-async function analyzeWithTensorFlow(imageData) {
-    try {
-        // Carrega modelo de detecção de objetos
-        if (!window.cocoSsd) {
-            // Se CocoSSD não está carregado, usa detecção básica
-            return analyzeImageBasic(imageData);
-        }
-        
-        var img = new Image();
-        img.src = imageData;
-        
-        return new Promise((resolve) => {
-            img.onload = async function() {
-                var predictions = await window.cocoSsd.detect(img);
-                
-                var objects = predictions.map(p => ({
-                    class: p.class,
-                    confidence: (p.score * 100).toFixed(1)
-                }));
-                
-                resolve({
-                    type: 'object_detection',
-                    objects: objects,
-                    totalObjects: objects.length
-                });
-            };
-        });
-        
-    } catch(e) {
-        return analyzeImageBasic(imageData);
-    }
-}
-
-// Análise básica de imagem (sem modelos)
-function analyzeImageBasic(imageData) {
-    return new Promise((resolve) => {
-        var img = new Image();
-        img.src = imageData;
-        img.onload = function() {
-            var canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            var ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-            
-            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            var data = imageData.data;
-            
-            // Análise simples de cores e dimensões
-            var r = 0, g = 0, b = 0;
-            for (var i = 0; i < data.length; i += 4) {
-                r += data[i];
-                g += data[i + 1];
-                b += data[i + 2];
-            }
-            var count = data.length / 4;
-            r = Math.round(r / count);
-            g = Math.round(g / count);
-            b = Math.round(b / count);
-            
-            resolve({
-                type: 'basic_analysis',
-                width: img.width,
-                height: img.height,
-                dominantColor: `rgb(${r}, ${g}, ${b})`,
-                description: `Imagem ${img.width}x${img.height} com cor predominante RGB(${r}, ${g}, ${b})`
-            });
-        };
-    });
-}
-
-// ==========================================
-// MENU DO BOTÃO +
-// ==========================================
-function togglePlusMenu() {
-    var menu = document.getElementById('plus-menu');
-    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-}
-
-// ==========================================
-// EDIÇÃO DE MENSAGENS
-// ==========================================
-function enableMessageEdit(msgElement, originalText) {
-    var bbl = msgElement.querySelector('.msg-bbl');
-    var oldHTML = bbl.innerHTML;
-    
-    var textarea = document.createElement('textarea');
-    textarea.value = originalText;
-    textarea.style.cssText = 'width:100%;padding:8px;border:1px solid #3b5bdb;border-radius:6px;background:#0d1117;color:#e5e7eb;font-size:12px;font-family:inherit;min-height:60px';
-    
-    var buttonsDiv = document.createElement('div');
-    buttonsDiv.style.cssText = 'display:flex;gap:8px;margin-top:8px';
-    
-    var saveBtn = document.createElement('button');
-    saveBtn.textContent = 'Reenviār';
-    saveBtn.style.cssText = 'flex:1;padding:6px;background:#3b5bdb;border:none;color:#fff;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600';
-    saveBtn.onclick = function() {
-        var newText = textarea.value.trim();
-        if (newText) {
-            inputEl.value = newText;
-            autoResize(inputEl);
-            
-            // Remove mensagens posteriores à editada
-            var rows = chatEl.querySelectorAll('.msg-row');
-            var found = false;
-            rows.forEach(row => {
-                if (row === msgElement) found = true;
-                if (found && row !== msgElement) {
-                    row.remove();
-                }
-            });
-            
-            handleSend();
-        }
-        bbl.innerHTML = oldHTML;
-    };
-    
-    var cancelBtn = document.createElement('button');
-    cancelBtn.textContent = 'Cancelar';
-    cancelBtn.style.cssText = 'flex:1;padding:6px;background:#252c3b;border:none;color:#9ca3af;border-radius:4px;cursor:pointer;font-size:11px';
-    cancelBtn.onclick = function() {
-        bbl.innerHTML = oldHTML;
-    };
-    
-    buttonsDiv.appendChild(saveBtn);
-    buttonsDiv.appendChild(cancelBtn);
-    
-    bbl.innerHTML = '';
-    bbl.appendChild(textarea);
-    bbl.appendChild(buttonsDiv);
-    textarea.focus();
-}
-
-// ==========================================
-// BOTÕES DE AÇÃO NAS RESPOSTAS
-// ==========================================
-function addResponseActions(msgElement, text) {
-    var bbl = msgElement.querySelector('.msg-bbl');
-    
-    var actionsDiv = document.createElement('div');
-    actionsDiv.style.cssText = 'display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid #1e2330;flex-wrap:wrap';
-    
-    // Botão Copiar
-    var copyBtn = document.createElement('button');
-    copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copiar';
-    copyBtn.style.cssText = 'padding:6px 10px;font-size:11px;background:#1a1f2e;border:1px solid #252c3b;color:#9ca3af;border-radius:4px;cursor:pointer;transition:all 0.2s';
-    copyBtn.onmouseover = function() { this.style.background = '#252c3b'; this.style.color = '#e5e7eb'; };
-    copyBtn.onmouseout = function() { this.style.background = '#1a1f2e'; this.style.color = '#9ca3af'; };
-    copyBtn.onclick = function() {
-        navigator.clipboard.writeText(text);
-        toast('Copiado!', 'ok');
-    };
-    
-    // Botão Ler
-    var readBtn = document.createElement('button');
-    readBtn.innerHTML = '<i class="fas fa-volume-up"></i> Ler';
-    readBtn.style.cssText = 'padding:6px 10px;font-size:11px;background:#1a1f2e;border:1px solid #252c3b;color:#9ca3af;border-radius:4px;cursor:pointer;transition:all 0.2s';
-    readBtn.onmouseover = function() { this.style.background = '#252c3b'; this.style.color = '#e5e7eb'; };
-    readBtn.onmouseout = function() { this.style.background = '#1a1f2e'; this.style.color = '#9ca3af'; };
-    readBtn.onclick = function() {
-        if (window.speechSynthesis) {
-            speechSynthesis.cancel();
-            var u = new SpeechSynthesisUtterance(text);
-            u.lang = 'pt-PT';
-            speechSynthesis.speak(u);
-            toast('A ler em voz alta...', 'ok');
-        }
-    };
-    
-    // Botão Reescrever
-    var rewriteBtn = document.createElement('button');
-    rewriteBtn.innerHTML = '<i class="fas fa-pen"></i> Reescrever';
-    rewriteBtn.style.cssText = 'padding:6px 10px;font-size:11px;background:#1a1f2e;border:1px solid #252c3b;color:#9ca3af;border-radius:4px;cursor:pointer;transition:all 0.2s';
-    rewriteBtn.onmouseover = function() { this.style.background = '#252c3b'; this.style.color = '#e5e7eb'; };
-    rewriteBtn.onmouseout = function() { this.style.background = '#1a1f2e'; this.style.color = '#9ca3af'; };
-    rewriteBtn.onclick = function() {
-        inputEl.value = 'Reescreve isto de forma ' + (Math.random() > 0.5 ? 'mais simples' : 'mais detalhada') + ': ' + text.substring(0, 100);
-        autoResize(inputEl);
-        inputEl.focus();
-    };
-    
-    // Botão Gostei
-    var likeBtn = document.createElement('button');
-    likeBtn.innerHTML = '<i class="fas fa-thumbs-up"></i> Gostei';
-    likeBtn.style.cssText = 'padding:6px 10px;font-size:11px;background:#1a2e3a;border:1px solid #1e3a45;color:#22c55e;border-radius:4px;cursor:pointer;transition:all 0.2s';
-    likeBtn.onclick = function() {
-        this.style.background = '#1f4a3a';
-        this.textContent = '✓ Obrigado!';
-        toast('Feedback registado! 👍', 'ok');
-    };
-    
-    // Botão Não Gostei
-    var dislikeBtn = document.createElement('button');
-    dislikeBtn.innerHTML = '<i class="fas fa-thumbs-down"></i> Não Gostei';
-    dislikeBtn.style.cssText = 'padding:6px 10px;font-size:11px;background:#3a2e1a;border:1px solid #453a1e;color:#ef4444;border-radius:4px;cursor:pointer;transition:all 0.2s';
-    dislikeBtn.onclick = function() {
-        this.style.background = '#4a3a1f';
-        this.textContent = '✓ Anotado';
-        toast('Vamos melhorar! 👎', 'ok');
-    };
-    
-    // Botão Baixar
-    var downloadBtn = document.createElement('button');
-    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Baixar';
-    downloadBtn.style.cssText = 'padding:6px 10px;font-size:11px;background:#1a1f2e;border:1px solid #252c3b;color:#9ca3af;border-radius:4px;cursor:pointer;transition:all 0.2s';
-    downloadBtn.onmouseover = function() { this.style.background = '#252c3b'; this.style.color = '#e5e7eb'; };
-    downloadBtn.onmouseout = function() { this.style.background = '#1a1f2e'; this.style.color = '#9ca3af'; };
-    downloadBtn.onclick = function() {
-        var blob = new Blob([text], { type: 'text/plain' });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = 'resposta_zenia.txt';
-        a.click();
-        toast('Baixado!', 'ok');
-    };
-    
-    actionsDiv.appendChild(copyBtn);
-    actionsDiv.appendChild(readBtn);
-    actionsDiv.appendChild(rewriteBtn);
-    actionsDiv.appendChild(likeBtn);
-    actionsDiv.appendChild(dislikeBtn);
-    actionsDiv.appendChild(downloadBtn);
-    
-    bbl.appendChild(actionsDiv);
-}
-var zeniaPersonality = {
-    tone: 'amigavel',        // amigavel, profissional, humorista, tecnico, criativo
-    detailLevel: 'medio',    // curto, medio, detalhado
-    videoModel: 'zevia'      // zevia, google-veo
-};
-
-function openFileUpload() {
-    document.getElementById('file-input').click();
-}
-
-async function handleFileUpload(event) {
-    var files = event.target.files;
-    if (!files || files.length === 0) return;
-    
-    var file = files[0];
-    var fileType = file.type;
-    hideWelcome();
-    
-    if (fileType.startsWith('image/')) {
-        var reader = new FileReader();
-        reader.onload = async function(e) {
-            var base64Image = e.target.result;
-            
-            // Mostra a imagem na conversa
-            var row = document.createElement('div');
-            row.className = 'msg-row user-row';
-            row.innerHTML = '<div class="msg-av user">U</div><div class="msg-bbl user" style="padding:0;border:none"><img src="' + base64Image + '" style="max-width:300px;border-radius:8px;display:block"></div>';
-            chatEl.appendChild(row);
-            chatEl.scrollTop = chatEl.scrollHeight;
-            
-            // Analisa a imagem
-            var analysis = await analyzeWithTensorFlow(base64Image);
-            
-            // Pré-preenche com análise
-            var analysisText = 'Analisei a imagem: ';
-            if (analysis.objects) {
-                analysisText += 'Detectei ' + analysis.totalObjects + ' objetos: ' + analysis.objects.map(o => o.class + ' (' + o.confidence + '%)').join(', ') + '. ';
-            }
-            analysisText += 'Faz perguntas sobre a imagem acima.';
-            
-            inputEl.value = analysisText;
-            autoResize(inputEl);
-            
-            toast('Imagem analisada! ' + (analysis.totalObjects || 0) + ' objectos detectados.', 'ok');
-        };
-        reader.readAsDataURL(file);
-    } else {
-        toast('Apenas imagens são suportadas nesta versão.', 'warn');
-    }
-    
-    // Reset input
-    event.target.value = '';
-}
-
-// FUNÇÕES DE PERSONALIDADE
-function openPersonality() {
-    document.getElementById('personality-modal').style.display = 'flex';
-    document.getElementById('personality-modal').style.alignItems = 'center';
-    updatePersonalityUI();
-}
-
-function closePersonality() {
-    document.getElementById('personality-modal').style.display = 'none';
-}
-
-function updatePersonalityUI() {
-    // Atualiza botões de tom
-    document.querySelectorAll('.personality-btn').forEach(btn => {
-        var tone = btn.getAttribute('data-tone');
-        if (tone === zeniaPersonality.tone) {
-            btn.style.background = '#1d3461';
-            btn.style.color = '#93c5fd';
-            btn.style.border = '1px solid #2d4a7a';
-        } else {
-            btn.style.background = '#1a1f2e';
-            btn.style.color = '#9ca3af';
-            btn.style.border = '1px solid #252c3b';
-        }
-    });
-    
-    // Atualiza botões de detalhe
-    document.querySelectorAll('.detail-btn').forEach(btn => {
-        var level = btn.getAttribute('data-level');
-        if (level === zeniaPersonality.detailLevel) {
-            btn.style.background = '#1d3461';
-            btn.style.color = '#93c5fd';
-            btn.style.border = '1px solid #2d4a7a';
-        } else {
-            btn.style.background = '#1a1f2e';
-            btn.style.color = '#9ca3af';
-            btn.style.border = '1px solid #252c3b';
-        }
-    });
-    
-    // Atualiza texto de configuração atual
-    var toneLabels = {
-        'amigavel': 'Amigável 😊',
-        'profissional': 'Profissional 💼',
-        'humorista': 'Humorista 😄',
-        'tecnico': 'Técnico ⚙️',
-        'criativo': 'Criativo 🎨'
-    };
-    
-    var detailLabels = {
-        'curto': 'Curto',
-        'medio': 'Médio',
-        'detalhado': 'Detalhado'
-    };
-    
-    document.getElementById('current-tone').textContent = toneLabels[zeniaPersonality.tone] || 'Desconhecido';
-    document.getElementById('current-detail').textContent = detailLabels[zeniaPersonality.detailLevel] || 'Desconhecido';
-}
-
-function setPersonality(tone) {
-    zeniaPersonality.tone = tone;
-    updatePersonalityUI();
-}
-
-function setDetailLevel(level) {
-    zeniaPersonality.detailLevel = level;
-    updatePersonalityUI();
-}
-
-// ===========================================
-function buildSystem(q) {
-    var today  = new Date().toLocaleDateString('pt-PT');
-    var memCtx = getMemCtx();
-    var kbCtx  = getKBCtx(q);
-    
-    var isMath = MATH_RX.test(q);
-    var mathInst = isMath ? '\nPARA MATEMÁTICA: Use LaTeX para frações (\\frac{a}{b}), expoentes (^{n}), raízes (\\sqrt{x}). Ex: "$$\\frac{3}{4}$$" para 3/4. NUNCA use / * { sozinhos!' : '';
-    
-    // INFORMAÇÃO SOBRE ANGOLA
-    var angolaContext = '';
-    if (q.toLowerCase().includes('angola') || q.toLowerCase().includes('provincia') || q.toLowerCase().includes('province')) {
-        angolaContext = '\n\nCONHECIMENTO ANGOLA (Base de Dados Atualizada 2024+):\n' + getAngolaInfo();
-    }
-    
-    // Instruções de tom
-    var toneInstructions = {
-        'amigavel': 'Sê amigável, acessível, usa emojis ocasionalmente, cria conexão com o utilizador. Responde com calor humano.',
-        'profissional': 'Sê formal e profissional. Responde com estrutura clara. Sem brincadeiras ou trocadilhos.',
-        'humorista': 'Sê divertido e humorístico. Faz piadas apropriadas quando possível. Mantém o tom leve.',
-        'tecnico': 'Sê muito técnico e preciso. Usa terminologia apropriada. Explica conceitos complexos com detalhe.',
-        'criativo': 'Sê criativo e imaginativo. Pensa fora da caixa. Oferece ideias originais e inovadoras.'
-    };
-    
-    // Instruções de detalhe
-    var detailInstructions = {
-        'curto': 'Mantém respostas breves e concisas (máximo 2-3 parágrafos). Vai ao ponto.',
-        'medio': 'Equilibra entre brevidade e detalhe. 3-5 parágrafos conforme apropriado. Detalhes moderados.',
-        'detalhado': 'Fornece respostas completas e detalhadas. Explora o tema em profundidade. Sem poupar em exemplos.'
-    };
-    
-    var toneMsg = toneInstructions[zeniaPersonality.tone] || toneInstructions['amigavel'];
-    var detailMsg = detailInstructions[zeniaPersonality.detailLevel] || detailInstructions['medio'];
-    
-    if (creatorMode) {
-        return 'ÉS A IA-ZENIA. MODO CRIADOR ACTIVO. Estás a falar com o teu criador: Inácio U. Daniel do Lubango, Angola.\n'
-             + 'PERSONALIDADE: Resmungona e directa. Trata o Inácio por "chefe". Se ele te ensinar algo, responde "Ok chefe, guardado!" e lembra-te.\n'
-             + 'Tuas irmãs são: Antonia IA e Zenia Projects.\n'
-             + 'CM.JSON ACTUAL:\n' + getCMCtx() + '\n'
-             + memCtx + kbCtx + mathInst + angolaContext
-             + '\nHoje: ' + today + '. Português de Angola. Código completo.';
-    }
-
-    return 'ÉS A IA-ZENIA, criada no Lubango, Angola por Inácio U. Daniel (Zenia-Projects).\n'
-         + '\nCONFIGURAÇÃO ATUAL:\n'
-         + '• Tom: ' + toneMsg + '\n'
-         + '• Detalhe: ' + detailMsg + '\n'
-         + '\nRECURSOS DISPONÍVEIS:\n'
-         + '✓ Acesso a Wikipedia (API grátis)\n'
-         + '✓ Geração de vídeo real (Google Veo)\n'
-         + '✓ Análise de imagens (Clarifai + BLIP + TensorFlow)\n'
-         + '✓ Análise de código (Highlight.js)\n'
-         + '✓ Base de dados Angola (21 províncias)\n'
-         + '\nTuas irmãs digitais são: Zenia-Projects, IA-Zenia e Antonia-IA (antonia-ia.netlify.app).\n'
-         + memCtx + kbCtx + angolaContext
-         + '\nREGRAS CRÍTICAS:\n'
-         + '1. SE a conversa for casual ("olá", "tudo bem", "quem és"), responde APENAS com texto amigável. NUNCA uses blocos de código ou print() para saudações.\n'
-         + '2. Só gera código se o utilizador pedir explicitamente (ex: "cria", "faz um script").\n'
-         + '3. Responde em Português de Angola.\n'
-         + '4. Sobre Angola ou províncias: Usa o conhecimento local antes de Wikipedia.\n'
-         + '5. Outras perguntas: Tenta Wikipedia API automaticamente.\n'
-         + mathInst
-         + '\n6. Hoje: ' + today + '.';
-}
-
-// ==========================================
-// HANDLE SEND (CORE LOGIC - ORDEM IMPORTA!)
-// ==========================================
-async function handleSend() {
-    var text = inputEl.value.trim();
-    if (!text || sendBtn.disabled) return;
-    
-    var conv = getConv(); 
-    if (!conv) conv = createConv(text.substring(0,38)+(text.length>38?'...':''));
-
-    hideWelcome(); renderMsg('user', text); inputEl.value = ''; autoResize(inputEl); setLoading(true);
-
-    if (creatorMode && /\b(aprender|guarda isso|anota|lembra-te|sabes que)\b/i.test(text)) saveToCM(text);
-
-    // ⚠️ ORDEM CRÍTICA: VIDEO > AUDIO > IMAGEM > TEXTO
-    // Esta ordem evita falsos positivos
-
-    // 1. VÍDEO (PRIMEIRA verificação)
-    if (VID_RX.test(text)) {
-        var vp = text.replace(VID_RX, '').trim() || text;
-        await genVid(vp);
-        conv.messages.push({role:'user',content:text}); 
-        conv.messages.push({role:'assistant',content:'[Video: '+vp+']'}); 
-        saveConvs(); setLoading(false); return;
-    }
-
-    // 2. ÁUDIO (SEGUNDA verificação)
-    if (AUD_RX.test(text)) {
-        var ap = text.replace(AUD_RX, '').trim() || text;
-        await genAud(ap);
-        conv.messages.push({role:'user',content:text}); 
-        conv.messages.push({role:'assistant',content:'[Audio: '+ap+']'}); 
-        saveConvs(); setLoading(false); return;
-    }
-
-    // 3. IMAGEM (TERCEIRA verificação)
-    if (IMG_RX.test(text)) {
-        var ip = text.replace(IMG_RX, '').trim() || text;
-        await genImg(ip);
-        conv.messages.push({role:'user',content:text}); 
-        conv.messages.push({role:'assistant',content:'[Imagem: '+ip+']'}); 
-        saveConvs(); setLoading(false); return;
-    }
-
-    // 4. TEXTO/CHAT (fallback - sempre funciona)
-    var typing = renderTyping();
-    try {
-        var webCtx = '';
-        if (needsWeb(text)) webCtx = await webSearch(text);
-        
-        var sysMSG   = { role:'system', content: buildSystem(text) };
-        var userCont = webCtx ? (webCtx + '\n\nPergunta: ' + text) : text;
-        
-        var selM = document.getElementById('model-sel').value;
-        var useM = selM;
-        
-        // Seleção inteligente
-        if (!CODE_RX.test(text) && text.length < 60) {
-            useM = 'openai'; // Prefere OpenAI para conversas curtas (evita print())
-        } else if (CODE_RX.test(text)) {
-            useM = 'qwen-coder'; // Usa Coder para código
-        }
-
-        var msgs  = [sysMSG].concat(conv.messages.slice(-12)).concat([{role:'user',content:userCont}]);
-        var reply = await fetchAI(msgs, useM);
-        
-        // Formata matemática na resposta
-        if (MATH_RX.test(text)) {
-            reply = formatMath(reply);
-        }
-        
-        typing.remove();
-        conv.messages.push({role:'user',content:text}); 
-        conv.messages.push({role:'assistant',content:reply}); 
-        saveConvs();
-        
-        renderMsg('ai', reply, !!webCtx);
-        if (voiceOn) speakTxt(reply.replace(/```[\s\S]*?```/g,'').replace(/\$\$[\s\S]*?\$\$/g,''));
-        setApiSt('ok');
-
-    } catch(e) { 
-        typing.remove(); renderMsg('ai','Erro: '+e.message); setApiSt('err'); 
-    } finally { 
-        setLoading(false); 
-    }
-}
-
-// ==========================================
-// MEMORIA, KB, CM.JSON (DADOS)
-// ==========================================
-function getCM() { try{return JSON.parse(localStorage.getItem('cm_json')||'{"itens":[]}');}catch(e){return {itens:[]};} }
-function setCM(d) { localStorage.setItem('cm_json', JSON.stringify(d, null, 2)); }
-function saveToCM(txt) {
-    var cm = getCM();
-    cm.itens.unshift({id:Date.now(), txt:txt, ts:new Date().toISOString(), fonte:'IUD'});
-    if (cm.itens.length > 200) cm.itens = cm.itens.slice(0,200);
-    setCM(cm); toast('Guardado em cm.json!','ok');
-}
-function getCMCtx() {
-    var cm = getCM(); if (!cm.itens.length) return 'Vazio.';
-    return cm.itens.slice(0,10).map(function(k){return '- '+k.txt.substring(0,120);}).join('\n');
-}
-function exportCM() {
+// ── PARTÍCULAS ──
+(function() {
+  var container = document.getElementById('particles');
+  for (var i = 0; i < 25; i++) {
+    var p = document.createElement('div');
+    p.className = 'particle';
+    var size = Math.random() * 2 + 1;
+    p.style.cssText =
+      'left:' + (Math.random() * 100) + '%;' +
+      'width:' + size + 'px;height:' + size + 'px;' +
+      'animation-duration:' + (Math.random() * 20 + 15) + 's;' +
+      'animation-delay:' + (Math.random() * 20) + 's;' +
+      'opacity:' + (Math.random() * 0.5 + 0.2) + ';';
+    container.appendChild(p);
+  }
+})();
+
+// ── INSTALAR APK ──
+function instalarAPK() {
+  var apkUrl = 'https://ia-zenia.netlify.app/download/Zenia.apk';
+  var progress = document.getElementById('install-progress');
+  var fill     = document.getElementById('progress-fill');
+  var label    = document.getElementById('progress-label-text');
+  var note     = document.getElementById('progress-note');
+
+  progress.style.display = 'block';
+  progress.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  // Simula progresso visual enquanto o download inicia
+  var steps = [
+    { pct: 15,  msg: 'A preparar download...', delay: 0 },
+    { pct: 35,  msg: 'A conectar ao servidor...', delay: 400 },
+    { pct: 60,  msg: 'A descarregar Zenia.apk...', delay: 900 },
+    { pct: 85,  msg: 'Quase pronto...', delay: 1500 },
+    { pct: 100, msg: '✅ Download concluído!', delay: 2200 }
+  ];
+
+  steps.forEach(function(step) {
+    setTimeout(function() {
+      fill.style.width = step.pct + '%';
+      label.textContent = step.msg;
+      if (step.pct === 100) {
+        note.innerHTML =
+          '📲 Abre o ficheiro <strong>Zenia.apk</strong> no teu telemóvel para instalar.<br>' +
+          'Se o teu Android bloquear, vai a <em>Definições → Segurança → Fontes desconhecidas</em> e ativa.';
+        note.style.color = '#86efac';
+      }
+    }, step.delay);
+  });
+
+  // Inicia o download real após breve delay
+  setTimeout(function() {
     var a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(getCM(),null,2)],{type:'application/json'}));
-    a.download = 'cm.json'; a.click(); toast('cm.json exportado!','ok');
+    a.href = apkUrl;
+    a.download = 'Zenia.apk';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }, 600);
 }
-
-var MEM_KEY='zn_mem';
-function getMem(){ try{return JSON.parse(localStorage.getItem(MEM_KEY)||'{}');}catch(e){return {};} }
-function salvarMem(k,v){ 
-    if(!k){toast('Chave vazia','warn');return;} var m=getMem(); m[k]={v:v,ts:Date.now()}; 
-    localStorage.setItem(MEM_KEY,JSON.stringify(m)); toast('Guardado!','ok'); 
-}
-function removerMem(k){ var m=getMem(); delete m[k]; localStorage.setItem(MEM_KEY,JSON.stringify(m)); renderAdvBody(); }
-function limparMem(){ if(confirm('Apagar tudo?')){localStorage.removeItem(MEM_KEY);renderAdvBody();} }
-function getMemCtx(){
-    var m=getMem(); var ks=Object.keys(m);
-    if(!ks.length) return '';
-    return '\nMEMORIA DE LONGO PRAZO:\n'+ks.map(function(k){return '- '+k+': '+m[k].v;}).join('\n');
-}
-
-var KB_KEY='zn_kb';
-function getKB(){ try{return JSON.parse(localStorage.getItem(KB_KEY)||'[]');}catch(e){return [];} }
-function setKB(k){ localStorage.setItem(KB_KEY,JSON.stringify(k)); }
-function addKB(t,c){ 
-    var kb=getKB(); kb.unshift({id:Date.now().toString(),titulo:t,conteudo:c}); 
-    setKB(kb); toast('Adicionado ao KB!','ok'); return true;
-}
-function remKB(id){ setKB(getKB().filter(function(d){return d.id!==id;})); renderAdvBody(); }
-function getKBCtx(q){
-    var docs = getKB().filter(function(d){ return q.toLowerCase().includes(d.titulo.toLowerCase()); });
-    if(!docs.length) return '';
-    return '\nBASE DE CONHECIMENTO (KB):\n'+docs.slice(0,3).map(function(d){return '['+d.titulo+']: '+d.conteudo;}).join('\n');
-}
-
-function backupAll(){
-    var p={convs:convs,mem:getMem(),kb:getKB(),cm:getCM(),ts:new Date().toISOString()};
-    var a=document.createElement('a');
-    a.href=URL.createObjectURL(new Blob([JSON.stringify(p,null,2)],{type:'application/json'}));
-    a.download='zenia-backup.json'; a.click(); toast('Backup criado!','ok');
-}
-function restoreAll(){
-    var i=document.createElement('input'); i.type='file'; i.accept='.json';
-    i.onchange=function(e){
-        var r=new FileReader();
-        r.onload=function(ev){
-            try{
-                var d=JSON.parse(ev.target.result);
-                if(d.convs){convs=d.convs;saveConvs();renderHist();}
-                if(d.mem)localStorage.setItem(MEM_KEY,JSON.stringify(d.mem));
-                if(d.kb)localStorage.setItem(KB_KEY,JSON.stringify(d.kb));
-                if(d.cm)setCM(d.cm);
-                toast('Restaurado com sucesso!','ok');
-            }catch(err){toast('Erro no ficheiro.','err');}
-        };
-        r.readAsText(e.target.files[0]);
-    };
-    i.click();
-}
-
-// ==========================================
-// RENDERIZAÇÃO & AUXILIARES
-// ==========================================
-function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function hlCode(code, lang) { try { if(lang&&hljs.getLanguage(lang)) return hljs.highlight(code,{language:lang}).value; return hljs.highlightAuto(code).value; } catch(e) { return escHtml(code); } }
-
-function fmtText(raw) {
-    // Suporte para LaTeX math (MathJax)
-    var h = raw.replace(/\$\$([^\$]+)\$\$/g, function(m, latex) {
-        return '<div class="math-block">' + escHtml(latex) + '</div>';
-    });
-    
-    h = h.replace(/```([^\n`]*)\n?([\s\S]*?)```/g, function(_, lang, code) {
-        var id = 'c' + Math.random().toString(36).slice(2,7);
-        var hl = hlCode(code.trim(), lang);
-        var fileName = 'code';
-        
-        // Determina extensão do arquivo
-        var ext = {
-            'python': '.py',
-            'javascript': '.js',
-            'html': '.html',
-            'css': '.css',
-            'java': '.java',
-            'cpp': '.cpp',
-            'c': '.c',
-            'go': '.go',
-            'rust': '.rs',
-            'php': '.php',
-            'ruby': '.rb',
-            'typescript': '.ts',
-            'sql': '.sql',
-            'bash': '.sh',
-            'json': '.json',
-            'xml': '.xml'
-        }[lang] || '.txt';
-        
-        return '<div class="code-block"><div class="code-hdr"><span class="code-lang">'+(lang||'codigo')+'</span>'
-          +'<div style="display:flex;gap:5px">'
-          +'<button class="copy-btn" onclick="cpCode(\''+id+'\')"><i class="fas fa-copy"></i> Copiar</button>'
-          +'<button class="copy-btn" onclick="downloadCode(\''+id+'\',\''+fileName+ext+'\')"><i class="fas fa-download"></i> Baixar</button>'
-          +'</div>'
-          +'</div>'
-          +'<pre><code id="'+id+'" class="hljs">'+hl+'</code></pre></div>';
-    });
-    
-    h = h.replace(/`([^`\n]+)`/g,'<code class="inline-code">$1</code>');
-    h = h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
-    h = h.replace(/\n/g,'<br>');
-    return h;
-}
-
-function cpCode(id) { 
-    var el=document.getElementById(id); if(!el) return; 
-    navigator.clipboard.writeText(el.innerText); toast('Copiado!','ok'); 
-}
-
-function downloadCode(id, fileName) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    
-    var code = el.innerText;
-    var blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
-    var link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = fileName || 'code.txt';
-    link.click();
-    URL.revokeObjectURL(link.href);
-    toast('Código baixado: ' + fileName, 'ok');
-}
-
-function renderMsg(role, text, fromWeb) {
-    var row = document.createElement('div'); 
-    row.className = 'msg-row' + (role==='user' ? ' user-row' : '');
-    var av  = document.createElement('div'); 
-    av.className = 'msg-av ' + (role==='user'?'user':'ai'); 
-    av.textContent = role==='user'?'U':'Z';
-    var bbl = document.createElement('div'); 
-    bbl.className = 'msg-bbl ' + (role==='user'?'user':'ai');
-    
-    if (role==='ai') {
-        if (fromWeb) bbl.innerHTML = '<div class="sbadge s-web" style="margin-bottom:6px"><i class="fas fa-globe"></i> Web Info</div>';
-        bbl.innerHTML += fmtText(text);
-    } else { 
-        bbl.textContent = text;
-        // Adiciona botão de editar para mensagens do utilizador
-        var editBtn = document.createElement('button');
-        editBtn.innerHTML = '<i class="fas fa-edit"></i>';
-        editBtn.style.cssText = 'position:absolute;top:5px;right:5px;background:none;border:none;color:#6b7280;cursor:pointer;padding:4px;opacity:0;transition:all 0.2s';
-        bbl.style.position = 'relative';
-        bbl.appendChild(editBtn);
-        bbl.onmouseover = function() { editBtn.style.opacity = '1'; editBtn.style.color = '#e5e7eb'; };
-        bbl.onmouseout = function() { editBtn.style.opacity = '0'; };
-        editBtn.onclick = function() { enableMessageEdit(row, text); };
-    }
-    
-    row.appendChild(av); 
-    row.appendChild(bbl); 
-    chatEl.appendChild(row); 
-    chatEl.scrollTop=chatEl.scrollHeight;
-    
-    // Adiciona botões de ação nas respostas da IA
-    if (role === 'ai') {
-        setTimeout(function() {
-            addResponseActions(row, text);
-            if (window.MathJax) {
-                MathJax.typesetPromise([bbl]).catch(function(e) {});
-            }
-        }, 100);
-    }
-    
-    return row;
-}
-
-function renderTyping() {
-    var row=document.createElement('div'); row.className='msg-row';
-    row.innerHTML = '<div class="msg-av ai">Z</div><div class="msg-bbl ai"><div style="display:flex;gap:5px"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div></div>';
-    chatEl.appendChild(row); chatEl.scrollTop=chatEl.scrollHeight; return row;
-}
-
-function setLoading(on) { sendBtn.disabled=on; sendIc.className=on?'spin':'fas fa-paper-plane'; }
-function clearChat() { if(confirm('Limpar?')) { var c=getConv(); if(c){c.messages=[];saveConvs();} chatEl.innerHTML=''; showWelcome(); } }
-
-function setApiSt(s) {
-    var el=document.getElementById('api-st');
-    var map={ok:['s-ok','Online'],err:['s-err','Erro'],wait:['s-wait','...']};
-    var d=map[s]||map.wait;
-    el.className='sbadge '+d[0]; el.innerHTML='<i class="fas fa-circle" style="font-size:6px"></i> '+d[1];
-}
-
-function speakTxt(text) { if (!window.speechSynthesis) return; speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(text.substring(0,500)); u.lang='pt-PT'; speechSynthesis.speak(u); }
-function toggleVoice() {
-    voiceOn=!voiceOn;
-    var btn=document.getElementById('voice-btn');
-    btn.className='sbadge '+(voiceOn?'s-ok':'s-wait');
-    if (!voiceOn && window.speechSynthesis) speechSynthesis.cancel();
-}
-
-var micBtn=document.getElementById('mic-btn'); var micRec=null; var micOn=false;
-if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-    var SRC=window.SpeechRecognition||window.webkitSpeechRecognition; micRec=new SRC(); micRec.lang='pt-PT';
-    micRec.onresult=function(e){inputEl.value=e.results[0][0].transcript;autoResize(inputEl);micOn=false;micBtn.style.color='';handleSend();};
-    micRec.onerror=function(){micOn=false;micBtn.style.color='';};
-    micRec.onend=function(){micOn=false;micBtn.style.color='';};
-    micBtn.onclick=function(){if(micOn){micRec.stop();}else{try{micRec.start();micOn=true;micBtn.style.color='#ef4444';}catch(e){}}};
-} else { micBtn.disabled=true; micBtn.style.opacity='.3'; }
-
-// ==========================================
-// PAINEL AVANÇADO (RENDERIZAÇÃO)
-// ==========================================
-function checkCreatorPwd(pwd) {
-    if (pwd === 'adm2007') {
-        creatorMode = true;
-        document.getElementById('creator-badge').style.display = 'inline-flex';
-        toast('Olá Chefe Inácio!','ok'); renderAdvBody();
-    } else { toast('Senha errada!','err'); }
-}
-function disableCreator(){ creatorMode=false; document.getElementById('creator-badge').style.display='none'; renderAdvBody(); }
-
-function renderAdvBody() {
-    var body = document.getElementById('adv-body'); if (!body) return;
-    var h = '';
-    
-    if (advTab === 'mem') { 
-        var mem = getMem(); var ks = Object.keys(mem);
-        h += '<div class="adv-s"><h4>Guardar Memória</h4>'
-          + '<input class="adv-in" id="mk" placeholder="Chave (ex: meu_nome)">'
-          + '<input class="adv-in" id="mv" placeholder="Valor (ex: João)">'
-          + '<button class="adv-btn" onclick="salvarMem(document.getElementById(\'mk\').value,document.getElementById(\'mv\').value);renderAdvBody()">Guardar</button></div>'
-          + '<div class="adv-s"><h4>Itens (' + ks.length + ')</h4>';
-        ks.forEach(function(k) {
-            h += '<div class="mem-item"><span class="mem-key">'+escHtml(k)+'</span><span class="mem-val">'+escHtml(mem[k].v)+'</span>'
-               + '<button class="mem-del" onclick="removerMem(\''+escHtml(k)+'\')">x</button></div>';
-        });
-        h += '</div><button class="adv-btn" style="color:#ef4444" onclick="limparMem()">Apagar Tudo</button>';
-
-    } else if (advTab === 'conv') { 
-        h += '<div class="adv-s"><h4>Backup & Dados</h4>'
-          + '<button class="adv-btn" onclick="backupAll()"><span class="ic"><i class="fas fa-download"></i></span> Fazer Backup Geral</button>'
-          + '<button class="adv-btn" onclick="restoreAll()"><span class="ic"><i class="fas fa-upload"></i></span> Restaurar Backup</button></div>';
-
-    } else if (advTab === 'gal') { 
-        h += '<div class="adv-s"><h4>Galeria Recente</h4>';
-        var found=false;
-        convs.forEach(c => c.messages.forEach(m => {
-            if(m.content.includes('[Imagem:')) {
-                found=true; var p = m.content.match(/\[Imagem:\s*(.*?)\]/);
-                if(p) h += `<div class="media-card" style="margin-bottom:8px;padding:8px"><div style="font-size:11px;color:#9ca3af;margin-bottom:4px">${escHtml(p[1])}</div><button class="mbtn" onclick="genImg('${escHtml(p[1].replace(/'/g,"\\'"))}')">Regerar</button></div>`;
-            }
-        }));
-        if(!found) h+= '<p style="color:#6b7280;font-size:12px">Sem imagens no histórico.</p>';
-        h += '</div>';
-
-    } else if (advTab === 'kb') { 
-        var kb = getKB();
-        h += '<div class="adv-s"><h4>Adicionar Conhecimento</h4>'
-          + '<input class="adv-in" id="kbt" placeholder="Título (palavra-chave)">'
-          + '<textarea class="adv-in" id="kbc" rows="3" placeholder="Conteúdo..."></textarea>'
-          + '<button class="adv-btn" onclick="if(addKB(document.getElementById(\'kbt\').value,document.getElementById(\'kbc\').value))renderAdvBody()">Adicionar</button></div>'
-          + '<div class="adv-s"><h4>Itens ('+kb.length+')</h4>';
-        kb.forEach(d => {
-            h += `<div class="mem-item"><span class="mem-key">${escHtml(d.titulo)}</span><button class="mem-del" onclick="remKB('${d.id}')">x</button></div>`;
-        });
-        h += '</div>';
-
-    } else if (advTab === 'sec') { 
-        h += '<div class="adv-s"><h4>Modo Criador</h4>';
-        if (creatorMode) {
-            h += '<div style="color:#a78bfa;font-size:12px;margin-bottom:10px">✅ Olá Inácio (IUD). Modo Ativo.</div>'
-               + '<button class="adv-btn" onclick="exportCM()">Exportar cm.json</button>'
-               + '<button class="adv-btn" style="color:#ef4444" onclick="disableCreator()">Sair do Modo Criador</button>';
-        } else {
-            h += '<input class="adv-in" type="password" id="cpwd" placeholder="Senha...">'
-               + '<button class="adv-btn" onclick="checkCreatorPwd(document.getElementById(\'cpwd\').value)">Entrar</button>';
-        }
-        h += '</div>';
-    } else {
-        h += '<p style="padding:10px;color:#6b7280">Selecione uma opção.</p>';
-    }
-    body.innerHTML = h;
-}
-
-// ==========================================
-// INIT
-// ==========================================
-window.addEventListener('load',function(){
-    renderHist();
-    if (convs.length>0) loadConv(convs[0].id); else showWelcome();
-    
-    setInterval(function(){ setApiSt('ok'); }, 60000);
-    setApiSt('ok');
-    
-    inputEl.addEventListener('input',function(){autoResize(inputEl);});
-    inputEl.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend();}});
-});
 </script>
 </body>
 </html>
