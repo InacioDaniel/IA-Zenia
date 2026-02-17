@@ -729,6 +729,9 @@ var VEO3_KEY  = "sk-e186d16eaf8242e283233714196d7bdc";
 // Proxy Netlify (via _redirects - sem CORS, server-side)
 // O Netlify reescreve /api/veo3/* → https://veo3api.com/*
 var VEO3 = {
+    generate:  '/api/veo3/generate',
+    feed:      '/api/veo3/feed',
+    extend:    '/api/veo3/extend',
     get1080p:  '/api/veo3/get-1080p'
 };
 
@@ -774,9 +777,9 @@ var sendIc  = document.getElementById('send-ic');
 // ==========================================
 // REGEX
 // ==========================================
-var VID_RX  = /\b(gera|cria|faz|mostra|quero|video|filme|clip\s+ver|faz-me)\s+um?\s*(video|filme|clip|animacao|gif|cena|movie|cinematic|scene)\b/i;
+var VID_RX  = /\b(gera|cria|faz|mostra|quero\s+ver|faz-me)\s+um?\s*(video|filme|clip|animacao|gif|cena|movie|cinematic|scene)\b/i;
 var AUD_RX  = /\b(gera|cria|faz|toca|compoe|quero\s+ouvir|sintetiza|narra|fala|canta)\s+um?a?\s*(musica|audio|som|song|beat|trilha|melodia|faixa|track|instrumental|voz|discurso|podcast)\b/i;
-var IMG_RX  = /\b(gera|cria|faz|desenha|pinta|mostra|quero\s+ver|faz-me|ilustra|imagem!foto|picture)\s+um?a?\s*(imagem|foto|image|picture|desenho|wallpaper|arte|avatar|paisagem|retrato|fotografia|quadro|pintura|ilustracao)\b/i;
+var IMG_RX  = /\b(gera|cria|faz|desenha|pinta|mostra|quero\s+ver|faz-me|ilustra)\s+um?a?\s*(imagem|foto|image|picture|desenho|wallpaper|arte|avatar|paisagem|retrato|fotografia|quadro|pintura|ilustracao)\b/i;
 var CODE_RX = /\b(codigo|code|script|funcao|function|html|css|javascript|python|java|sql|php|bash|react|api|algoritmo|classe|bug|debug)\b/i;
 var MATH_RX = /\b(exercicio|problema|calcular|resolver|simplificar|derivada|integral|fracao|divisao|multiplicacao|raiz|potencia|equacao|sistema|matriz)\b/i;
 
@@ -1068,15 +1071,15 @@ async function genVid(prompt) {
     var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '640px';
     var sid  = 'vs' + Date.now();
 
-    card.innerHTML = veoLoadingHTML(sid, '🚀 A submeter para Zevia...');
+    card.innerHTML = veoLoadingHTML(sid, '🚀 A submeter para Google Veo 3...');
     row.appendChild(av); row.appendChild(card);
     chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
 
     try {
         // 1 — SUBMETE GERAÇÃO
-        var genResp = await veoFetch(VEO3.get-1080p, 'POST', {
+        var genResp = await veoFetch(VEO3.get1080p, 'POST', {
             prompt: 'cinematic 4k ultra-realistic: ' + prompt,
-            model: 'get-1080p',
+            model: 'get1080p',
             aspect_ratio: '16:9',
             watermark: null
         });
@@ -1088,7 +1091,7 @@ async function genVid(prompt) {
         }
 
         var genData = await genResp.json();
-        if (genData.code !== 200) throw new Error(genData.message || 'Erro Zevia');
+        if (genData.code !== 200) throw new Error(genData.message || 'Erro Veo 3');
 
         var taskId = genData.data.task_id;
         setVeoStatus(sid, '✅ Task aceite — a aguardar geração...', 18);
@@ -1156,7 +1159,7 @@ async function pollVeoTask(taskId, sid) {
                 var urls = d.data?.response;
                 if (urls && urls.length) { setVeoStatus(sid, '🎬 Vídeo pronto!', 94); return urls[0]; }
             }
-            if (d.data?.status === 'FAILED') throw new Error('Zevia: geração falhou no servidor do Lubango.');
+            if (d.data?.status === 'FAILED') throw new Error('Veo 3: geração falhou no servidor.');
         } catch(e) {
             if (e.message.includes('falhou no servidor')) throw e;
         }
