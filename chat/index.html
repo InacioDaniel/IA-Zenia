@@ -725,59 +725,15 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
 // ==========================================
 var API_KEY   = "pk_urEpxcajGs5TF9Fs";
 var VEO3_KEY  = "sk-e186d16eaf8242e283233714196d7bdc";
-var VEO3_BASE = "https://veo3api.com";
 
-// Proxies CORS públicos (tenta em cascata se um falhar)
-var CORS_PROXIES = [
-    "https://corsproxy.io/?",
-    "https://api.allorigins.win/raw?url=",
-    "https://cors-anywhere.herokuapp.com/"
-];
-var activeProxy = 0;
-
-// Constrói URL com proxy CORS
-function proxyUrl(url) {
-    return CORS_PROXIES[activeProxy] + encodeURIComponent(url);
-}
-
-// Fetch com proxy CORS + fallback automático entre proxies
-async function corsGet(url, headers) {
-    for (var i = 0; i < CORS_PROXIES.length; i++) {
-        try {
-            var proxyEndpoint = CORS_PROXIES[i] + encodeURIComponent(url);
-            var resp = await fetch(proxyEndpoint, {
-                method: 'GET',
-                headers: headers || {},
-                signal: AbortSignal.timeout(15000)
-            });
-            if (resp.ok) { activeProxy = i; return resp; }
-        } catch(e) { /* tenta próximo proxy */ }
-    }
-    // Última tentativa: direto (pode falhar por CORS)
-    return fetch(url, { method: 'GET', headers: headers || {}, signal: AbortSignal.timeout(15000) });
-}
-
-async function corsPost(url, headers, body) {
-    for (var i = 0; i < CORS_PROXIES.length; i++) {
-        try {
-            var proxyEndpoint = CORS_PROXIES[i] + encodeURIComponent(url);
-            var resp = await fetch(proxyEndpoint, {
-                method: 'POST',
-                headers: Object.assign({'Content-Type':'application/json'}, headers || {}),
-                body: typeof body === 'string' ? body : JSON.stringify(body),
-                signal: AbortSignal.timeout(20000)
-            });
-            if (resp.ok) { activeProxy = i; return resp; }
-        } catch(e) { /* tenta próximo proxy */ }
-    }
-    // Última tentativa: direto
-    return fetch(url, {
-        method: 'POST',
-        headers: Object.assign({'Content-Type':'application/json'}, headers || {}),
-        body: typeof body === 'string' ? body : JSON.stringify(body),
-        signal: AbortSignal.timeout(20000)
-    });
-}
+// Proxy Netlify (via _redirects - sem CORS, server-side)
+// O Netlify reescreve /api/veo3/* → https://veo3api.com/*
+var VEO3 = {
+    generate:  '/api/veo3/generate',
+    feed:      '/api/veo3/feed',
+    extend:    '/api/veo3/extend',
+    get1080p:  '/api/veo3/get-1080p'
+};
 
 var IMG_EP    = "https://gen.pollinations.ai/image/";
 var IMG_EP2   = "https://image.pollinations.ai/prompt/";
@@ -1091,157 +1047,132 @@ function sendVisionToChat() {
 function copyToClipboard(text) { navigator.clipboard.writeText(text); toast('Copiado!','ok'); }
 
 // ==========================================
-// GERAÇÃO DE VÍDEO - Google Veo 3 (API Real veo3api.com)
+// GERAÇÃO DE VÍDEO - Google Veo 3
+// Proxy Netlify: /api/veo3/* → https://veo3api.com/*
+// Ficheiro _redirects na raiz do deploy (incluído no zip)
 // ==========================================
+async function veoFetch(endpoint, method, body) {
+    var opts = {
+        method: method || 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + VEO3_KEY,
+            'Content-Type': 'application/json'
+        },
+        signal: AbortSignal.timeout(20000)
+    };
+    if (body) opts.body = JSON.stringify(body);
+    var resp = await fetch(endpoint, opts);
+    return resp;
+}
+
 async function genVid(prompt) {
     var row  = document.createElement('div'); row.className = 'msg-row';
     var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
     var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '640px';
-    var statusId = 'vstatus-' + Date.now();
+    var sid  = 'vs' + Date.now();
 
-    card.innerHTML = veoLoadingHTML(statusId, 'A enviar pedido ao Google Veo 3...');
-    row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
+    card.innerHTML = veoLoadingHTML(sid, '🚀 A submeter para Google Veo 3...');
+    row.appendChild(av); row.appendChild(card);
+    chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
 
     try {
-        // 1. SUBMETE O PEDIDO DE GERAÇÃO
-        setVeoStatus(statusId, '🚀 A submeter para Google Veo 3...', 10);
-        var genResp = await corsPost(
-            VEO3_BASE + '/generate',
-            { 'Authorization': 'Bearer ' + VEO3_KEY },
-            {
-                prompt: 'cinematic, 4k, ultra-realistic: ' + prompt,
-                model: 'veo3-fast',
-                aspect_ratio: '16:9',
-                watermark: null
-            }
-        );
+        // 1 — SUBMETE GERAÇÃO
+        var genResp = await veoFetch(VEO3.generate, 'POST', {
+            prompt: 'cinematic 4k ultra-realistic: ' + prompt,
+            model: 'veo3-fast',
+            aspect_ratio: '16:9',
+            watermark: null
+        });
 
         if (!genResp.ok) {
-            var errText = await genResp.text().catch(() => '');
-            var errData = {};
-            try { errData = JSON.parse(errText); } catch(e) {}
-            throw new Error('Veo 3: ' + (errData.message || errData.error || ('HTTP ' + genResp.status + (errText ? ' — ' + errText.substring(0,80) : ''))));
+            var et = await genResp.text().catch(() => '');
+            var ed = {}; try { ed = JSON.parse(et); } catch(x) {}
+            throw new Error(ed.message || ed.error || 'HTTP ' + genResp.status);
         }
 
         var genData = await genResp.json();
-        if (genData.code !== 200) throw new Error('Erro Veo 3: ' + genData.message);
+        if (genData.code !== 200) throw new Error(genData.message || 'Erro Veo 3');
 
         var taskId = genData.data.task_id;
-        setVeoStatus(statusId, '✅ Pedido aceite! Task: ' + taskId.substring(0,20) + '...', 20);
+        setVeoStatus(sid, '✅ Task aceite — a aguardar geração...', 18);
 
-        // 2. POLLING - aguarda o vídeo ficar pronto (máx 3 minutos)
-        var videoUrl = await pollVeoTask(taskId, statusId);
+        // 2 — POLLING (máx 3 min)
+        var videoUrl = await pollVeoTask(taskId, sid);
+        if (!videoUrl) throw new Error('Tempo esgotado (3 min). Tenta novamente.');
 
-        if (!videoUrl) throw new Error('Tempo esgotado. Tenta novamente.');
-
-        // 3. TENTA OBTER VERSÃO 1080P (grátis)
-        setVeoStatus(statusId, '📥 A obter versão HD 1080P...', 95);
+        // 3 — 1080P grátis
+        setVeoStatus(sid, '📥 A obter versão 1080P HD...', 96);
         var hdUrl = await getVeo1080p(taskId);
 
-        // 4. MOSTRA O PLAYER
+        // 4 — PLAYER
         showVeoPlayer(card, hdUrl || videoUrl, prompt, taskId);
 
     } catch(e) {
-        var isCors = e.message.toLowerCase().includes('fetch') || e.message.toLowerCase().includes('network') || e.message.toLowerCase().includes('cors') || e.message.toLowerCase().includes('failed');
-        card.innerHTML = '<div style="padding:16px">'
+        card.innerHTML =
+            '<div style="padding:16px">'
             + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
-            + '<div style="width:36px;height:36px;background:rgba(239,68,68,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i></div>'
+            + '<div style="width:36px;height:36px;background:rgba(239,68,68,.15);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i></div>'
             + '<div><div style="font-size:13px;font-weight:600;color:#ef4444">Erro ao gerar vídeo</div>'
             + '<div style="font-size:11px;color:var(--text-muted);margin-top:2px">' + escHtml(e.message) + '</div></div></div>'
-            + (isCors ? '<div style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:8px;padding:10px;margin-bottom:12px;font-size:11px;color:#fbbf24">'
-                + '<i class="fas fa-info-circle"></i> <strong>Possível bloqueio CORS</strong> — O browser está a bloquear o pedido. '
-                + 'A Zenia vai tentar automaticamente com um proxy diferente na próxima tentativa.</div>' : '')
             + '<button onclick="genVid(\'' + escHtml(prompt.replace(/'/g,"\\'").replace(/\n/g,' ')) + '\')" '
             + 'style="padding:7px 14px;background:var(--send-btn);border:none;color:#fff;border-radius:7px;font-size:12px;cursor:pointer;font-family:var(--font-ui)">'
-            + '<i class="fas fa-redo"></i> Tentar novamente (proxy ' + ((activeProxy + 1) % CORS_PROXIES.length + 1) + '/' + CORS_PROXIES.length + ')'
-            + '</button>'
+            + '<i class="fas fa-redo"></i> Tentar novamente</button>'
             + '</div>';
-        // Avança para próximo proxy na próxima tentativa
-        activeProxy = (activeProxy + 1) % CORS_PROXIES.length;
     }
 }
 
-function veoLoadingHTML(statusId, msg) {
+function veoLoadingHTML(sid, msg) {
     return '<div style="padding:16px">'
         + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
-        + '<div style="width:36px;height:36px;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-video" style="color:#fff;font-size:14px"></i></div>'
+        + '<div style="width:36px;height:36px;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+        + '<i class="fas fa-video" style="color:#fff;font-size:14px"></i></div>'
         + '<div><div style="font-size:13px;font-weight:700;color:var(--accent-primary)">Google Veo 3</div>'
-        + '<div style="font-size:11px;color:var(--text-muted)" id="' + statusId + '-msg">' + msg + '</div></div></div>'
+        + '<div style="font-size:11px;color:var(--text-muted)" id="' + sid + '-msg">' + msg + '</div></div></div>'
         + '<div style="background:var(--border-color);border-radius:4px;height:6px;overflow:hidden;margin-bottom:8px">'
-        + '<div id="' + statusId + '-bar" style="height:100%;background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));width:5%;border-radius:4px;transition:width .5s ease"></div></div>'
+        + '<div id="' + sid + '-bar" style="height:100%;background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));width:5%;border-radius:4px;transition:width .5s ease"></div></div>'
         + '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted)">'
-        + '<span>Geração assíncrona via veo3api.com</span>'
-        + '<span id="' + statusId + '-pct">5%</span></div>'
-        + '<div style="margin-top:10px;font-size:10px;color:var(--text-muted);opacity:0.6">⏱ Pode demorar 1-3 minutos. A Zenia aguarda contigo!</div>'
+        + '<span>⏱ Pode demorar 1–3 minutos</span>'
+        + '<span id="' + sid + '-pct">5%</span></div>'
         + '</div>';
 }
 
-function setVeoStatus(statusId, msg, pct) {
-    var msgEl = document.getElementById(statusId + '-msg');
-    var barEl = document.getElementById(statusId + '-bar');
-    var pctEl = document.getElementById(statusId + '-pct');
-    if (msgEl) msgEl.textContent = msg;
-    if (barEl) barEl.style.width = pct + '%';
-    if (pctEl) pctEl.textContent = pct + '%';
+function setVeoStatus(sid, msg, pct) {
+    var m = document.getElementById(sid + '-msg');
+    var b = document.getElementById(sid + '-bar');
+    var p = document.getElementById(sid + '-pct');
+    if (m) m.textContent = msg;
+    if (b) b.style.width = pct + '%';
+    if (p) p.textContent = pct + '%';
 }
 
-async function pollVeoTask(taskId, statusId) {
-    var maxAttempts = 36; // 36 × 5s = 3 minutos
-    var attempt = 0;
-    var progressSteps = [25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 78, 80, 82, 84, 86, 88, 90, 91, 92, 93, 94];
-
-    while (attempt < maxAttempts) {
-        await new Promise(r => setTimeout(r, 5000)); // aguarda 5s entre polls
-        attempt++;
-
-        var pct = progressSteps[Math.min(attempt, progressSteps.length - 1)];
-        var elapsed = attempt * 5;
-        setVeoStatus(statusId,
-            '⏳ A gerar... (' + elapsed + 's) — aguarda mais um pouco',
-            pct
-        );
-
+async function pollVeoTask(taskId, sid) {
+    var steps = [22,27,32,37,42,47,52,57,62,67,72,76,79,82,84,86,88,90,91,92,93,94];
+    for (var i = 0; i < 36; i++) {
+        await new Promise(r => setTimeout(r, 5000));
+        setVeoStatus(sid, '⏳ A gerar... (' + ((i+1)*5) + 's)', steps[Math.min(i, steps.length-1)]);
         try {
-            var resp = await corsGet(
-                VEO3_BASE + '/feed?task_id=' + encodeURIComponent(taskId),
-                { 'Authorization': 'Bearer ' + VEO3_KEY }
-            );
-
-            if (!resp.ok) continue;
-
-            var data = await resp.json();
-            if (data.code !== 200) continue;
-
-            var status = data.data?.status;
-
-            if (status === 'COMPLETED') {
-                var urls = data.data?.response;
-                if (urls && urls.length > 0) {
-                    setVeoStatus(statusId, '🎬 Vídeo pronto! A carregar...', 93);
-                    return urls[0];
-                }
-            } else if (status === 'FAILED') {
-                throw new Error('Geração falhou no servidor Veo 3.');
+            var r = await veoFetch(VEO3.feed + '?task_id=' + encodeURIComponent(taskId), 'GET');
+            if (!r.ok) continue;
+            var d = await r.json();
+            if (d.code !== 200) continue;
+            if (d.data?.status === 'COMPLETED') {
+                var urls = d.data?.response;
+                if (urls && urls.length) { setVeoStatus(sid, '🎬 Vídeo pronto!', 94); return urls[0]; }
             }
-            // status PENDING ou PROCESSING → continua
-
+            if (d.data?.status === 'FAILED') throw new Error('Veo 3: geração falhou no servidor.');
         } catch(e) {
-            if (e.message.includes('Geração falhou')) throw e;
-            // Ignora erros de rede e continua
+            if (e.message.includes('falhou no servidor')) throw e;
         }
     }
-    return null; // timeout
+    return null;
 }
 
 async function getVeo1080p(taskId) {
     try {
-        var resp = await corsGet(
-            VEO3_BASE + '/get-1080p?task_id=' + encodeURIComponent(taskId),
-            { 'Authorization': 'Bearer ' + VEO3_KEY }
-        );
-        if (!resp.ok) return null;
-        var data = await resp.json();
-        return data.data?.result_url || null;
+        var r = await veoFetch(VEO3.get1080p + '?task_id=' + encodeURIComponent(taskId), 'GET');
+        if (!r.ok) return null;
+        var d = await r.json();
+        return d.data?.result_url || null;
     } catch(e) { return null; }
 }
 
@@ -1250,67 +1181,40 @@ function showVeoPlayer(card, videoUrl, prompt, taskId) {
     card.innerHTML =
         '<div style="position:relative;background:#000;border-radius:8px 8px 0 0;overflow:hidden">'
         + '<video controls autoplay loop playsinline style="width:100%;display:block;max-height:400px" src="' + videoUrl + '"></video>'
-        + '<div style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.85);color:#fff;font-size:10px;padding:5px 12px;border-radius:18px;font-weight:700;display:flex;align-items:center;gap:5px">'
-        + '<i class="fas fa-video" style="color:#60a5fa"></i> Google Veo 3'
-        + '</div>'
-        + '<div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.85);color:#22c55e;font-size:10px;padding:5px 12px;border-radius:18px;font-weight:700">'
-        + '✅ 1080P HD'
-        + '</div>'
+        + '<div style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,.85);color:#fff;font-size:10px;padding:5px 12px;border-radius:18px;font-weight:700;display:flex;align-items:center;gap:5px">'
+        + '<i class="fas fa-video" style="color:#60a5fa"></i> Google Veo 3</div>'
+        + '<div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,.85);color:#22c55e;font-size:10px;padding:5px 12px;border-radius:18px;font-weight:700">✅ 1080P HD</div>'
         + '</div>'
         + '<div class="media-foot">'
         + '<span class="media-lbl"><i class="fas fa-film" style="color:var(--accent-primary);margin-right:4px"></i>' + safe + '</span>'
         + '<div style="display:flex;gap:5px;flex-wrap:wrap">'
-        + '<a href="' + videoUrl + '" target="_blank" download="veo3-video.mp4" class="mbtn"><i class="fas fa-download"></i> MP4</a>'
-        + '<button class="mbtn" onclick="extendVeoVideo(\'' + escHtml(taskId) + '\',\'' + escHtml(prompt.replace(/'/g,"\\'")) + '\')"><i class="fas fa-expand"></i> Estender</button>'
+        + '<a href="' + videoUrl + '" target="_blank" download="veo3.mp4" class="mbtn"><i class="fas fa-download"></i> MP4</a>'
+        + '<button class="mbtn" onclick="extendVeoVideo(\'' + escHtml(taskId) + '\',\'' + escHtml(prompt.replace(/'/g,"\\'")) + '\')"><i class="fas fa-plus"></i> Estender</button>'
         + '</div></div>';
     chatEl.scrollTop = chatEl.scrollHeight;
 }
 
-// ESTENDER VÍDEO VEO 3
 async function extendVeoVideo(originalTaskId, originalPrompt) {
-    var newPrompt = prompt('Descreve como continuar o vídeo:', 'Continue ' + originalPrompt);
+    var newPrompt = window.prompt('Como continuar o vídeo?', '');
     if (!newPrompt) return;
-
-    toast('A estender vídeo com Veo 3...', 'ok');
-
+    toast('A estender vídeo...', 'ok');
     try {
-        var resp = await corsPost(
-            VEO3_BASE + '/extend',
-            { 'Authorization': 'Bearer ' + VEO3_KEY },
-            {
-                task_id: originalTaskId,
-                prompt: newPrompt,
-                watermark: null
-            }
-        );
-
-        if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        var data = await resp.json();
-        if (data.code !== 200) throw new Error(data.message);
-
-        var newTaskId = data.data.task_id;
-        toast('Extensão iniciada! Task: ' + newTaskId.substring(0,15) + '...', 'ok');
-
-        // Cria novo card para o vídeo estendido
-        var row  = document.createElement('div'); row.className = 'msg-row';
-        var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
-        var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '640px';
-        var statusId = 'vext-' + Date.now();
-        card.innerHTML = veoLoadingHTML(statusId, 'A estender vídeo Veo 3...');
+        var r = await veoFetch(VEO3.extend, 'POST', { task_id: originalTaskId, prompt: newPrompt, watermark: null });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        var d = await r.json();
+        if (d.code !== 200) throw new Error(d.message);
+        var sid = 'vext' + Date.now();
+        var row = document.createElement('div'); row.className = 'msg-row';
+        var av  = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
+        var card= document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '640px';
+        card.innerHTML = veoLoadingHTML(sid, 'A estender vídeo...');
         row.appendChild(av); row.appendChild(card); chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
-
-        var videoUrl = await pollVeoTask(newTaskId, statusId);
-        if (videoUrl) {
-            var hdUrl = await getVeo1080p(newTaskId);
-            showVeoPlayer(card, hdUrl || videoUrl, newPrompt + ' (ext.)', newTaskId);
-        } else {
-            card.innerHTML = '<div style="padding:13px;color:#fbbf24">Extensão expirou. Tenta novamente.</div>';
-        }
-
-    } catch(e) {
-        toast('Erro ao estender: ' + e.message, 'err');
-    }
+        var videoUrl = await pollVeoTask(d.data.task_id, sid);
+        if (videoUrl) { var hd = await getVeo1080p(d.data.task_id); showVeoPlayer(card, hd||videoUrl, newPrompt, d.data.task_id); }
+        else card.innerHTML = '<div style="padding:13px;color:#fbbf24">Extensão expirou.</div>';
+    } catch(e) { toast('Erro: ' + e.message, 'err'); }
 }
+
 
 // ==========================================
 // IMAGEM
