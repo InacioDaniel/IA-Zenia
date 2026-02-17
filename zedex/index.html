@@ -1129,7 +1129,7 @@
 
         <!-- Footer -->
         <div class="footer">
-            Criado por <a href="#" target="_blank">Zénia Projects</a> - @inacio.u.daniel | Powered by Pollinations AI (OpenAI) 🌸
+            Criado por <a href="#" target="_blank">Zénia Projects</a> - @inacio.u.daniel | Powered by Pollinations AI (Mistral Large) 🌸🚀
         </div>
     </div>
 
@@ -1142,8 +1142,8 @@
     <script>
         // Pollinations API Configuration
         const POLLINATIONS_API_KEY = 'pk_7HHmBkBPEiNS5dyF';
-        const POLLINATIONS_API_URL = 'https://gen.pollinations.ai/v1/chat/completions';
-        const AI_MODEL = 'openai'; // Free model
+        const POLLINATIONS_API_URL = 'https://text.pollinations.ai';
+        const AI_MODEL = 'mistral-large'; // Powerful free model for coding
 
         let currentCode = '';
         let currentLanguage = 'html';
@@ -1151,20 +1151,34 @@
         let currentTheme = 'system';
         let conversationHistory = [];
 
-        // Pollinations API Call
+        // Pollinations API Call (using their text endpoint)
         async function callPollinationsAPI(messages) {
             try {
-                const response = await fetch(POLLINATIONS_API_URL, {
+                // Build the prompt from messages
+                let fullPrompt = '';
+                messages.forEach(msg => {
+                    if (msg.role === 'system') {
+                        fullPrompt += msg.content + '\n\n';
+                    } else if (msg.role === 'user') {
+                        fullPrompt += 'User: ' + msg.content + '\n\n';
+                    } else if (msg.role === 'assistant') {
+                        fullPrompt += 'Assistant: ' + msg.content + '\n\n';
+                    }
+                });
+
+                const url = `${POLLINATIONS_API_URL}/${AI_MODEL}`;
+                
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${POLLINATIONS_API_KEY}`,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${POLLINATIONS_API_KEY}`
                     },
                     body: JSON.stringify({
-                        model: AI_MODEL,
                         messages: messages,
+                        model: AI_MODEL,
                         temperature: 0.7,
-                        max_tokens: 4000
+                        max_tokens: 8000
                     })
                 });
 
@@ -1173,16 +1187,8 @@
                     throw new Error(`API Error: ${errorData.error?.message || response.statusText}`);
                 }
 
-                const result = await response.json();
-                
-                // Handle both OpenAI and Claude response formats
-                if (result.choices && result.choices[0]) {
-                    return result.choices[0].message;
-                } else if (result.content) {
-                    return { content: result.content };
-                } else {
-                    throw new Error('Formato de resposta inesperado');
-                }
+                const text = await response.text();
+                return { content: text };
             } catch (error) {
                 console.error('Pollinations API Error:', error);
                 throw error;
@@ -1193,10 +1199,10 @@
         function simulateReasoningSteps(prompt) {
             const steps = [
                 { text: '🔍 Analisando requisitos do projeto...', type: 'analyzing', delay: 0 },
-                { text: '🎨 Planejando estrutura e design...', type: 'planning', delay: 400 },
-                { text: '⚡ IA está processando sua solicitação...', type: 'generating', delay: 800 },
-                { text: '💻 Gerando código HTML, CSS e JavaScript...', type: 'generating', delay: 1200 },
-                { text: '🔧 Otimizando funcionalidades...', type: 'finalizing', delay: 1600 }
+                { text: '🎨 Planejando arquitetura e design...', type: 'planning', delay: 400 },
+                { text: '⚡ Mistral Large processando com IA avançada...', type: 'generating', delay: 800 },
+                { text: '💻 Gerando código HTML, CSS e JavaScript completo...', type: 'generating', delay: 1200 },
+                { text: '🔧 Otimizando e adicionando funcionalidades...', type: 'finalizing', delay: 1600 }
             ];
 
             steps.forEach(step => {
@@ -1434,7 +1440,7 @@ Lembre-se: retorne APENAS o código HTML completo, sem explicações.`;
                     { role: 'user', content: userMessage }
                 ];
 
-                console.log('🌸 Chamando Pollinations API com Claude...');
+                console.log('🌸 Chamando Pollinations API com Mistral Large...');
                 
                 // Call Pollinations API
                 const response = await callPollinationsAPI(conversationHistory);
@@ -1577,7 +1583,7 @@ REGRAS:
                     { role: 'user', content: `Escreva código ${language.toUpperCase()} completo e funcional para: "${description}"` }
                 ];
 
-                console.log(`🌸 Gerando código ${language} com IA...`);
+                console.log(`🌸 Gerando código ${language} com Mistral Large...`);
 
                 const response = await callPollinationsAPI(messages);
 
