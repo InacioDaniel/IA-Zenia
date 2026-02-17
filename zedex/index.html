@@ -434,6 +434,27 @@
                 opacity: 1;
             }
         }
+
+        /* Footer */
+        .footer {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 10px 30px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -444,7 +465,7 @@
                 <i class="fas fa-robot"></i>
                 <div>
                     <h1>Zedex</h1>
-                    <span>Gerador de Apps Web com IA</span>
+                    <span>by Zénia Projects - @inacio.u.daniel</span>
                 </div>
             </div>
         </div>
@@ -562,6 +583,11 @@
                 </div>
             </div>
         </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            Criado por <a href="#" target="_blank">Zénia Projects</a> - @inacio.u.daniel | Powered by Puter.js & GPT-5.2-Codex
+        </div>
     </div>
 
     <!-- Success Message -->
@@ -608,6 +634,7 @@
             const previewFrame = document.getElementById('previewFrame');
             
             generateBtn.disabled = true;
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
             loadingVisual.classList.add('active');
             previewFrame.style.display = 'none';
 
@@ -622,15 +649,20 @@ IMPORTANTE: Retorne APENAS o código HTML completo, incluindo CSS inline no <sty
 - Inclua todas as funcionalidades necessárias
 - O código deve começar com <!DOCTYPE html>`;
 
+                console.log('Iniciando chamada à API Puter...');
+                
                 const response = await puter.ai.chat(fullPrompt, {
                     model: "openai/gpt-5.2-codex"
                 });
+
+                console.log('Resposta recebida:', response);
 
                 // Clean the response
                 let htmlCode = response.trim();
                 
                 // Remove markdown code blocks if present
                 htmlCode = htmlCode.replace(/```html\n?/g, '').replace(/```\n?/g, '');
+                htmlCode = htmlCode.replace(/```/g, '');
                 
                 // Ensure it starts with DOCTYPE
                 if (!htmlCode.toLowerCase().includes('<!doctype html>')) {
@@ -653,9 +685,20 @@ IMPORTANTE: Retorne APENAS o código HTML completo, incluindo CSS inline no <sty
                 showSuccess('App gerado com sucesso!');
             } catch (error) {
                 console.error('Erro ao gerar app:', error);
-                alert('Erro ao gerar o app. Tente novamente!');
+                let errorMessage = 'Erro ao gerar o app. ';
+                
+                if (error.message.includes('connection')) {
+                    errorMessage += 'Verifique sua conexão com a internet e tente novamente.';
+                } else if (error.message.includes('API')) {
+                    errorMessage += 'Erro na API. Tente novamente em alguns segundos.';
+                } else {
+                    errorMessage += error.message || 'Tente novamente!';
+                }
+                
+                alert(errorMessage);
             } finally {
                 generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fas fa-magic"></i> Gerar App';
                 loadingVisual.classList.remove('active');
             }
         }
@@ -716,9 +759,13 @@ IMPORTANTE:
 - Inclua comentários quando necessário
 - Use as melhores práticas da linguagem`;
 
+                console.log('Gerando código em ' + language + '...');
+
                 const response = await puter.ai.chat(fullPrompt, {
                     model: "openai/gpt-5.2-codex"
                 });
+
+                console.log('Código recebido:', response);
 
                 let code = response.trim();
                 code = code.replace(/```[\w]*\n?/g, '').replace(/```\n?/g, '');
@@ -729,7 +776,17 @@ IMPORTANTE:
                 showSuccess(`Código em ${language} gerado com sucesso!`);
             } catch (error) {
                 console.error('Erro ao gerar código:', error);
-                alert('Erro ao gerar código. Tente novamente!');
+                let errorMessage = 'Erro ao gerar código. ';
+                
+                if (error.message.includes('connection')) {
+                    errorMessage += 'Verifique sua conexão com a internet.';
+                } else if (error.message.includes('API')) {
+                    errorMessage += 'Erro na API. Tente novamente.';
+                } else {
+                    errorMessage += error.message || 'Tente novamente!';
+                }
+                
+                alert(errorMessage);
             } finally {
                 loadingCode.classList.remove('active');
                 codeDisplay.style.display = 'block';
