@@ -746,7 +746,7 @@ var VISION_EP = "https://gen.pollinations.ai/v1/chat/completions";
 var angolaProvincias = {"Bengo":"Capital: Caxito | Norte | ~400k","Benguela":"Capital: Benguela | Centro | ~2.2M","Bié":"Capital: Kuito | Centro | ~1.4M","Cabinda":"Capital: Cabinda | Norte | ~800k | Enclave petrolífero","Cuando Cubango":"Capital: Menongue | Leste | ~500k","Cuanza Norte":"Capital: N'Dalatando | Norte | ~600k","Cuanza Sul":"Capital: Sumbe | Centro | ~1.1M","Cunene":"Capital: Ondjiva | Sul | ~600k","Huambo":"Capital: Huambo | Centro | ~2.3M","Huíla":"Capital: Lubango | Sul | ~1.5M","Lunda Norte":"Capital: Dundo | NE | ~600k","Lunda Sul":"Capital: Saurimo | NE | ~600k","Luanda":"Capital: Luanda | Costa | ~8.3M | CAPITAL NACIONAL","Malanje":"Capital: Malanje | Norte | ~1.2M","Moxico":"Capital: Luena | Leste | ~600k","Namibe":"Capital: Namibe | Sul | ~500k","Uíge":"Capital: Uíge | NE | ~1.1M","Zaire":"Capital: M'Banza Congo | NO | ~300k","Ícolo e Bengo":"Luanda Sul | Centro | ~1.1M","Cuando":"Capital: Menongue | ~500k","Cubango":"Capital: Cuito Cuanavale | ~500k"};
 
 function getAngolaInfo() {
-    var info = "ANGOLA (Atualizado 2024):\n• Capital: Luanda\n• Pop: ~35M\n• Moeda: Kwanza (AOA)\n• Presidente: João Lourenço\n• Independência: 11/11/1975\n• Províncias (21):\n";
+    var info = "ANGOLA (Atualizado 2026):\n• Capital: Luanda\n• Pop: ~35M\n• Moeda: Kwanza (AOA)\n• Presidente: João Lourenço\n• Independência: 11/11/1975\n• Províncias (21):\n";
     Object.entries(angolaProvincias).forEach(([k,v],i) => { info += (i+1)+". "+k+" - "+v+"\n"; });
     return info;
 }
@@ -1070,55 +1070,82 @@ async function genVid(prompt) {
     var av   = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
     var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '640px';
     var sid  = 'vs' + Date.now();
-
+    
     card.innerHTML = veoLoadingHTML(sid, '🚀 A submeter para Google Veo 3...');
     row.appendChild(av); row.appendChild(card);
     chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
-
+    
     try {
-        // 1 — SUBMETE GERAÇÃO
-        var genResp = await veoFetch(VEO3.get1080p, 'POST', {
-            prompt: 'cinematic 4k ultra-realistic: ' + prompt,
-            model: 'get1080p',
-            aspect_ratio: '16:9',
-            watermark: null
+        // Usar apenas o endpoint GET do Veo3 (modelo gratuito)
+        var baseUrl = 'https://veo3api.com/api/get1080p';
+        var fullUrl = baseUrl + '?prompt=' + encodeURIComponent('cinematic 4k ultra-realistic: ' + prompt) + '&model=get1080p&aspect_ratio=16:9';
+        
+        // Fazer requisição GET diretamente
+        var response = await fetch(fullUrl, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + VEO3_KEY,
+                'Content-Type': 'application/json'
+            },
+            signal: AbortSignal.timeout(20000)
         });
-
-        if (!genResp.ok) {
-            var et = await genResp.text().catch(() => '');
-            var ed = {}; try { ed = JSON.parse(et); } catch(x) {}
-            throw new Error(ed.message || ed.error || 'HTTP ' + genResp.status);
+        
+        if (!response.ok) {
+            var errorText = await response.text().catch(() => '');
+            var errorData = {};
+            try { errorData = JSON.parse(errorText); } catch(x) {}
+            throw new Error(errorData.message || errorData.error || 'HTTP ' + response.status);
         }
-
-        var genData = await genResp.json();
-        if (genData.code !== 200) throw new Error(genData.message || 'Erro Veo 3');
-
-        var taskId = genData.data.task_id;
+        
+        var data = await response.json();
+        if (data.code !== 200) throw new Error(data.message || 'Erro Veo 3');
+        
+        var taskId = data.data.task_id;
         setVeoStatus(sid, '✅ Task aceite — a aguardar geração...', 18);
-
-        // 2 — POLLING (máx 3 min)
+        
+        // Aguardar a conclusão do vídeo
         var videoUrl = await pollVeoTask(taskId, sid);
         if (!videoUrl) throw new Error('Tempo esgotado (3 min). Tenta novamente.');
-
-        // 3 — 1080P grátis
+        
+        // Obter a versão HD
         setVeoStatus(sid, '📥 A obter versão 1080P HD...', 96);
         var hdUrl = await getVeo1080p(taskId);
-
-        // 4 — PLAYER
+        
+        // Mostrar o player do vídeo
         showVeoPlayer(card, hdUrl || videoUrl, prompt, taskId);
-
+        
     } catch(e) {
-        card.innerHTML =
-            '<div style="padding:16px">'
-            + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
-            + '<div style="width:36px;height:36px;background:rgba(239,68,68,.15);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i></div>'
-            + '<div><div style="font-size:13px;font-weight:600;color:#ef4444">Erro ao gerar vídeo</div>'
-            + '<div style="font-size:11px;color:var(--text-muted);margin-top:2px">' + escHtml(e.message) + '</div></div></div>'
-            + '<button onclick="genVid(\'' + escHtml(prompt.replace(/'/g,"\\'").replace(/\n/g,' ')) + '\')" '
-            + 'style="padding:7px 14px;background:var(--send-btn);border:none;color:#fff;border-radius:7px;font-size:12px;cursor:pointer;font-family:var(--font-ui)">'
-            + '<i class="fas fa-redo"></i> Tentar novamente</button>'
-            + '</div>';
+        card.innerHTML = 
+            '<div style="padding:16px">' +
+            '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">' +
+            '<div style="width:36px;height:36px;background:rgba(239,68,68,.15);border-radius:50%;display:flex;align-items:center;justify-content:center">' +
+            '<i class="fas fa-exclamation-triangle" style="color:#ef4444"></i></div>' +
+            '<div><div style="font-size:13px;font-weight:600;color:#ef4444">Erro ao gerar vídeo</div>' +
+            '<div style="font-size:11px;color:var(--text-muted);margin-top:2px">' + escHtml(e.message) + '</div></div></div>' +
+            '<button onclick="genVid(\'' + escHtml(prompt.replace(/'/g,"\\'").replace(/\n/g,' ')) + '\')" ' +
+            'style="padding:7px 14px;background:var(--send-btn);border:none;color:#fff;border-radius:7px;font-size:12px;cursor:pointer;font-family:var(--font-ui)">' +
+            '<i class="fas fa-redo"></i> Tentar novamente</button>' +
+            '</div>';
     }
+}
+
+// Função para mostrar o player do vídeo
+function showVeoPlayer(card, videoUrl, prompt, taskId) {
+    var safe = escHtml(prompt.substring(0, 65));
+    card.innerHTML = 
+        '<div style="position:relative;background:#000;border-radius:8px 8px 0 0;overflow:hidden">' +
+        '<video controls autoplay loop playsinline style="width:100%;display:block;max-height:400px" src="' + videoUrl + '"></video>' +
+        '<div style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,.85);color:#fff;font-size:10px;padding:5px 12px;border-radius:18px;font-weight:700;display:flex;align-items:center;gap:5px">' +
+        '<i class="fas fa-video" style="color:#60a5fa"></i> Google Veo 3</div>' +
+        '<div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,.85);color:#22c55e;font-size:10px;padding:5px 12px;border-radius:18px;font-weight:700">✅ 1080P HD</div>' +
+        '</div>' +
+        '<div class="media-foot">' +
+        '<span class="media-lbl"><i class="fas fa-film" style="color:var(--accent-primary);margin-right:4px"></i>' + safe + '</span>' +
+        '<div style="display:flex;gap:5px;flex-wrap:wrap">' +
+        '<a href="' + videoUrl + '" target="_blank" download="veo3.mp4" class="mbtn"><i class="fas fa-download"></i> MP4</a>' +
+        '<button class="mbtn" onclick="extendVeoVideo(\'' + escHtml(taskId) + '\',\'' + escHtml(prompt.replace(/'/g,"\\'")) + '\')"><i class="fas fa-plus"></i> Estender</button>' +
+        '</div></div>';
+    chatEl.scrollTop = chatEl.scrollHeight;
 }
 
 function veoLoadingHTML(sid, msg) {
