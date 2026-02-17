@@ -1,1728 +1,1548 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zedex - Gerador de Apps Web com IA</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --bg-secondary: rgba(255, 255, 255, 0.95);
-            --bg-tertiary: #f5f5f5;
-            --text-primary: #333;
-            --text-secondary: #666;
-            --text-inverse: white;
-            --border-color: #e0e0e0;
-            --code-bg: #1e1e1e;
-            --code-text: #d4d4d4;
-            --accent-color: #667eea;
-            --success-color: #4caf50;
-            --toolbar-bg: #252526;
-            --toolbar-border: #3e3e42;
-        }
-
-        [data-theme="light"] {
-            --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --bg-secondary: rgba(255, 255, 255, 0.95);
-            --bg-tertiary: #f5f5f5;
-            --text-primary: #333;
-            --text-secondary: #666;
-            --text-inverse: white;
-            --border-color: #e0e0e0;
-            --code-bg: #ffffff;
-            --code-text: #333333;
-            --accent-color: #667eea;
-            --success-color: #4caf50;
-            --toolbar-bg: #f5f5f5;
-            --toolbar-border: #e0e0e0;
-        }
-
-        [data-theme="dark"] {
-            --bg-primary: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            --bg-secondary: rgba(30, 30, 46, 0.95);
-            --bg-tertiary: #252540;
-            --text-primary: #e0e0e0;
-            --text-secondary: #a0a0a0;
-            --text-inverse: #e0e0e0;
-            --border-color: #3e3e5e;
-            --code-bg: #1e1e1e;
-            --code-text: #d4d4d4;
-            --accent-color: #7c8adb;
-            --success-color: #66bb6a;
-            --toolbar-bg: #252526;
-            --toolbar-border: #3e3e42;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--bg-primary);
-            height: 100vh;
-            overflow: hidden;
-            transition: background 0.3s ease;
-        }
-
-        .container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-
-        /* Header */
-        .header {
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            padding: 15px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: var(--text-inverse);
-        }
-
-        .logo i {
-            font-size: 32px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
-        }
-
-        .logo h1 {
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-        .logo span {
-            font-size: 12px;
-            opacity: 0.8;
-        }
-
-        .theme-selector {
-            display: flex;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 5px;
-            border-radius: 8px;
-        }
-
-        .theme-btn {
-            padding: 8px 16px;
-            background: transparent;
-            color: var(--text-inverse);
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .theme-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .theme-btn.active {
-            background: var(--accent-color);
-            color: white;
-        }
-
-        /* Mobile Menu Toggle */
-        .mobile-menu-toggle {
-            display: none;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: var(--text-inverse);
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 18px;
-        }
-
-        @media (max-width: 768px) {
-            .mobile-menu-toggle {
-                display: block;
-            }
-            
-            .prompt-section {
-                position: fixed;
-                left: -100%;
-                top: 0;
-                height: 100vh;
-                z-index: 1000;
-                transition: left 0.3s ease;
-                box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
-            }
-            
-            .prompt-section.mobile-open {
-                left: 0;
-            }
-            
-            .examples {
-                display: block;
-            }
-        }
-
-        .mobile-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-
-        .mobile-overlay.active {
-            display: block;
-        }
-
-        .close-mobile-menu {
-            display: none;
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: var(--accent-color);
-            border: none;
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            align-items: center;
-            justify-content: center;
-        }
-
-        @media (max-width: 768px) {
-            .close-mobile-menu {
-                display: flex;
-            }
-        }
-
-        /* Tabs */
-        .tabs {
-            display: flex;
-            gap: 5px;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 0;
-        }
-
-        .tab {
-            padding: 12px 24px;
-            background: transparent;
-            color: rgba(255, 255, 255, 0.7);
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s;
-            border-bottom: 3px solid transparent;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .tab:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-
-        .tab.active {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            border-bottom-color: #667eea;
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-        }
-
-        /* Prompt Section */
-        .prompt-section {
-            width: 380px;
-            background: var(--bg-secondary);
-            backdrop-filter: blur(10px);
-            padding: 25px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .prompt-section h2 {
-            color: var(--text-primary);
-            margin-bottom: 15px;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .prompt-section h2 i {
-            color: var(--accent-color);
-        }
-
-        .prompt-input {
-            flex: 1;
-            width: 100%;
-            padding: 15px;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-            resize: none;
-            margin-bottom: 15px;
-            transition: border-color 0.3s;
-            background: var(--code-bg);
-            color: var(--code-text);
-        }
-
-        .prompt-input:focus {
-            outline: none;
-            border-color: var(--accent-color);
-        }
-
-        .examples {
-            margin-bottom: 15px;
-        }
-
-        .examples h3 {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-
-        .example-btn {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 6px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            text-align: left;
-            transition: all 0.3s;
-            color: var(--text-secondary);
-        }
-
-        .example-btn:hover {
-            background: var(--accent-color);
-            color: white;
-            border-color: var(--accent-color);
-            transform: translateX(5px);
-        }
-
-        .generate-btn {
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .generate-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .generate-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .generate-btn i {
-            font-size: 18px;
-        }
-
-        /* Tab Content */
-        .tab-content {
-            flex: 1;
-            display: none;
-            background: var(--code-bg);
-        }
-
-        .tab-content.active {
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* AI Thinking Panel */
-        .ai-thinking-panel {
-            display: none;
-            background: var(--code-bg);
-            color: var(--code-text);
-            padding: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-            border-bottom: 2px solid var(--accent-color);
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 13px;
-            line-height: 1.8;
-        }
-
-        .ai-thinking-panel.active {
-            display: block;
-            animation: slideDown 0.3s ease-out;
-        }
-
-        @keyframes slideDown {
-            from {
-                max-height: 0;
-                opacity: 0;
-            }
-            to {
-                max-height: 300px;
-                opacity: 1;
-            }
-        }
-
-        .thinking-step {
-            margin-bottom: 12px;
-            padding: 10px;
-            border-left: 3px solid var(--accent-color);
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 4px;
-            animation: fadeInLeft 0.5s ease-out;
-        }
-
-        @keyframes fadeInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .thinking-step .step-icon {
-            display: inline-block;
-            margin-right: 8px;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .thinking-step.planning {
-            border-left-color: #ffa726;
-        }
-
-        .thinking-step.analyzing {
-            border-left-color: #42a5f5;
-        }
-
-        .thinking-step.generating {
-            border-left-color: #66bb6a;
-        }
-
-        .thinking-step.finalizing {
-            border-left-color: #ab47bc;
-        }
-
-        .code-stream {
-            margin-top: 10px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 6px;
-            font-size: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .code-line {
-            margin-bottom: 4px;
-            animation: typewriter 0.1s ease-out;
-        }
-
-        @keyframes typewriter {
-            from {
-                opacity: 0;
-                transform: translateX(-5px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        /* Visual Editor Tab */
-        .editor-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .editor-toolbar {
-            background: #f5f5f5;
-            padding: 10px 15px;
-            display: flex;
-            gap: 10px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .toolbar-btn {
-            padding: 8px 15px;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .toolbar-btn:hover {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
-        .preview-frame {
-            flex: 1;
-            border: none;
-            background: white;
-        }
-
-        /* Code Editor Tab */
-        .code-editor-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: #1e1e1e;
-        }
-
-        .code-toolbar {
-            background: var(--toolbar-bg);
-            padding: 8px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--toolbar-border);
-        }
-
-        .language-selector {
-            display: flex;
-            gap: 5px;
-        }
-
-        .lang-btn {
-            padding: 6px 12px;
-            background: #3e3e42;
-            color: #cccccc;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s;
-            font-family: 'Consolas', 'Monaco', monospace;
-        }
-
-        .lang-btn:hover {
-            background: #4e4e52;
-        }
-
-        .lang-btn.active {
-            background: #667eea;
-            color: white;
-        }
-
-        .code-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .code-action-btn {
-            padding: 6px 12px;
-            background: #3e3e42;
-            color: #cccccc;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .code-action-btn:hover {
-            background: #667eea;
-        }
-
-        .code-editor {
-            flex: 1;
-            background: var(--code-bg);
-            color: var(--code-text);
-            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-            font-size: 14px;
-            padding: 20px;
-            overflow: auto;
-            line-height: 1.6;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-
-        .code-editor textarea {
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            color: var(--code-text);
-            border: none;
-            outline: none;
-            font-family: inherit;
-            font-size: inherit;
-            line-height: inherit;
-            resize: none;
-        }
-
-        /* Loading Animation */
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
-            color: var(--accent-color);
-        }
-
-        .loading.active {
-            display: block;
-        }
-
-        .loading i {
-            font-size: 48px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .loading p {
-            margin-top: 15px;
-            font-size: 16px;
-            color: var(--text-secondary);
-        }
-
-        /* Enhanced Syntax Highlighting */
-        .code-display {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-
-        .keyword { color: #569cd6; font-weight: bold; }
-        .string { color: #ce9178; }
-        .comment { color: #6a9955; font-style: italic; }
-        .function { color: #dcdcaa; font-weight: 600; }
-        .number { color: #b5cea8; }
-        .tag { color: #4ec9b0; }
-        .attribute { color: #9cdcfe; }
-        .value { color: #ce9178; }
-        .operator { color: #d4d4d4; }
-        .variable { color: #4fc1ff; }
-        .class-name { color: #4ec9b0; font-weight: 600; }
-        .punctuation { color: #808080; }
-        .selector { color: #d7ba7d; }
-        .property { color: #9cdcfe; }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .prompt-section {
-                width: 320px;
-            }
-            
-            .logo h1 {
-                font-size: 24px;
-            }
-        }
-
-        @media (max-width: 992px) {
-            .header {
-                padding: 12px 20px;
-            }
-            
-            .logo h1 {
-                font-size: 20px;
-            }
-            
-            .logo span {
-                display: none;
-            }
-            
-            .theme-selector {
-                gap: 5px;
-            }
-            
-            .theme-btn {
-                padding: 6px 10px;
-                font-size: 11px;
-            }
-            
-            .theme-btn span {
-                display: none;
-            }
-            
-            .prompt-section {
-                width: 280px;
-            }
-            
-            .tab {
-                padding: 10px 16px;
-                font-size: 13px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                height: 100vh;
-                overflow: hidden;
-            }
-            
-            .header {
-                padding: 10px 15px;
-                flex-direction: column;
-                gap: 10px;
-                align-items: stretch;
-            }
-            
-            .logo {
-                justify-content: center;
-            }
-            
-            .theme-selector {
-                justify-content: center;
-            }
-            
-            .main-content {
-                flex-direction: column;
-                height: calc(100vh - 140px);
-            }
-            
-            .prompt-section {
-                width: 100%;
-                max-height: 40vh;
-                padding: 15px;
-                overflow-y: auto;
-            }
-            
-            .prompt-input {
-                min-height: 80px;
-                font-size: 13px;
-            }
-            
-            .examples {
-                display: none;
-            }
-            
-            .tab-content {
-                height: 60vh;
-            }
-            
-            .ai-thinking-panel {
-                max-height: 150px;
-                font-size: 11px;
-                padding: 10px;
-            }
-            
-            .thinking-step {
-                padding: 6px;
-                font-size: 11px;
-            }
-            
-            .code-stream {
-                padding: 8px;
-                font-size: 10px;
-                max-height: 100px;
-            }
-            
-            .editor-toolbar {
-                flex-wrap: wrap;
-                gap: 5px;
-            }
-            
-            .toolbar-btn {
-                padding: 6px 12px;
-                font-size: 12px;
-            }
-            
-            .code-toolbar {
-                flex-direction: column;
-                gap: 8px;
-                padding: 10px;
-            }
-            
-            .language-selector {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            
-            .lang-btn {
-                padding: 5px 10px;
-                font-size: 11px;
-            }
-            
-            .code-editor {
-                font-size: 12px;
-                padding: 12px;
-            }
-            
-            .footer {
-                font-size: 10px;
-                padding: 8px 15px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .logo h1 {
-                font-size: 18px;
-            }
-            
-            .logo i {
-                font-size: 24px;
-            }
-            
-            .tab {
-                padding: 8px 12px;
-                font-size: 12px;
-            }
-            
-            .tab i {
-                font-size: 12px;
-            }
-            
-            .prompt-section {
-                padding: 12px;
-            }
-            
-            .prompt-section h2 {
-                font-size: 16px;
-            }
-            
-            .generate-btn {
-                padding: 12px;
-                font-size: 14px;
-            }
-            
-            .toolbar-btn, .code-action-btn {
-                padding: 5px 10px;
-                font-size: 11px;
-            }
-            
-            .lang-btn {
-                padding: 4px 8px;
-                font-size: 10px;
-            }
-            
-            .code-editor {
-                font-size: 11px;
-                padding: 10px;
-            }
-            
-            .ai-thinking-panel {
-                font-size: 10px;
-                padding: 8px;
-            }
-            
-            .thinking-step {
-                padding: 5px;
-                font-size: 10px;
-            }
-            
-            .footer {
-                font-size: 9px;
-                padding: 6px 10px;
-            }
-        }
-
-        /* iOS specific fixes */
-        @supports (-webkit-touch-callout: none) {
-            .container {
-                height: -webkit-fill-available;
-            }
-            
-            .main-content {
-                height: -webkit-fill-available;
-            }
-            
-            .prompt-input {
-                font-size: 16px; /* Prevents zoom on iOS */
-            }
-        }
-
-        /* Landscape mode adjustments */
-        @media (max-width: 768px) and (orientation: landscape) {
-            .prompt-section {
-                max-height: 30vh;
-            }
-            
-            .tab-content {
-                height: 70vh;
-            }
-            
-            .ai-thinking-panel {
-                max-height: 100px;
-            }
-        }
-
-        /* Touch-friendly improvements */
-        @media (hover: none) and (pointer: coarse) {
-            .tab, .toolbar-btn, .lang-btn, .code-action-btn, .theme-btn, .example-btn {
-                min-height: 44px; /* iOS touch target size */
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .generate-btn {
-                min-height: 48px;
-            }
-        }
-
-        /* High DPI screens */
-        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            .code-editor, .code-display, .ai-thinking-panel {
-                -webkit-font-smoothing: antialiased;
-                -moz-osx-font-smoothing: grayscale;
-            }
-        }
-
-        /* Success Message */
-        .success-message {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            background: #4caf50;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            display: none;
-            align-items: center;
-            gap: 10px;
-            z-index: 1000;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        .success-message.show {
-            display: flex;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        /* Footer */
-        .footer {
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            padding: 10px 30px;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .footer a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Zedex — AI Web App Generator</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ═══════════════════════════════════════
+   ZEDEX — by Zénia Projects
+   @inacio.u.daniel
+═══════════════════════════════════════ */
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+/* ─── THEME VARIABLES ─── */
+:root {
+  --accent: #7c6af7;
+  --accent2: #f06292;
+  --radius: 8px;
+  --font-ui: 'Segoe UI', system-ui, sans-serif;
+  --font-code: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+  --transition: 0.25s ease;
+}
+
+/* DARK (default) */
+[data-theme="dark"] {
+  --bg-app:    #0d0d0f;
+  --bg-panel:  #13131a;
+  --bg-side:   #111118;
+  --bg-card:   #1a1a24;
+  --bg-hover:  #22223a;
+  --bg-input:  #191924;
+  --border:    #2a2a3d;
+  --text1:     #e8e8ff;
+  --text2:     #9898b8;
+  --text3:     #5a5a78;
+  --header-bg: rgba(13,13,15,0.95);
+  --tab-bar:   #0f0f16;
+  --editor-bg: #0d0d0f;
+  --line-num:  #3a3a5c;
+  --gutter:    #151520;
+  --selection: rgba(124,106,247,0.25);
+  --scrollbar: #2a2a3d;
+}
+/* LIGHT */
+[data-theme="light"] {
+  --bg-app:    #f0f0f7;
+  --bg-panel:  #ffffff;
+  --bg-side:   #f5f5fc;
+  --bg-card:   #e8e8f5;
+  --bg-hover:  #dcdcf0;
+  --bg-input:  #f8f8ff;
+  --border:    #d0d0e8;
+  --text1:     #1a1a2e;
+  --text2:     #5050a0;
+  --text3:     #8080b0;
+  --header-bg: rgba(240,240,247,0.95);
+  --tab-bar:   #e8e8f5;
+  --editor-bg: #fafafe;
+  --line-num:  #b0b0d0;
+  --gutter:    #f0f0fa;
+  --selection: rgba(124,106,247,0.2);
+  --scrollbar: #c8c8e8;
+}
+/* NORD */
+[data-theme="nord"] {
+  --bg-app:    #242933;
+  --bg-panel:  #2e3440;
+  --bg-side:   #272c36;
+  --bg-card:   #3b4252;
+  --bg-hover:  #434c5e;
+  --bg-input:  #2e3440;
+  --border:    #434c5e;
+  --text1:     #eceff4;
+  --text2:     #d8dee9;
+  --text3:     #81a1c1;
+  --header-bg: rgba(36,41,51,0.97);
+  --tab-bar:   #2e3440;
+  --editor-bg: #2e3440;
+  --line-num:  #4c566a;
+  --gutter:    #2a3040;
+  --selection: rgba(129,161,193,0.25);
+  --scrollbar: #4c566a;
+  --accent:    #88c0d0;
+  --accent2:   #bf616a;
+}
+/* DRACULA */
+[data-theme="dracula"] {
+  --bg-app:    #1e1f29;
+  --bg-panel:  #282a36;
+  --bg-side:   #21222c;
+  --bg-card:   #313341;
+  --bg-hover:  #393b4d;
+  --bg-input:  #282a36;
+  --border:    #44475a;
+  --text1:     #f8f8f2;
+  --text2:     #bd93f9;
+  --text3:     #6272a4;
+  --header-bg: rgba(30,31,41,0.97);
+  --tab-bar:   #21222c;
+  --editor-bg: #282a36;
+  --line-num:  #6272a4;
+  --gutter:    #21222c;
+  --selection: rgba(189,147,249,0.2);
+  --scrollbar: #44475a;
+  --accent:    #bd93f9;
+  --accent2:   #ff79c6;
+}
+/* SOLARIZED */
+[data-theme="solarized"] {
+  --bg-app:    #002b36;
+  --bg-panel:  #073642;
+  --bg-side:   #00303d;
+  --bg-card:   #094652;
+  --bg-hover:  #0d5260;
+  --bg-input:  #073642;
+  --border:    #0d5260;
+  --text1:     #fdf6e3;
+  --text2:     #93a1a1;
+  --text3:     #586e75;
+  --header-bg: rgba(0,43,54,0.97);
+  --tab-bar:   #073642;
+  --editor-bg: #002b36;
+  --line-num:  #2a6e7b;
+  --gutter:    #06303a;
+  --selection: rgba(181,137,0,0.2);
+  --scrollbar: #0d5260;
+  --accent:    #268bd2;
+  --accent2:   #cb4b16;
+}
+/* MONOKAI */
+[data-theme="monokai"] {
+  --bg-app:    #1c1c1e;
+  --bg-panel:  #272822;
+  --bg-side:   #1e1e20;
+  --bg-card:   #2f3025;
+  --bg-hover:  #3a3b30;
+  --bg-input:  #272822;
+  --border:    #383830;
+  --text1:     #f8f8f2;
+  --text2:     #a8a8a2;
+  --text3:     #75715e;
+  --header-bg: rgba(28,28,30,0.97);
+  --tab-bar:   #1e1e20;
+  --editor-bg: #272822;
+  --line-num:  #52524a;
+  --gutter:    #222220;
+  --selection: rgba(102,217,239,0.15);
+  --scrollbar: #383830;
+  --accent:    #a6e22e;
+  --accent2:   #f92672;
+}
+/* NEON */
+[data-theme="neon"] {
+  --bg-app:    #050510;
+  --bg-panel:  #0a0a1a;
+  --bg-side:   #07070f;
+  --bg-card:   #0f0f22;
+  --bg-hover:  #161630;
+  --bg-input:  #0a0a1a;
+  --border:    #1a1a40;
+  --text1:     #e0e0ff;
+  --text2:     #8080d0;
+  --text3:     #4040a0;
+  --header-bg: rgba(5,5,16,0.97);
+  --tab-bar:   #07070f;
+  --editor-bg: #050510;
+  --line-num:  #303080;
+  --gutter:    #080818;
+  --selection: rgba(0,255,200,0.12);
+  --scrollbar: #1a1a40;
+  --accent:    #00ffc8;
+  --accent2:   #ff00aa;
+}
+/* ONE DARK */
+[data-theme="onedark"] {
+  --bg-app:    #21252b;
+  --bg-panel:  #282c34;
+  --bg-side:   #21252b;
+  --bg-card:   #2c313c;
+  --bg-hover:  #333842;
+  --bg-input:  #282c34;
+  --border:    #3a3f4b;
+  --text1:     #abb2bf;
+  --text2:     #636d83;
+  --text3:     #4b5263;
+  --header-bg: rgba(33,37,43,0.97);
+  --tab-bar:   #21252b;
+  --editor-bg: #282c34;
+  --line-num:  #4b5263;
+  --gutter:    #21252b;
+  --selection: rgba(97,175,239,0.2);
+  --scrollbar: #3a3f4b;
+  --accent:    #61afef;
+  --accent2:   #e06c75;
+}
+/* GITHUB DARK */
+[data-theme="github"] {
+  --bg-app:    #0d1117;
+  --bg-panel:  #161b22;
+  --bg-side:   #0d1117;
+  --bg-card:   #1c2128;
+  --bg-hover:  #22272e;
+  --bg-input:  #161b22;
+  --border:    #30363d;
+  --text1:     #e6edf3;
+  --text2:     #848d97;
+  --text3:     #484f58;
+  --header-bg: rgba(13,17,23,0.97);
+  --tab-bar:   #0d1117;
+  --editor-bg: #0d1117;
+  --line-num:  #484f58;
+  --gutter:    #0d1117;
+  --selection: rgba(56,139,253,0.2);
+  --scrollbar: #30363d;
+  --accent:    #388bfd;
+  --accent2:   #f78166;
+}
+
+/* ─── SYNTAX HIGHLIGHT PALETTES per theme ─── */
+[data-theme="dark"]     { --s-keyword:#c792ea; --s-string:#c3e88d; --s-comment:#546e7a; --s-function:#82aaff; --s-number:#f78c6c; --s-tag:#f07178; --s-attr:#ffcb6b; --s-value:#c3e88d; --s-class:#ffcb6b; --s-operator:#89ddff; --s-var:#f07178; --s-prop:#80cbc4; --s-sel:#c3e88d; --s-type:#82aaff; --s-const:#f78c6c; }
+[data-theme="light"]    { --s-keyword:#7c4dff; --s-string:#2e7d32; --s-comment:#90a4ae; --s-function:#1565c0; --s-number:#e64a19; --s-tag:#c62828; --s-attr:#6d4c41; --s-value:#2e7d32; --s-class:#00695c; --s-operator:#0097a7; --s-var:#c62828; --s-prop:#00695c; --s-sel:#2e7d32; --s-type:#1565c0; --s-const:#e64a19; }
+[data-theme="nord"]     { --s-keyword:#81a1c1; --s-string:#a3be8c; --s-comment:#4c566a; --s-function:#88c0d0; --s-number:#b48ead; --s-tag:#bf616a; --s-attr:#d08770; --s-value:#a3be8c; --s-class:#ebcb8b; --s-operator:#81a1c1; --s-var:#bf616a; --s-prop:#8fbcbb; --s-sel:#a3be8c; --s-type:#88c0d0; --s-const:#b48ead; }
+[data-theme="dracula"]  { --s-keyword:#ff79c6; --s-string:#f1fa8c; --s-comment:#6272a4; --s-function:#50fa7b; --s-number:#bd93f9; --s-tag:#ff5555; --s-attr:#ffb86c; --s-value:#f1fa8c; --s-class:#ffb86c; --s-operator:#ff79c6; --s-var:#ff5555; --s-prop:#8be9fd; --s-sel:#f1fa8c; --s-type:#8be9fd; --s-const:#bd93f9; }
+[data-theme="solarized"]{ --s-keyword:#859900; --s-string:#2aa198; --s-comment:#586e75; --s-function:#268bd2; --s-number:#d33682; --s-tag:#dc322f; --s-attr:#b58900; --s-value:#2aa198; --s-class:#b58900; --s-operator:#6c71c4; --s-var:#dc322f; --s-prop:#2aa198; --s-sel:#2aa198; --s-type:#268bd2; --s-const:#d33682; }
+[data-theme="monokai"]  { --s-keyword:#f92672; --s-string:#e6db74; --s-comment:#75715e; --s-function:#a6e22e; --s-number:#ae81ff; --s-tag:#f92672; --s-attr:#a6e22e; --s-value:#e6db74; --s-class:#66d9e8; --s-operator:#f92672; --s-var:#f92672; --s-prop:#66d9e8; --s-sel:#e6db74; --s-type:#66d9e8; --s-const:#ae81ff; }
+[data-theme="neon"]     { --s-keyword:#ff00aa; --s-string:#00ffc8; --s-comment:#304080; --s-function:#00d4ff; --s-number:#ff8c00; --s-tag:#ff0055; --s-attr:#ffdc00; --s-value:#00ffc8; --s-class:#ffdc00; --s-operator:#ff00aa; --s-var:#ff0055; --s-prop:#00e5ff; --s-sel:#00ffc8; --s-type:#00d4ff; --s-const:#ff8c00; }
+[data-theme="onedark"]  { --s-keyword:#c678dd; --s-string:#98c379; --s-comment:#5c6370; --s-function:#61afef; --s-number:#d19a66; --s-tag:#e06c75; --s-attr:#d19a66; --s-value:#98c379; --s-class:#e5c07b; --s-operator:#56b6c2; --s-var:#e06c75; --s-prop:#56b6c2; --s-sel:#98c379; --s-type:#e5c07b; --s-const:#d19a66; }
+[data-theme="github"]   { --s-keyword:#ff7b72; --s-string:#a5d6ff; --s-comment:#8b949e; --s-function:#d2a8ff; --s-number:#79c0ff; --s-tag:#ff7b72; --s-attr:#79c0ff; --s-value:#a5d6ff; --s-class:#ffa657; --s-operator:#ff7b72; --s-var:#ff7b72; --s-prop:#79c0ff; --s-sel:#a5d6ff; --s-type:#ffa657; --s-const:#79c0ff; }
+
+/* ─── GLOBAL ─── */
+body {
+  font-family: var(--font-ui);
+  background: var(--bg-app);
+  color: var(--text1);
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: background var(--transition), color var(--transition);
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-app); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ─── HEADER ─── */
+.header {
+  background: var(--header-bg);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: #fff;
+  box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.logo-text h1 { font-size: 18px; font-weight: 700; color: var(--text1); line-height: 1; }
+.logo-text span { font-size: 11px; color: var(--text3); }
+
+.header-right { display: flex; align-items: center; gap: 10px; }
+
+.theme-picker-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  padding: 7px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex; align-items: center; gap: 6px;
+  transition: all var(--transition);
+  font-family: var(--font-ui);
+}
+.theme-picker-btn:hover { border-color: var(--accent); color: var(--text1); }
+
+/* Theme dropdown */
+.theme-dropdown {
+  position: absolute;
+  top: 62px; right: 20px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px;
+  display: none;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  z-index: 999;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  min-width: 280px;
+}
+.theme-dropdown.open { display: grid; animation: dropIn .2s ease; }
+
+@keyframes dropIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+
+.theme-option {
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex; align-items: center; gap: 7px;
+  color: var(--text2);
+  transition: all var(--transition);
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.theme-option:hover { background: var(--bg-hover); color: var(--text1); border-color: var(--border); }
+.theme-option.active { background: color-mix(in srgb, var(--accent) 15%, transparent); border-color: var(--accent); color: var(--text1); }
+
+.theme-swatch {
+  width: 16px; height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.ham-btn {
+  display: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  width: 38px; height: 38px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  align-items: center; justify-content: center;
+  transition: all var(--transition);
+}
+.ham-btn:hover { color: var(--text1); border-color: var(--accent); }
+
+/* ─── TABS BAR ─── */
+.tabs-bar {
+  background: var(--tab-bar);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  height: 42px;
+  padding: 0 6px;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.tab-btn {
+  padding: 0 18px;
+  height: 34px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text3);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: var(--font-ui);
+  display: flex; align-items: center; gap: 7px;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.tab-btn:hover { background: var(--bg-hover); color: var(--text2); }
+.tab-btn.active {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--text1);
+  font-weight: 600;
+}
+.tab-btn .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: inline-block;
+}
+
+/* ─── LAYOUT ─── */
+.workspace {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ─── SIDEBAR / PROMPT ─── */
+.sidebar {
+  width: 340px;
+  background: var(--bg-side);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+  transition: transform var(--transition);
+}
+
+.sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.sidebar-header h2 { font-size: 14px; font-weight: 600; color: var(--text1); }
+.sidebar-header i { color: var(--accent); font-size: 15px; }
+
+.sidebar-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.prompt-area {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text1);
+  resize: none;
+  outline: none;
+  min-height: 120px;
+  width: 100%;
+  transition: border-color var(--transition);
+  line-height: 1.6;
+}
+.prompt-area:focus { border-color: var(--accent); }
+.prompt-area::placeholder { color: var(--text3); }
+
+.label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; color: var(--text3); margin-bottom: 4px; }
+
+.examples-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.example-chip {
+  padding: 9px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text2);
+  cursor: pointer;
+  font-size: 12px;
+  text-align: left;
+  transition: all var(--transition);
+  font-family: var(--font-ui);
+  display: flex; align-items: center; gap: 8px;
+}
+.example-chip:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  color: var(--text1);
+  transform: translateX(3px);
+}
+
+.generate-btn {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--font-ui);
+  transition: all var(--transition);
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--accent) 35%, transparent);
+  letter-spacing: .3px;
+}
+.generate-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--accent) 50%, transparent);
+}
+.generate-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+/* ─── CONTENT AREA ─── */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-app);
+}
+
+/* Tab Pages */
+.page { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+.page.active { display: flex; }
+
+/* ─── THINKING PANEL ─── */
+.thinking-panel {
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  font-size: 12px;
+  max-height: 220px;
+  overflow-y: auto;
+  display: none;
+  font-family: var(--font-code);
+}
+.thinking-panel.show { display: block; animation: slideDown .3s ease; }
+@keyframes slideDown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+
+.think-row {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+  animation: fadeRow .4s ease;
+}
+@keyframes fadeRow { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+.think-row:last-child { border-bottom: none; }
+.think-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+.think-text { color: var(--text2); line-height: 1.5; }
+.think-row.plan .think-text  { color: #ffcb6b; }
+.think-row.ana  .think-text  { color: #82aaff; }
+.think-row.gen  .think-text  { color: var(--accent); }
+.think-row.fin  .think-text  { color: #c3e88d; }
+
+.code-stream-mini {
+  margin-top: 8px;
+  background: var(--editor-bg);
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 11px;
+  max-height: 120px;
+  overflow: hidden;
+}
+.stream-line {
+  color: var(--text2);
+  line-height: 1.7;
+  animation: typeLine .08s ease;
+}
+@keyframes typeLine { from{opacity:0} to{opacity:1} }
+.stream-line .s-k { color: var(--s-keyword); }
+.stream-line .s-s { color: var(--s-string); }
+.stream-line .s-c { color: var(--s-comment); font-style: italic; }
+.stream-line .s-f { color: var(--s-function); }
+.stream-line .s-n { color: var(--s-number); }
+
+/* ─── VISUAL EDITOR ─── */
+.editor-toolbar {
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.tool-btn {
+  padding: 7px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text2);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--font-ui);
+  display: flex; align-items: center; gap: 5px;
+  transition: all var(--transition);
+}
+.tool-btn:hover { background: var(--bg-hover); border-color: var(--accent); color: var(--text1); }
+.tool-btn i { font-size: 13px; }
+
+.preview-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+.preview-frame {
+  width: 100%; height: 100%;
+  border: none;
+  background: #fff;
+}
+.preview-empty {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px; color: var(--text3);
+}
+.preview-empty i { font-size: 64px; opacity: .2; }
+.preview-empty p { font-size: 15px; }
+.preview-empty small { font-size: 12px; opacity: .6; }
+
+/* ─── CODE EDITOR ─── */
+.code-page-layout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* VS Code-like title bar */
+.code-titlebar {
+  background: color-mix(in srgb, var(--bg-panel) 95%, var(--accent) 5%);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.code-tabs-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  overflow-x: auto;
+  flex: 1;
+}
+.code-tabs-row::-webkit-scrollbar { height: 2px; }
+
+.code-file-tab {
+  padding: 0 14px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text3);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--font-code);
+  display: flex; align-items: center; gap: 6px;
+  transition: all var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.code-file-tab:hover { color: var(--text2); background: var(--bg-hover); }
+.code-file-tab.active {
+  color: var(--text1);
+  border-bottom-color: var(--accent);
+  background: var(--editor-bg);
+}
+.code-file-tab .tab-icon { font-size: 13px; }
+.ext-html { color: #e34c26 !important; }
+.ext-css  { color: #1572b6 !important; }
+.ext-js   { color: #f7df1e !important; }
+.ext-py   { color: #3572a5 !important; }
+.ext-java { color: #b07219 !important; }
+.ext-ts   { color: #2b7489 !important; }
+.ext-php  { color: #4f5d95 !important; }
+.ext-cpp  { color: #f34b7d !important; }
+.ext-rb   { color: #701516 !important; }
+.ext-go   { color: #00add8 !important; }
+.ext-rs   { color: #dea584 !important; }
+
+.code-actions-row {
+  display: flex; align-items: center; gap: 6px;
+}
+.code-act-btn {
+  padding: 5px 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text2);
+  cursor: pointer;
+  font-size: 11px;
+  font-family: var(--font-ui);
+  display: flex; align-items: center; gap: 4px;
+  transition: all var(--transition);
+}
+.code-act-btn:hover { background: var(--bg-hover); color: var(--text1); border-color: var(--accent); }
+.code-act-btn.run { border-color: color-mix(in srgb, var(--accent) 50%, transparent); color: var(--accent); }
+
+/* AI Chat for code editor */
+.code-ai-bar {
+  background: var(--bg-panel);
+  border-top: 1px solid var(--border);
+  padding: 10px 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.code-ai-input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text1);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--transition);
+}
+.code-ai-input:focus { border-color: var(--accent); }
+.code-ai-input::placeholder { color: var(--text3); }
+.code-ai-send {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+  transition: all var(--transition);
+}
+.code-ai-send:hover { opacity: .9; transform: translateY(-1px); }
+.code-ai-send:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+/* Language selector bar */
+.lang-selector-bar {
+  background: var(--gutter);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 12px;
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.lang-pill {
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text3);
+  font-size: 11px;
+  font-family: var(--font-code);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.lang-pill:hover { color: var(--text2); border-color: var(--text3); }
+.lang-pill.active { background: color-mix(in srgb, var(--accent) 15%, transparent); border-color: var(--accent); color: var(--accent); }
+
+/* Code editor main area */
+.editor-main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  background: var(--editor-bg);
+}
+
+.line-numbers {
+  background: var(--gutter);
+  border-right: 1px solid var(--border);
+  padding: 16px 0;
+  min-width: 52px;
+  overflow: hidden;
+  flex-shrink: 0;
+  user-select: none;
+  text-align: right;
+}
+.line-num-item {
+  font-family: var(--font-code);
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--line-num);
+  padding: 0 12px 0 6px;
+  height: 22.1px;
+}
+.line-num-item.active { color: var(--accent); }
+
+.code-content {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+  font-family: var(--font-code);
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text1);
+  white-space: pre;
+  tab-size: 2;
+  cursor: text;
+  background: var(--editor-bg);
+  position: relative;
+}
+.code-content::selection { background: var(--selection); }
+
+/* Minimap */
+.minimap {
+  width: 80px;
+  background: var(--gutter);
+  border-left: 1px solid var(--border);
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+  opacity: .6;
+}
+.minimap canvas { display: block; width: 100%; height: 100%; }
+
+/* Status bar */
+.status-bar {
+  background: var(--accent);
+  color: rgba(255,255,255,0.9);
+  padding: 3px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-family: var(--font-code);
+  flex-shrink: 0;
+  gap: 12px;
+}
+.status-left, .status-right { display: flex; align-items: center; gap: 14px; }
+.status-item { display: flex; align-items: center; gap: 4px; opacity: .9; white-space: nowrap; }
+.status-item i { font-size: 10px; }
+
+/* ─── TOAST ─── */
+.toast {
+  position: fixed;
+  bottom: 20px; right: 20px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  color: var(--text1);
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  z-index: 9999;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  animation: toastIn .3s ease;
+  max-width: 320px;
+}
+.toast.show { display: flex; }
+.toast.error { border-left-color: #ff5555; }
+.toast.success { border-left-color: #50fa7b; }
+@keyframes toastIn { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:translateX(0)} }
+
+/* ─── OVERLAY ─── */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 490; backdrop-filter: blur(2px);
+}
+.overlay.show { display: block; }
+
+/* ─── SYNTAX COLORING SPANS ─── */
+.code-content .s-keyword  { color: var(--s-keyword);  font-weight: 600; }
+.code-content .s-string   { color: var(--s-string); }
+.code-content .s-comment  { color: var(--s-comment); font-style: italic; }
+.code-content .s-function { color: var(--s-function); }
+.code-content .s-number   { color: var(--s-number); }
+.code-content .s-tag      { color: var(--s-tag); }
+.code-content .s-attr     { color: var(--s-attr); }
+.code-content .s-value    { color: var(--s-value); }
+.code-content .s-class    { color: var(--s-class); font-weight: 600; }
+.code-content .s-operator { color: var(--s-operator); }
+.code-content .s-var      { color: var(--s-var); }
+.code-content .s-prop     { color: var(--s-prop); }
+.code-content .s-sel      { color: var(--s-sel); }
+.code-content .s-type     { color: var(--s-type); }
+.code-content .s-const    { color: var(--s-const); font-weight: 600; }
+
+/* ─── FOOTER ─── */
+.footer {
+  background: var(--bg-panel);
+  border-top: 1px solid var(--border);
+  padding: 8px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 11px; color: var(--text3);
+  flex-shrink: 0;
+  gap: 10px; flex-wrap: wrap;
+}
+.footer a { color: var(--accent); text-decoration: none; transition: color var(--transition); }
+.footer a:hover { color: var(--accent2); }
+.footer-links { display: flex; gap: 14px; flex-wrap: wrap; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .minimap { display: none; }
+  .sidebar { width: 300px; }
+}
+@media (max-width: 768px) {
+  .ham-btn { display: flex; }
+  .sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: 300px; z-index: 500;
+    transform: translateX(-100%);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .lang-selector-bar { flex-wrap: nowrap; overflow-x: auto; }
+  .lang-pill { flex-shrink: 0; }
+  .status-right .status-item:not(:first-child) { display: none; }
+  .code-tabs-row .code-file-tab .tab-icon + span:not(.active) { display: none; }
+}
+@media (max-width: 480px) {
+  .header { padding: 0 12px; }
+  .logo-text span { display: none; }
+  .editor-toolbar { padding: 6px 8px; }
+  .tool-btn span { display: none; }
+  .code-titlebar { padding: 0 8px; }
+}
+@supports (-webkit-touch-callout: none) {
+  body { height: -webkit-fill-available; }
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="logo">
-                <i class="fas fa-robot"></i>
-                <div>
-                    <h1>Zedex</h1>
-                    <span>by Zénia Projects - @inacio.u.daniel</span>
-                </div>
-            </div>
-            <div class="theme-selector">
-                <button class="theme-btn" onclick="setTheme('light')">
-                    <i class="fas fa-sun"></i>
-                    <span>Light</span>
-                </button>
-                <button class="theme-btn" onclick="setTheme('dark')">
-                    <i class="fas fa-moon"></i>
-                    <span>Dark</span>
-                </button>
-                <button class="theme-btn active" onclick="setTheme('system')">
-                    <i class="fas fa-desktop"></i>
-                    <span>System</span>
-                </button>
-            </div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon"><i class="fas fa-bolt"></i></div>
+    <div class="logo-text">
+      <h1>Zedex</h1>
+      <span>AI Web App Generator</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="theme-picker-btn" onclick="toggleThemeDropdown()">
+      <i class="fas fa-palette"></i>
+      <span id="themeLabel">Dark</span>
+      <i class="fas fa-chevron-down" style="font-size:10px;opacity:.6"></i>
+    </button>
+    <button class="ham-btn" onclick="toggleSidebar()" id="hamBtn"><i class="fas fa-bars"></i></button>
+  </div>
+</header>
+
+<!-- THEME DROPDOWN -->
+<div class="theme-dropdown" id="themeDropdown">
+  <div class="theme-option active" data-theme="dark"    onclick="setTheme('dark','Dark')">    <div class="theme-swatch" style="background:#0d0d0f;border-color:#7c6af7"></div>Dark</div>
+  <div class="theme-option"        data-theme="light"   onclick="setTheme('light','Light')">  <div class="theme-swatch" style="background:#f0f0f7;border-color:#7c4dff"></div>Light</div>
+  <div class="theme-option"        data-theme="nord"    onclick="setTheme('nord','Nord')">    <div class="theme-swatch" style="background:#2e3440;border-color:#88c0d0"></div>Nord</div>
+  <div class="theme-option"        data-theme="dracula" onclick="setTheme('dracula','Dracula')"><div class="theme-swatch" style="background:#282a36;border-color:#bd93f9"></div>Dracula</div>
+  <div class="theme-option"        data-theme="solarized" onclick="setTheme('solarized','Solarized')"><div class="theme-swatch" style="background:#002b36;border-color:#268bd2"></div>Solarized</div>
+  <div class="theme-option"        data-theme="monokai" onclick="setTheme('monokai','Monokai')"><div class="theme-swatch" style="background:#272822;border-color:#a6e22e"></div>Monokai</div>
+  <div class="theme-option"        data-theme="neon"    onclick="setTheme('neon','Neon')">    <div class="theme-swatch" style="background:#050510;border-color:#00ffc8"></div>Neon</div>
+  <div class="theme-option"        data-theme="onedark" onclick="setTheme('onedark','One Dark')"><div class="theme-swatch" style="background:#282c34;border-color:#61afef"></div>One Dark</div>
+  <div class="theme-option"        data-theme="github"  onclick="setTheme('github','GitHub')"><div class="theme-swatch" style="background:#0d1117;border-color:#388bfd"></div>GitHub</div>
+</div>
+
+<!-- TABS BAR -->
+<div class="tabs-bar">
+  <button class="tab-btn active" id="tab-visual" onclick="switchPage('visual')">
+    <i class="fas fa-eye"></i> Editor Visual
+  </button>
+  <button class="tab-btn" id="tab-code" onclick="switchPage('code')">
+    <i class="fas fa-code"></i> Só Código <span class="dot" id="codeDot" style="display:none"></span>
+  </button>
+</div>
+
+<!-- OVERLAY (mobile) -->
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- WORKSPACE -->
+<div class="workspace">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <i class="fas fa-wand-magic-sparkles"></i>
+      <h2>Descreva seu App</h2>
+    </div>
+    <div class="sidebar-body">
+      <textarea class="prompt-area" id="promptInput" placeholder="Ex: Crie um dashboard financeiro com gráficos, cards de estatísticas, tabela de transações e design dark moderno..."></textarea>
+
+      <div>
+        <div class="label">Exemplos rápidos</div>
+        <div class="examples-grid">
+          <button class="example-chip" onclick="setPrompt('Landing page moderna para startup de tecnologia com hero animado, features, pricing e CTA')">🚀 Landing Page Startup</button>
+          <button class="example-chip" onclick="setPrompt('Dashboard administrativo com gráficos de barras e linhas, cards de estatísticas e tabela de dados')">📊 Dashboard Admin</button>
+          <button class="example-chip" onclick="setPrompt('Calculadora científica funcional com histórico de operações e design premium')">🧮 Calculadora Científica</button>
+          <button class="example-chip" onclick="setPrompt('Jogo Snake completo em canvas com pontuação, níveis e efeitos visuais')">🐍 Jogo Snake</button>
+          <button class="example-chip" onclick="setPrompt('App de tarefas (Todo) com drag and drop, categorias, prioridades e animações')">✅ Todo App Premium</button>
+          <button class="example-chip" onclick="setPrompt('Player de música com visualizador de ondas, playlist e controles animados')">🎵 Music Player</button>
         </div>
+      </div>
 
-        <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab('visual')">
-                <i class="fas fa-eye"></i>
-                Editor Visual
-            </button>
-            <button class="tab" onclick="switchTab('code')">
-                <i class="fas fa-code"></i>
-                Só Código
-            </button>
+      <button class="generate-btn" id="generateBtn" onclick="generateApp()">
+        <i class="fas fa-bolt" id="genIcon"></i>
+        <span id="genText">Gerar App</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ═══ PAGE: VISUAL ═══ -->
+    <div class="page active" id="page-visual">
+
+      <!-- AI Thinking -->
+      <div class="thinking-panel" id="thinkingPanel"></div>
+
+      <!-- Toolbar -->
+      <div class="editor-toolbar">
+        <button class="tool-btn" onclick="refreshPreview()"><i class="fas fa-rotate-right"></i><span>Atualizar</span></button>
+        <button class="tool-btn" onclick="downloadApp()"><i class="fas fa-download"></i><span>Baixar HTML</span></button>
+        <button class="tool-btn" onclick="openFullscreen()"><i class="fas fa-expand"></i><span>Fullscreen</span></button>
+        <button class="tool-btn" onclick="switchPage('code');showHtmlCode()"><i class="fas fa-code"></i><span>Ver Código</span></button>
+      </div>
+
+      <!-- Preview -->
+      <div class="preview-wrap">
+        <div class="preview-empty" id="previewEmpty">
+          <i class="fas fa-bolt"></i>
+          <p>Seu app aparecerá aqui</p>
+          <small>Descreva o que quer criar e clique em Gerar App</small>
         </div>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Mobile Overlay -->
-            <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
-            
-            <!-- Prompt Section -->
-            <div class="prompt-section" id="promptSection">
-                <button class="close-mobile-menu" onclick="closeMobileMenu()">
-                    <i class="fas fa-times"></i>
-                </button>
-                <h2>
-                    <i class="fas fa-magic"></i>
-                    Descreva seu App
-                </h2>
-                
-                <textarea 
-                    class="prompt-input" 
-                    id="promptInput" 
-                    placeholder="Descreva o aplicativo web que você quer criar...&#10;&#10;Exemplo: 'Crie um calculadora simples com design moderno'"></textarea>
-                
-                <div class="examples">
-                    <h3>Exemplos Rápidos:</h3>
-                    <button class="example-btn" onclick="setPrompt('Crie uma landing page moderna para um app de fitness com seção hero, recursos e call-to-action')">
-                        🏋️ Landing Page de Fitness
-                    </button>
-                    <button class="example-btn" onclick="setPrompt('Desenvolva um dashboard administrativo com gráficos, tabelas e cards de estatísticas')">
-                        📊 Dashboard Admin
-                    </button>
-                    <button class="example-btn" onclick="setPrompt('Crie uma calculadora científica funcional com design moderno e responsivo')">
-                        🧮 Calculadora Científica
-                    </button>
-                    <button class="example-btn" onclick="setPrompt('Faça um portfólio pessoal com seções de projetos, sobre mim e contato')">
-                        💼 Portfólio Pessoal
-                    </button>
-                    <button class="example-btn" onclick="setPrompt('Crie um timer pomodoro com controles e estatísticas de produtividade')">
-                        ⏱️ Timer Pomodoro
-                    </button>
-                </div>
-
-                <button class="generate-btn" id="generateBtn" onclick="generateApp()">
-                    <i class="fas fa-magic"></i>
-                    Gerar App
-                </button>
-            </div>
-
-            <!-- Visual Editor Tab -->
-            <div class="tab-content active" id="visualTab">
-                <div class="editor-container">
-                    <!-- AI Thinking Panel -->
-                    <div class="ai-thinking-panel" id="aiThinkingPanel"></div>
-                    
-                    <div class="editor-toolbar">
-                        <button class="toolbar-btn" onclick="editApp()">
-                            <i class="fas fa-edit"></i>
-                            Editar
-                        </button>
-                        <button class="toolbar-btn" onclick="refreshPreview()">
-                            <i class="fas fa-sync"></i>
-                            Atualizar
-                        </button>
-                        <button class="toolbar-btn" onclick="downloadApp()">
-                            <i class="fas fa-download"></i>
-                            Baixar
-                        </button>
-                    </div>
-                    
-                    <div class="loading" id="loadingVisual">
-                        <i class="fas fa-cog"></i>
-                        <p>Zedex está gerando seu app...</p>
-                    </div>
-                    
-                    <iframe class="preview-frame" id="previewFrame"></iframe>
-                </div>
-            </div>
-
-            <!-- Code Editor Tab -->
-            <div class="tab-content" id="codeTab">
-                <div class="code-editor-container">
-                    <div class="code-toolbar">
-                        <div class="language-selector">
-                            <button class="lang-btn active" onclick="switchLanguage('html')">HTML</button>
-                            <button class="lang-btn" onclick="switchLanguage('css')">CSS</button>
-                            <button class="lang-btn" onclick="switchLanguage('javascript')">JavaScript</button>
-                            <button class="lang-btn" onclick="switchLanguage('python')">Python</button>
-                            <button class="lang-btn" onclick="switchLanguage('java')">Java</button>
-                            <button class="lang-btn" onclick="switchLanguage('custom')">Customizar</button>
-                        </div>
-                        <div class="code-actions">
-                            <button class="code-action-btn" onclick="copyCode()">
-                                <i class="fas fa-copy"></i>
-                                Copiar
-                            </button>
-                            <button class="code-action-btn" onclick="downloadCode()">
-                                <i class="fas fa-download"></i>
-                                Baixar
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="loading" id="loadingCode">
-                        <i class="fas fa-cog"></i>
-                        <p>Gerando código...</p>
-                    </div>
-                    
-                    <div class="code-editor" id="codeEditor">
-                        <div class="code-display" id="codeDisplay">// Seu código aparecerá aqui após a geração...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-            Criado por <a href="#" target="_blank">Zénia Projects</a> - @inacio.u.daniel | Powered by Pollinations AI (Qwen-Coder) 🌸💻
-        </div>
+        <iframe class="preview-frame" id="previewFrame" style="display:none"></iframe>
+      </div>
     </div>
 
-    <!-- Success Message -->
-    <div class="success-message" id="successMessage">
-        <i class="fas fa-check-circle"></i>
-        <span id="successText">App gerado com sucesso!</span>
+    <!-- ═══ PAGE: CODE ═══ -->
+    <div class="page" id="page-code">
+      <div class="code-page-layout">
+
+        <!-- VS Code Title Bar -->
+        <div class="code-titlebar">
+          <div class="code-tabs-row" id="codeTabs">
+            <!-- tabs injected by JS -->
+          </div>
+          <div class="code-actions-row">
+            <button class="code-act-btn" onclick="copyCode()"><i class="fas fa-copy"></i> Copiar</button>
+            <button class="code-act-btn" onclick="downloadCode()"><i class="fas fa-download"></i> Baixar</button>
+            <button class="code-act-btn run" onclick="generateCodeForCurrentLang()"><i class="fas fa-wand-magic-sparkles"></i> Gerar</button>
+          </div>
+        </div>
+
+        <!-- Language pills -->
+        <div class="lang-selector-bar" id="langBar">
+          <button class="lang-pill active" onclick="selectLang('html')"  data-lang="html">HTML</button>
+          <button class="lang-pill"        onclick="selectLang('css')"   data-lang="css">CSS</button>
+          <button class="lang-pill"        onclick="selectLang('js')"    data-lang="js">JavaScript</button>
+          <button class="lang-pill"        onclick="selectLang('ts')"    data-lang="ts">TypeScript</button>
+          <button class="lang-pill"        onclick="selectLang('python')"data-lang="python">Python</button>
+          <button class="lang-pill"        onclick="selectLang('java')"  data-lang="java">Java</button>
+          <button class="lang-pill"        onclick="selectLang('cpp')"   data-lang="cpp">C++</button>
+          <button class="lang-pill"        onclick="selectLang('php')"   data-lang="php">PHP</button>
+          <button class="lang-pill"        onclick="selectLang('rb')"    data-lang="rb">Ruby</button>
+          <button class="lang-pill"        onclick="selectLang('go')"    data-lang="go">Go</button>
+          <button class="lang-pill"        onclick="selectLang('rs')"    data-lang="rs">Rust</button>
+          <button class="lang-pill"        onclick="selectLang('custom')"data-lang="custom">+ Custom</button>
+        </div>
+
+        <!-- Editor -->
+        <div class="editor-main">
+          <div class="line-numbers" id="lineNumbers"></div>
+          <div class="code-content" id="codeContent" onclick="codeClicked()">
+            <span style="color:var(--text3);font-style:italic">// O código gerado aparecerá aqui com syntax highlight completo...</span>
+          </div>
+          <div class="minimap" id="minimap"><canvas id="minimapCanvas"></canvas></div>
+        </div>
+
+        <!-- AI Chat Bar -->
+        <div class="code-ai-bar">
+          <i class="fas fa-robot" style="color:var(--accent);font-size:16px;flex-shrink:0"></i>
+          <input class="code-ai-input" id="codeAiInput" placeholder="Peça à IA: Ex: 'Crie uma API REST em Node.js com autenticação JWT'..." onkeydown="if(event.key==='Enter')generateCodeForCurrentLang()">
+          <button class="code-ai-send" id="codeAiBtn" onclick="generateCodeForCurrentLang()">
+            <i class="fas fa-paper-plane"></i> Gerar
+          </button>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <div class="status-left">
+            <div class="status-item"><i class="fas fa-code-branch"></i><span id="statusLang">HTML</span></div>
+            <div class="status-item"><i class="fas fa-lines-leaning"></i><span id="statusLines">0 linhas</span></div>
+            <div class="status-item"><i class="fas fa-robot"></i><span>Qwen-Coder via Pollinations</span></div>
+          </div>
+          <div class="status-right">
+            <div class="status-item"><i class="fas fa-check-circle"></i><span>UTF-8</span></div>
+            <div class="status-item"><i class="fas fa-indent"></i><span>Espaços: 2</span></div>
+            <div class="status-item">Zedex</div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <script>
-        // Pollinations API Configuration
-        const POLLINATIONS_API_KEY = 'pk_7HHmBkBPEiNS5dyF';
-        const POLLINATIONS_API_URL = 'https://gen.pollinations.ai/v1/chat/completions';
-        const AI_MODEL = 'qwen-coder'; // Specialized coding model with large context
+  </div>
+</div>
 
-        let currentCode = '';
-        let currentLanguage = 'html';
-        let appFiles = { html: '', css: '', js: '' };
-        let currentTheme = 'system';
-        let conversationHistory = [];
+<!-- FOOTER -->
+<footer class="footer">
+  <div>© 2025 <a href="https://zenia-projects.netlify.app" target="_blank">Zénia Projects</a> | <a href="https://ia-zenia.netlify.app" target="_blank">IA-Zénia</a> | <a href="https://instagram.com/inacio.u.daniel" target="_blank">@inacio.u.daniel</a></div>
+  <div class="footer-links">
+    <a href="https://zenia-projects.netlify.app" target="_blank">🌐 Zénia Projects</a>
+    <a href="https://ia-zenia.netlify.app" target="_blank">🤖 IA-Zénia</a>
+  </div>
+</footer>
 
-        // Pollinations API Call
-        async function callPollinationsAPI(messages) {
-            try {
-                const response = await fetch(POLLINATIONS_API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${POLLINATIONS_API_KEY}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        model: AI_MODEL,
-                        messages: messages,
-                        temperature: 0.7,
-                        max_tokens: 16000
-                    })
-                });
+<!-- TOAST -->
+<div class="toast" id="toast"><i class="fas fa-circle-check" id="toastIcon"></i><span id="toastMsg"></span></div>
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('API Response:', errorText);
-                    throw new Error(`API Error (${response.status}): ${errorText || response.statusText}`);
-                }
+<script>
+/* ═══════════════════════════════════
+   ZEDEX CORE — by Zénia Projects
+═══════════════════════════════════ */
 
-                const result = await response.json();
-                console.log('API Response:', result);
-                
-                // Handle response format
-                if (result.choices && result.choices[0] && result.choices[0].message) {
-                    return result.choices[0].message;
-                } else if (result.content) {
-                    return { content: result.content };
-                } else if (typeof result === 'string') {
-                    return { content: result };
-                } else {
-                    throw new Error('Formato de resposta inesperado: ' + JSON.stringify(result));
-                }
-            } catch (error) {
-                console.error('Pollinations API Error:', error);
-                throw error;
-            }
-        }
+// ─── CONFIG ───
+const API_KEY  = 'pk_7HHmBkBPEiNS5dyF';
+const API_URL  = 'https://gen.pollinations.ai/v1/chat/completions';
+const AI_MODEL = 'qwen-coder';
 
-        // Simulate reasoning steps for better UX
-        function simulateReasoningSteps(prompt) {
-            const steps = [
-                { text: '🔍 Analisando requisitos do projeto...', type: 'analyzing', delay: 0 },
-                { text: '🎨 Planejando arquitetura completa...', type: 'planning', delay: 400 },
-                { text: '⚡ Qwen-Coder processando com especialização em código...', type: 'generating', delay: 800 },
-                { text: '💻 Gerando código completo: HTML + CSS + JavaScript...', type: 'generating', delay: 1200 },
-                { text: '🔧 Otimizando performance e funcionalidades...', type: 'finalizing', delay: 1600 }
-            ];
+// ─── STATE ───
+let state = {
+  currentLang: 'html',
+  currentCode: '',
+  appHtml: '',
+  rawCode: '',
+  generating: false
+};
 
-            steps.forEach(step => {
-                addThinkingStep(step.text, step.type, step.delay);
-            });
-        }
+// ─── API ───
+async function callAPI(messages) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: AI_MODEL, messages, temperature: 0.7, max_tokens: 16000 })
+  });
+  if (!res.ok) {
+    const e = await res.text();
+    throw new Error(`(${res.status}) ${e}`);
+  }
+  const j = await res.json();
+  if (j.choices?.[0]?.message) return j.choices[0].message.content;
+  if (j.content) return j.content;
+  if (typeof j === 'string') return j;
+  throw new Error('Resposta inesperada: ' + JSON.stringify(j));
+}
 
-        // Theme Management
-        function setTheme(theme) {
-            currentTheme = theme;
-            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.closest('.theme-btn').classList.add('active');
+// ─── GENERATE APP ───
+async function generateApp() {
+  const prompt = document.getElementById('promptInput').value.trim();
+  if (!prompt) { showToast('Descreva o app primeiro!','error'); return; }
+  if (state.generating) return;
+  state.generating = true;
 
-            if (theme === 'system') {
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-            } else {
-                document.documentElement.setAttribute('data-theme', theme);
-            }
+  setBtnLoading(true);
+  showThinking();
 
-            localStorage.setItem('zedex-theme', theme);
-        }
+  addThought('🔍 Analisando requisitos do projeto...','ana', 0);
+  addThought('🏗️ Planejando arquitetura e componentes...','plan', 500);
+  addThought('⚡ Qwen-Coder gerando código completo...','gen', 1000);
+  addThought('🎨 Aplicando design e estilos modernos...','gen', 1500);
+  addThought('🔧 Otimizando performance e responsividade...','fin', 2000);
 
-        // Initialize theme on load
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('zedex-theme') || 'system';
-            const themeBtn = document.querySelector(`.theme-btn[onclick*="${savedTheme}"]`);
-            if (themeBtn) {
-                document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
-                themeBtn.classList.add('active');
-            }
-            
-            if (savedTheme === 'system') {
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-            } else {
-                document.documentElement.setAttribute('data-theme', savedTheme);
-            }
-
-            // Listen for system theme changes
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-                if (currentTheme === 'system') {
-                    document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
-                }
-            });
-        });
-
-        // AI Thinking Panel Functions
-        function showThinkingPanel() {
-            const panel = document.getElementById('aiThinkingPanel');
-            panel.classList.add('active');
-            panel.innerHTML = '';
-        }
-
-        function hideThinkingPanel() {
-            setTimeout(() => {
-                const panel = document.getElementById('aiThinkingPanel');
-                panel.classList.remove('active');
-            }, 2000);
-        }
-
-        function addThinkingStep(message, type = 'planning', delay = 0) {
-            setTimeout(() => {
-                const panel = document.getElementById('aiThinkingPanel');
-                const step = document.createElement('div');
-                step.className = `thinking-step ${type}`;
-                
-                let icon = '🤔';
-                if (type === 'planning') icon = '📋';
-                else if (type === 'analyzing') icon = '🔍';
-                else if (type === 'generating') icon = '⚡';
-                else if (type === 'finalizing') icon = '✨';
-                
-                step.innerHTML = `<span class="step-icon">${icon}</span>${message}`;
-                panel.appendChild(step);
-                panel.scrollTop = panel.scrollHeight;
-            }, delay);
-        }
-
-        function showCodeStream(code) {
-            const panel = document.getElementById('aiThinkingPanel');
-            const streamDiv = document.createElement('div');
-            streamDiv.className = 'code-stream';
-            panel.appendChild(streamDiv);
-
-            const lines = code.split('\n').slice(0, 20); // First 20 lines
-            lines.forEach((line, index) => {
-                setTimeout(() => {
-                    const lineDiv = document.createElement('div');
-                    lineDiv.className = 'code-line';
-                    lineDiv.textContent = line || ' ';
-                    streamDiv.appendChild(lineDiv);
-                    streamDiv.scrollTop = streamDiv.scrollHeight;
-                }, index * 50);
-            });
-
-            if (code.split('\n').length > 20) {
-                setTimeout(() => {
-                    const moreDiv = document.createElement('div');
-                    moreDiv.className = 'code-line';
-                    moreDiv.style.color = '#888';
-                    moreDiv.textContent = `... +${code.split('\n').length - 20} linhas`;
-                    streamDiv.appendChild(moreDiv);
-                }, lines.length * 50);
-            }
-        }
-
-        // Syntax Highlighting Function
-        function highlightCode(code, language = 'html') {
-            if (!code) return '';
-            
-            let highlighted = code;
-            
-            if (language === 'html' || language === 'xml') {
-                highlighted = highlighted
-                    .replace(/(&lt;!--[\s\S]*?--&gt;|\/\/.*$|\/\*[\s\S]*?\*\/)/gm, '<span class="comment">$1</span>')
-                    .replace(/(&lt;\/?)([\w-]+)/g, '$1<span class="tag">$2</span>')
-                    .replace(/([\w-]+)=/g, '<span class="attribute">$1</span>=')
-                    .replace(/=["']([^"']*)["']/g, '=<span class="value">"$1"</span>');
-            } else if (language === 'css') {
-                highlighted = highlighted
-                    .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="comment">$1</span>')
-                    .replace(/([.#]?[\w-]+)(?=\s*\{)/g, '<span class="selector">$1</span>')
-                    .replace(/([\w-]+)(?=\s*:)/g, '<span class="property">$1</span>')
-                    .replace(/:\s*([^;}\n]+)/g, ': <span class="value">$1</span>');
-            } else if (language === 'javascript' || language === 'js') {
-                highlighted = highlighted
-                    .replace(/(\/\/.*$|\/\*[\s\S]*?\*\/)/gm, '<span class="comment">$1</span>')
-                    .replace(/\b(function|const|let|var|if|else|for|while|return|class|import|export|async|await|try|catch|new)\b/g, '<span class="keyword">$1</span>')
-                    .replace(/\b(\d+)\b/g, '<span class="number">$1</span>')
-                    .replace(/(['"`])(?:(?=(\\?))\2.)*?\1/g, '<span class="string">$&</span>')
-                    .replace(/\b([A-Z]\w+)\b/g, '<span class="class-name">$1</span>');
-            } else if (language === 'python') {
-                highlighted = highlighted
-                    .replace(/(#.*$)/gm, '<span class="comment">$1</span>')
-                    .replace(/\b(def|class|if|elif|else|for|while|return|import|from|try|except|with|as|lambda|yield|async|await)\b/g, '<span class="keyword">$1</span>')
-                    .replace(/\b(\d+)\b/g, '<span class="number">$1</span>')
-                    .replace(/(['"`])(?:(?=(\\?))\2.)*?\1/g, '<span class="string">$&</span>')
-                    .replace(/\b([A-Z]\w+)\b/g, '<span class="class-name">$1</span>');
-            } else if (language === 'java') {
-                highlighted = highlighted
-                    .replace(/(\/\/.*$|\/\*[\s\S]*?\*\/)/gm, '<span class="comment">$1</span>')
-                    .replace(/\b(public|private|protected|static|final|class|interface|extends|implements|import|package|void|int|String|boolean|if|else|for|while|return|new|try|catch)\b/g, '<span class="keyword">$1</span>')
-                    .replace(/\b(\d+)\b/g, '<span class="number">$1</span>')
-                    .replace(/"([^"]*)"/g, '<span class="string">"$1"</span>')
-                    .replace(/\b([A-Z]\w+)\b/g, '<span class="class-name">$1</span>');
-            }
-            
-            return highlighted;
-        }
-
-        // Switch between tabs
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-            
-            if (tab === 'visual') {
-                document.querySelectorAll('.tab')[0].classList.add('active');
-                document.getElementById('visualTab').classList.add('active');
-            } else {
-                document.querySelectorAll('.tab')[1].classList.add('active');
-                document.getElementById('codeTab').classList.add('active');
-            }
-            
-            // Close mobile menu on tab switch
-            closeMobileMenu();
-        }
-
-        // Mobile menu functions
-        function toggleMobileMenu() {
-            const promptSection = document.getElementById('promptSection');
-            const overlay = document.getElementById('mobileOverlay');
-            promptSection.classList.toggle('mobile-open');
-            overlay.classList.toggle('active');
-            document.body.style.overflow = promptSection.classList.contains('mobile-open') ? 'hidden' : '';
-        }
-
-        function closeMobileMenu() {
-            const promptSection = document.getElementById('promptSection');
-            const overlay = document.getElementById('mobileOverlay');
-            promptSection.classList.remove('mobile-open');
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        // Set prompt from examples
-        function setPrompt(text) {
-            document.getElementById('promptInput').value = text;
-        }
-
-        // Generate app using Pollinations API with Claude
-        async function generateApp() {
-            const prompt = document.getElementById('promptInput').value.trim();
-            
-            if (!prompt) {
-                alert('Por favor, descreva o app que você quer criar!');
-                return;
-            }
-
-            const generateBtn = document.getElementById('generateBtn');
-            const loadingVisual = document.getElementById('loadingVisual');
-            const previewFrame = document.getElementById('previewFrame');
-            
-            generateBtn.disabled = true;
-            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
-            loadingVisual.classList.add('active');
-            previewFrame.style.display = 'none';
-            
-            // Show AI thinking panel
-            showThinkingPanel();
-            simulateReasoningSteps(prompt);
-
-            try {
-                const systemPrompt = `Você é um expert em desenvolvimento web full-stack. Crie aplicativos web completos, modernos e funcionais.
+  try {
+    const sysPrompt = `Você é um especialista em desenvolvimento web full-stack. Crie aplicativos web completos, modernos e altamente funcionais.
 
 REGRAS CRÍTICAS:
-1. Retorne APENAS código HTML completo (sem markdown, sem explicações)
-2. Inclua TODO o CSS no <style> dentro do <head>
-3. Inclua TODO o JavaScript no <script> antes de </body>
-4. Design deve ser moderno, responsivo e atraente
-5. Código deve ser 100% funcional
-6. Comece sempre com <!DOCTYPE html>
-7. Use cores vibrantes e animações quando apropriado
-8. Inclua todos os recursos necessários (não use imports externos quando possível)`;
+- Retorne APENAS código HTML puro, sem markdown, sem explicações, sem \`\`\`
+- Todo CSS dentro de <style> no <head>
+- Todo JavaScript dentro de <script> antes de </body>
+- Design ultra-moderno, responsivo, com gradientes e animações
+- Código 100% funcional e completo
+- Inicie SEMPRE com <!DOCTYPE html>
+- Inclua todas as funcionalidades pedidas
+- Use emojis e ícones (Font Awesome CDN se necessário)
+- Faça apps que impressionem visualmente`;
 
-                const userMessage = `Crie um aplicativo web completo e funcional baseado nesta descrição detalhada:
+    const content = await callAPI([
+      { role: 'system', content: sysPrompt },
+      { role: 'user', content: `Crie um aplicativo web completo para: "${prompt}"\n\nLembre: apenas código HTML, sem qualquer texto extra.` }
+    ]);
 
-"${prompt}"
+    let html = content.trim().replace(/^```html\n?/i,'').replace(/^```\n?/,'').replace(/```$/,'').trim();
+    if (!html.toLowerCase().includes('<!doctype')) html = '<!DOCTYPE html>\n' + html;
 
-Lembre-se: retorne APENAS o código HTML completo, sem explicações.`;
+    state.appHtml = html;
+    state.rawCode = html;
+    state.currentCode = html;
+    state.currentLang = 'html';
 
-                // Build conversation
-                conversationHistory = [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: userMessage }
-                ];
+    addThought('✅ App gerado com sucesso!','fin', 500);
+    setTimeout(() => showCodeStream(html), 600);
 
-                console.log('🌸 Chamando Pollinations API com Qwen-Coder...');
-                
-                // Call Pollinations API
-                const response = await callPollinationsAPI(conversationHistory);
+    setTimeout(() => {
+      renderPreview(html);
+      updateCodeEditor(html, 'html');
+      document.getElementById('codeDot').style.display = 'inline-block';
+      hideThinking();
+      showToast('App gerado com sucesso! 🎉','success');
+    }, 2200);
 
-                console.log('✅ Resposta recebida:', response);
+  } catch(err) {
+    console.error(err);
+    addThought('❌ Erro: ' + (err.message || err), 'fin', 0);
+    showToast('Erro: ' + (err.message || 'Tente novamente'), 'error');
+    hideThinking();
+  } finally {
+    state.generating = false;
+    setBtnLoading(false);
+  }
+}
 
-                // Extract code from response
-                let htmlCode = response.content.trim();
-                
-                addThinkingStep('✨ Código gerado pela IA! Processando...', 'finalizing', 2000);
-                
-                // Show code streaming
-                setTimeout(() => showCodeStream(htmlCode), 2200);
-                
-                // Clean the response
-                htmlCode = htmlCode.replace(/```html\n?/g, '').replace(/```\n?/g, '');
-                htmlCode = htmlCode.replace(/```/g, '');
-                
-                // Ensure it starts with DOCTYPE
-                if (!htmlCode.toLowerCase().includes('<!doctype html>')) {
-                    htmlCode = '<!DOCTYPE html>\n' + htmlCode;
-                }
-                
-                addThinkingStep('🎨 Renderizando aplicativo...', 'finalizing', 2800);
+// ─── GENERATE CODE FOR LANG ───
+async function generateCodeForCurrentLang() {
+  const input = document.getElementById('codeAiInput').value.trim();
+  const prompt = input || document.getElementById('promptInput').value.trim();
+  if (!prompt) { showToast('Escreva o que deseja na barra de IA abaixo!','error'); return; }
 
-                // Store the code and conversation
-                appFiles.html = htmlCode;
-                currentCode = htmlCode;
-                
-                // Save conversation for future refinements
-                conversationHistory.push({
-                    role: 'assistant',
-                    content: response.content
-                });
+  const btn = document.getElementById('codeAiBtn');
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-                // Display in preview
-                setTimeout(() => {
-                    const blob = new Blob([htmlCode], { type: 'text/html' });
-                    const url = URL.createObjectURL(blob);
-                    previewFrame.src = url;
-                    previewFrame.style.display = 'block';
+  const langNames = { html:'HTML',css:'CSS',js:'JavaScript',ts:'TypeScript',python:'Python',java:'Java',cpp:'C++',php:'PHP',rb:'Ruby',go:'Go',rs:'Rust',custom:'código' };
+  const lang = state.currentLang === 'custom' ? (prompt.split(' ')[0] || 'código') : (langNames[state.currentLang] || state.currentLang);
 
-                    // Also update code editor
-                    updateCodeDisplay(htmlCode);
+  try {
+    const content = await callAPI([
+      { role:'system', content:`Você é um especialista em ${lang}. Retorne APENAS código ${lang} puro, sem markdown, sem explicações. Código completo, funcional e com comentários úteis.` },
+      { role:'user', content:`Crie código ${lang} para: "${prompt}"` }
+    ]);
 
-                    addThinkingStep('✅ App gerado com sucesso pela IA!', 'finalizing', 0);
-                    showSuccess('App gerado com sucesso!');
-                    hideThinkingPanel();
-                    closeMobileMenu();
-                }, 3500);
+    let code = content.trim().replace(/^```[\w]*\n?/,'').replace(/```$/,'').trim();
+    state.currentCode = code;
+    state.rawCode = code;
+    updateCodeEditor(code, state.currentLang);
+    showToast(`Código ${lang} gerado! 🚀`,'success');
+  } catch(err) {
+    showToast('Erro: ' + (err.message || 'Tente novamente'),'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Gerar';
+  }
+}
 
-            } catch (error) {
-                console.error('❌ Erro ao gerar app:', error);
-                addThinkingStep('❌ Erro ao gerar o app', 'finalizing', 0);
-                
-                let errorMessage = 'Erro ao gerar o app. ';
-                
-                if (error && error.message) {
-                    if (error.message.includes('rate limit') || error.message.includes('429')) {
-                        errorMessage += 'Limite de requisições atingido. Aguarde um momento e tente novamente.';
-                    } else if (error.message.includes('401') || error.message.includes('unauthorized')) {
-                        errorMessage += 'Erro de autenticação. Verifique a API key.';
-                    } else if (error.message.includes('network') || error.message.includes('fetch')) {
-                        errorMessage += 'Erro de conexão. Verifique sua internet.';
-                    } else {
-                        errorMessage += error.message;
-                    }
-                } else {
-                    errorMessage += 'Tente novamente!';
-                }
-                
-                alert(errorMessage);
-                hideThinkingPanel();
-            } finally {
-                generateBtn.disabled = false;
-                generateBtn.innerHTML = '<i class="fas fa-magic"></i> Gerar App';
-                loadingVisual.classList.remove('active');
-            }
-        }
+// ─── SYNTAX HIGHLIGHT ───
+function highlight(code, lang) {
+  let esc = code
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
 
-        // Switch language in code editor
-        async function switchLanguage(lang) {
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            currentLanguage = lang;
+  if (lang === 'html') {
+    return esc
+      .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="s-comment">$1</span>')
+      .replace(/(&lt;\/?)([\w-]+)/g, '$1<span class="s-tag">$2</span>')
+      .replace(/([\w:-]+)(=)(&quot;[^&]*&quot;|'[^']*')/g, '<span class="s-attr">$1</span><span class="s-operator">$2</span><span class="s-value">$3</span>')
+      .replace(/(&lt;!DOCTYPE[^&]*&gt;)/gi, '<span class="s-comment">$1</span>');
+  }
+  if (lang === 'css') {
+    return esc
+      .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="s-comment">$1</span>')
+      .replace(/([.#:[\w][^{]*?)(\{)/g, '<span class="s-sel">$1</span>$2')
+      .replace(/([\w-]+)(\s*:)/g, '<span class="s-prop">$1</span>$2')
+      .replace(/:\s*(#[0-9a-fA-F]{3,8}|[\d.]+(?:px|em|rem|vh|vw|%))/g, ': <span class="s-value">$1</span>');
+  }
+  const jsLike = (esc) => esc
+    .replace(/(\/\/[^\n]*)/g, '<span class="s-comment">$1</span>')
+    .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="s-comment">$1</span>')
+    .replace(/\b(function|const|let|var|if|else|for|while|return|class|import|export|async|await|try|catch|throw|new|this|typeof|instanceof|switch|case|break|continue|default|extends|super|yield|static|get|set|from|of|in|do)\b/g, '<span class="s-keyword">$1</span>')
+    .replace(/\b(true|false|null|undefined|NaN|Infinity)\b/g,'<span class="s-const">$1</span>')
+    .replace(/(&quot;(?:[^&]|&(?!quot;))*&quot;|&#x27;(?:[^&]|&(?!#x27;))*&#x27;|`[^`]*`)/g, '<span class="s-string">$1</span>')
+    .replace(/\b(\d+\.?\d*)\b/g, '<span class="s-number">$1</span>')
+    .replace(/\b([A-Z][a-zA-Z0-9_]*)\b/g, '<span class="s-class">$1</span>')
+    .replace(/\b([a-z_$][a-z0-9_$]*)(?=\s*\()/g, '<span class="s-function">$1</span>');
 
-            if (lang === 'custom') {
-                const customLang = prompt('Digite a linguagem que você quer usar (ex: Python, Java, C++, Ruby, etc.):');
-                if (!customLang) return;
-                
-                const customPrompt = prompt(`Digite o que você quer em ${customLang}:`);
-                if (!customPrompt) return;
+  if (['js','ts'].includes(lang)) return jsLike(esc);
 
-                await generateCodeForLanguage(customLang, customPrompt);
-            } else if (['html', 'css', 'javascript'].includes(lang)) {
-                // Show existing app code
-                if (appFiles.html) {
-                    let code = '';
-                    if (lang === 'html') {
-                        code = appFiles.html;
-                    } else if (lang === 'css') {
-                        const cssMatch = appFiles.html.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
-                        code = cssMatch ? cssMatch[1].trim() : '/* Nenhum CSS encontrado */';
-                    } else if (lang === 'javascript') {
-                        const jsMatch = appFiles.html.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
-                        code = jsMatch ? jsMatch[1].trim() : '// Nenhum JavaScript encontrado';
-                    }
-                    updateCodeDisplay(code);
-                }
-            } else {
-                // Generate code for other languages
-                const prompt = document.getElementById('promptInput').value.trim();
-                if (prompt) {
-                    await generateCodeForLanguage(lang, prompt);
-                }
-            }
-        }
+  if (lang === 'python') return esc
+    .replace(/(#[^\n]*)/g,'<span class="s-comment">$1</span>')
+    .replace(/("""[\s\S]*?"""|\'\'\'[\s\S]*?\'\'\')/g,'<span class="s-string">$1</span>')
+    .replace(/\b(def|class|if|elif|else|for|while|return|import|from|try|except|with|as|lambda|yield|async|await|pass|raise|global|nonlocal|del|assert|in|is|not|and|or)\b/g,'<span class="s-keyword">$1</span>')
+    .replace(/\b(True|False|None)\b/g,'<span class="s-const">$1</span>')
+    .replace(/(&quot;[^&]*&quot;|&#x27;[^&#]*&#x27;)/g,'<span class="s-string">$1</span>')
+    .replace(/\b(\d+\.?\d*)\b/g,'<span class="s-number">$1</span>')
+    .replace(/\b([A-Z][a-zA-Z0-9_]*)\b/g,'<span class="s-class">$1</span>')
+    .replace(/\b([a-z_][a-z0-9_]*)(?=\s*\()/g,'<span class="s-function">$1</span>');
 
-        // Generate code for specific language
-        async function generateCodeForLanguage(language, description) {
-            const loadingCode = document.getElementById('loadingCode');
-            const codeDisplay = document.getElementById('codeDisplay');
-            
-            loadingCode.classList.add('active');
-            codeDisplay.style.display = 'none';
+  if (lang === 'java' || lang === 'cpp') return esc
+    .replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/)/g,'<span class="s-comment">$1</span>')
+    .replace(/\b(public|private|protected|static|final|class|interface|extends|implements|import|package|void|int|String|boolean|float|double|char|long|byte|short|new|return|if|else|for|while|try|catch|throw|throws|this|super|abstract|enum|synchronized|volatile)\b/g,'<span class="s-keyword">$1</span>')
+    .replace(/\b(true|false|null)\b/g,'<span class="s-const">$1</span>')
+    .replace(/(&quot;[^&]*&quot;)/g,'<span class="s-string">$1</span>')
+    .replace(/\b(\d+\.?\d*[fFdDlL]?)\b/g,'<span class="s-number">$1</span>')
+    .replace(/\b([A-Z][a-zA-Z0-9_]*)\b/g,'<span class="s-class">$1</span>')
+    .replace(/\b([a-z_][a-z0-9_]*)(?=\s*\()/g,'<span class="s-function">$1</span>');
 
-            try {
-                const systemPrompt = `Você é um expert programador ${language.toUpperCase()} com anos de experiência.
-                
-REGRAS:
-1. Retorne APENAS código puro (sem markdown, sem explicações)
-2. Código deve ser completo e funcional
-3. Use as melhores práticas da linguagem ${language}
-4. Inclua comentários úteis no código
-5. Código deve ser production-ready`;
+  if (lang === 'php') return esc
+    .replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/#)/g,'<span class="s-comment">$1</span>')
+    .replace(/\b(function|class|if|else|foreach|for|while|return|echo|print|include|require|extends|implements|public|private|protected|static|new|namespace|use|try|catch|throw)\b/g,'<span class="s-keyword">$1</span>')
+    .replace(/(\$[a-zA-Z_][a-zA-Z0-9_]*)/g,'<span class="s-var">$1</span>')
+    .replace(/(&quot;[^&]*&quot;|&#x27;[^&#]*&#x27;)/g,'<span class="s-string">$1</span>')
+    .replace(/\b(\d+)\b/g,'<span class="s-number">$1</span>');
 
-                const messages = [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: `Escreva código ${language.toUpperCase()} completo e funcional para: "${description}"` }
-                ];
+  if (['rb','go','rs'].includes(lang)) return jsLike(esc);
+  return esc;
+}
 
-                console.log(`🌸 Gerando código ${language} com Qwen-Coder...`);
+// ─── UPDATE CODE EDITOR ───
+function updateCodeEditor(code, lang) {
+  state.rawCode = code;
+  state.currentCode = code;
 
-                const response = await callPollinationsAPI(messages);
+  const lines = code.split('\n');
+  // Line numbers
+  const ln = document.getElementById('lineNumbers');
+  ln.innerHTML = lines.map((_, i) => `<div class="line-num-item">${i+1}</div>`).join('');
+  // Highlighted code
+  document.getElementById('codeContent').innerHTML = highlight(code, lang);
+  // Status
+  document.getElementById('statusLines').textContent = lines.length + ' linhas';
+  document.getElementById('statusLang').textContent = lang.toUpperCase();
+  // File tabs
+  buildCodeTabs(lang);
+  // Minimap
+  drawMinimap(code);
+}
 
-                console.log('✅ Código recebido:', response);
+// ─── CODE TABS ───
+const langMeta = {
+  html:   { icon:'fab fa-html5',   ext:'index.html',   cls:'ext-html' },
+  css:    { icon:'fab fa-css3-alt', ext:'style.css',    cls:'ext-css'  },
+  js:     { icon:'fab fa-js-square',ext:'script.js',    cls:'ext-js'   },
+  ts:     { icon:'fas fa-code',     ext:'index.ts',     cls:'ext-ts'   },
+  python: { icon:'fab fa-python',   ext:'main.py',      cls:'ext-py'   },
+  java:   { icon:'fab fa-java',     ext:'Main.java',    cls:'ext-java' },
+  cpp:    { icon:'fas fa-c',        ext:'main.cpp',     cls:'ext-cpp'  },
+  php:    { icon:'fab fa-php',      ext:'index.php',    cls:'ext-php'  },
+  rb:     { icon:'fas fa-gem',      ext:'app.rb',       cls:'ext-rb'   },
+  go:     { icon:'fas fa-code',     ext:'main.go',      cls:'ext-go'   },
+  rs:     { icon:'fas fa-code',     ext:'main.rs',      cls:'ext-rs'   },
+  custom: { icon:'fas fa-file-code',ext:'arquivo',      cls:''         }
+};
+function buildCodeTabs(active) {
+  const m = langMeta[active] || langMeta.custom;
+  document.getElementById('codeTabs').innerHTML = `
+    <button class="code-file-tab active">
+      <i class="tab-icon ${m.icon} ${m.cls}"></i>
+      <span>${m.ext}</span>
+    </button>`;
+}
 
-                // Extract code from response
-                let code = response.content.trim();
-                code = code.replace(/```[\w]*\n?/g, '').replace(/```\n?/g, '');
-                
-                currentCode = code;
-                updateCodeDisplay(code);
-                
-                showSuccess(`Código em ${language} gerado com sucesso!`);
-            } catch (error) {
-                console.error('❌ Erro ao gerar código:', error);
-                let errorMessage = 'Erro ao gerar código. ';
-                
-                if (error && error.message) {
-                    if (error.message.includes('rate limit') || error.message.includes('429')) {
-                        errorMessage += 'Limite de requisições atingido. Aguarde.';
-                    } else if (error.message.includes('401')) {
-                        errorMessage += 'Erro de autenticação. Verifique a API key.';
-                    } else if (error.message.includes('network')) {
-                        errorMessage += 'Verifique sua conexão com a internet.';
-                    } else {
-                        errorMessage += error.message;
-                    }
-                } else {
-                    errorMessage += 'Tente novamente!';
-                }
-                
-                alert(errorMessage);
-            } finally {
-                loadingCode.classList.remove('active');
-                codeDisplay.style.display = 'block';
-            }
-        }
+// ─── SHOW HTML CODE ───
+function showHtmlCode() {
+  if (state.appHtml) updateCodeEditor(state.appHtml, 'html');
+}
 
-        // Update code display
-        function updateCodeDisplay(code) {
-            const codeDisplay = document.getElementById('codeDisplay');
-            const highlightedCode = highlightCode(escapeHtml(code), currentLanguage);
-            codeDisplay.innerHTML = highlightedCode;
-            currentCode = code;
-        }
+// ─── SELECT LANG ───
+function selectLang(lang) {
+  state.currentLang = lang;
+  document.querySelectorAll('.lang-pill').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[data-lang="${lang}"]`)?.classList.add('active');
 
-        // Helper function to escape HTML
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+  if (lang === 'custom') {
+    document.getElementById('codeAiInput').placeholder = 'Diga a linguagem e o que criar. Ex: "Rust: servidor HTTP básico"';
+    document.getElementById('codeAiInput').focus();
+    return;
+  }
 
-        // Copy code to clipboard
-        function copyCode() {
-            if (!currentCode) {
-                alert('Nenhum código para copiar!');
-                return;
-            }
+  // If we have app html, extract
+  if (state.appHtml) {
+    if (lang === 'html') { updateCodeEditor(state.appHtml, 'html'); return; }
+    if (lang === 'css') {
+      const m = state.appHtml.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+      if (m) { updateCodeEditor(m[1].trim(), 'css'); return; }
+    }
+    if (lang === 'js') {
+      const m = state.appHtml.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
+      if (m) { updateCodeEditor(m[1].trim(), 'js'); return; }
+    }
+  }
 
-            navigator.clipboard.writeText(currentCode).then(() => {
-                showSuccess('Código copiado para a área de transferência!');
-            }).catch(err => {
-                alert('Erro ao copiar código!');
-            });
-        }
+  // Otherwise prompt for generation
+  const langNames = { css:'CSS',js:'JavaScript',ts:'TypeScript',python:'Python',java:'Java',cpp:'C++',php:'PHP',rb:'Ruby',go:'Go',rs:'Rust' };
+  document.getElementById('codeAiInput').placeholder = `Descreva o que criar em ${langNames[lang] || lang}...`;
+  document.getElementById('codeAiInput').focus();
+  updateCodeEditor(`// Peça à IA para gerar código ${langNames[lang] || lang} na barra abaixo...`, lang);
+  document.getElementById('statusLang').textContent = lang.toUpperCase();
+}
 
-        // Download code
-        function downloadCode() {
-            if (!currentCode) {
-                alert('Nenhum código para baixar!');
-                return;
-            }
+// ─── MINIMAP ───
+function drawMinimap(code) {
+  const canvas = document.getElementById('minimapCanvas');
+  const container = document.getElementById('minimap');
+  const W = container.offsetWidth;
+  const lines = code.split('\n').slice(0, 200);
+  const H = Math.min(lines.length * 3, container.offsetHeight);
+  canvas.width = W; canvas.height = H || 300;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  lines.forEach((line,i) => {
+    const brightness = Math.min(line.length / 80, 1);
+    ctx.fillStyle = `rgba(124,106,247,${brightness * 0.5})`;
+    ctx.fillRect(0, i*3, W * brightness, 2);
+  });
+}
 
-            const extensions = {
-                html: 'html',
-                css: 'css',
-                javascript: 'js',
-                python: 'py',
-                java: 'java'
-            };
+// ─── THINKING PANEL ───
+function showThinking() {
+  const p = document.getElementById('thinkingPanel');
+  p.innerHTML = '';
+  p.classList.add('show');
+}
+function hideThinking() {
+  setTimeout(() => {
+    document.getElementById('thinkingPanel').classList.remove('show');
+  }, 2500);
+}
+function addThought(text, type='gen', delay=0) {
+  setTimeout(() => {
+    const p = document.getElementById('thinkingPanel');
+    const row = document.createElement('div');
+    row.className = `think-row ${type}`;
+    row.innerHTML = `<span class="think-text">${text}</span>`;
+    p.appendChild(row);
+    p.scrollTop = p.scrollHeight;
+  }, delay);
+}
+function showCodeStream(code) {
+  const p = document.getElementById('thinkingPanel');
+  const wrap = document.createElement('div');
+  wrap.className = 'code-stream-mini';
+  p.appendChild(wrap);
+  const lines = code.split('\n').filter(l => l.trim()).slice(0, 18);
+  lines.forEach((line, i) => {
+    setTimeout(() => {
+      const d = document.createElement('div');
+      d.className = 'stream-line';
+      d.textContent = line.substring(0, 70) + (line.length > 70 ? '…' : '');
+      wrap.appendChild(d);
+      wrap.scrollTop = wrap.scrollHeight;
+    }, i * 80);
+  });
+}
 
-            const extension = extensions[currentLanguage] || 'txt';
-            const blob = new Blob([currentCode], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `zedex-code.${extension}`;
-            a.click();
-            URL.revokeObjectURL(url);
-            
-            showSuccess('Código baixado com sucesso!');
-        }
+// ─── RENDER PREVIEW ───
+function renderPreview(html) {
+  const frame = document.getElementById('previewFrame');
+  document.getElementById('previewEmpty').style.display = 'none';
+  frame.style.display = 'block';
+  const blob = new Blob([html], { type: 'text/html' });
+  frame.src = URL.createObjectURL(blob);
+}
+function refreshPreview() {
+  if (state.appHtml) renderPreview(state.appHtml);
+  else showToast('Gere um app primeiro!','error');
+}
+function openFullscreen() {
+  if (!state.appHtml) { showToast('Gere um app primeiro!','error'); return; }
+  const w = window.open('');
+  w.document.write(state.appHtml); w.document.close();
+}
+function downloadApp() {
+  if (!state.appHtml) { showToast('Gere um app primeiro!','error'); return; }
+  download('zedex-app.html', state.appHtml, 'text/html');
+  showToast('App baixado!','success');
+}
 
-        // Edit app (simplified - allows user to edit in code view)
-        function editApp() {
-            switchTab('code');
-            switchLanguage('html');
-            showSuccess('Edite o código na aba "Só Código" e clique em Atualizar');
-        }
+// ─── COPY / DOWNLOAD CODE ───
+function copyCode() {
+  if (!state.rawCode) { showToast('Nenhum código disponível!','error'); return; }
+  navigator.clipboard.writeText(state.rawCode).then(() => showToast('Código copiado!','success'));
+}
+function downloadCode() {
+  if (!state.rawCode) { showToast('Nenhum código disponível!','error'); return; }
+  const m = langMeta[state.currentLang] || langMeta.custom;
+  download(m.ext, state.rawCode, 'text/plain');
+  showToast('Arquivo baixado!','success');
+}
+function download(name, content, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content],{type}));
+  a.download = name; a.click();
+}
 
-        // Refresh preview
-        function refreshPreview() {
-            if (appFiles.html) {
-                const previewFrame = document.getElementById('previewFrame');
-                const blob = new Blob([appFiles.html], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                previewFrame.src = url;
-                showSuccess('Preview atualizado!');
-            }
-        }
+// ─── UI HELPERS ───
+function setPrompt(t) { document.getElementById('promptInput').value = t; closeSidebar(); }
+function codeClicked() {}
 
-        // Download complete app
-        function downloadApp() {
-            if (!appFiles.html) {
-                alert('Gere um app primeiro!');
-                return;
-            }
+function switchPage(p) {
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-' + p).classList.add('active');
+  document.getElementById('tab-' + p).classList.add('active');
+}
 
-            const blob = new Blob([appFiles.html], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'zedex-app.html';
-            a.click();
-            URL.revokeObjectURL(url);
-            
-            showSuccess('App baixado com sucesso!');
-        }
+function setBtnLoading(on) {
+  const btn = document.getElementById('generateBtn');
+  const icon = document.getElementById('genIcon');
+  const text = document.getElementById('genText');
+  btn.disabled = on;
+  icon.className = on ? 'fas fa-spinner fa-spin' : 'fas fa-bolt';
+  text.textContent = on ? 'Gerando...' : 'Gerar App';
+}
 
-        // Show success message
-        function showSuccess(message) {
-            const successMessage = document.getElementById('successMessage');
-            const successText = document.getElementById('successText');
-            successText.textContent = message;
-            successMessage.classList.add('show');
-            
-            setTimeout(() => {
-                successMessage.classList.remove('show');
-            }, 3000);
-        }
-    </script>
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  const i = document.getElementById('toastIcon');
+  const m = document.getElementById('toastMsg');
+  t.className = `toast show ${type}`;
+  i.className = type === 'error' ? 'fas fa-circle-xmark' : 'fas fa-circle-check';
+  m.textContent = msg;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.className = 'toast', 3500);
+}
+
+// ─── THEME ───
+function toggleThemeDropdown() {
+  document.getElementById('themeDropdown').classList.toggle('open');
+}
+function setTheme(t, label) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('themeLabel').textContent = label;
+  document.querySelectorAll('.theme-option').forEach(o => o.classList.toggle('active', o.dataset.theme === t));
+  document.getElementById('themeDropdown').classList.remove('open');
+  localStorage.setItem('zedex-theme', t);
+  localStorage.setItem('zedex-theme-label', label);
+  if (state.rawCode) drawMinimap(state.rawCode);
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.theme-picker-btn') && !e.target.closest('.theme-dropdown')) {
+    document.getElementById('themeDropdown').classList.remove('open');
+  }
+});
+
+// ─── SIDEBAR (mobile) ───
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ─── INIT ───
+(function init() {
+  const t = localStorage.getItem('zedex-theme') || 'dark';
+  const l = localStorage.getItem('zedex-theme-label') || 'Dark';
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('themeLabel').textContent = l;
+  document.querySelectorAll('.theme-option').forEach(o => o.classList.toggle('active', o.dataset.theme === t));
+  buildCodeTabs('html');
+  drawMinimap('');
+})();
+</script>
 </body>
 </html>
