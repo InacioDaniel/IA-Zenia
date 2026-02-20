@@ -44,6 +44,16 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
 #sidebar-scroll{flex:1;overflow-y:auto}
 #sidebar-scroll::-webkit-scrollbar{width:3px}
 #sidebar-scroll::-webkit-scrollbar-thumb{background:var(--border-accent);border-radius:4px}
+/* Collapsible sidebar sections */
+.sb-section{border-bottom:1px solid var(--border-color)}
+.sb-section-hdr{width:100%;display:flex;align-items:center;justify-content:space-between;padding:7px 13px;background:transparent;border:none;cursor:pointer;color:var(--text-muted);font-family:var(--font-ui);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;transition:background .15s}
+.sb-section-hdr:hover{background:var(--bg-secondary);color:var(--text-primary)}
+.sb-section-body{overflow:hidden;transition:max-height .28s ease,opacity .2s;max-height:500px;opacity:1;padding:3px 0 6px}
+.sb-section-body.collapsed{max-height:0 !important;opacity:0;padding:0;pointer-events:none}
+.sb-chev{transition:transform .25s}
+.sb-chev.rotated{transform:rotate(-90deg)}
+.sb-item{width:100%;display:flex;align-items:center;gap:7px;padding:5px 13px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:12px;text-align:left;font-family:var(--font-ui);transition:background .15s,color .15s;text-decoration:none}
+.sb-item:hover{background:var(--bg-secondary);color:var(--text-primary)}
 #sidebar-toggle{position:absolute;top:50%;right:-17px;transform:translateY(-50%);background:var(--bg-secondary);border:1px solid var(--border-color);width:17px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:101;border-radius:0 7px 7px 0;color:var(--text-muted);transition:background .2s;flex-shrink:0}
 #sidebar-toggle:hover{background:var(--border-accent);color:var(--text-primary)}
 #mob-toggle{display:none;position:fixed;top:10px;left:10px;z-index:300;background:var(--bg-secondary);border:1px solid var(--border-color);width:36px;height:36px;border-radius:9px;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary)}
@@ -470,37 +480,70 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
       </button>
     </div>
     <div id="sidebar-scroll">
-      <div style="padding:9px 10px 3px">
-        <p style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;padding:0 3px">Recursos</p>
-        <button onclick="openAdv()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:12px;text-align:left;font-family:var(--font-ui)"><i class="fas fa-sliders-h" style="color:var(--accent-primary);width:15px"></i> Ferramentas Avançadas</button>
-        <button onclick="document.getElementById('websearch-modal').classList.add('open')" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:12px;text-align:left;font-family:var(--font-ui)"><i class="fas fa-search" style="color:#60a5fa;width:15px"></i> Pesquisa Web</button>
-        <button onclick="openGallery()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:12px;text-align:left;font-family:var(--font-ui)"><i class="fas fa-images" style="color:#db2777;width:15px"></i> Galeria</button>
-        <button onclick="openThemeModal()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:12px;text-align:left;font-family:var(--font-ui)"><i class="fas fa-palette" style="color:#f59e0b;width:15px"></i> Trocar Tema</button>
-        <button onclick="openPersonality()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:12px;text-align:left;font-family:var(--font-ui)"><i class="fas fa-microphone" style="color:#a855f7;width:15px"></i> Config. Voz</button>
-        <button onclick="openVisionModal()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:12px;text-align:left;font-family:var(--font-ui)"><i class="fas fa-eye" style="color:#10b981;width:15px"></i> Visão (OpenCV)</button>
+
+      <!-- RECURSOS -->
+      <div class="sb-section">
+        <button class="sb-section-hdr" onclick="toggleSbSection('recursos')">
+          <span><i class="fas fa-tools" style="color:var(--accent-primary);margin-right:6px;font-size:10px"></i>Recursos</span>
+          <i class="fas fa-chevron-down sb-chev" id="chev-recursos" style="font-size:9px;transition:transform .2s"></i>
+        </button>
+        <div class="sb-section-body" id="body-recursos">
+          <button onclick="openAdv()" class="sb-item"><i class="fas fa-sliders-h" style="color:var(--accent-primary);width:15px"></i> Ferramentas Avançadas</button>
+          <button onclick="document.getElementById('websearch-modal').classList.add('open')" class="sb-item"><i class="fas fa-search" style="color:#60a5fa;width:15px"></i> Pesquisa Web</button>
+          <button onclick="openGallery()" class="sb-item"><i class="fas fa-images" style="color:#db2777;width:15px"></i> Galeria</button>
+          <button onclick="openThemeModal()" class="sb-item"><i class="fas fa-palette" style="color:#f59e0b;width:15px"></i> Trocar Tema</button>
+          <button onclick="openPersonality()" class="sb-item"><i class="fas fa-microphone" style="color:#a855f7;width:15px"></i> Config. Voz</button>
+          <button onclick="openVisionModal()" class="sb-item"><i class="fas fa-eye" style="color:#10b981;width:15px"></i> Visão (OpenCV)</button>
+        </div>
       </div>
-      <div style="padding:9px 10px 3px">
-        <p style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;padding:0 3px">Criar</p>
-        <button onclick="openArtifacts()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:12px;text-align:left;font-family:var(--font-ui)"><i class="fas fa-magic" style="color:#8b5cf6;width:15px"></i> Artefatos</button>
-        <button onclick="openCodeStudio()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:12px;text-align:left;font-family:var(--font-ui)"><i class="fas fa-code" style="color:#60a5fa;width:15px"></i> Código</button>
-        <button onclick="openProjects()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:12px;text-align:left;font-family:var(--font-ui)"><i class="fas fa-folder-open" style="color:#f59e0b;width:15px"></i> Projetos</button>
+
+      <!-- CRIAR -->
+      <div class="sb-section">
+        <button class="sb-section-hdr" onclick="toggleSbSection('criar')">
+          <span><i class="fas fa-magic" style="color:#8b5cf6;margin-right:6px;font-size:10px"></i>Criar</span>
+          <i class="fas fa-chevron-down sb-chev" id="chev-criar" style="font-size:9px;transition:transform .2s"></i>
+        </button>
+        <div class="sb-section-body" id="body-criar">
+          <button onclick="openArtifacts()" class="sb-item"><i class="fas fa-magic" style="color:#8b5cf6;width:15px"></i> Artefatos</button>
+          <button onclick="openCodeStudio()" class="sb-item"><i class="fas fa-code" style="color:#60a5fa;width:15px"></i> Código</button>
+          <button onclick="openProjects()" class="sb-item"><i class="fas fa-folder-open" style="color:#f59e0b;width:15px"></i> Projetos</button>
+        </div>
       </div>
-      <div style="padding:9px 10px 3px">
-        <p style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;padding:0 3px">Aplicativos</p>
-        <a href="https://antonia-ia.netlify.app" target="_blank" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;text-decoration:none;color:var(--text-secondary);font-size:12px"><i class="fas fa-comment-dots" style="color:#10b981;width:15px"></i> Antonia IA</a>
-        <a href="https://ia-zenia.netlify.app/zedex" target="_blank" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;text-decoration:none;color:var(--text-secondary);font-size:12px"><i class="fas fa-code" style="color:#60a5fa;width:15px"></i> Zedex Code</a>
-        <a href="https://zenia-projects.netlify.app" target="_blank" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;text-decoration:none;color:var(--text-secondary);font-size:12px"><i class="fas fa-project-diagram" style="color:#f59e0b;width:15px"></i> Zenia Projects</a>
+
+      <!-- APLICATIVOS -->
+      <div class="sb-section">
+        <button class="sb-section-hdr" onclick="toggleSbSection('apps')">
+          <span><i class="fas fa-th" style="color:#22c55e;margin-right:6px;font-size:10px"></i>Aplicativos</span>
+          <i class="fas fa-chevron-down sb-chev" id="chev-apps" style="font-size:9px;transition:transform .2s"></i>
+        </button>
+        <div class="sb-section-body" id="body-apps">
+          <a href="https://antonia-ia.netlify.app" target="_blank" class="sb-item sb-link"><i class="fas fa-comment-dots" style="color:#10b981;width:15px"></i> Antonia IA</a>
+          <a href="https://ia-zenia.netlify.app/zedex" target="_blank" class="sb-item sb-link"><i class="fas fa-code" style="color:#60a5fa;width:15px"></i> Zedex Code</a>
+          <a href="https://zedex-ide.netlify.app" target="_blank" class="sb-item sb-link"><i class="fas fa-laptop-code" style="color:#a78bfa;width:15px"></i> Zedex IDE</a>
+          <a href="https://zenia-projects.netlify.app" target="_blank" class="sb-item sb-link"><i class="fas fa-project-diagram" style="color:#f59e0b;width:15px"></i> Zenia Projects</a>
+          <a href="https://zenia-api.netlify.app/" target="_blank" class="sb-item sb-link"><i class="fas fa-plug" style="color:#38bdf8;width:15px"></i> Zenia API</a>
+        </div>
       </div>
+
+      <!-- DOWNLOAD -->
       <div style="padding:6px 10px">
         <a href="https://ia-zenia.netlify.app/download" target="_blank" class="download-zenia-btn" style="width:100%;justify-content:center;border-radius:8px;text-decoration:none">
           <i class="fas fa-download"></i> <span>Baixar IA-Zenia</span>
         </a>
       </div>
-      <div style="padding:4px 10px">
-        <p style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;padding:0 3px">Histórico</p>
-        <input id="search-in" type="text" placeholder="Pesquisar..." oninput="filterHist(this.value)" style="width:100%;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:7px;padding:5px 9px;font-size:12px;color:var(--text-primary);outline:none;margin-bottom:6px;font-family:var(--font-msg)">
-        <div id="hist-list"></div>
+
+      <!-- HISTÓRICO -->
+      <div class="sb-section">
+        <button class="sb-section-hdr" onclick="toggleSbSection('hist')">
+          <span><i class="fas fa-history" style="color:var(--text-muted);margin-right:6px;font-size:10px"></i>Histórico</span>
+          <i class="fas fa-chevron-down sb-chev" id="chev-hist" style="font-size:9px;transition:transform .2s"></i>
+        </button>
+        <div class="sb-section-body" id="body-hist">
+          <input id="search-in" type="text" placeholder="Pesquisar..." oninput="filterHist(this.value)" style="width:100%;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:7px;padding:5px 9px;font-size:12px;color:var(--text-primary);outline:none;margin-bottom:6px;font-family:var(--font-msg)">
+          <div id="hist-list"></div>
+        </div>
       </div>
+
     </div>
     <div style="padding:9px 13px;border-top:1px solid var(--border-color);flex-shrink:0;display:flex;align-items:center;gap:7px">
       <div style="width:28px;height:28px;background:var(--user-av);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">
@@ -704,11 +747,26 @@ var sendBtn = document.getElementById('send-btn');
 var sendIc  = document.getElementById('send-ic');
 
 // Regex detectores
-var VID_RX  = /\b(gera|cria|faz|mostra|quero\s+ver|faz-me)\s+um?\s*(video|filme|clip|animacao|gif|cena|movie|cinematic|scene)\b/i;
-var AUD_RX  = /\b(gera|cria|faz|toca|compoe|quero\s+ouvir|sintetiza|narra|fala|canta)\s+um?a?\s*(musica|audio|som|song|beat|trilha|melodia|faixa|track|instrumental|voz|discurso|podcast)\b/i;
-var IMG_RX  = /\b(gera|cria|faz|desenha|pinta|mostra|quero\s+ver|faz-me|ilustra)\s+um?a?\s*(imagem|foto|image|picture|desenho|wallpaper|arte|avatar|paisagem|retrato|fotografia|quadro|pintura|ilustracao)\b/i;
-var CODE_RX = /\b(codigo|code|script|funcao|function|html|css|javascript|python|java|sql|php|bash|react|api|algoritmo|classe|bug|debug)\b/i;
-var MATH_RX = /\b(exercicio|problema|calcular|resolver|simplificar|derivada|integral|fracao|divisao|multiplicacao|raiz|potencia|equacao|sistema|matriz|calcule|calcula)\b/i;
+var VID_RX  = /\b(gera|gere|gerar|cria|criar|faz|fazer|mostra|quero\s+ver|faz-me)\s+um?\s*(video|filme|clip|animacao|animação|gif|cena|movie|cinematic|scene)\b/i;
+var AUD_RX  = /\b(gera|gere|gerar|cria|criar|faz|fazer|toca|compoe|quero\s+ouvir|sintetiza|narra|fala|canta)\s+um?a?\s*(musica|música|audio|áudio|som|song|beat|trilha|melodia|faixa|track|instrumental|voz|discurso|podcast)\b/i;
+
+// IMG_RX — cobre TODOS os padrões possíveis:
+// "gera uma imagem", "gere imagem", "gerar imagem", "cria foto", "faz um desenho", etc.
+var IMG_RX  = /\b(gera|gere|gerar|cria|criar|crie|faz|fazer|faze|desenha|desenhe|desenhar|pinta|pinte|pintar|mostra|mostre|mostrar|quero\s+ver|faz-me|ilustra|ilustre|ilustrar|produz|produze|produzir|gere-me|cria-me)\s+(um?a?\s+)?(imagem|foto|fotografia|image|picture|desenho|wallpaper|arte|avatar|paisagem|retrato|quadro|pintura|ilustra[cç][aã]o|thumbnail|banner|poster|pôster|logo|logotipo|icon|ícone|capa)\b/i;
+
+var CODE_RX = /\b(codigo|código|code|script|funcao|função|function|html|css|javascript|python|java|sql|php|bash|react|api|algoritmo|classe|bug|debug)\b/i;
+var MATH_RX = /\b(exercicio|exercício|problema|calcular|resolver|simplificar|derivada|integral|fracao|fração|divisao|divisão|multiplicacao|multiplicação|raiz|potencia|potência|equacao|equação|sistema|matriz|calcule|calcula)\b/i;
+
+// Função auxiliar para extrair o prompt de imagem do texto
+function extractImgPrompt(text) {
+  // Remove os verbos/palavras de comando do início para pegar só o subject
+  var cleaned = text
+    .replace(/\b(gera|gere|gerar|cria|criar|crie|faz|fazer|desenha|desenhe|desenhar|pinta|pinte|pintar|mostra|mostre|mostrar|ilustra|ilustre|produz|gere-me|cria-me|faz-me|quero\s+ver)\s+/gi, '')
+    .replace(/\b(uma?|um)\s+/gi, '')
+    .replace(/\b(imagem|foto|fotografia|image|picture|desenho|wallpaper|arte|avatar|paisagem|retrato|quadro|pintura|ilustração|thumbnail|banner|poster|logo|logotipo|icon|ícone|capa)\s*(de|do|da|com|sobre)?\s*/gi, '')
+    .trim();
+  return cleaned || text;
+}
 
 // ==========================================
 // FACTORY MEMORY (cm.json auto-load)
@@ -778,10 +836,35 @@ function completeSetup() {
   initApp();
 }
 
+function toggleSbSection(id) {
+  var body = document.getElementById('body-' + id);
+  var chev = document.getElementById('chev-' + id);
+  if (!body) return;
+  var collapsed = body.classList.toggle('collapsed');
+  if (chev) chev.classList.toggle('rotated', collapsed);
+  // persist state
+  try { var st = JSON.parse(localStorage.getItem('zn_sb_sections') || '{}'); st[id] = collapsed; localStorage.setItem('zn_sb_sections', JSON.stringify(st)); } catch(e) {}
+}
+
+function initSbSections() {
+  try {
+    var st = JSON.parse(localStorage.getItem('zn_sb_sections') || '{}');
+    Object.keys(st).forEach(function(id) {
+      if (st[id]) {
+        var body = document.getElementById('body-' + id);
+        var chev = document.getElementById('chev-' + id);
+        if (body) body.classList.add('collapsed');
+        if (chev) chev.classList.add('rotated');
+      }
+    });
+  } catch(e) {}
+}
+
 function initApp() {
   var wn=document.getElementById('welcome-name');if(wn)wn.textContent=userName||'amigo';
   var un=document.getElementById('uname');if(un)un.textContent=userName||'Utilizador';
   var ui=document.getElementById('user-initial');if(ui)ui.textContent=(userName||'U').charAt(0).toUpperCase();
+  initSbSections();
   renderHist();
   // Sempre começa com conversa nova
   startNew();
@@ -1135,7 +1218,7 @@ async function handleSend() {
 
   if (VID_RX.test(text)){var vp=text.replace(VID_RX,'').trim()||text;await genVid(vp);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Video: '+vp+']'});saveConvs();setLoading(false);return;}
   if (AUD_RX.test(text)){var ap=text.replace(AUD_RX,'').trim()||text;await genAud(ap);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Audio: '+ap+']'});saveConvs();setLoading(false);return;}
-  if (IMG_RX.test(text)){var ip=text.replace(IMG_RX,'').trim()||text;await genImg(ip);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Imagem: '+ip+']'});saveConvs();setLoading(false);return;}
+  if (IMG_RX.test(text)){var ip=extractImgPrompt(text);await genImg(ip);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Imagem: '+ip+']'});saveConvs();setLoading(false);return;}
 
   var typing = renderTyping();
   try {
@@ -1210,23 +1293,86 @@ function showVeoPlayer(card,url,prompt){
 }
 
 // ==========================================
-// IMAGE GENERATION
+// IMAGE GENERATION — via Pollinations AI (fetch + Authorization)
+// curl 'https://gen.pollinations.ai/image/prompt?model=flux' -H 'Authorization: Bearer KEY'
 // ==========================================
-async function genImg(prompt){
-  var ep=encodeURIComponent(prompt),seed=Math.floor(Math.random()*999999);
-  var u1=IMG_EP+ep+'?model=flux&seed='+seed+'&width=768&height=512&nologo=true&enhance=true';
-  var u2=IMG_EP2+ep+'?seed='+seed+'&width=768&height=512&nologo=true';
-  var row=document.createElement('div');row.className='msg-row';
-  var av=document.createElement('div');av.className='msg-av ai';av.textContent='Z';
-  var card=document.createElement('div');card.className='media-card';card.style.maxWidth='500px';
-  card.innerHTML='<div style="padding:13px;display:flex;align-items:center;gap:9px;color:var(--text-muted);font-size:13px"><span class="spin"></span> A gerar imagem...</div>';
-  row.appendChild(av);row.appendChild(card);chatEl.appendChild(row);chatEl.scrollTop=chatEl.scrollHeight;
-  function showCard(url){card.innerHTML='<img src="'+url+'" alt="" loading="lazy"><div class="media-foot"><span class="media-lbl">'+escHtml(prompt.substring(0,55))+'</span><div style="display:flex;gap:5px"><a href="'+url+'" target="_blank" class="mbtn"><i class="fas fa-external-link-alt"></i></a><a href="'+url+'" download="zenia.jpg" class="mbtn"><i class="fas fa-download"></i></a></div></div>';chatEl.scrollTop=chatEl.scrollHeight;}
-  return new Promise(res=>{
-    var t=setTimeout(()=>{card.innerHTML='<div style="padding:13px;color:#fbbf24;font-size:13px">Demorou demasiado.</div>';res(null);},35000);
-    var i1=new Image();i1.onload=()=>{clearTimeout(t);showCard(u1);res(u1);};
-    i1.onerror=()=>{var i2=new Image();i2.onload=()=>{clearTimeout(t);showCard(u2);res(u2);};i2.onerror=()=>{clearTimeout(t);card.innerHTML='<div style="padding:13px;color:#fbbf24">Falha ao gerar.</div>';res(null);};i2.src=u2;};
-    i1.src=u1;
+var POLLINATIONS_KEY = 'pk_urEpxcajGs5TF9Fs';
+
+async function genImg(prompt) {
+  var seed = Math.floor(Math.random()*999999);
+  var encodedPrompt = encodeURIComponent(prompt);
+
+  // URL principal: gen.pollinations.ai com Authorization header (como o curl)
+  var primaryUrl  = 'https://gen.pollinations.ai/image/' + encodedPrompt + '?model=flux&seed=' + seed + '&width=768&height=512&nologo=true&enhance=true';
+  // Fallback sem auth (image.pollinations.ai)
+  var fallbackUrl = 'https://image.pollinations.ai/prompt/' + encodedPrompt + '?seed=' + seed + '&width=768&height=512&nologo=true';
+
+  var row  = document.createElement('div'); row.className = 'msg-row';
+  var av   = document.createElement('div'); av.className  = 'msg-av ai'; av.textContent = 'Z';
+  var card = document.createElement('div'); card.className = 'media-card'; card.style.maxWidth = '520px';
+
+  card.innerHTML = '<div style="padding:14px;display:flex;align-items:center;gap:10px">'
+    + '<span class="spin"></span>'
+    + '<div><div style="font-size:13px;font-weight:600;color:var(--accent-primary)">Gerando imagem...</div>'
+    + '<div style="font-size:11px;color:var(--text-muted);margin-top:2px">' + escHtml(prompt.substring(0,50)) + '</div></div>'
+    + '</div>';
+
+  row.appendChild(av); row.appendChild(card);
+  chatEl.appendChild(row); chatEl.scrollTop = chatEl.scrollHeight;
+
+  function showCard(imgUrl) {
+    var safe = escHtml(prompt.substring(0, 58));
+    card.innerHTML = '<img src="' + imgUrl + '" alt="' + safe + '" loading="lazy" style="width:100%;display:block;border-radius:8px 8px 0 0">'
+      + '<div class="media-foot">'
+      + '<span class="media-lbl"><i class="fas fa-image" style="color:var(--accent-secondary);margin-right:4px"></i>' + safe + '</span>'
+      + '<div style="display:flex;gap:5px">'
+      + '<a href="' + imgUrl + '" target="_blank" class="mbtn"><i class="fas fa-external-link-alt"></i></a>'
+      + '<a href="' + imgUrl + '" download="zenia-img.jpg" class="mbtn"><i class="fas fa-download"></i></a>'
+      + '<button onclick="genImg(\'' + escHtml(prompt.replace(/'/g,"\\'")) + '\')" class="mbtn"><i class="fas fa-redo"></i></button>'
+      + '</div></div>';
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }
+
+  // Tentativa 1: fetch com Authorization header
+  try {
+    var resp = await fetch(primaryUrl, {
+      method: 'GET',
+      headers: { 'Authorization': 'Bearer ' + POLLINATIONS_KEY },
+      signal: AbortSignal.timeout(30000)
+    });
+    if (resp.ok) {
+      var blob = await resp.blob();
+      if (blob.type && blob.type.startsWith('image/')) {
+        var blobUrl = URL.createObjectURL(blob);
+        showCard(blobUrl);
+        return blobUrl;
+      }
+    }
+  } catch(e) { /* fallback */ }
+
+  // Tentativa 2: img tag com URL direta (sem CORS)
+  return new Promise(resolve => {
+    var timeout = setTimeout(() => {
+      // Tentativa 3: fallback sem auth
+      var img3 = new Image();
+      img3.onload = () => { showCard(fallbackUrl); resolve(fallbackUrl); };
+      img3.onerror = () => {
+        card.innerHTML = '<div style="padding:14px"><div style="color:#fbbf24;font-size:13px;margin-bottom:8px">Não foi possível gerar a imagem.</div>'
+          + '<button onclick="genImg(\'' + escHtml(prompt.replace(/'/g,"\\'")) + '\')" style="padding:6px 12px;background:var(--send-btn);border:none;color:#fff;border-radius:6px;font-size:12px;cursor:pointer"><i class="fas fa-redo"></i> Tentar novamente</button></div>';
+        resolve(null);
+      };
+      img3.src = fallbackUrl;
+    }, 25000);
+
+    var img = new Image();
+    img.onload = () => { clearTimeout(timeout); showCard(primaryUrl); resolve(primaryUrl); };
+    img.onerror = () => {
+      var img2 = new Image();
+      img2.onload = () => { clearTimeout(timeout); showCard(fallbackUrl); resolve(fallbackUrl); };
+      img2.onerror = () => { /* deixar o timeout lidar */ };
+      img2.src = fallbackUrl;
+    };
+    img.src = primaryUrl;
   });
 }
 
