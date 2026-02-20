@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script async src="https://docs.opencv.org/4.8.0/opencv.js" onload="window._cvReady=true;console.log('OpenCV.js carregado');" onerror="window._cvReady=false;"></script>
 <style>
 :root {
   --bg-primary:#0b0d11;--bg-secondary:#111318;--bg-tertiary:#151b2d;--bg-input:#151c2e;
@@ -362,6 +363,94 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
   </div>
 </div>
 
+<!-- ARTIFACTS MODAL -->
+<div id="artifacts-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:760px;height:90vh;display:flex;flex-direction:column;padding:0">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <h3 style="font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px"><i class="fas fa-magic" style="color:#8b5cf6"></i> Artefatos</h3>
+      <div style="display:flex;gap:7px;align-items:center">
+        <button onclick="createNewArtifact()" style="padding:5px 12px;background:var(--send-btn);border:none;color:#fff;border-radius:7px;font-size:12px;cursor:pointer;font-family:var(--font-ui)"><i class="fas fa-plus"></i> Novo</button>
+        <button class="modal-close" style="position:static" onclick="document.getElementById('artifacts-modal').classList.remove('open')">&times;</button>
+      </div>
+    </div>
+    <div style="display:flex;flex:1;overflow:hidden">
+      <div id="artifacts-list" style="width:200px;flex-shrink:0;border-right:1px solid var(--border-color);overflow-y:auto;padding:8px"></div>
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+        <div id="artifact-editor-area" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+          <div style="padding:10px 14px;border-bottom:1px solid var(--border-color);display:flex;gap:8px;align-items:center;flex-shrink:0">
+            <input id="artifact-title" placeholder="Nome do artefato..." style="flex:1;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:6px;padding:5px 9px;font-size:12px;color:var(--text-primary);outline:none;font-family:var(--font-msg)">
+            <select id="artifact-type" style="background:var(--bg-primary);border:1px solid var(--border-color);border-radius:6px;padding:5px 9px;font-size:12px;color:var(--text-primary);outline:none">
+              <option value="html">HTML</option><option value="markdown">Markdown</option>
+              <option value="code">Código</option><option value="text">Texto</option>
+            </select>
+            <button onclick="saveArtifact()" style="padding:5px 11px;background:var(--send-btn);border:none;color:#fff;border-radius:6px;font-size:12px;cursor:pointer"><i class="fas fa-save"></i></button>
+            <button onclick="runArtifact()" style="padding:5px 11px;background:#22c55e;border:none;color:#fff;border-radius:6px;font-size:12px;cursor:pointer"><i class="fas fa-play"></i></button>
+          </div>
+          <textarea id="artifact-editor" style="flex:1;background:var(--bg-primary);border:none;outline:none;color:var(--text-primary);font-family:var(--font-code);font-size:13px;padding:14px;resize:none;line-height:1.6" placeholder="Escreve ou pede à Zenia para gerar código aqui..."></textarea>
+        </div>
+        <div id="artifact-preview" style="flex:1;display:none;overflow:hidden;border-top:1px solid var(--border-color)">
+          <div style="padding:6px 10px;background:var(--bg-secondary);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-color)">
+            <span style="font-size:11px;color:var(--text-muted)">Pré-visualização</span>
+            <button onclick="closeArtifactPreview()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px">&times;</button>
+          </div>
+          <iframe id="artifact-iframe" style="width:100%;height:calc(100% - 35px);border:none;background:#fff"></iframe>
+        </div>
+      </div>
+    </div>
+    <div style="padding:8px 14px;border-top:1px solid var(--border-color);display:flex;gap:7px;flex-shrink:0">
+      <input id="artifact-ai-prompt" placeholder="Pede à Zenia para gerar/melhorar este artefato..." style="flex:1;background:var(--bg-input);border:1px solid var(--border-accent);border-radius:7px;padding:7px 11px;font-size:12px;color:var(--text-primary);outline:none;font-family:var(--font-msg)">
+      <button onclick="aiGenerateArtifact()" style="padding:7px 14px;background:var(--send-btn);border:none;color:#fff;border-radius:7px;font-size:12px;cursor:pointer;font-family:var(--font-ui);white-space:nowrap"><span class="spin" id="artifact-spin" style="display:none"></span> <i class="fas fa-wand-magic-sparkles"></i> Gerar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CODE STUDIO MODAL -->
+<div id="codestudio-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:800px;height:90vh;display:flex;flex-direction:column;padding:0">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <h3 style="font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px"><i class="fas fa-code" style="color:#60a5fa"></i> Zenia Code Studio</h3>
+      <div style="display:flex;gap:6px;align-items:center">
+        <select id="cs-lang" style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--text-primary);outline:none">
+          <option>python</option><option>javascript</option><option>html</option><option>css</option>
+          <option>java</option><option>c</option><option>cpp</option><option>sql</option><option>bash</option><option>php</option>
+        </select>
+        <button onclick="csRun()" style="padding:5px 11px;background:#22c55e;border:none;color:#fff;border-radius:6px;font-size:12px;cursor:pointer"><i class="fas fa-play"></i> Executar</button>
+        <button onclick="csCopy()" style="padding:5px 11px;background:var(--border-accent);border:1px solid var(--border-color);color:var(--text-primary);border-radius:6px;font-size:12px;cursor:pointer"><i class="fas fa-copy"></i></button>
+        <button onclick="csDownload()" style="padding:5px 11px;background:var(--border-accent);border:1px solid var(--border-color);color:var(--text-primary);border-radius:6px;font-size:12px;cursor:pointer"><i class="fas fa-download"></i></button>
+        <button class="modal-close" style="position:static" onclick="document.getElementById('codestudio-modal').classList.remove('open')">&times;</button>
+      </div>
+    </div>
+    <div style="display:flex;flex:1;overflow:hidden">
+      <textarea id="cs-editor" style="flex:1;background:#0d1117;border:none;outline:none;color:#e6edf3;font-family:var(--font-code);font-size:13px;padding:16px;resize:none;line-height:1.7;tab-size:2" placeholder="// Escreve ou cola o teu código aqui...&#10;// Pede à Zenia para gerar código no campo abaixo" spellcheck="false" onkeydown="csTab(event)"></textarea>
+      <div id="cs-output" style="width:300px;flex-shrink:0;border-left:1px solid var(--border-color);background:#0a0a0a;overflow-y:auto;display:flex;flex-direction:column">
+        <div style="padding:8px 12px;border-bottom:1px solid var(--border-color);font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase">Saída</div>
+        <div id="cs-out-content" style="padding:12px;font-family:var(--font-code);font-size:12px;color:#22c55e;flex:1;white-space:pre-wrap"></div>
+      </div>
+    </div>
+    <div style="padding:8px 14px;border-top:1px solid var(--border-color);display:flex;gap:7px;flex-shrink:0">
+      <input id="cs-ai-prompt" placeholder="Pede à Zenia para gerar código (ex: cria uma função para ordenar listas)..." style="flex:1;background:var(--bg-input);border:1px solid var(--border-accent);border-radius:7px;padding:7px 11px;font-size:12px;color:var(--text-primary);outline:none;font-family:var(--font-msg)">
+      <button onclick="csAiGenerate()" style="padding:7px 14px;background:var(--send-btn);border:none;color:#fff;border-radius:7px;font-size:12px;cursor:pointer;font-family:var(--font-ui);white-space:nowrap"><i class="fas fa-wand-magic-sparkles"></i> Gerar</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECTS MODAL -->
+<div id="projects-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:580px">
+    <button class="modal-close" onclick="document.getElementById('projects-modal').classList.remove('open')">&times;</button>
+    <h3 style="margin-bottom:16px;font-size:16px;font-weight:700"><i class="fas fa-folder-open" style="color:#f59e0b;margin-right:8px"></i>Projetos</h3>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <input id="proj-name" class="adv-in" placeholder="Nome do projeto..." style="flex:1;margin-bottom:0">
+      <input id="proj-desc" class="adv-in" placeholder="Descrição..." style="flex:2;margin-bottom:0">
+      <button onclick="addProject()" style="padding:7px 12px;background:var(--send-btn);border:none;color:#fff;border-radius:6px;cursor:pointer;font-size:12px;flex-shrink:0"><i class="fas fa-plus"></i></button>
+    </div>
+    <div id="projects-list" style="max-height:360px;overflow-y:auto"></div>
+    <div style="margin-top:14px;border-top:1px solid var(--border-color);padding-top:12px;font-size:11px;color:var(--text-muted)">
+      Os projetos guardam as tuas conversas e artefatos organizados por contexto.
+    </div>
+  </div>
+</div>
+
 <!-- APP -->
 <div id="app">
 
@@ -388,6 +477,13 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
         <button onclick="openGallery()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:12px;text-align:left;font-family:var(--font-ui)"><i class="fas fa-images" style="color:#db2777;width:15px"></i> Galeria</button>
         <button onclick="openThemeModal()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:12px;text-align:left;font-family:var(--font-ui)"><i class="fas fa-palette" style="color:#f59e0b;width:15px"></i> Trocar Tema</button>
         <button onclick="openPersonality()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:12px;text-align:left;font-family:var(--font-ui)"><i class="fas fa-microphone" style="color:#a855f7;width:15px"></i> Config. Voz</button>
+        <button onclick="openVisionModal()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:12px;text-align:left;font-family:var(--font-ui)"><i class="fas fa-eye" style="color:#10b981;width:15px"></i> Visão (OpenCV)</button>
+      </div>
+      <div style="padding:9px 10px 3px">
+        <p style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;padding:0 3px">Criar</p>
+        <button onclick="openArtifacts()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:12px;text-align:left;font-family:var(--font-ui)"><i class="fas fa-magic" style="color:#8b5cf6;width:15px"></i> Artefatos</button>
+        <button onclick="openCodeStudio()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:12px;text-align:left;font-family:var(--font-ui)"><i class="fas fa-code" style="color:#60a5fa;width:15px"></i> Código</button>
+        <button onclick="openProjects()" style="width:100%;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:12px;text-align:left;font-family:var(--font-ui)"><i class="fas fa-folder-open" style="color:#f59e0b;width:15px"></i> Projetos</button>
       </div>
       <div style="padding:9px 10px 3px">
         <p style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;padding:0 3px">Aplicativos</p>
@@ -810,44 +906,73 @@ function formatSqrt(text){
 }
 
 function fmtText(raw){
-  // 1. Extrair e processar blocos de código primeiro
-  var codeBlocks = [];
-  var h = raw.replace(/```([^\n`]*)\n?([\s\S]*?)```/g, (_, lang, code) => {
-    var id='c'+Math.random().toString(36).slice(2,7);
-    var hl=hlCode(code.trim(),lang);
-    var exts={'python':'.py','javascript':'.js','html':'.html','css':'.css','java':'.java','typescript':'.ts','sql':'.sql','bash':'.sh','json':'.json'};
-    var ext=exts[(lang||'').toLowerCase()]||'.txt';
-    var block='<div class="code-block"><div class="code-hdr"><span class="code-lang">'+(lang||'código')+'</span>'
-      +'<div style="display:flex;gap:5px"><button class="copy-btn" onclick="cpCode(\''+id+'\')"><i class="fas fa-copy"></i> Copiar</button>'
-      +'<button class="copy-btn" onclick="downloadCode(\''+id+'\',\'code'+ext+'\')"><i class="fas fa-download"></i></button></div></div>'
-      +'<pre><code id="'+id+'" class="hljs">'+hl+'</code></pre></div>';
-    var ph='__CODE'+codeBlocks.length+'__';
-    codeBlocks.push(block);
-    return ph;
+  // 1. Extrair blocos de código — usar UUID único que NUNCA aparece no texto normal
+  var codeStore = {};
+  var h = raw.replace(/```([^\n`]*)\n?([\s\S]*?)```/g, function(_, lang, code) {
+    var uid = '\x00CODE' + (Math.random().toString(36).slice(2,10)) + '\x00';
+    var id = 'c' + Math.random().toString(36).slice(2,8);
+    var hl = hlCode(code.trim(), lang);
+    var exts = {python:'.py',javascript:'.js',html:'.html',css:'.css',java:'.java',typescript:'.ts',sql:'.sql',bash:'.sh',json:'.json',c:'.c',cpp:'.cpp',php:'.php',ruby:'.rb',go:'.go'};
+    var ext = exts[(lang||'').toLowerCase()] || '.txt';
+    var safeId = id.replace(/[^a-z0-9]/gi,'');
+    codeStore[uid] = '<div class="code-block"><div class="code-hdr">'
+      + '<span class="code-lang">' + escHtml(lang||'código') + '</span>'
+      + '<div style="display:flex;gap:5px">'
+      + '<button class="copy-btn" onclick="cpCode(\'' + safeId + '\')"><i class="fas fa-copy"></i> Copiar</button>'
+      + '<button class="copy-btn" onclick="downloadCode(\'' + safeId + '\',\'code' + ext + '\')"><i class="fas fa-download"></i></button>'
+      + '</div></div>'
+      + '<pre><code id="' + safeId + '" class="hljs">' + hl + '</code></pre></div>';
+    return uid;
   });
 
-  // 2. Inline code
-  h = h.replace(/`([^`\n]+)`/g,'<code class="inline-code">$1</code>');
-
-  // 3. Limpar markdown indesejado
-  h = cleanMarkdown(h);
-
-  // 4. Frações matemáticas
-  h = formatScientificFractions(h);
-  h = formatExponents(h);
-  h = formatSqrt(h);
-
-  // 5. Listas
-  h = h.replace(/^[\-\*]\s+(.+)$/gm,'<li>$1</li>');
-  h = h.replace(/(<li>.*<\/li>)/gs, '<ul style="padding-left:20px;margin:6px 0">$1</ul>');
-
-  // 6. Newlines
-  h = h.replace(/\n/g,'<br>');
-
-  // 7. Restaurar blocos de código
-  codeBlocks.forEach((block,i)=>{
-    h = h.replace('__CODE'+i+'__', block);
+  // 2. Inline code — proteger antes de processar tudo mais
+  var inlineStore = {};
+  h = h.replace(/`([^`\n]+)`/g, function(_, code) {
+    var uid = '\x00INLINE' + Math.random().toString(36).slice(2,10) + '\x00';
+    inlineStore[uid] = '<code class="inline-code">' + escHtml(code) + '</code>';
+    return uid;
   });
+
+  // 3. Limpar markdown — remover ### ** * _ headings etc.
+  h = h.replace(/^#{1,6}\s+/gm, '');
+  h = h.replace(/\*\*\*(.+?)\*\*\*/g, '<strong>$1</strong>');
+  h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  h = h.replace(/(?<![*_])\*([^*\n]+?)\*(?![*_])/g, '$1');
+  h = h.replace(/_{2}(.+?)_{2}/g, '<strong>$1</strong>');
+  h = h.replace(/(?<!_)_([^_\n]+?)_(?!_)/g, '$1');
+
+  // 4. Frações matemáticas — renderizar ANTES de escapar HTML
+  // Detecta padrões numéricos e algébricos: 3/4, 22/7, a/b, (x+1)/(x-1)
+  // Aplica apenas fora de URLs http:// e caminhos de ficheiro
+  h = h.replace(/(?<![:/\w\\])\b(\d+)\s*\/\s*(\d+)\b(?!\w)/g, function(_, n, d) {
+    return '<span class="frac-display"><span class="frac-num">' + n + '</span><span class="frac-den">' + d + '</span></span>';
+  });
+
+  // 5. Expoentes: x^2 → x<sup>2</sup>, x^(n+1) → x<sup>(n+1)</sup>
+  h = h.replace(/(\w+)\^\(([^)]+)\)/g, '$1<sup>($2)</sup>');
+  h = h.replace(/(\w+)\^(\d+)/g, '$1<sup>$2</sup>');
+  h = h.replace(/(\w+)\^([a-zA-Z])/g, '$1<sup>$2</sup>');
+
+  // 6. Raízes: sqrt(x) → √x, √(expr)
+  h = h.replace(/sqrt\(([^)]+)\)/gi, '√($1)');
+
+  // 7. Subscritos matemáticos: H_2O → H<sub>2</sub>O
+  h = h.replace(/([A-Za-z])_(\d+)/g, '$1<sub>$2</sub>');
+
+  // 8. Listas simples
+  h = h.replace(/^[\-•]\s+(.+)$/gm, '<li style="margin:3px 0">$1</li>');
+  h = h.replace(/^(\d+)\.\s+(.+)$/gm, '<li style="margin:3px 0;list-style:decimal">$2</li>');
+  // Agrupar li consecutivos
+  h = h.replace(/((<li[^>]*>.*?<\/li>\n?)+)/g, '<ul style="padding-left:18px;margin:6px 0">$1</ul>');
+
+  // 9. Newlines → <br>
+  h = h.replace(/\n/g, '<br>');
+
+  // 10. Restaurar inline code
+  Object.keys(inlineStore).forEach(k => { h = h.split(k).join(inlineStore[k]); });
+
+  // 11. Restaurar blocos de código (split/join para evitar regex em HTML)
+  Object.keys(codeStore).forEach(k => { h = h.split(k).join(codeStore[k]); });
 
   return h;
 }
@@ -1106,20 +1231,91 @@ async function genImg(prompt){
 }
 
 // ==========================================
-// AUDIO GENERATION
+// AUDIO GENERATION — via Zenia API + Web Speech
 // ==========================================
-async function genAud(prompt){
+async function genAud(prompt) {
   var row=document.createElement('div');row.className='msg-row';
   var av=document.createElement('div');av.className='msg-av ai';av.textContent='Z';
-  var card=document.createElement('div');card.className='media-card';card.style.maxWidth='480px';
-  card.innerHTML='<div style="padding:13px;display:flex;align-items:center;gap:9px;color:var(--text-muted);font-size:13px"><span class="spin"></span> A criar áudio...</div>';
+  var card=document.createElement('div');card.className='media-card';card.style.maxWidth='520px';
+  card.innerHTML='<div style="padding:13px;display:flex;align-items:center;gap:9px;color:var(--text-muted);font-size:13px"><span class="spin"></span> A criar áudio com Zenia API...</div>';
   row.appendChild(av);row.appendChild(card);chatEl.appendChild(row);chatEl.scrollTop=chatEl.scrollHeight;
-  var waveUrl=IMG_EP2+encodeURIComponent('music equalizer neon audio waves')+'?width=580&height=100&nologo=true&seed='+Date.now();
-  var ttsUrl='https://api.unspeech.com/tts?text='+encodeURIComponent(prompt.substring(0,200))+'&voice=pt-PT-RaquelNeural';
-  setTimeout(()=>{
-    card.innerHTML='<div style="background:linear-gradient(90deg,#1a3a52,#2d5a8c);border-radius:9px;padding:12px"><img src="'+waveUrl+'" style="width:100%;height:55px;object-fit:cover;border-radius:6px;margin-bottom:8px"><audio controls style="width:100%;height:34px"><source src="'+ttsUrl+'" type="audio/mpeg"></audio><div style="font-size:11px;color:#22c55e;margin-top:5px">'+escHtml(prompt.substring(0,55))+'</div></div>';
+
+  try {
+    // 1 — Pedir à Zenia API para gerar script/texto para narrar
+    var r = await fetch(ZENIA_API, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        message: 'Cria um texto curto (máximo 3 parágrafos) para narração em áudio sobre: '+prompt+'. Escreve apenas o texto a narrar, sem títulos, sem lista, só prosa fluida em Português.',
+        model:'openai',
+        max_tokens:600
+      }),
+      signal: AbortSignal.timeout(20000)
+    });
+    var d = await r.json();
+    var script = (d.response || d.choices?.[0]?.message?.content || prompt).trim();
+
+    // 2 — Renderizar card com player de Web Speech API
+    var waveUrl = IMG_EP2 + encodeURIComponent('sound wave equalizer music neon dark') + '?width=520&height=90&nologo=true&seed=' + Date.now();
+    var sid = 'aud' + Date.now();
+    card.innerHTML = `
+      <div style="background:linear-gradient(135deg,#0f1a2e,#1a2d4a);border-radius:9px 9px 0 0;overflow:hidden;position:relative">
+        <img src="${waveUrl}" style="width:100%;height:80px;object-fit:cover;opacity:0.7;display:block">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:12px">
+          <button id="${sid}-play" onclick="playAudioScript('${sid}')" style="width:44px;height:44px;border-radius:50%;background:var(--accent-primary);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:0 0 20px var(--accent-glow)">
+            <i class="fas fa-play" id="${sid}-ic"></i>
+          </button>
+          <button onclick="stopAudioScript('${sid}')" style="width:32px;height:32px;border-radius:50%;background:rgba(239,68,68,.2);border:1px solid #ef4444;color:#ef4444;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center">
+            <i class="fas fa-stop"></i>
+          </button>
+        </div>
+        <div style="position:absolute;top:8px;right:10px;background:rgba(0,0,0,.7);color:#22c55e;font-size:10px;padding:3px 9px;border-radius:12px;font-weight:700">
+          <i class="fas fa-microphone"></i> Zenia TTS
+        </div>
+      </div>
+      <div class="media-foot">
+        <span class="media-lbl"><i class="fas fa-headphones" style="color:var(--accent-primary);margin-right:4px"></i>${escHtml(prompt.substring(0,50))}</span>
+        <button onclick="copyToClipboardSimple('${sid}-script')" class="mbtn"><i class="fas fa-copy"></i> Texto</button>
+      </div>
+      <div id="${sid}-script" style="display:none">${escHtml(script)}</div>`;
+
+    // Guardar script para reprodução
+    window['_aud_'+sid] = script;
     chatEl.scrollTop=chatEl.scrollHeight;
-  },800);
+  } catch(e) {
+    card.innerHTML='<div style="padding:13px"><div style="color:#ef4444;font-size:13px;margin-bottom:8px">Erro ao gerar áudio: '+escHtml(e.message)+'</div><button onclick="speakTxt(\''+escHtml(prompt.substring(0,200).replace(/'/g,"\\'"))+'\''+')" style="padding:6px 12px;background:var(--send-btn);border:none;color:#fff;border-radius:6px;font-size:12px;cursor:pointer"><i class="fas fa-volume-up"></i> Usar síntese local</button></div>';
+  }
+}
+
+var _audSpeaking = {};
+function playAudioScript(sid) {
+  var script = window['_aud_'+sid] || '';
+  if (!script) return;
+  if (_audSpeaking[sid]) {
+    speechSynthesis.cancel();
+    _audSpeaking[sid] = false;
+    var ic = document.getElementById(sid+'-ic');
+    if(ic) ic.className='fas fa-play';
+    return;
+  }
+  _audSpeaking[sid] = true;
+  var ic = document.getElementById(sid+'-ic');
+  if(ic) ic.className='fas fa-pause';
+  speakTxt(script);
+  // Reset icon when done
+  setTimeout(function() {
+    if(_audSpeaking[sid]){ _audSpeaking[sid]=false; var ic2=document.getElementById(sid+'-ic');if(ic2)ic2.className='fas fa-play';}
+  }, script.length * 80);
+}
+function stopAudioScript(sid) {
+  speechSynthesis.cancel();
+  _audSpeaking[sid]=false;
+  var ic=document.getElementById(sid+'-ic');if(ic)ic.className='fas fa-play';
+}
+function copyToClipboardSimple(elId) {
+  var el=document.getElementById(elId);
+  if(el)navigator.clipboard.writeText(el.textContent||el.innerText);
+  toast('Texto copiado!','ok');
 }
 
 // ==========================================
@@ -1164,16 +1360,117 @@ async function analyzeVision(){
   var q=document.getElementById('vision-question').value.trim()||'Descreve detalhadamente esta imagem em português.';
   var btn=document.getElementById('vision-analyze-btn'),res=document.getElementById('vision-result');
   btn.disabled=true;btn.innerHTML='<span class="spin"></span> Analisando...';
-  res.style.display='block';res.innerHTML='<div style="padding:14px;text-align:center;color:var(--text-muted)"><span class="spin"></span> A processar...</div>';
-  var analysis='',modelUsed='';
+  res.style.display='block';
+  res.innerHTML='<div style="padding:14px;text-align:center;color:var(--text-muted)"><span class="spin"></span> A processar com IA...</div>';
+
+  var analysis='', modelUsed='', cvData='';
+
+  // — OpenCV.js análise local (sempre executa se disponível) —
+  if(window._cvReady && window.cv) {
+    try { cvData = await analyzeWithOpenCV(visionImageData); } catch(e) {}
+  }
+
+  // — Zenia API Vision —
   try{
-    var r=await fetch(ZENIA_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:[{type:'image_url',image_url:{url:visionImageData}},{type:'text',text:'Responde em Português de Angola. '+q}]}],model:'openai',max_tokens:1024}),signal:AbortSignal.timeout(25000)});
-    if(r.ok){var d=await r.json();var t=d.response||d.choices?.[0]?.message?.content;if(t&&t.length>20){analysis=t;modelUsed='Zenia Vision';}}
+    var r=await fetch(ZENIA_API,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        messages:[{role:'user',content:[
+          {type:'image_url',image_url:{url:visionImageData}},
+          {type:'text',text:'Responde em Português de Angola. '+q+(cvData?'\n\nDados técnicos da imagem (OpenCV.js): '+cvData:'')}
+        ]}],
+        model:'openai',max_tokens:1200
+      }),
+      signal:AbortSignal.timeout(25000)
+    });
+    if(r.ok){
+      var d=await r.json();
+      var t=d.response||d.choices?.[0]?.message?.content;
+      if(t&&t.length>20){analysis=t;modelUsed='Zenia Vision + '+(cvData?'OpenCV.js':'IA');}
+    }
   }catch(e){}
-  if(!analysis){analysis='Não foi possível analisar a imagem via API. Tenta carregar novamente.';modelUsed='Fallback';}
-  res.innerHTML='<div class="vision-result"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:var(--accent-primary)">ANÁLISE DA ZENIA</div><span style="font-size:10px;color:var(--text-muted)">'+modelUsed+'</span></div><div style="font-size:13px;line-height:1.7;color:var(--text-primary)">'+escHtml(analysis)+'</div><div style="margin-top:10px;display:flex;gap:6px"><button onclick="sendVisionToChat()" class="mbtn" style="color:var(--accent-primary)">Continuar no Chat</button><button onclick="navigator.clipboard.writeText(\''+escHtml(analysis.replace(/'/g,"\\'").replace(/\n/g,' '))+'\');toast(\'Copiado!\',\'ok\')" class="mbtn">Copiar</button></div></div>';
+
+  // — Fallback: apenas OpenCV local —
+  if(!analysis){
+    if(cvData){ analysis=cvData; modelUsed='OpenCV.js (local)'; }
+    else { analysis='Não foi possível analisar a imagem. Verifica a tua ligação.'; modelUsed='Erro'; }
+  }
+
+  res.innerHTML='<div class="vision-result">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--accent-primary);text-transform:uppercase">Análise da Zenia</div>'
+    +'<span style="font-size:10px;background:var(--accent-glow);color:var(--accent-primary);padding:2px 8px;border-radius:12px;border:1px solid var(--accent-primary)">'+escHtml(modelUsed)+'</span>'
+    +'</div>'
+    +(cvData?'<div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:7px;padding:8px 10px;font-size:11px;color:#6ee7b7;margin-bottom:10px;font-family:var(--font-code)"><i class="fas fa-microchip" style="margin-right:5px"></i>OpenCV.js: '+escHtml(cvData)+'</div>':'')
+    +'<div style="font-size:13.5px;line-height:1.75;color:var(--text-primary)">'+fmtText(analysis)+'</div>'
+    +'<div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap">'
+    +'<button onclick="sendVisionToChat()" class="mbtn" style="color:var(--accent-primary);border-color:var(--accent-primary)"><i class="fas fa-comment"></i> Continuar no Chat</button>'
+    +'<button onclick="navigator.clipboard.writeText(document.querySelector(\'#vision-result .vision-result div:nth-child(3)\').innerText);toast(\'Copiado!\',\'ok\')" class="mbtn"><i class="fas fa-copy"></i> Copiar</button>'
+    +'</div></div>';
+
   window._lastVisionAnalysis={image:visionImageData,text:analysis};
   btn.disabled=false;btn.innerHTML='<i class="fas fa-search"></i> Analisar com IA';
+}
+
+// OpenCV.js — análise local da imagem
+async function analyzeWithOpenCV(imageDataUrl) {
+  return new Promise((resolve, reject) => {
+    var img = new Image();
+    img.onload = function() {
+      try {
+        var canvas = document.createElement('canvas');
+        canvas.width = img.width; canvas.height = img.height;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+
+        var src = cv.imread(canvas);
+        var results = [];
+
+        // Dimensões
+        results.push('Dimensões: ' + src.cols + '×' + src.rows + 'px');
+
+        // Canais
+        results.push('Canais: ' + src.channels() + ' (' + (src.channels()===1?'Grayscale':src.channels()===3?'BGR':'BGRA') + ')');
+
+        // Análise de cores dominantes (histograma simples)
+        var gray = new cv.Mat();
+        cv.cvtColor(src, gray, cv.COLOR_BGR2GRAY);
+        var mean = cv.mean(src);
+        results.push('Cor média RGB: (' + Math.round(mean[2]) + ', ' + Math.round(mean[1]) + ', ' + Math.round(mean[0]) + ')');
+
+        // Brilho médio
+        var brightness = Math.round((mean[0]*0.114 + mean[1]*0.587 + mean[2]*0.299));
+        results.push('Luminosidade: ' + brightness + '/255 (' + (brightness>180?'muito clara':brightness>120?'clara':brightness>60?'escura':'muito escura') + ')');
+
+        // Detecção de bordas (Canny) para avaliar complexidade
+        var edges = new cv.Mat();
+        cv.Canny(gray, edges, 50, 150);
+        var edgeMean = cv.mean(edges);
+        var complexity = edgeMean[0];
+        results.push('Complexidade visual: ' + (complexity>20?'Alta':complexity>8?'Média':'Baixa') + ' (' + complexity.toFixed(1) + ')');
+
+        // Detecção de faces (se disponível)
+        try {
+          var faceCascade = new cv.CascadeClassifier();
+          // Nota: classifier precisa de ficheiro haar — indicamos só se disponível
+          results.push('Detecção de faces: requer ficheiro Haar (não carregado)');
+        } catch(e2) {}
+
+        // Aspeto
+        var ratio = img.width / img.height;
+        results.push('Proporção: ' + ratio.toFixed(2) + ' (' + (ratio>1.2?'Paisagem':ratio<0.8?'Retrato':'Quadrado') + ')');
+
+        // Limpeza
+        src.delete(); gray.delete(); edges.delete();
+        resolve(results.join(' | '));
+      } catch(e) {
+        reject(e);
+      }
+    };
+    img.onerror = () => reject(new Error('Falha ao carregar imagem'));
+    img.src = imageDataUrl;
+  });
 }
 function sendVisionToChat(){
   if(!window._lastVisionAnalysis)return;
@@ -1405,6 +1702,189 @@ function renderAdvBody(){
     h+='</div><div class="adv-s"><h4>Resetar Aplicação</h4><button class="adv-btn" style="color:#ef4444" onclick="if(confirm(\'Apagar todos os dados e recomeçar?\')){localStorage.clear();location.reload();}"><i class="fas fa-exclamation-triangle"></i> Resetar Tudo</button></div>';
   }
   body.innerHTML=h;
+}
+
+// ==========================================
+// ARTIFACTS
+// ==========================================
+var artifacts = JSON.parse(localStorage.getItem('zn_artifacts')||'[]');
+var currentArtifactId = null;
+
+function saveArtifacts(){localStorage.setItem('zn_artifacts',JSON.stringify(artifacts));}
+function openArtifacts(){document.getElementById('artifacts-modal').classList.add('open');renderArtifactsList();}
+
+function renderArtifactsList(){
+  var el=document.getElementById('artifacts-list');
+  if(!artifacts.length){el.innerHTML='<div style="font-size:11px;color:var(--text-muted);padding:8px;font-style:italic">Sem artefatos. Cria o primeiro!</div>';return;}
+  el.innerHTML='';
+  artifacts.forEach(a=>{
+    var div=document.createElement('div');
+    var active=a.id===currentArtifactId;
+    div.style.cssText='padding:7px 9px;border-radius:7px;cursor:pointer;margin-bottom:3px;border:1px solid '+(active?'var(--accent-primary)':'transparent')+';background:'+(active?'var(--accent-glow)':'transparent');
+    var ic={'html':'fa-html5','markdown':'fa-markdown','code':'fa-code','text':'fa-file-alt'}[a.type]||'fa-file';
+    var col={'html':'#f97316','markdown':'#38bdf8','code':'#a78bfa','text':'#94a3b8'}[a.type]||'#94a3b8';
+    div.innerHTML='<div style="display:flex;align-items:center;gap:6px"><i class="fab '+ic+'" style="color:'+col+';font-size:11px"></i><span style="font-size:12px;color:var(--text-primary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(a.title||'Sem título')+'</span><button onclick="deleteArtifact(\''+a.id+'\',event)" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:10px;padding:1px 3px">×</button></div><div style="font-size:10px;color:var(--text-muted);margin-top:1px;padding-left:17px">'+a.type+' • '+new Date(parseInt(a.id)).toLocaleDateString('pt-PT')+'</div>';
+    div.onclick=(e)=>{if(e.target.tagName!=='BUTTON'){loadArtifact(a.id);}};
+    el.appendChild(div);
+  });
+}
+
+function createNewArtifact(){
+  var a={id:Date.now().toString(),title:'Novo Artefato',type:'html',content:'<!DOCTYPE html>\n<html>\n<head><style>body{font-family:sans-serif;padding:20px;background:#1a1a2e;color:#e0e0ff}</style></head>\n<body>\n  <h1>Olá do Artefato!</h1>\n</body>\n</html>'};
+  artifacts.unshift(a);saveArtifacts();currentArtifactId=a.id;
+  document.getElementById('artifact-title').value=a.title;
+  document.getElementById('artifact-type').value=a.type;
+  document.getElementById('artifact-editor').value=a.content;
+  closeArtifactPreview();renderArtifactsList();
+}
+function loadArtifact(id){
+  var a=artifacts.find(x=>x.id===id);if(!a)return;
+  currentArtifactId=id;
+  document.getElementById('artifact-title').value=a.title;
+  document.getElementById('artifact-type').value=a.type;
+  document.getElementById('artifact-editor').value=a.content;
+  closeArtifactPreview();renderArtifactsList();
+}
+function saveArtifact(){
+  var a=artifacts.find(x=>x.id===currentArtifactId);
+  if(!a){toast('Nenhum artefato selecionado.','warn');return;}
+  a.title=document.getElementById('artifact-title').value||'Sem título';
+  a.type=document.getElementById('artifact-type').value;
+  a.content=document.getElementById('artifact-editor').value;
+  saveArtifacts();renderArtifactsList();toast('Artefato guardado!','ok');
+}
+function deleteArtifact(id,e){
+  e.stopPropagation();
+  artifacts=artifacts.filter(x=>x.id!==id);
+  if(currentArtifactId===id){currentArtifactId=null;document.getElementById('artifact-editor').value='';document.getElementById('artifact-title').value='';}
+  saveArtifacts();renderArtifactsList();
+}
+function runArtifact(){
+  saveArtifact();
+  var a=artifacts.find(x=>x.id===currentArtifactId);if(!a)return;
+  var iframe=document.getElementById('artifact-iframe');
+  var preview=document.getElementById('artifact-preview');
+  var edArea=document.getElementById('artifact-editor-area');
+  preview.style.display='flex';preview.style.flexDirection='column';
+  edArea.style.height='50%';
+  if(a.type==='html'){
+    iframe.srcdoc=a.content;
+  }else{
+    iframe.srcdoc='<html><body style="background:#1a1a2e;color:#e0e0ff;font-family:monospace;padding:20px;white-space:pre-wrap">'+escHtml(a.content)+'</body></html>';
+  }
+}
+function closeArtifactPreview(){
+  document.getElementById('artifact-preview').style.display='none';
+  document.getElementById('artifact-editor-area').style.height='auto';
+}
+async function aiGenerateArtifact(){
+  var prompt=document.getElementById('artifact-ai-prompt').value.trim();
+  if(!prompt)return;
+  var spin=document.getElementById('artifact-spin');
+  if(spin)spin.style.display='inline-block';
+  var type=document.getElementById('artifact-type').value;
+  var typeInst={'html':'Cria código HTML completo com CSS inline e JavaScript incorporado.','code':'Cria código limpo e comentado.','markdown':'Cria texto em formato Markdown limpo, sem ### **.','text':'Cria texto limpo e bem estruturado.'}[type]||'';
+  try{
+    var r=await fetch(ZENIA_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:typeInst+' '+prompt+'\n\nResponde APENAS com o código/texto solicitado, sem explicações, sem blocos de markdown (sem ```).',model:'qwen-coder',max_tokens:3000}),signal:AbortSignal.timeout(30000)});
+    var d=await r.json();
+    var content=(d.response||'').trim().replace(/^```[^\n]*\n?/,'').replace(/\n?```$/,'');
+    if(content){
+      document.getElementById('artifact-editor').value=content;
+      document.getElementById('artifact-ai-prompt').value='';
+      toast('Artefato gerado!','ok');
+    }
+  }catch(e){toast('Erro: '+e.message,'err');}
+  if(spin)spin.style.display='none';
+}
+
+// ==========================================
+// CODE STUDIO
+// ==========================================
+function openCodeStudio(){document.getElementById('codestudio-modal').classList.add('open');}
+function csTab(e){if(e.key==='Tab'){e.preventDefault();var ta=e.target,s=ta.selectionStart,en=ta.selectionEnd;ta.value=ta.value.substring(0,s)+'  '+ta.value.substring(en);ta.selectionStart=ta.selectionEnd=s+2;}}
+function csCopy(){var ta=document.getElementById('cs-editor');if(ta)navigator.clipboard.writeText(ta.value);toast('Copiado!','ok');}
+function csDownload(){
+  var ta=document.getElementById('cs-editor'),lang=document.getElementById('cs-lang').value;
+  var exts={python:'.py',javascript:'.js',html:'.html',css:'.css',java:'.java',c:'.c',cpp:'.cpp',sql:'.sql',bash:'.sh',php:'.php'};
+  var b=new Blob([ta.value],{type:'text/plain'});var a=document.createElement('a');
+  a.href=URL.createObjectURL(b);a.download='zenia-code'+(exts[lang]||'.txt');a.click();
+}
+function csRun(){
+  var code=document.getElementById('cs-editor').value;
+  var lang=document.getElementById('cs-lang').value;
+  var out=document.getElementById('cs-out-content');
+  if(lang==='javascript'){
+    try{
+      var logs=[];var orig=console.log;
+      console.log=function(){logs.push([...arguments].map(a=>typeof a==='object'?JSON.stringify(a,null,2):String(a)).join(' '));};
+      var result=eval(code);
+      console.log=orig;
+      out.style.color='#22c55e';
+      out.textContent=(logs.length?logs.join('\n')+'\n':'')+(result!==undefined?'→ '+result:'');
+    }catch(e){out.style.color='#ef4444';out.textContent='Erro: '+e.message;}
+  }else if(lang==='html'){
+    var w=window.open('','_blank');if(w){w.document.write(code);w.document.close();}
+    out.style.color='#60a5fa';out.textContent='HTML aberto numa nova janela.';
+  }else{
+    out.style.color='#fbbf24';out.textContent='Execução de '+lang+' requer ambiente servidor.\nUsa JavaScript ou HTML para execução local.';
+  }
+}
+async function csAiGenerate(){
+  var prompt=document.getElementById('cs-ai-prompt').value.trim();
+  if(!prompt)return;
+  var lang=document.getElementById('cs-lang').value;
+  var out=document.getElementById('cs-out-content');
+  out.style.color='#6b7280';out.textContent='Gerando...';
+  try{
+    var r=await fetch(ZENIA_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'Escreve código '+lang+' para: '+prompt+'\nResponde APENAS com o código, sem explicações, sem blocos de markdown (sem ```).',model:'qwen-coder',max_tokens:2500}),signal:AbortSignal.timeout(25000)});
+    var d=await r.json();
+    var code=(d.response||'').trim().replace(/^```[^\n]*\n?/,'').replace(/\n?```$/,'');
+    if(code){document.getElementById('cs-editor').value=code;document.getElementById('cs-ai-prompt').value='';out.style.color='#22c55e';out.textContent='Código gerado! Carrega ▶ para executar.';}
+  }catch(e){out.style.color='#ef4444';out.textContent='Erro: '+e.message;}
+}
+
+// ==========================================
+// PROJECTS
+// ==========================================
+var projects = JSON.parse(localStorage.getItem('zn_projects')||'[]');
+function saveProjects(){localStorage.setItem('zn_projects',JSON.stringify(projects));}
+function openProjects(){document.getElementById('projects-modal').classList.add('open');renderProjectsList();}
+function addProject(){
+  var name=document.getElementById('proj-name').value.trim();
+  var desc=document.getElementById('proj-desc').value.trim();
+  if(!name){toast('Dá um nome ao projeto!','warn');return;}
+  projects.unshift({id:Date.now().toString(),name,desc,created:new Date().toISOString(),convIds:[],artifacts:[]});
+  saveProjects();renderProjectsList();
+  document.getElementById('proj-name').value='';document.getElementById('proj-desc').value='';
+  toast('Projeto criado!','ok');
+}
+function deleteProject(id){projects=projects.filter(p=>p.id!==id);saveProjects();renderProjectsList();}
+function addConvToProject(projId){
+  if(!curConvId){toast('Abre uma conversa primeiro!','warn');return;}
+  var p=projects.find(x=>x.id===projId);if(!p)return;
+  if(!p.convIds.includes(curConvId)){p.convIds.push(curConvId);saveProjects();toast('Conversa adicionada ao projeto!','ok');}
+}
+function renderProjectsList(){
+  var el=document.getElementById('projects-list');
+  if(!projects.length){el.innerHTML='<div style="font-size:12px;color:var(--text-muted);padding:6px;font-style:italic">Sem projetos. Cria o primeiro!</div>';return;}
+  el.innerHTML='';
+  projects.forEach(p=>{
+    var div=document.createElement('div');
+    div.style.cssText='padding:10px 12px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:9px;margin-bottom:7px';
+    div.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:5px">'
+      +'<div><div style="font-size:13px;font-weight:600;color:var(--text-primary)">📁 '+escHtml(p.name)+'</div>'
+      +(p.desc?'<div style="font-size:11px;color:var(--text-muted);margin-top:2px">'+escHtml(p.desc)+'</div>':'')+'</div>'
+      +'<button onclick="deleteProject(\''+p.id+'\')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;padding:0 3px">×</button></div>'
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap;font-size:11px">'
+      +'<span style="color:var(--text-muted)">'+p.convIds.length+' conversa(s)</span>'
+      +'<span style="color:var(--text-muted)">•</span>'
+      +'<span style="color:var(--text-muted)">'+new Date(p.created).toLocaleDateString('pt-PT')+'</span>'
+      +'</div>'
+      +'<div style="margin-top:8px;display:flex;gap:6px">'
+      +'<button onclick="addConvToProject(\''+p.id+'\')" class="mbtn"><i class="fas fa-comment"></i> Adicionar conversa atual</button>'
+      +'</div>';
+    el.appendChild(div);
+  });
 }
 
 // ==========================================
