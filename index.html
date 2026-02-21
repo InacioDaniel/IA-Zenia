@@ -27,7 +27,7 @@
         }
 
         /* Fundo Animado com Profundidade */
-        .background {
+       .background {
             position: fixed;
             top: 0;
             left: 0;
@@ -38,7 +38,7 @@
         }
 
         /* Grelha Holográfica */
-        .background::after {
+       .background::after {
             content: "";
             position: absolute;
             top: 0;
@@ -55,7 +55,7 @@
         }
 
         /* Partículas flutuantes */
-        .particles {
+       .particles {
             position: absolute;
             width: 100%;
             height: 100%;
@@ -63,7 +63,7 @@
         }
 
         /* Contentor Principal */
-        .loader-container {
+       .loader-container {
             position: relative;
             display: flex;
             flex-direction: column;
@@ -72,7 +72,7 @@
         }
 
         /* Anéis Orbitais Melhores */
-        .orbit-rings {
+       .orbit-rings {
             position: absolute;
             width: 350px;
             height: 350px;
@@ -81,32 +81,32 @@
             align-items: center;
         }
 
-        .ring {
+       .ring {
             position: absolute;
             border-radius: 50%;
             border: 1px solid transparent;
             animation: rotate var(--duration) linear infinite;
         }
 
-        .ring-1 { 
+       .ring-1 { 
             width: 100%; height: 100%; --duration: 10s; 
             border-top: 2px solid var(--accent-glow); 
             box-shadow: 0 -5px 15px -5px var(--accent-glow);
         }
-        .ring-2 { 
+       .ring-2 { 
             width: 80%; height: 80%; --duration: 6s; 
             border-bottom: 2px solid var(--secondary-glow); 
             opacity: 0.4;
             animation-direction: reverse;
         }
-        .ring-3 { 
+       .ring-3 { 
             width: 120%; height: 120%; --duration: 20s; 
             border: 1px dashed var(--accent-glow); 
             opacity: 0.15; 
         }
 
         /* Logótipo com Aberração Cromática */
-        .logo-wrapper {
+       .logo-wrapper {
             position: relative;
             width: 200px;
             height: 200px;
@@ -116,7 +116,7 @@
             animation: float 5s ease-in-out infinite;
         }
 
-        .logo-wrapper img {
+       .logo-wrapper img {
             max-width: 100%;
             max-height: 100%;
             filter: drop-shadow(0 0 20px rgba(0, 242, 255, 0.4));
@@ -124,13 +124,13 @@
         }
 
         /* Barra de Progresso e Status */
-        .progress-box {
+       .progress-box {
             margin-top: 100px;
             text-align: center;
             width: 300px;
         }
 
-        .status-text {
+       .status-text {
             font-size: 0.75rem;
             letter-spacing: 4px;
             text-transform: uppercase;
@@ -140,7 +140,7 @@
             min-height: 1.2em;
         }
 
-        .progress-bar-bg {
+       .progress-bar-bg {
             width: 100%;
             height: 3px;
             background: rgba(255, 255, 255, 0.05);
@@ -149,7 +149,7 @@
             overflow: hidden;
         }
 
-        .progress-bar-fill {
+       .progress-bar-fill {
             position: absolute;
             top: 0;
             left: 0;
@@ -177,7 +177,7 @@
         }
 
         /* Localização Lubango */
-        .location-tag {
+       .location-tag {
             position: fixed;
             bottom: 30px;
             left: 50%;
@@ -189,7 +189,7 @@
             width: 100%;
         }
 
-        .location-tag span {
+       .location-tag span {
             color: var(--accent-glow);
             opacity: 0.5;
         }
@@ -307,7 +307,7 @@
             document.body.style.filter = 'blur(10px)';
             
             setTimeout(function() {
-                window.location.href = 'https://ia-zenia.netlify.app/chat/v2.1';
+                window.location.href = 'https://zenia-3.netlify.app/chat/v2.1';
             }, 1500);
         }, 12000);
     </script>
