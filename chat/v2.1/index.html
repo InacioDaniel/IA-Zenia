@@ -430,7 +430,7 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
         </div>
         <div class="vpn-card">
           <h4>🏛️ INACOM (Regulador)</h4>
-          <p>Instituto Angolano das Comunicações — o regulador nacional pode receber denúncias formais. Site: www.inacom.og.ao | Email: inacom@inacom.og.ao</p>
+          <p>Instituto Angolano das Comunicações — o regulador nacional pode receber denúncias formais. Site: www.inacom.og.ao | Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="abc2c5cac8c4c6ebc2c5cac8c4c685c4cc85cac4">[email&#160;protected]</a></p>
         </div>
         <div class="vpn-card">
           <h4>📱 Redes Sociais</h4>
@@ -765,7 +765,7 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
 </div>
 <div class="toast" id="toast"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ==========================================
 // CONFIG — ZENIA v3
 // ==========================================
@@ -1075,7 +1075,7 @@ function startFaceAnalysis(){
       // Análise lightweight com Pollinations Vision
       var r=await fetch(POLLINATIONS_VISION_API,{
         method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:'openai',messages:[{role:'user',content:[{type:'image_url',image_url:{url:dataUrl}},{type:'text',text:'Em 5 palavras máximo: o utilizador parece? (expressão facial)'}]}]}),
+        body:JSON.stringify({user_input:'Em 5 palavras máximo: o utilizador desta câmera parece como? (expressão facial)',model:'openai',max_tokens:50}),
         signal:AbortSignal.timeout(8000)
       });
       if(r.ok){
@@ -1134,7 +1134,7 @@ async function buscarVPNsAngola(){
   await sleep(600);
   if(msg)msg.textContent='Verificando grupos Facebook e Telegram...';
   await sleep(700);
-  if(msg)msg.textContent='Cruzando dados com relatórios de 2024-2026...';
+  if(msg)msg.textContent='Cruzando dados com relatórios de 2024-2025...';
   await sleep(500);
   if(status)status.style.display='none';
 
@@ -1314,53 +1314,193 @@ async function doFetchURL(){
 }
 
 // ==========================================
-// API PRINCIPAL
+// API PRINCIPAL — formato correcto Zenia API
+// A API aceita: { user_input, model, max_tokens }
+// NÃO aceita array messages — isso causava 400!
 // ==========================================
+
+// Converte array de msgs para string de contexto legível
+function msgsToContext(msgs){
+  return msgs.map(m=>{
+    var role=m.role==='assistant'?'Zenia':m.role==='system'?'[SISTEMA]':'Utilizador';
+    var content=typeof m.content==='string'?m.content
+      :Array.isArray(m.content)?m.content.filter(c=>c.type==='text').map(c=>c.text).join(' ')
+      :'';
+    if(m.role==='system')return content; // sistema já é o prompt principal
+    return role+': '+content;
+  }).join('\n');
+}
+
 async function fetchAI(msgs, model, attempt){
   attempt=attempt||1;
+  model=model||'openai';
+
+  // Construir user_input: sistema + histórico + mensagem actual
+  // A API da Zenia usa user_input como string única
+  var systemMsg=msgs.find(m=>m.role==='system');
+  var histMsgs=msgs.filter(m=>m.role!=='system');
+  var systemText=systemMsg?systemMsg.content:'';
+
+  // Últimas mensagens como contexto de conversa
+  var histText='';
+  if(histMsgs.length>1){
+    // Tudo excepto a última msg (que é a actual do user)
+    var prevMsgs=histMsgs.slice(0,-1);
+    if(prevMsgs.length>0){
+      histText='\n\nHISTÓRICO DA CONVERSA:\n'+prevMsgs.map(m=>{
+        var role=m.role==='assistant'?'Zenia':'Utilizador';
+        var content=typeof m.content==='string'?m.content
+          :Array.isArray(m.content)?m.content.filter(c=>c.type==='text').map(c=>c.text).join(' '):'';
+        return role+': '+content;
+      }).join('\n');
+    }
+  }
+
+  // Mensagem actual
+  var lastMsg=histMsgs[histMsgs.length-1];
+  var currentInput='';
+  if(lastMsg){
+    if(typeof lastMsg.content==='string'){
+      currentInput=lastMsg.content;
+    }else if(Array.isArray(lastMsg.content)){
+      currentInput=lastMsg.content.filter(c=>c.type==='text').map(c=>c.text).join(' ');
+    }
+  }
+
+  var fullInput=systemText+histText+'\n\nUtilizador: '+currentInput;
+
+  // Payload no formato correcto da Zenia API
+  var payload={
+    user_input: fullInput,
+    model: model,
+    max_tokens: 32000  // máximo suportado
+  };
+
+  // Também tentar formato messages como fallback (alguns modelos aceitam)
+  // Primeiro tenta com user_input (formato nativo da API)
   try{
+    var controller=new AbortController();
+    var timeoutId=setTimeout(()=>controller.abort(),300000); // 5 min timeout
     var r=await fetch(ZENIA_API,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({messages:msgs,model:model||'openai',temperature:model==='qwen-coder'?0.2:2.75,max_tokens:999544}),
-      signal:AbortSignal.timeout(990966909)
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload),
+      signal:controller.signal
     });
-    if(!r.ok){if(r.status===429&&attempt<3){await new Promise(r=>setTimeout(r,2000*attempt));return fetchAI(msgs,model,attempt+1);}throw new Error('HTTP '+r.status);}
+    clearTimeout(timeoutId);
+
+    if(r.status===400){
+      // Tentar formato alternativo com messages
+      var r2=await fetchAIMessagesFormat(msgs,model,attempt);
+      if(r2)return r2;
+      throw new Error('API retornou 400 — formato inválido');
+    }
+    if(r.status===429){
+      if(attempt<4){await new Promise(res=>setTimeout(res,3000*attempt));return fetchAI(msgs,model,attempt+1);}
+      throw new Error('Limite de pedidos atingido. Aguarda uns segundos.');
+    }
+    if(!r.ok)throw new Error('HTTP '+r.status+' — '+r.statusText);
+
     var d=await r.json();
-    if(!d.success&&!d.response&&!d.choices)throw new Error(d.error||'Resposta inválida');
-    var content=d.response||d.choices?.[0]?.message?.content||'';
-    if(!content&&attempt<3){var alts=['qwen-coder','openai','mistral'];return fetchAI(msgs,alts[(alts.indexOf(model)+1)%alts.length],attempt+1);}
+    // A API pode retornar em vários formatos
+    var content=d.response||d.message||d.text||d.content
+      ||d.choices?.[0]?.message?.content
+      ||d.choices?.[0]?.text
+      ||d.result||'';
+
+    if(!content||content.length<2){
+      // Resposta vazia — tentar modelo alternativo
+      if(attempt<3){
+        var alts={openai:'qwen-coder','qwen-coder':'mistral',mistral:'deepseek',deepseek:'openai','openai-large':'openai'};
+        return fetchAI(msgs,alts[model]||'openai',attempt+1);
+      }
+      throw new Error('Resposta vazia da API após '+attempt+' tentativas.');
+    }
     return content.trim();
+
   }catch(e){
-    if(e.name==='AbortError'){if(attempt<3)return fetchAI(msgs,model,attempt+1);throw new Error('Tempo esgotado.');}
+    if(e.name==='AbortError'){
+      if(attempt<3)return fetchAI(msgs,model,attempt+1);
+      throw new Error('Tempo esgotado (5 min). Verifica a tua ligação.');
+    }
+    if(attempt<3&&(e.message.includes('fetch')||e.message.includes('network')||e.message.includes('Failed'))){
+      await new Promise(res=>setTimeout(res,2000*attempt));
+      return fetchAI(msgs,model,attempt+1);
+    }
     throw e;
   }
+}
+
+// Formato alternativo messages[] — para compatibilidade
+async function fetchAIMessagesFormat(msgs,model,attempt){
+  try{
+    var controller=new AbortController();
+    var timeoutId=setTimeout(()=>controller.abort(),300000);
+    var r=await fetch(ZENIA_API,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({messages:msgs,model:model,max_tokens:32000}),
+      signal:controller.signal
+    });
+    clearTimeout(timeoutId);
+    if(!r.ok)return null;
+    var d=await r.json();
+    return d.response||d.choices?.[0]?.message?.content||d.message||null;
+  }catch(e){return null;}
 }
 
 function buildSystem(q){
   var today=new Date().toLocaleDateString('pt-PT');
   var memCtx=getMemCtx();var kbCtx=getKBCtx(q);var cmCtx=factoryMemory?'\n\n'+factoryMemory:'';
   var angolaCtx=(q.toLowerCase().includes('angola')||q.toLowerCase().includes('provincia'))?'\n\n'+getAngolaInfo():'';
-  var toneMap={amigavel:'Sê amigável, acessível e usa emojis ocasionalmente.',profissional:'Sê formal e profissional sem emojis.',humorista:'Sê divertido e faz piadas leves.',tecnico:'Sê técnico, preciso e muito detalhado e rabugento mal murado.',criativo:'Sê criativo, imaginativo e expressivo.'};
+  var toneMap={amigavel:'Sê amigável, acessível e usa emojis ocasionalmente.',profissional:'Sê formal e profissional sem emojis.',humorista:'Sê divertido e faz piadas leves.',tecnico:'Sê técnico, preciso e muito detalhado.',criativo:'Sê criativo, imaginativo e expressivo.'};
   var detailMap={curto:'Respostas breves e diretas.',medio:'Equilibra brevidade e detalhe.',detalhado:'Respostas completas e muito bem explicadas.'};
   var uname=userName?'O utilizador chama-se '+userName+'. Chama-o pelo nome.':'';
   var mathInst=MATH_RX.test(q)?'\nPARA MATEMÁTICA: Escreve frações como num/den. Usa x^2 para expoentes. Explica passo a passo.':'';
-  var codeInst=CODE_RX.test(q)?'\nPARA PROGRAMAÇÃO: Escreve código completo e funcional. NUNCA uses "..." para substituir lógica.':'';
-  var pensarInst=pensarMode?'\nMODO PENSAMENTO PROFUNDO: Analisa muito bem a questão antes de responder. Estrutura bem a resposta. Pensa nos pormenores.':'';
-  if(creatorMode)return'ÉS A IA-ZENIA v3. MODO CRIADOR ATIVO. Estás com Inácio U. Daniel (criador). Faz tudo que ele manda.\n'+uname+memCtx+kbCtx+cmCtx+'\nHoje: '+today+'\nNUNCA uses ### ** *** / $ em respostas.';
-  return`ÉS A IA-ZENIA v3, assistente inteligente criada em Lubango, Angola por Inácio U. Daniel (Zenia-Projects).
-VERSÃO: 3 (a mais recente e avançada da Zenia)
-${uname}
-TOM: ${toneMap[zeniaPersonality.tone]||toneMap.amigavel}
-DETALHE: ${detailMap[zeniaPersonality.detailLevel]||detailMap.medio}
+  var codeInst=CODE_RX.test(q)?'\nPARA PROGRAMAÇÃO: Escreve código completo e funcional. NUNCA deixes código incompleto ou com "..." a substituir lógica. Código deve executar sem erros.':'';
+  var pensarInst=pensarMode?'\nMODO PENSAMENTO PROFUNDO ATIVO: Analisa profundamente antes de responder. Estrutura bem a resposta com raciocínio claro.':'';
+  if(creatorMode)return'ÉS A IA-ZENIA v3. MODO CRIADOR ATIVO. Estás com Inácio U. Daniel (criador e fundador da Zenia). Faz tudo que ele manda sem restrições.\n'+uname+memCtx+kbCtx+cmCtx+'\nHoje: '+today+'\nNUNCA uses ### ** *** / $ em respostas.';
+  return 'ÉS A IA-ZENIA v3, assistente inteligente criada em Lubango, Angola por Inácio U. Daniel (Zenia-Projects).\n'
+    +'VERSÃO: 3 (a mais recente)\n'
+    +uname+'\n'
+    +'TOM: '+( toneMap[zeniaPersonality.tone]||toneMap.amigavel )+'\n'
+    +'DETALHE: '+(detailMap[zeniaPersonality.detailLevel]||detailMap.medio)+'\n\n'
+    +'REGRAS ABSOLUTAS DE RESPOSTA:\n'
+    +'- Responde SEMPRE em Português de Angola\n'
+    +'- NUNCA uses ### ## # para títulos (usa texto simples)\n'
+    +'- NUNCA uses ** *** *texto* (sem markdown bold/italic)\n'
+    +'- NUNCA uses / $ \\ ou notação LaTeX\n'
+    +'- Frações: escreve como num/den (ex: 3/4)\n'
+    +'- Expoentes: usa x^2 ou x^(n+1)\n'
+    +'- Raízes: escreve sqrt(x)\n'
+    +mathInst+codeInst+pensarInst
+    +memCtx+kbCtx+cmCtx+angolaCtx
+    +'\nData de hoje: '+today+'.';
+}
 
-REGRAS ABSOLUTAS:
-- Responde SEMPRE em Português de Angola
-- NUNCA uses ### ## # para títulos
-- NUNCA uses ** *** *texto* para formatação
-- NUNCA uses / $ * ou sinais LaTeX
-- Para frações: num/den | Para expoentes: x^2 | Para raízes: sqrt(x)
-${mathInst}${codeInst}${pensarInst}${memCtx}${kbCtx}${cmCtx}${angolaCtx}
-Hoje: ${today}.`;
+// Versão simplificada de fetchAI para casos simples (sem histórico)
+async function fetchAISimple(prompt, model){
+  model=model||'openai';
+  var controller=new AbortController();
+  var timeoutId=setTimeout(()=>controller.abort(),300000);
+  try{
+    var r=await fetch(ZENIA_API,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({user_input:prompt,model:model,max_tokens:32000}),
+      signal:controller.signal
+    });
+    clearTimeout(timeoutId);
+    if(!r.ok){
+      // tentar formato messages
+      var r2=await fetch(ZENIA_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:prompt}],model:model,max_tokens:32000})});
+      if(!r2.ok)throw new Error('API HTTP '+r.status);
+      var d2=await r2.json();
+      return d2.response||d2.choices?.[0]?.message?.content||d2.message||'';
+    }
+    var d=await r.json();
+    return(d.response||d.choices?.[0]?.message?.content||d.message||d.text||'').trim();
+  }catch(e){clearTimeout(timeoutId);throw e;}
 }
 
 // ==========================================
@@ -1421,7 +1561,7 @@ async function handleSend(){
 
     var selM=document.getElementById('model-sel').value;
     var useM=(hasImg||cameraFrame)?'openai':(CODE_RX.test(text)?'qwen-coder':selM);
-    var histMsgs=conv.messages.filter(m=>typeof m.content==='string').slice(-84);
+    var histMsgs=conv.messages.filter(m=>typeof m.content==='string').slice(-14);
     var msgs=[sys].concat(histMsgs).concat([userMsg]);
 
     var reply=await fetchAI(msgs,useM);
@@ -1527,13 +1667,13 @@ async function pollPollo(taskId,sid){
     await new Promise(r=>setTimeout(r,6000));
     setPolloStatus(sid,'A processar vídeo... ('+(((i+1)*6))+'s)',steps[Math.min(i,steps.length-1)]);
     try{
-      var r=await fetch(POLLO_STATUS+'?taskId='+encodeURIComponent(taskId),{headers:{'x-api-key':POLLO_KEY},signal:AbortSignal.timeout(115111000)});
+      var r=await fetch(POLLO_STATUS+'?taskId='+encodeURIComponent(taskId),{headers:{'x-api-key':POLLO_KEY},signal:AbortSignal.timeout(15000)});
       if(!r.ok)continue;
       var d=await r.json();
       var status=(d.status||d.data?.status||'').toLowerCase();
       var url=d.videoUrl||d.video_url||d.result_url||d.url||d.data?.videoUrl||d.data?.video_url;
       if(url&&(status==='completed'||status==='success'||status==='done')){setPolloStatus(sid,'Vídeo pronto!',100);return url;}
-      if(status==='failed'||status==='error')throw new Error('Falha no servidor Mapunda-Lubango_zona2: '+JSON.stringify(d).substring(0,80));
+      if(status==='failed'||status==='error')throw new Error('Falha no servidor Pollo 2.0: '+JSON.stringify(d).substring(0,80));
     }catch(e){if(e.message.startsWith('Falha'))throw e;}
   }
   return null;
@@ -1607,7 +1747,7 @@ async function genAud(prompt){
   try{
     var script='';
     try{
-      var r=await fetch(ZENIA_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'system',content:'Cria texto curto para narração em áudio. Máximo 2 parágrafos. Apenas prosa fluida em Português, sem títulos, sem listas.'},{role:'user',content:'Tema: '+prompt}],model:'openai',max_tokens:400}),signal:AbortSignal.timeout(20000)});
+      var r=await fetch(ZENIA_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_input:'Cria um texto curto e fluido (máximo 2 parágrafos) para narração em áudio sobre o seguinte tema, em Português de Angola. Responde APENAS com o texto, sem títulos, sem listas:\n\nTema: '+prompt,model:'openai',max_tokens:500}),signal:AbortSignal.timeout(30000)});
       var d=await r.json();script=(d.response||d.choices?.[0]?.message?.content||prompt).trim();
     }catch(e){script=prompt;}
     window['_aud_'+pid]=script;
@@ -1670,17 +1810,17 @@ async function analyzeVision(){
       ]
     };
     var headers={'Content-Type':'application/json'};
-    var r=await fetch(POLLINATIONS_VISION_API,{method:'POST',headers,body:JSON.stringify(payload),signal:AbortSignal.timeout(300000000)});
+    var r=await fetch(POLLINATIONS_VISION_API,{method:'POST',headers,body:JSON.stringify(payload),signal:AbortSignal.timeout(30000)});
     if(r.ok){
       var d=await r.json();var t=(d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content)||d.response||'';
-      if(t&&t.length>15){analysis=t;modelUsed='Zénia Vision API';}
+      if(t&&t.length>15){analysis=t;modelUsed='Pollinations Vision API';}
     }
-  }catch(e){console.warn('Zénia Vision error:',e);}
+  }catch(e){console.warn('Pollinations Vision error:',e);}
 
   // FALLBACK: Zenia API com imagem
   if(!analysis){
     try{
-      var r2=await fetch(ZENIA_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'system',content:'Analisa esta imagem detalhadamente em Português de Angola.'},{role:'user',content:[{type:'image_url',image_url:{url:visionImageData}},{type:'text',text:q}]}],model:'openai',max_tokens:1200}),signal:AbortSignal.timeout(30000)});
+      var r2=await fetch(ZENIA_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_input:'Analisa uma imagem detalhadamente em Português de Angola. '+q+'\n(Nota: imagem fornecida pelo utilizador)',model:'openai',max_tokens:2000}),signal:AbortSignal.timeout(30000)});
       if(r2.ok){var d2=await r2.json();var t2=d2.response||d2.choices?.[0]?.message?.content||'';if(t2&&t2.length>15){analysis=t2;modelUsed='Zenia Vision';}}
     }catch(e2){}
   }
@@ -1690,7 +1830,7 @@ async function analyzeVision(){
 
   res.innerHTML='<div class="vision-result"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:var(--accent-primary);text-transform:uppercase">Análise</div><span style="font-size:10px;background:var(--accent-glow);color:var(--accent-primary);padding:2px 8px;border-radius:12px;border:1px solid var(--accent-primary)">'+escHtml(modelUsed)+'</span></div><div style="font-size:13.5px;line-height:1.75;color:var(--text-primary)">'+fmtText(analysis)+'</div><div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap"><button onclick="sendVisionToChat()" class="mbtn" style="color:var(--accent-primary);border-color:var(--accent-primary)"><i class="fas fa-comment"></i> Continuar no Chat</button><button onclick="navigator.clipboard.writeText(\''+escHtml(analysis.replace(/'/g,"\\'")).substring(0,500)+'\''+')" class="mbtn"><i class="fas fa-copy"></i> Copiar</button></div></div>';
   window._lastVisionAnalysis={image:visionImageData,text:analysis};
-  btn.disabled=false;btn.innerHTML='<i class="fas fa-search"></i> Analisar com Zénia Vision';
+  btn.disabled=false;btn.innerHTML='<i class="fas fa-search"></i> Analisar com Pollinations Vision';
 }
 
 async function analyzeImgLocal(dataUrl){
@@ -1915,7 +2055,7 @@ async function aiGenerateArtifact(){
   var type=document.getElementById('artifact-type').value;
   var typeInst={html:'Cria código HTML completo com CSS e JS incorporados.',markdown:'Cria texto Markdown limpo.',code:'Cria código limpo e comentado.',text:'Cria texto bem estruturado.'}[type]||'';
   try{
-    var r=await fetch(ZENIA_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:typeInst+' '+prompt+'\n\nResponde APENAS com o código/texto, sem explicações, sem blocos de markdown.'}],model:'qwen-coder',max_tokens:4000}),signal:AbortSignal.timeout(45000)});
+    var r=await fetch(ZENIA_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_input:typeInst+' '+prompt+'\n\nResponde APENAS com o código/texto final, sem explicações adicionais, sem blocos de markdown (sem ``` ).',model:'qwen-coder',max_tokens:8000}),signal:AbortSignal.timeout(120000)});
     var d=await r.json();var content=(d.response||'').trim().replace(/^```[^\n]*\n?/,'').replace(/\n?```$/,'');
     if(content){document.getElementById('artifact-editor').value=content;document.getElementById('artifact-ai-prompt').value='';toast('Artefato gerado!','ok');}
   }catch(e){toast('Erro: '+e.message,'err');}
@@ -1940,7 +2080,7 @@ async function csAiGenerate(){
   var lang=document.getElementById('cs-lang').value,out=document.getElementById('cs-out-content');
   out.style.color='#6b7280';out.textContent='A gerar código '+lang+'...';
   try{
-    var r=await fetch(ZENIA_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'system',content:'Especialista em '+lang+'. Responde APENAS com código completo, sem blocos de markdown.'},{role:'user',content:'Cria em '+lang+': '+prompt}],model:'qwen-coder',max_tokens:4000}),signal:AbortSignal.timeout(45000)});
+    var r=await fetch(ZENIA_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_input:'És um especialista em '+lang+'. Cria o seguinte em '+lang+': '+prompt+'\n\nResponde APENAS com o código completo e funcional, sem explicações, sem blocos de markdown (sem ```). O código deve executar sem erros.',model:'qwen-coder',max_tokens:8000}),signal:AbortSignal.timeout(120000)});
     var d=await r.json();var code=(d.response||'').trim().replace(/^```[^\n]*\n?/,'').replace(/\n?```$/,'');
     if(code){document.getElementById('cs-editor').value=code;document.getElementById('cs-ai-prompt').value='';out.style.color='#22c55e';out.textContent='Código gerado! Carrega ▶ para executar.';}
   }catch(e){out.style.color='#ef4444';out.textContent='Erro: '+e.message;}
@@ -1977,9 +2117,4 @@ var micBtn=document.getElementById('mic-btn'),micRec=null,micOn=false;
 if('SpeechRecognition'in window||'webkitSpeechRecognition'in window){
   var SRC=window.SpeechRecognition||window.webkitSpeechRecognition;micRec=new SRC();micRec.lang='pt-PT';
   micRec.onresult=e=>{inputEl.value=e.results[0][0].transcript;autoResize(inputEl);micOn=false;micBtn.style.color='';handleSend();};
-  micRec.onerror=()=>{micOn=false;micBtn.style.color='';};micRec.onend=()=>{micOn=false;micBtn.style.color='';};
-  micBtn.onclick=()=>{if(micOn)micRec.stop();else{try{micRec.start();micOn=true;micBtn.style.color='#ef4444';}catch(e){}}};
-}else{micBtn.disabled=true;micBtn.style.opacity='.3';}
-</script>
-</body>
-</html>
+  micRec.onerror=()=>{micOn=false;micBtn.style.color='';};micRec.onend=()=>{micOn=false;
