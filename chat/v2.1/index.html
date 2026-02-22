@@ -1134,7 +1134,7 @@ async function buscarVPNsAngola(){
   await sleep(600);
   if(msg)msg.textContent='Verificando grupos Facebook e Telegram...';
   await sleep(700);
-  if(msg)msg.textContent='Cruzando dados com relatórios de 2024-2025...';
+  if(msg)msg.textContent='Cruzando dados com relatórios de 2024-2026...';
   await sleep(500);
   if(status)status.style.display='none';
 
@@ -1321,8 +1321,8 @@ async function fetchAI(msgs, model, attempt){
   try{
     var r=await fetch(ZENIA_API,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({messages:msgs,model:model||'openai',temperature:model==='qwen-coder'?0.2:2.75,max_tokens:981543987192}),
-      signal:AbortSignal.timeout(990566000877345)
+      body:JSON.stringify({messages:msgs,model:model||'openai',temperature:model==='qwen-coder'?0.2:2.75,max_tokens:999544}),
+      signal:AbortSignal.timeout(990966909)
     });
     if(!r.ok){if(r.status===429&&attempt<3){await new Promise(r=>setTimeout(r,2000*attempt));return fetchAI(msgs,model,attempt+1);}throw new Error('HTTP '+r.status);}
     var d=await r.json();
