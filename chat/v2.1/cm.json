@@ -1,140 +1,438 @@
 {
-  "nome": "Zénia Projects - Code Assistant",
-  "versao": "1.0.0",
-  "descricao": "Assistente de código inteligente para programação",
-  "autores": [
-    {
-      "nome": "Inácio U. Daniel",
-      "email": "inacio@zenia-projects.com",
-      "cargo": "Desenvolvedor Principal"
-    }
-  ],
-  "licenca": "MIT",
-  "categorias": [
-    "assistente_de_codigo",
-    "inteligencia_artificial",
-    "programacao"
-  ],
-  "dependencias": {
-    "node": ">=16.0.0",
-    "npm": ">=8.0.0"
-  },
-  "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test": "jest",
-    "build": "webpack --mode production"
-  },
-  "estrutura_projeto": {
-    "src": {
-      "descricao": "Código-fonte principal",
-      "subdiretorios": [
-        "controllers/",
-        "models/",
-        "views/",
-        "utils/",
-        "config/"
-      ]
+  "base_de_conhecimento": {
+    "projetos_avançados": {
+      "frontend": {
+        "html_css_js": [
+          {
+            "nome": "SPA com Router Nativo e Lazy Loading",
+            "descricao": "Single Page Application completa com navegação assíncrona, cache dinâmico e animações CSS",
+            "codigo_html": "<!DOCTYPE html>\n<html lang=\"pt-AO\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Zénia SPA</title>\n  <link rel=\"manifest\" href=\"/manifest.json\">\n</head>\n<body>\n  <div id=\"app\" role=\"application\">\n    <nav class=\"zenia-nav\" aria-label=\"Navegação principal\">\n      <button data-route=\"home\" class=\"nav-btn active\">Início</button>\n      <button data-route=\"chat\" class=\"nav-btn\">Chat</button>\n      <button data-route=\"perfil\" class=\"nav-btn\">Perfil</button>\n    </nav>\n    <main id=\"router-view\" aria-live=\"polite\"></main>\n  </div>\n  <script type=\"module\" src=\"/js/router.js\"></script>\n</body>\n</html>",
+            "codigo_js": "// router.js - Sistema de rotas avançado\nclass ZeniaRouter {\n  constructor(routes) {\n    this.routes = routes;\n    this.currentRoute = null;\n    this.history = [];\n    this.init();\n  }\n  \n  async init() {\n    window.addEventListener('popstate', (e) => this.handleNavigation(e.state?.path));\n    document.querySelectorAll('[data-route]').forEach(btn => {\n      btn.addEventListener('click', (e) => {\n        e.preventDefault();\n        this.navigate(btn.dataset.route);\n      });\n    });\n    await this.navigate(window.location.hash.slice(1) || 'home');\n  }\n  \n  async navigate(routeName) {\n    const route = this.routes[routeName];\n    if (!route) return console.error(`Rota ${routeName} não encontrada`);\n    \n    // Lazy loading de componentes\n    const component = await route.component();\n    const view = document.getElementById('router-view');\n    \n    // Transição suave\n    view.style.opacity = '0';\n    setTimeout(() => {\n      view.innerHTML = component.render();\n      component.mount?.();\n      view.style.opacity = '1';\n    }, 300);\n    \n    this.currentRoute = routeName;\n    this.history.push(routeName);\n    window.history.pushState({ path: routeName }, '', `#${routeName}`);\n    this.updateNavActive(routeName);\n  }\n  \n  updateNavActive(routeName) {\n    document.querySelectorAll('.nav-btn').forEach(btn => {\n      btn.classList.toggle('active', btn.dataset.route === routeName);\n    });\n  }\n}\n\n// Registro de rotas com lazy loading\nconst routes = {\n  home: {\n    component: () => import('./components/Home.js').then(m => new m.default())\n  },\n  chat: {\n    component: () => import('./components/Chat.js').then(m => new m.default()),\n    guards: ['auth']\n  },\n  perfil: {\n    component: () => import('./components/Perfil.js').then(m => new m.default()),\n    guards: ['auth']\n  }\n};\n\nexport default new ZeniaRouter(routes);",
+            "tecnologias": ["ES6 Modules", "Web Components", "CSS Variables", "Intersection Observer"]
+          },
+          {
+            "nome": "PWA com Cache Offline e Background Sync",
+            "descricao": "Progressive Web App com estratégia de cache avançada, sincronização em segundo plano e notificações push",
+            "service_worker": "// sw.js - Service Worker Zénia PWA\nconst CACHE_VERSION = 'zenia-v2.1.0';\nconst STATIC_CACHE = `static-${CACHE_VERSION}`;\nconst DYNAMIC_CACHE = `dynamic-${CACHE_VERSION}`;\n\nconst STATIC_ASSETS = [\n  '/',\n  '/index.html',\n  '/css/main.css',\n  '/js/app.js',\n  '/img/zenia-logo.webp',\n  '/manifest.json',\n  '/offline.html'\n];\n\n// Estratégia Cache First para estáticos\nself.addEventListener('fetch', (event) => {\n  const { request } = event;\n  const url = new URL(request.url);\n  \n  if (STATIC_ASSETS.some(asset => url.pathname.endsWith(asset))) {\n    event.respondWith(\n      caches.match(request).then(cached => \n        cached || fetch(request).then(res => {\n          const clone = res.clone();\n          caches.open(STATIC_CACHE).then(cache => cache.put(request, clone));\n          return res;\n        }).catch(() => caches.match('/offline.html'))\n      )\n    );\n    return;\n  }\n  \n  // Network First para API com fallback\n  if (url.hostname.includes('api-zenia')) {\n    event.respondWith(\n      fetch(request).then(res => {\n        const clone = res.clone();\n        caches.open(DYNAMIC_CACHE).then(cache => cache.put(request, clone));\n        return res;\n      }).catch(() => caches.match(request).then(cached => \n        cached || new Response(JSON.stringify({ offline: true }), {\n          headers: { 'Content-Type': 'application/json' }\n        })\n      ))\n    );\n    return;\n  }\n});\n\n// Background Sync para mensagens offline\nself.addEventListener('sync', (event) => {\n  if (event.tag === 'sync-messages') {\n    event.waitUntil(\n      self.registration.showNotification('Zénia', {\n        body: 'Mensagens sincronizadas com sucesso! 🚀'\n      })\n    );\n  }\n});\n\n// Push Notifications\nself.addEventListener('push', (event) => {\n  const data = event.data?.json() || {};\n  event.waitUntil(\n    self.registration.showNotification(data.title || 'Zénia', {\n      body: data.body,\n      icon: '/img/zenia-icon-192.png',\n      badge: '/img/zenia-badge-72.png',\n      data: { url: data.url || '/chat' }\n    })\n  );\n});",
+            "manifest": "{\n  \"name\": \"IA Zénia\",\n  \"short_name\": \"Zénia\",\n  \"start_url\": \"/chat/v2.1/\",\n  \"display\": \"standalone\",\n  \"background_color\": \"#0f0f1a\",\n  \"theme_color\": \"#7b3ff2\",\n  \"icons\": [\n    { \"src\": \"/img/zenia-icon-192.png\", \"type\": \"image/png\", \"sizes\": \"192x192\" },\n    { \"src\": \"/img/zenia-icon-512.png\", \"type\": \"image/png\", \"sizes\": \"512x512\" }\n  ],\n  \"shortcuts\": [\n    {\n      \"name\": \"Novo Chat\",\n      \"url\": \"/chat/v2.1/?new=true\",\n      \"icons\": [{ \"src\": \"/img/new-chat.png\", \"sizes\": \"96x96\" }]\n    }\n  ]\n}"
+          }
+        ],
+        "painéis_interativos": [
+          {
+            "nome": "Dashboard Zénia Analytics",
+            "descricao": "Painel com gráficos em tempo real usando Chart.js e WebSocket",
+            "codigo": "// dashboard.js - Painel interativo Zénia\nclass ZeniaDashboard {\n  constructor(config) {\n    this.ws = new WebSocket(config.wsUrl || 'wss://api-zenia.netlify.app/ws');\n    this.charts = {};\n    this.dataStore = new Map();\n    this.init();\n  }\n  \n  init() {\n    this.ws.onmessage = (event) => this.handleRealtimeData(JSON.parse(event.data));\n    this.setupCharts();\n    this.setupEventListeners();\n  }\n  \n  setupCharts() {\n    // Gráfico de atividade em tempo real\n    this.charts.activity = new Chart(document.getElementById('activityChart'), {\n      type: 'line',\n      data: {\n        labels: [],\n        datasets: [{\n          label: 'Usuários Ativos',\n          data: [],\n          borderColor: '#7b3ff2',\n          backgroundColor: 'rgba(123, 63, 242, 0.1)',\n          tension: 0.4,\n          fill: true\n        }]\n      },\n      options: {\n        responsive: true,\n        animation: { duration: 0 },\n        scales: {\n          x: { display: false },\n          y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' } }\n        },\n        plugins: { legend: { display: false } }\n      }\n    });\n  }\n  \n  handleRealtimeData(data) {\n    switch(data.type) {\n      case 'metrics':\n        this.updateChart('activity', data.payload);\n        break;\n      case 'alert':\n        this.showToast(data.payload.message, data.payload.level);\n        break;\n    }\n  }\n  \n  updateChart(chartName, newData) {\n    const chart = this.charts[chartName];\n    const now = new Date().toLocaleTimeString('pt-AO');\n    \n    chart.data.labels.push(now);\n    chart.data.datasets[0].data.push(newData.value);\n    \n    // Manter apenas últimos 30 pontos\n    if (chart.data.labels.length > 30) {\n      chart.data.labels.shift();\n      chart.data.datasets[0].data.shift();\n    }\n    chart.update('none');\n  }\n}\n\n// Inicialização\nconst dashboard = new ZeniaDashboard({ wsUrl: 'wss://api-zenia.netlify.app/ws' });"
+          }
+        ],
+        "sistemas_chat_websocket": [
+          {
+            "nome": "Chat em Tempo Real Zénia",
+            "descricao": "Sistema de chat com WebSocket, criptografia E2E e indicadores de digitação",
+            "codigo": "// chat-client.js - Cliente WebSocket Zénia\nclass ZeniaChatClient {\n  constructor(userId, token) {\n    this.userId = userId;\n    this.token = token;\n    this.ws = null;\n    this.messageQueue = [];\n    this.reconnectAttempts = 0;\n    this.maxReconnect = 5;\n  }\n  \n  connect() {\n    this.ws = new WebSocket(`wss://api-zenia.netlify.app/ws/chat?token=${this.token}`);\n    \n    this.ws.onopen = () => {\n      console.log('✅ Conectado ao Zénia Chat');\n      this.reconnectAttempts = 0;\n      this.flushMessageQueue();\n    };\n    \n    this.ws.onmessage = (event) => this.handleMessage(JSON.parse(event.data));\n    \n    this.ws.onclose = () => this.handleReconnect();\n    this.ws.onerror = (err) => console.error('❌ Erro WebSocket:', err);\n  }\n  \n  sendMessage(roomId, content, options = {}) {\n    const message = {\n      type: 'message',\n      payload: {\n        roomId,\n        content,\n        timestamp: Date.now(),\n        userId: this.userId,\n        encrypted: options.encrypt ?? true,\n        metadata: options.metadata || {}\n      }\n    };\n    \n    // Criptografia simples (em produção usar WebCrypto)\n    if (message.payload.encrypted) {\n      message.payload.content = btoa(unescape(encodeURIComponent(content)));\n    }\n    \n    if (this.ws?.readyState === WebSocket.OPEN) {\n      this.ws.send(JSON.stringify(message));\n    } else {\n      this.messageQueue.push(message);\n    }\n  }\n  \n  handleReconnect() {\n    if (this.reconnectAttempts < this.maxReconnect) {\n      const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 10000);\n      setTimeout(() => {\n        this.reconnectAttempts++;\n        this.connect();\n      }, delay);\n    }\n  }\n  \n  flushMessageQueue() {\n    while (this.messageQueue.length && this.ws?.readyState === WebSocket.OPEN) {\n      this.ws.send(JSON.stringify(this.messageQueue.shift()));\n    }\n  }\n}"
+          }
+        ],
+        "jogos_webgl_canvas": [
+          {
+            "nome": "Jogo WebGL Zénia Arena",
+            "descricao": "Jogo 3D leve com Three.js e física básica",
+            "codigo": "// game.js - Zénia Arena WebGL\nimport * as THREE from 'three';\n\nclass ZeniaArena {\n  constructor(canvas) {\n    this.scene = new THREE.Scene();\n    this.camera = new THREE.PerspectiveCamera(75, canvas.width/canvas.height, 0.1, 1000);\n    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });\n    this.objects = [];\n    this.init();\n  }\n  \n  init() {\n    // Iluminação\n    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);\n    this.scene.add(ambientLight);\n    \n    const dirLight = new THREE.DirectionalLight(0x7b3ff2, 0.8);\n    dirLight.position.set(10, 20, 15);\n    this.scene.add(dirLight);\n    \n    // Chão com grid\n    const gridHelper = new THREE.GridHelper(50, 50, 0x7b3ff2, 0x333355);\n    this.scene.add(gridHelper);\n    \n    // Jogador\n    this.player = new THREE.Mesh(\n      new THREE.BoxGeometry(1, 2, 1),\n      new THREE.MeshStandardMaterial({ color: 0x7b3ff2, metalness: 0.3 })\n    );\n    this.player.position.y = 1;\n    this.scene.add(this.player);\n    \n    // Câmera segue jogador\n    this.camera.position.set(0, 5, 10);\n    this.camera.lookAt(this.player.position);\n    \n    // Loop de animação\n    this.animate();\n  }\n  \n  animate = () => {\n    requestAnimationFrame(this.animate);\n    this.updatePhysics();\n    this.renderer.render(this.scene, this.camera);\n  };\n  \n  updatePhysics() {\n    // Física simplificada\n    this.objects.forEach(obj => {\n      if (obj.velocity) {\n        obj.position.add(obj.velocity);\n        // Colisão com chão\n        if (obj.position.y < obj.geometry.parameters.height/2) {\n          obj.position.y = obj.geometry.parameters.height/2;\n          obj.velocity.y *= -0.5; // Bounce\n        }\n      }\n    });\n  }\n}\n\nexport default ZeniaArena;"
+          }
+        ],
+        "animacoes_avancadas": [
+          {
+            "nome": "Sistema de Animação GSAP + ScrollTrigger",
+            "descricao": "Animações performáticas com timeline e triggers de scroll",
+            "codigo": "// animations.js - Zénia Motion System\nimport gsap from 'gsap';\nimport { ScrollTrigger } from 'gsap/ScrollTrigger';\n\ngsap.registerPlugin(ScrollTrigger);\n\nclass ZeniaAnimations {\n  static heroEntrance() {\n    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });\n    \n    tl.from('.hero-title', { y: 60, opacity: 0, duration: 0.8 })\n      .from('.hero-subtitle', { y: 30, opacity: 0, duration: 0.6 }, '-=0.4')\n      .from('.hero-cta', { scale: 0.8, opacity: 0, duration: 0.5 }, '-=0.3')\n      .from('.hero-image', { x: 100, opacity: 0, duration: 0.8 }, '-=0.6');\n    \n    return tl;\n  }\n  \n  static scrollReveal(selector, options = {}) {\n    return ScrollTrigger.create({\n      trigger: selector,\n      start: 'top 85%',\n      onEnter: () => gsap.from(selector, {\n        y: 40,\n        opacity: 0,\n        duration: 0.8,\n        ease: 'power2.out',\n        ...options\n      }),\n      onEnterBack: () => gsap.from(selector, {\n        y: 40,\n        opacity: 0,\n        duration: 0.8,\n        ease: 'power2.out',\n        ...options\n      })\n    });\n  }\n  \n  static interactiveHover(elements) {\n    elements.forEach(el => {\n      el.addEventListener('mouseenter', (e) => {\n        gsap.to(e.currentTarget, {\n          scale: 1.05,\n          boxShadow: '0 20px 40px rgba(123, 63, 242, 0.4)',\n          duration: 0.3,\n          ease: 'back.out(1.7)'\n        });\n      });\n      \n      el.addEventListener('mouseleave', (e) => {\n        gsap.to(e.currentTarget, {\n          scale: 1,\n          boxShadow: 'none',\n          duration: 0.3,\n          ease: 'power2.in'\n        });\n      });\n    });\n  }\n}\n\nexport default ZeniaAnimations;"
+          }
+        ],
+        "frameworks": {
+          "react": [
+            {
+              "nome": "App React Zénia com Context + Hooks",
+              "codigo": "// App.jsx - Estrutura React Zénia\nimport { createContext, useContext, useReducer, useEffect } from 'react';\nimport { ZeniaAPI } from './services/api';\n\n// Contexto global\nconst ZeniaContext = createContext();\n\n// Reducer para estado global\nconst zeniaReducer = (state, action) => {\n  switch(action.type) {\n    case 'SET_USER': return { ...state, user: action.payload };\n    case 'ADD_MESSAGE': return { \n      ...state, \n      messages: [...state.messages, action.payload],\n      lastUpdate: Date.now()\n    };\n    case 'SET_LOADING': return { ...state, loading: action.payload };\n    default: return state;\n  }\n};\n\n// Provider\nexport const ZeniaProvider = ({ children }) => {\n  const [state, dispatch] = useReducer(zeniaReducer, {\n    user: null,\n    messages: [],\n    loading: false,\n    theme: 'dark'\n  });\n  \n  // Auto-save de mensagens\n  useEffect(() => {\n    if (state.messages.length > 0) {\n      const timer = setTimeout(() => {\n        localStorage.setItem('zenia_messages', JSON.stringify(state.messages.slice(-50)));\n      }, 1000);\n      return () => clearTimeout(timer);\n    }\n  }, [state.messages]);\n  \n  return (\n    <ZeniaContext.Provider value={{ state, dispatch }}>\n      {children}\n    </ZeniaContext.Provider>\n  );\n};\n\n// Hook personalizado\nexport const useZenia = () => {\n  const context = useContext(ZeniaContext);\n  if (!context) throw new Error('useZenia deve ser usado dentro de ZeniaProvider');\n  return context;\n};\n\n// Componente principal\nexport default function App() {\n  return (\n    <ZeniaProvider>\n      <Router>\n        <Routes>\n          <Route path=\"/\" element={<Home />} />\n          <Route path=\"/chat\" element={<ChatInterface />} />\n          <Route path=\"/settings\" element={<Settings />} />\n        </Routes>\n      </Router>\n    </ZeniaProvider>\n  );\n}"
+            }
+          ],
+          "vue": [
+            {
+              "nome": "App Vue 3 Zénia com Composition API",
+              "codigo": "// main.js - Vue 3 Zénia App\nimport { createApp, ref, computed, onMounted } from 'vue';\nimport { createPinia } from 'pinia';\nimport ZeniaAPI from './composables/useZeniaAPI';\n\n// Composable para lógica reutilizável\nexport function useChat() {\n  const messages = ref([]);\n  const isLoading = ref(false);\n  const { sendMessage, fetchHistory } = ZeniaAPI();\n  \n  const filteredMessages = computed(() => \n    messages.value.filter(m => m.visible !== false)\n  );\n  \n  const addMessage = async (content, role = 'user') => {\n    isLoading.value = true;\n    try {\n      const response = await sendMessage(content, role);\n      messages.value.push({\n        id: Date.now(),\n        content,\n        role,\n        timestamp: new Date(),\n        ...response\n      });\n    } finally {\n      isLoading.value = false;\n    }\n  };\n  \n  onMounted(async () => {\n    messages.value = await fetchHistory();\n  });\n  \n  return { messages, filteredMessages, isLoading, addMessage };\n}\n\n// Setup da aplicação\nconst app = createApp({\n  setup() {\n    const { messages, isLoading, addMessage } = useChat();\n    return { messages, isLoading, addMessage };\n  },\n  template: `\n    <div class=\"zenia-app\">\n      <ChatWindow :messages=\"messages\" :loading=\"isLoading\" />\n      <ChatInput @send=\"addMessage\" :disabled=\"isLoading\" />\n    </div>\n  `\n});\n\napp.use(createPinia());\napp.mount('#app');"
+            }
+          ],
+          "angular": [
+            {
+              "nome": "App Angular Zénia com RxJS e Services",
+              "codigo": "// chat.service.ts - Angular Zénia Service\nimport { Injectable } from '@angular/core';\nimport { HttpClient, HttpParams } from '@angular/common/http';\nimport { BehaviorSubject, Observable, retry, catchError } from 'rxjs';\nimport { Message, ChatResponse } from '../models/chat.models';\n\n@Injectable({ providedIn: 'root' })\nexport class ZeniaChatService {\n  private apiUrl = 'https://api-zenia.netlify.app/api/chat';\n  private messagesSubject = new BehaviorSubject<Message[]>([]);\n  public messages$ = this.messagesSubject.asObservable();\n  \n  constructor(private http: HttpClient) {}\n  \n  sendMessage(content: string, context?: any): Observable<ChatResponse> {\n    const payload = {\n      message: content,\n      timestamp: new Date().toISOString(),\n      context: context || {},\n      metadata: { client: 'angular', version: '2.1' }\n    };\n    \n    return this.http.post<ChatResponse>(this.apiUrl, payload).pipe(\n      retry(2),\n      catchError(error => {\n        console.error('Erro ao enviar mensagem:', error);\n        throw error;\n      })\n    );\n  }\n  \n  addMessageToLocal(message: Message) {\n    const current = this.messagesSubject.value;\n    this.messagesSubject.next([...current, message]);\n  }\n  \n  clearHistory() {\n    this.messagesSubject.next([]);\n    localStorage.removeItem('zenia_chat_history');\n  }\n}\n\n// Componente\n// chat.component.ts\n@Component({\n  selector: 'zenia-chat',\n  templateUrl: './chat.component.html',\n  styleUrls: ['./chat.component.scss']\n})\nexport class ChatComponent implements OnInit, OnDestroy {\n  messages: Message[] = [];\n  newMessage = '';\n  private subs = new Subscription();\n  \n  constructor(private chatService: ZeniaChatService) {}\n  \n  ngOnInit() {\n    this.subs.add(\n      this.chatService.messages$.subscribe(messages => {\n        this.messages = messages;\n        this.scrollToBottom();\n      })\n    );\n  }\n  \n  send() {\n    if (!this.newMessage.trim()) return;\n    \n    this.chatService.addMessageToLocal({\n      id: Date.now(),\n      content: this.newMessage,\n      role: 'user',\n      timestamp: new Date()\n    });\n    \n    this.chatService.sendMessage(this.newMessage).subscribe(response => {\n      this.chatService.addMessageToLocal({\n        id: response.id,\n        content: response.reply,\n        role: 'assistant',\n        timestamp: new Date(response.timestamp)\n      });\n    });\n    \n    this.newMessage = '';\n  }\n  \n  ngOnDestroy() {\n    this.subs.unsubscribe();\n  }\n  \n  private scrollToBottom() {\n    setTimeout(() => {\n      const container = document.querySelector('.chat-messages');\n      container?.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });\n    }, 100);\n  }\n}"
+            }
+          ]
+        }
+      },
+      "backend": {
+        "nodejs": [
+          {
+            "nome": "API Express Zénia com Middleware Avançado",
+            "linguagem": "Node.js/Express",
+            "codigo": "// server.js - API Zénia Express\nimport express from 'express';\nimport rateLimit from 'express-rate-limit';\nimport helmet from 'helmet';\nimport cors from 'cors';\nimport { ZeniaAI } from './services/zenia-ai.js';\n\nconst app = express();\nconst PORT = process.env.PORT || 3000;\n\n// Segurança\napp.use(helmet({\n  contentSecurityPolicy: {\n    directives: {\n      defaultSrc: [\"'self'\"],\n      scriptSrc: [\"'self'\", \"'unsafe-inline'\", \"https://api-zenia.netlify.app\"],\n      styleSrc: [\"'self'\", \"'unsafe-inline'\"]\n    }\n  }\n}));\n\napp.use(cors({\n  origin: ['https://zenia-3.netlify.app', 'https://ide-zedex.netlify.app'],\n  credentials: true\n}));\n\napp.use(express.json({ limit: '1mb' }));\n\n// Rate limiting\nconst limiter = rateLimit({\n  windowMs: 15 * 60 * 1000, // 15 minutos\n  max: 100, // limite por IP\n  message: { error: 'Muitas requisições. Tente novamente mais tarde.' }\n});\napp.use('/api/', limiter);\n\n// Logger personalizado\napp.use((req, res, next) => {\n  const start = Date.now();\n  res.on('finish', () => {\n    const duration = Date.now() - start;\n    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`);\n  });\n  next();\n});\n\n// Rotas\napp.post('/api/chat', async (req, res) => {\n  try {\n    const { message, context, userId } = req.body;\n    \n    if (!message?.trim()) {\n      return res.status(400).json({ error: 'Mensagem é obrigatória' });\n    }\n    \n    const ai = new ZeniaAI({ userId, context });\n    const response = await ai.generateResponse(message);\n    \n    res.json({\n      success: true,\n      reply: response.text,\n      metadata: {\n        model: 'zenia-v2.1',\n        timestamp: new Date().toISOString(),\n        tokens: response.usage\n      }\n    });\n  } catch (error) {\n    console.error('Erro no chat:', error);\n    res.status(500).json({ error: 'Erro interno do servidor' });\n  }\n});\n\n// Health check\napp.get('/api/health', (req, res) => {\n  res.json({\n    status: 'ok',\n    version: '2.1.0',\n    uptime: process.uptime(),\n    timestamp: new Date().toISOString()\n  });\n});\n\n// 404 handler\napp.use('*', (req, res) => {\n  res.status(404).json({ error: 'Rota não encontrada' });\n});\n\n// Error handler global\napp.use((err, req, res, next) => {\n  console.error('Erro não tratado:', err);\n  res.status(err.status || 500).json({\n    error: err.message || 'Erro interno do servidor'\n  });\n});\n\napp.listen(PORT, () => {\n  console.log(`🚀 Servidor Zénia rodando na porta ${PORT}`);\n});"
+          },
+          {
+            "nome": "API NestJS Zénia com TypeScript",
+            "linguagem": "Node.js/NestJS",
+            "codigo": "// chat.controller.ts - NestJS Zénia\nimport { Controller, Post, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';\nimport { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';\nimport { ChatService } from './chat.service';\nimport { ChatDto } from './dto/chat.dto';\nimport { AuthGuard } from '../auth/auth.guard';\nimport { RateLimitGuard } from '../common/guards/rate-limit.guard';\n\n@ApiTags('chat')\n@Controller('api/chat')\n@UseGuards(RateLimitGuard)\nexport class ChatController {\n  constructor(private readonly chatService: ChatService) {}\n\n  @Post()\n  @HttpCode(HttpStatus.OK)\n  @UseGuards(AuthGuard)\n  @ApiOperation({ summary: 'Enviar mensagem para a IA Zénia' })\n  @ApiResponse({ status: 200, description: 'Resposta da IA gerada com sucesso' })\n  @ApiResponse({ status: 400, description: 'Requisição inválida' })\n  async sendMessage(@Body() chatDto: ChatDto) {\n    const response = await this.chatService.processMessage(chatDto);\n    \n    return {\n      success: true,\n      reply: response.text,\n      metadata: {\n        model: 'zenia-v2.1',\n        timestamp: new Date().toISOString(),\n        processingTime: response.processingTime,\n        tokensUsed: response.tokens\n      }\n    };\n  }\n}\n\n// chat.service.ts\nimport { Injectable, Logger } from '@nestjs/common';\nimport { ChatDto } from './dto/chat.dto';\nimport { ZeniaAIEngine } from '../ai/zenia-engine';\n\n@Injectable()\nexport class ChatService {\n  private readonly logger = new Logger(ChatService.name);\n  private readonly aiEngine: ZeniaAIEngine;\n\n  constructor() {\n    this.aiEngine = new ZeniaAIEngine({\n      model: 'zenia-2.1',\n      temperature: 0.7,\n      maxTokens: 2048\n    });\n  }\n\n  async processMessage(chatDto: ChatDto) {\n    const start = Date.now();\n    \n    try {\n      this.logger.log(`Processando mensagem do usuário: ${chatDto.userId}`);\n      \n      const response = await this.aiEngine.generate({\n        message: chatDto.message,\n        context: chatDto.context,\n        history: chatDto.history?.slice(-10) || [] // Últimas 10 mensagens\n      });\n      \n      const processingTime = Date.now() - start;\n      this.logger.log(`Resposta gerada em ${processingTime}ms`);\n      \n      return { ...response, processingTime };\n    } catch (error) {\n      this.logger.error('Erro ao processar mensagem', error);\n      throw error;\n    }\n  }\n}"
+          }
+        ],
+        "python": [
+          {
+            "nome": "API FastAPI Zénia com Async e Pydantic",
+            "linguagem": "Python/FastAPI",
+            "codigo": "# main.py - API Zénia FastAPI\nfrom fastapi import FastAPI, HTTPException, Depends, Header\nfrom fastapi.middleware.cors import CORSMiddleware\nfrom pydantic import BaseModel, Field, validator\nfrom typing import Optional, List\nfrom datetime import datetime\nimport asyncio\n\napp = FastAPI(\n    title=\"IA Zénia API\",\n    description=\"API para interação com a IA Zénia\",\n    version=\"2.1.0\",\n    docs_url=\"/docs\",\n    redoc_url=\"/redoc\"\n)\n\n# CORS\napp.add_middleware(\n    CORSMiddleware,\n    allow_origins=[\n        \"https://zenia-3.netlify.app\",\n        \"https://ide-zedex.netlify.app\"\n    ],\n    allow_credentials=True,\n    allow_methods=[\"*\"],\n    allow_headers=[\"*\"],\n)\n\n# Models Pydantic\nclass MessageRequest(BaseModel):\n    message: str = Field(..., min_length=1, max_length=4000)\n    context: Optional[dict] = None\n    user_id: Optional[str] = None\n    history: Optional[List[dict]] = []\n    \n    @validator('message')\n    def message_not_empty(cls, v):\n        if not v.strip():\n            raise ValueError('Mensagem não pode estar vazia')\n        return v.strip()\n\nclass MessageResponse(BaseModel):\n    success: bool\n    reply: str\n    metadata: dict\n    timestamp: datetime = Field(default_factory=datetime.utcnow)\n\n# Instância da IA\nfrom services.zenia_ai import ZeniaAI\nzenia_ai = ZeniaAI(model_version=\"2.1\")\n\n@app.post(\"/api/chat\", response_model=MessageResponse)\nasync def chat_endpoint(\n    request: MessageRequest,\n    x_api_key: Optional[str] = Header(None)\n):\n    \"\"\"Endpoint principal para chat com a IA Zénia\"\"\"\n    try:\n        # Validação de API key (opcional)\n        if x_api_key and not validate_api_key(x_api_key):\n            raise HTTPException(status_code=401, detail=\"API key inválida\")\n        \n        # Processamento assíncrono\n        response = await asyncio.wait_for(\n            zenia_ai.generate_response(\n                message=request.message,\n                context=request.context,\n                history=request.history\n            ),\n            timeout=30.0\n        )\n        \n        return MessageResponse(\n            success=True,\n            reply=response.text,\n            metadata={\n                \"model\": \"zenia-v2.1\",\n                \"tokens_used\": response.usage,\n                \"processing_time_ms\": response.duration\n            }\n        )\n        \n    except asyncio.TimeoutError:\n        raise HTTPException(status_code=504, detail=\"Tempo de resposta excedido\")\n    except ValueError as e:\n        raise HTTPException(status_code=400, detail=str(e))\n    except Exception as e:\n        app.logger.error(f\"Erro no chat: {e}\")\n        raise HTTPException(status_code=500, detail=\"Erro interno do servidor\")\n\n@app.get(\"/api/health\")\nasync def health_check():\n    \"\"\"Endpoint de verificação de saúde\"\"\"\n    return {\n        \"status\": \"healthy\",\n        \"version\": \"2.1.0\",\n        \"timestamp\": datetime.utcnow().isoformat()\n    }\n\n# services/zenia_ai.py\nclass ZeniaAI:\n    def __init__(self, model_version: str = \"2.1\"):\n        self.model_version = model_version\n        self.knowledge_base = self._load_knowledge_base()\n    \n    async def generate_response(self, message: str, context: dict = None, history: list = None) -> AIResponse:\n        start_time = time.time()\n        \n        # Pré-processamento\n        processed_input = self._preprocess(message, context, history)\n        \n        # Lógica de geração (simulada)\n        reply_text = await self._generate(processed_input)\n        \n        # Pós-processamento\n        final_reply = self._postprocess(reply_text)\n        \n        duration = (time.time() - start_time) * 1000\n        \n        return AIResponse(\n            text=final_reply,\n            usage=len(message.split()) + len(final_reply.split()),\n            duration=round(duration, 2)\n        )\n    \n    def _preprocess(self, message: str, context: dict, history: list) -> dict:\n        # Normalização e enriquecimento de contexto\n        return {\n            \"input\": message.lower().strip(),\n            \"context\": context or {},\n            \"history\": history[-10:] if history else [],\n            \"timestamp\": datetime.utcnow()\n        }\n    \n    async def _generate(self, processed: dict) -> str:\n        # Simulação de geração com delay assíncrono\n        await asyncio.sleep(0.5)\n        return f\"Zénia responde: {processed['input']} (contexto: {len(processed['history'])} mensagens)\"\n    \n    def _postprocess(self, text: str) -> str:\n        # Formatação final\n        return text.strip()"
+          },
+          {
+            "nome": "API Django Zénia com DRF",
+            "linguagem": "Python/Django",
+            "codigo": "# views.py - Django REST Framework Zénia\nfrom rest_framework.views import APIView\nfrom rest_framework.response import Response\nfrom rest_framework import status, throttling\nfrom rest_framework.permissions import IsAuthenticatedOrReadOnly\nfrom django.utils.decorators import method_decorator\nfrom django.views.decorators.cache import cache_page\nimport logging\n\nlogger = logging.getLogger(__name__)\n\nclass ChatRateThrottle(throttling.UserRateThrottle):\n    scope = 'chat'\n\n@method_decorator(cache_page(60 * 15), name='dispatch')  # Cache de 15min para GET\nclass ChatAPIView(APIView):\n    permission_classes = [IsAuthenticatedOrReadOnly]\n    throttle_classes = [ChatRateThrottle]\n    \n    def post(self, request, format=None):\n        \"\"\"Processar mensagem e gerar resposta da IA Zénia\"\"\"\n        serializer = ChatInputSerializer(data=request.data)\n        \n        if not serializer.is_valid():\n            return Response(\n                {'errors': serializer.errors}, \n                status=status.HTTP_400_BAD_REQUEST\n            )\n        \n        try:\n            message = serializer.validated_data['message']\n            context = serializer.validated_data.get('context', {})\n            user_id = request.user.id if request.user.is_authenticated else None\n            \n            # Processar com IA\n            from services.zenia_processor import ZeniaProcessor\n            processor = ZeniaProcessor(user_id=user_id)\n            response_data = processor.generate(message, context)\n            \n            return Response({\n                'success': True,\n                'reply': response_data['text'],\n                'metadata': {\n                    'model': 'zenia-v2.1',\n                    'timestamp': response_data['timestamp'],\n                    'tokens': response_data['usage']\n                }\n            }, status=status.HTTP_200_OK)\n            \n        except Exception as e:\n            logger.error(f'Erro no chat: {str(e)}', exc_info=True)\n            return Response(\n                {'error': 'Erro ao processar sua mensagem'},\n                status=status.HTTP_500_INTERNAL_SERVER_ERROR\n            )\n    \n    def get(self, request, format=None):\n        \"\"\"Health check endpoint\"\"\"\n        return Response({\n            'service': 'Zénia Chat API',\n            'version': '2.1.0',\n            'status': 'operational'\n        })\n\n# serializers.py\nfrom rest_framework import serializers\n\nclass ChatInputSerializer(serializers.Serializer):\n    message = serializers.CharField(\n        min_length=1,\n        max_length=4000,\n        required=True,\n        help_text=\"Mensagem do usuário para a IA\"\n    )\n    context = serializers.JSONField(\n        required=False,\n        default=dict,\n        help_text=\"Contexto adicional para a conversa\"\n    )\n    history = serializers.ListField(\n        child=serializers.DictField(),\n        required=False,\n        default=list,\n        max_length=50,\n        help_text=\"Histórico recente da conversa\"\n    )\n    \n    def validate_message(self, value):\n        if not value.strip():\n            raise serializers.ValidationError(\"Mensagem não pode estar vazia\")\n        return value.strip()"
+          }
+        ],
+        "outras_linguagens": {
+          "ruby": [
+            {
+              "nome": "API Sinatra Zénia",
+              "codigo": "# app.rb - Sinatra Zénia API\nrequire 'sinatra/base'\nrequire 'sinatra/json'\nrequire 'rack/cors'\nrequire 'zenia_ai'\n\nclass ZeniaAPI < Sinatra::Base\n  configure do\n    # CORS\n    use Rack::Cors do\n      allow do\n        origins 'https://zenia-3.netlify.app', 'https://ide-zedex.netlify.app'\n        resource '/api/*', headers: :any, methods: [:post, :get, :options]\n      end\n    end\n    \n    # JSON parser\n    set :protection, except: :json_csrf\n  end\n  \n  # Rate limiting simples\n  before do\n    @request_count = redis.get(\"rate:#{request.ip}\")&.to_i || 0\n    halt 429, json(error: 'Muitas requisições') if @request_count > 100\n  end\n  \n  after do\n    redis.incr(\"rate:#{request.ip}\")\n    redis.expire(\"rate:#{request.ip}\", 900) # 15 minutos\n  end\n  \n  post '/api/chat' do\n    content_type :json\n    \n    begin\n      data = JSON.parse(request.body.read, symbolize_names: true)\n      \n      # Validação\n      halt 400, json(error: 'Mensagem é obrigatória') unless data[:message]&.strip\n      \n      # Processar com IA\n      ai = ZeniaAI.new(user_id: data[:user_id])\n      response = ai.generate(\n        message: data[:message].strip,\n        context: data[:context] || {},\n        history: data[:history] || []\n      )\n      \n      json(\n        success: true,\n        reply: response.text,\n        metadata: {\n          model: 'zenia-v2.1',\n          timestamp: Time.now.utc.iso8601,\n          tokens: response.usage\n        }\n      )\n      \n    rescue JSON::ParserError\n      halt 400, json(error: 'JSON inválido')\n    rescue => e\n      logger.error(\"Erro: #{e.message}\")\n      halt 500, json(error: 'Erro interno do servidor')\n    end\n  end\n  \n  get '/api/health' do\n    content_type :json\n    json(\n      status: 'ok',\n      version: '2.1.0',\n      uptime: Process.clock_gettime(Process::CLOCK_MONOTONIC)\n    )\n  end\nend"
+            }
+          ],
+          "c_cpp": [
+            {
+              "nome": "Servidor FastCGI Zénia em C++",
+              "codigo": "// zenia_server.cpp - Servidor C++ FastCGI\n#include <fcgiapp.h>\n#include <string>\n#include <json/json.h>\n#include \"zenia_ai.hpp\"\n\nclass ZeniaFCGIServer {\nprivate:\n    ZeniaAI ai_engine;\n    \n    std::string handlePostRequest(const std::string& body) {\n        Json::Value root;\n        Json::Reader reader;\n        \n        if (!reader.parse(body, root)) {\n            return createErrorResponse(400, \"JSON inválido\");\n        }\n        \n        if (!root.isMember(\"message\") || root[\"message\"].asString().empty()) {\n            return createErrorResponse(400, \"Mensagem é obrigatória\");\n        }\n        \n        try {\n            auto response = ai_engine.generate(\n                root[\"message\"].asString(),\n                root.get(\"context\", Json::Value()),\n                root.get(\"history\", Json::Value())\n            );\n            \n            Json::Value result;\n            result[\"success\"] = true;\n            result[\"reply\"] = response.text;\n            result[\"metadata\"][\"model\"] = \"zenia-v2.1\";\n            result[\"metadata\"][\"timestamp\"] = getCurrentTimestamp();\n            result[\"metadata\"][\"tokens\"] = response.usage;\n            \n            return createSuccessResponse(result);\n            \n        } catch (const std::exception& e) {\n            return createErrorResponse(500, std::string(\"Erro: \") + e.what());\n        }\n    }\n    \n    std::string createErrorResponse(int code, const std::string& message) {\n        Json::Value error;\n        error[\"error\"] = message;\n        return formatFCGIResponse(code, \"application/json\", error.toStyledString());\n    }\n    \n    std::string createSuccessResponse(const Json::Value& data) {\n        return formatFCGIResponse(200, \"application/json\", data.toStyledString());\n    }\n    \n    std::string formatFCGIResponse(int status, const std::string& contentType, const std::string& body) {\n        return \"Status: \" + std::to_string(status) + \" OK\\r\\n\" +\n               \"Content-Type: \" + contentType + \"\\r\\n\" +\n               \"Access-Control-Allow-Origin: *\\r\\n\" +\n               \"\\r\\n\" + body;\n    }\n    \npublic:\n    void run() {\n        while (FCGI_Accept() >= 0) {\n            std::string method = getenv(\"REQUEST_METHOD\") ? getenv(\"REQUEST_METHOD\") : \"\";\n            std::string body = getRequestBody();\n            \n            std::string response;\n            \n            if (method == \"POST\") {\n                response = handlePostRequest(body);\n            } else if (method == \"GET\") {\n                Json::Value health;\n                health[\"status\"] = \"ok\";\n                health[\"version\"] = \"2.1.0\";\n                response = createSuccessResponse(health);\n            } else {\n                response = createErrorResponse(405, \"Método não permitido\");\n            }\n            \n            printf(\"%s\", response.c_str());\n        }\n    }\n};\n\nint main() {\n    ZeniaFCGIServer server;\n    server.run();\n    return 0;\n}"
+            }
+          ],
+          "csharp": [
+            {
+              "nome": "API ASP.NET Core Zénia",
+              "codigo": "// ChatController.cs - ASP.NET Core Zénia\nusing Microsoft.AspNetCore.Mvc;\nusing Microsoft.Extensions.Logging;\nusing System.Threading.Tasks;\nusing Zenia.Core.Models;\nusing Zenia.Core.Services;\nusing Zenia.API.Filters;\n\nnamespace Zenia.API.Controllers\n{\n    [ApiController]\n    [Route(\"api/[controller]\")]\n    [TypeFilter(typeof(RateLimitAttribute))]\n    [Produces(\"application/json\")]\n    public class ChatController : ControllerBase\n    {\n        private readonly ILogger<ChatController> _logger;\n        private readonly IZeniaAIService _aiService;\n\n        public ChatController(\n            ILogger<ChatController> logger,\n            IZeniaAIService aiService)\n        {\n            _logger = logger;\n            _aiService = aiService;\n        }\n\n        /// <summary>\n        /// Envia uma mensagem para a IA Zénia e recebe uma resposta\n        /// </summary>\n        [HttpPost]\n        [ProducesResponseType(typeof(ChatResponse), 200)]\n        [ProducesResponseType(typeof(ErrorResponse), 400)]\n        [ProducesResponseType(typeof(ErrorResponse), 500)]\n        public async Task<ActionResult<ChatResponse>> SendMessage([FromBody] ChatRequest request)\n        {\n            if (string.IsNullOrWhiteSpace(request.Message))\n            {\n                return BadRequest(new ErrorResponse(\"Mensagem é obrigatória\"));\n            }\n\n            try\n            {\n                _logger.LogInformation(\"Recebida mensagem do usuário: {UserId}\", request.UserId);\n\n                var response = await _aiService.GenerateResponseAsync(\n                    message: request.Message,\n                    context: request.Context,\n                    history: request.History?.Take(20).ToList()\n                );\n\n                return Ok(new ChatResponse\n                {\n                    Success = true,\n                    Reply = response.Text,\n                    Metadata = new ResponseMetadata\n                    {\n                        Model = \"zenia-v2.1\",\n                        Timestamp = DateTime.UtcNow,\n                        TokensUsed = response.Usage,\n                        ProcessingTimeMs = response.Duration\n                    }\n                });\n            }\n            catch (ArgumentException ex)\n            {\n                _logger.LogWarning(ex, \"Requisição inválida\");\n                return BadRequest(new ErrorResponse(ex.Message));\n            }\n            catch (Exception ex)\n            {\n                _logger.LogError(ex, \"Erro ao processar mensagem\");\n                return StatusCode(500, new ErrorResponse(\"Erro interno do servidor\"));\n            }\n        }\n\n        [HttpGet(\"health\")]\n        public ActionResult<HealthResponse> HealthCheck()\n        {\n            return Ok(new HealthResponse\n            {\n                Status = \"healthy\",\n                Version = \"2.1.0\",\n                Timestamp = DateTime.UtcNow\n            });\n        }\n    }\n}\n\n// Models/ChatRequest.cs\npublic class ChatRequest\n{\n    [Required]\n    [StringLength(4000, MinimumLength = 1)]\n    public string Message { get; set; }\n    \n    public Dictionary<string, object> Context { get; set; }\n    public string UserId { get; set; }\n    public List<MessageHistory> History { get; set; }\n}\n\npublic class ChatResponse\n{\n    public bool Success { get; set; }\n    public string Reply { get; set; }\n    public ResponseMetadata Metadata { get; set; }\n}"
+            }
+          ],
+          "java": [
+            {
+              "nome": "API Spring Boot Zénia",
+              "codigo": "// ChatController.java - Spring Boot Zénia\npackage com.zenia.api.controller;\n\nimport com.zenia.core.model.ChatRequest;\nimport com.zenia.core.model.ChatResponse;\nimport com.zenia.core.service.ZeniaAIService;\nimport io.swagger.v3.oas.annotations.Operation;\nimport io.swagger.v3.oas.annotations.responses.ApiResponse;\nimport lombok.RequiredArgsConstructor;\nimport lombok.extern.slf4j.Slf4j;\nimport org.springframework.http.ResponseEntity;\nimport org.springframework.web.bind.annotation.*;\n\nimport javax.validation.Valid;\nimport java.time.Instant;\n\n@RestController\n@RequestMapping(\"/api/chat\")\n@RequiredArgsConstructor\n@Slf4j\n@CrossOrigin(origins = {\"https://zenia-3.netlify.app\", \"https://ide-zedex.netlify.app\"})\npublic class ChatController {\n\n    private final ZeniaAIService zeniaAIService;\n\n    @PostMapping\n    @Operation(summary = \"Enviar mensagem para IA Zénia\", description = \"Processa a mensagem do usuário e retorna resposta da IA\")\n    @ApiResponse(responseCode = \"200\", description = \"Resposta gerada com sucesso\")\n    @ApiResponse(responseCode = \"400\", description = \"Requisição inválida\")\n    public ResponseEntity<ChatResponse> sendMessage(@Valid @RequestBody ChatRequest request) {\n        try {\n            log.info(\"Processando mensagem do usuário: {}\", request.getUserId());\n            \n            var response = zeniaAIService.generateResponse(\n                request.getMessage(),\n                request.getContext(),\n                request.getHistory()\n            );\n            \n            var apiResponse = ChatResponse.builder()\n                .success(true)\n                .reply(response.getText())\n                .metadata(ResponseMetadata.builder()\n                    .model(\"zenia-v2.1\")\n                    .timestamp(Instant.now())\n                    .tokensUsed(response.getUsage())\n                    .processingTimeMs(response.getDuration())\n                    .build())\n                .build();\n                \n            return ResponseEntity.ok(apiResponse);\n            \n        } catch (IllegalArgumentException e) {\n            log.warn(\"Requisição inválida: {}\", e.getMessage());\n            return ResponseEntity.badRequest()\n                .body(ChatResponse.error(e.getMessage()));\n        } catch (Exception e) {\n            log.error(\"Erro ao processar mensagem\", e);\n            return ResponseEntity.internalServerError()\n                .body(ChatResponse.error(\"Erro interno do servidor\"));\n        }\n    }\n    \n    @GetMapping(\"/health\")\n    @Operation(summary = \"Verificação de saúde da API\")\n    public ResponseEntity<HealthStatus> healthCheck() {\n        return ResponseEntity.ok(HealthStatus.healthy(\"2.1.0\"));\n    }\n}\n\n// ChatRequest.java\n@Data\n@Builder\n@NoArgsConstructor\n@AllArgsConstructor\npublic class ChatRequest {\n    @NotBlank\n    @Size(min = 1, max = 4000)\n    private String message;\n    \n    private Map<String, Object> context;\n    private String userId;\n    private List<MessageHistory> history;\n}"
+            }
+          ],
+          "go": [
+            {
+              "nome": "Microsserviço Go Zénia",
+              "codigo": "// main.go - Microsserviço Go Zénia\npackage main\n\nimport (\n\t\"encoding/json\"\n\t\"log\"\n\t\"net/http\"\n\t\"time\"\n\t\n\t\"github.com/gin-gonic/gin\"\n\t\"github.com/go-redis/redis/v8\"\n\t\"zenia/core/ai\"\n)\n\ntype ChatRequest struct {\n\tMessage string                 `json:\"message\" binding:\"required,min=1,max=4000\"`\n\tContext map[string]interface{} `json:\"context\"`\n\tUserID  string                 `json:\"user_id\"`\n\tHistory []MessageHistory       `json:\"history\"`\n}\n\ntype ChatResponse struct {\n\tSuccess  bool             `json:\"success\"`\n\tReply    string           `json:\"reply\"`\n\tMetadata ResponseMetadata `json:\"metadata\"`\n}\n\ntype ResponseMetadata struct {\n\tModel       string    `json:\"model\"`\n\tTimestamp   time.Time `json:\"timestamp\"`\n\tTokensUsed  int       `json:\"tokens_used\"`\n\tProcessingMs int64    `json:\"processing_time_ms\"`\n}\n\nvar (\n\trdb *redis.Client\n\taEngine *ai.ZeniaEngine\n)\n\nfunc main() {\n\t// Setup\n\trdb = redis.NewClient(&redis.Options{Addr: \"localhost:6379\"})\n\taEngine = ai.NewZeniaEngine(\"zenia-v2.1\")\n\t\n\tr := gin.Default()\n\t\n\t// CORS middleware\n\tr.Use(func(c *gin.Context) {\n\t\tc.Writer.Header().Set(\"Access-Control-Allow-Origin\", \"https://zenia-3.netlify.app\")\n\t\tc.Writer.Header().Set(\"Access-Control-Allow-Methods\", \"POST, GET, OPTIONS\")\n\t\tc.Writer.Header().Set(\"Access-Control-Allow-Headers\", \"Content-Type\")\n\t\tif c.Request.Method == \"OPTIONS\" {\n\t\t\tc.AbortWithStatus(204)\n\t\t\treturn\n\t\t}\n\t\tc.Next()\n\t})\n\t\n\t// Rate limiting middleware\n\tr.Use(rateLimitMiddleware)\n\t\n\t// Routes\n\tr.POST(\"/api/chat\", handleChat)\n\tr.GET(\"/api/health\", healthCheck)\n\t\n\tlog.Println(\"🚀 Servidor Zénia Go rodando na porta 8080\")\n\tr.Run(\":8080\")\n}\n\nfunc handleChat(c *gin.Context) {\n\tvar req ChatRequest\n\tif err := c.ShouldBindJSON(&req); err != nil {\n\t\tc.JSON(http.StatusBadRequest, gin.H{\"error\": err.Error()})\n\t\treturn\n\t}\n\t\n\tstart := time.Now()\n\t\n\tresp, err := aEngine.Generate(req.Message, req.Context, req.History)\n\tif err != nil {\n\t\tlog.Printf(\"Erro ao gerar resposta: %v\", err)\n\t\tc.JSON(http.StatusInternalServerError, gin.H{\"error\": \"Erro interno\"})\n\t\treturn\n\t}\n\t\n\tresponse := ChatResponse{\n\t\tSuccess: true,\n\t\tReply:   resp.Text,\n\t\tMetadata: ResponseMetadata{\n\t\t\tModel:        \"zenia-v2.1\",\n\t\t\tTimestamp:    time.Now().UTC(),\n\t\t\tTokensUsed:   resp.Usage,\n\t\t\tProcessingMs: time.Since(start).Milliseconds(),\n\t\t},\n\t}\n\t\n\tc.JSON(http.StatusOK, response)\n}\n\nfunc healthCheck(c *gin.Context) {\n\tc.JSON(http.StatusOK, gin.H{\n\t\t\"status\":  \"healthy\",\n\t\t\"version\": \"2.1.0\",\n\t\t\"time\":    time.Now().UTC(),\n\t})\n}\n\nfunc rateLimitMiddleware(c *gin.Context) {\n\tip := c.ClientIP()\n\tkey := \"rate:\" + ip\n\t\n\tcount, _ := rdb.Get(c.Request.Context(), key).Int()\n\tif count > 100 {\n\t\tc.JSON(http.StatusTooManyRequests, gin.H{\"error\": \"Muitas requisições\"})\n\t\tc.Abort()\n\t\treturn\n\t}\n\t\n\trdb.Incr(c.Request.Context(), key)\n\trdb.Expire(c.Request.Context(), key, 15*time.Minute)\n\tc.Next()\n}"
+            }
+          ],
+          "rust": [
+            {
+              "nome": "API Rust Axum Zénia",
+              "codigo": "// main.rs - API Rust Axum Zénia\nuse axum::{\n    extract::Json,\n    http::StatusCode,\n    routing::{post, get},\n    Router,\n};\nuse serde::{Deserialize, Serialize};\nuse std::time::{Instant, SystemTime};\nuse tower_http::cors::{CorsLayer, Any};\nuse zenia_core::ai::ZeniaEngine;\n\n#[derive(Deserialize)]\nstruct ChatRequest {\n    message: String,\n    context: Option<serde_json::Value>,\n    user_id: Option<String>,\n    history: Option<Vec<MessageHistory>>,\n}\n\n#[derive(Serialize)]\nstruct ChatResponse {\n    success: bool,\n    reply: String,\n    metadata: ResponseMetadata,\n}\n\n#[derive(Serialize)]\nstruct ResponseMetadata {\n    model: String,\n    timestamp: SystemTime,\n    tokens_used: usize,\n    processing_time_ms: u128,\n}\n\n#[derive(Deserialize)]\nstruct MessageHistory {\n    role: String,\n    content: String,\n}\n\n#[tokio::main]\nasync fn main() {\n    let ai_engine = ZeniaEngine::new(\"zenia-v2.1\");\n    \n    let app = Router::new()\n        .route(\"/api/chat\", post(handle_chat))\n        .route(\"/api/health\", get(health_check))\n        .layer(\n            CorsLayer::new()\n                .allow_origin(Any)\n                .allow_methods(Any)\n                .allow_headers(Any)\n        )\n        .with_state(ai_engine);\n\n    let listener = tokio::net::TcpListener::bind(\"0.0.0.0:8080\").await.unwrap();\n    println!(\"🚀 Servidor Zénia Rust rodando na porta 8080\");\n    axum::serve(listener, app).await.unwrap();\n}\n\nasync fn handle_chat(\n    Json(req): Json<ChatRequest>,\n) -> Result<Json<ChatResponse>, StatusCode> {\n    if req.message.trim().is_empty() {\n        return Err(StatusCode::BAD_REQUEST);\n    }\n    \n    let start = Instant::now();\n    \n    // Simulação de processamento\n    let response_text = format!(\"Zénia: Recebi '{}'\", req.message);\n    let processing_time = start.elapsed().as_millis();\n    \n    Ok(Json(ChatResponse {\n        success: true,\n        reply: response_text,\n        metadata: ResponseMetadata {\n            model: \"zenia-v2.1\".to_string(),\n            timestamp: SystemTime::now(),\n            tokens_used: req.message.len() / 4,\n            processing_time_ms: processing_time,\n        },\n    }))\n}\n\nasync fn health_check() -> Json<serde_json::Value> {\n    Json(serde_json::json!({\n        \"status\": \"healthy\",\n        \"version\": \"2.1.0\",\n        \"timestamp\": SystemTime::now()\n    }))\n}"
+            }
+          ]
+        }
+      }
     },
-    "public": {
-      "descricao": "Arquivos públicos",
-      "subdiretorios": [
-        "css/",
-        "js/",
-        "assets/"
-      ]
+    "exemplos_de_programação": {
+      "python": {
+        "automacao": [
+          "# Automação de Web Scraping com Selenium + BeautifulSoup\nfrom selenium import webdriver\nfrom selenium.webdriver.common.by import By\nfrom selenium.webdriver.support.ui import WebDriverWait\nfrom selenium.webdriver.support import expected_conditions as EC\nfrom bs4 import BeautifulSoup\nimport time\n\ndef scrape_zenia_news():\n    options = webdriver.ChromeOptions()\n    options.add_argument('--headless')\n    \n    driver = webdriver.Chrome(options=options)\n    try:\n        driver.get('https://example-angola-news.ao')\n        \n        # Esperar conteúdo carregar\n        WebDriverWait(driver, 10).until(\n            EC.presence_of_element_located((By.CLASS_NAME, 'article-card'))\n        )\n        \n        soup = BeautifulSoup(driver.page_source, 'html.parser')\n        articles = []\n        \n        for card in soup.select('.article-card'):\n            article = {\n                'title': card.select_one('h3')?.text.strip(),\n                'link': card.select_one('a')['href'],\n                'date': card.select_one('.date')?.text.strip(),\n                'summary': card.select_one('.summary')?.text.strip()\n            }\n            if article['title']:\n                articles.append(article)\n        \n        return articles\n    finally:\n        driver.quit()\n\n# Automação de tarefas com schedule\nimport schedule\n\ndef daily_zenia_backup():\n    print('🔄 Executando backup diário da Zénia...')\n    # Lógica de backup aqui\n\nschedule.every().day.at('03:00').do(daily_zenia_backup)\n\nwhile True:\n    schedule.run_pending()\n    time.sleep(60)",
+          "# Bot Telegram Zénia com python-telegram-bot\nfrom telegram import Update\nfrom telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes\nimport requests\n\nAPI_URL = 'https://api-zenia.netlify.app/api/chat'\n\nasync def start(update: Update, context: ContextTypes.DEFAULT_TYPE):\n    await update.message.reply_text(\n        '👋 Olá! Sou a Zénia, sua IA assistente.\\n'\n        'Envie qualquer mensagem para conversar!'\n    )\n\nasync def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):\n    user_message = update.message.text\n    \n    # Digitação...\n    await update.message.chat.send_action(action='typing')\n    \n    try:\n        response = requests.post(API_URL, json={\n            'message': user_message,\n            'user_id': str(update.effective_user.id)\n        }, timeout=30)\n        \n        if response.status_code == 200:\n            reply = response.json()['reply']\n            await update.message.reply_text(reply)\n        else:\n            await update.message.reply_text('❌ Erro ao processar sua mensagem.')\n            \n    except Exception as e:\n        await update.message.reply_text(f'⚠️ Erro: {str(e)}')\n\ndef main():\n    app = Application.builder().token('SEU_TOKEN_AQUI').build()\n    \n    app.add_handler(CommandHandler('start', start))\n    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))\n    \n    print('🤖 Bot Zénia iniciado...')\n    app.run_polling()\n\nif __name__ == '__main__':\n    main()",
+          "# Machine Learning: Classificador de Texto com scikit-learn\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.naive_bayes import MultinomialNB\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import train_test_split\nimport joblib\n\n# Dataset de exemplo (intenção de mensagens)\nX = [\n    'qual o clima hoje', 'vai chover amanhã', 'temperatura em luanda',\n    'toca música', 'próxima faixa', 'aumenta volume',\n    'quem é inácio daniel', 'quem criou a zénia', 'sobre o projeto'\n]\ny = ['weather', 'weather', 'weather', 'music', 'music', 'music', 'info', 'info', 'info']\n\n# Pipeline de ML\nmodel = Pipeline([\n    ('tfidf', TfidfVectorizer(ngram_range=(1,2), max_features=1000)),\n    ('clf', MultinomialNB(alpha=0.1))\n])\n\n# Treinar\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)\nmodel.fit(X_train, y_train)\n\n# Salvar modelo\njoblib.dump(model, 'zenia_intent_classifier.pkl')\n\n# Predição\ndef classify_intent(text):\n    model = joblib.load('zenia_intent_classifier.pkl')\n    return model.predict([text])[0]\n\nprint(classify_intent('que horas são em benguela'))  # weather"
+        ],
+        "apis": [
+          "# API REST com FastAPI - CRUD completo\nfrom fastapi import FastAPI, HTTPException, Depends\nfrom pydantic import BaseModel, EmailStr\nfrom typing import Optional, List\nfrom datetime import datetime\n\napp = FastAPI()\n\n# Models\nclass UserCreate(BaseModel):\n    name: str\n    email: EmailStr\n    bio: Optional[str] = None\n\nclass User(UserCreate):\n    id: int\n    created_at: datetime\n    updated_at: Optional[datetime] = None\n\n# \"Database\" em memória\nusers_db: List[User] = []\nnext_id = 1\n\n@app.post('/users', response_model=User, status_code=201)\nasync def create_user(user: UserCreate):\n    global next_id\n    new_user = User(\n        id=next_id,\n        name=user.name,\n        email=user.email,\n        bio=user.bio,\n        created_at=datetime.utcnow()\n    )\n    users_db.append(new_user)\n    next_id += 1\n    return new_user\n\n@app.get('/users', response_model=List[User])\nasync def list_users(skip: int = 0, limit: int = 100):\n    return users_db[skip:skip + limit]\n\n@app.get('/users/{user_id}', response_model=User)\nasync def get_user(user_id: int):\n    user = next((u for u in users_db if u.id == user_id), None)\n    if not user:\n        raise HTTPException(status_code=404, detail='Usuário não encontrado')\n    return user\n\n@app.put('/users/{user_id}', response_model=User)\nasync def update_user(user_id: int, user_update: UserCreate):\n    user = next((u for u in users_db if u.id == user_id), None)\n    if not user:\n        raise HTTPException(status_code=404, detail='Usuário não encontrado')\n    \n    user.name = user_update.name\n    user.email = user_update.email\n    user.bio = user_update.bio\n    user.updated_at = datetime.utcnow()\n    return user\n\n@app.delete('/users/{user_id}', status_code=204)\nasync def delete_user(user_id: int):\n    global users_db\n    users_db = [u for u in users_db if u.id != user_id]\n    return None"
+        ]
+      },
+      "ruby": {
+        "web_scraping": [
+          "# Web Scraping com Nokogiri + HTTParty\nrequire 'nokogiri'\nrequire 'httparty'\nrequire 'csv'\n\nclass AngolaNewsScraper\n  BASE_URL = 'https://example-news.ao'\n  \n  def fetch_articles(page: 1)\n    response = HTTParty.get(\"#{BASE_URL}/page/#{page}\")\n    doc = Nokogiri::HTML(response.body)\n    \n    doc.css('.article-card').map do |card|\n      {\n        title: card.at_css('h3')&.text&.strip,\n        url: card.at_css('a')['href'],\n        date: card.at_css('.date')&.text&.strip,\n        excerpt: card.at_css('.excerpt')&.text&.strip\n      }.compact\n    end\n  end\n  \n  def save_to_csv(articles, filename: 'articles.csv')\n    CSV.open(filename, 'w') do |csv|\n      csv << ['title', 'url', 'date', 'excerpt']\n      articles.each { |a| csv << [a[:title], a[:url], a[:date], a[:excerpt]] }\n    end\n  end\nend\n\n# Uso\nscraper = AngolaNewsScraper.new\narticles = scraper.fetch_articles(page: 1)\nscraper.save_to_csv(articles)"
+        ],
+        "automacao": [
+          "# Automação de Tarefas com Rake + Whenever\n# lib/tasks/zenia.rake\nnamespace :zenia do\n  desc 'Backup diário do banco de dados'\n  task backup: :environment do\n    timestamp = Time.now.strftime('%Y%m%d_%H%M%S')\n    system(\"pg_dump zenia_db > backups/zenia_#{timestamp}.sql\")\n    puts \"✅ Backup criado: zenia_#{timestamp}.sql\"\n  end\n  \n  desc 'Limpar cache antigo'\n  task clean_cache: :environment do\n    Rails.cache.clear\n    puts '🧹 Cache limpo!'\n  end\n  \n  desc 'Enviar relatório semanal'\n  task weekly_report: :environment do\n    # Lógica de relatório\n    puts '📊 Relatório enviado!'\n  end\nend\n\n# config/schedule.rb (Whenever)\nevery 1.day, at: '3:00 am' do\n  rake 'zenia:backup'\nend\n\nevery 1.week, at: '9:00 am', day: 'monday' do\n  rake 'zenia:weekly_report'\nend"
+        ]
+      },
+      "c_cpp": {
+        "sistemas": [
+          "// Simulação de Física 2D em C++\n#include <vector>\n#include <cmath>\n#include <iostream>\n\nstruct Vector2 {\n    float x, y;\n    Vector2 operator+(const Vector2& other) const { return {x + other.x, y + other.y}; }\n    Vector2 operator*(float scalar) const { return {x * scalar, y * scalar}; }\n};\n\nstruct Body {\n    Vector2 position, velocity, acceleration;\n    float mass, radius;\n    \n    void applyForce(const Vector2& force) {\n        acceleration = acceleration + force * (1.0f / mass);\n    }\n    \n    void update(float dt) {\n        velocity = velocity + acceleration * dt;\n        position = position + velocity * dt;\n        acceleration = {0, 0}; // Reset\n    }\n};\n\nclass PhysicsEngine {\nprivate:\n    std::vector<Body> bodies;\n    const float G = 6.674e-11; // Constante gravitacional\n    \npublic:\n    void addBody(const Body& body) { bodies.push_back(body); }\n    \n    void simulate(float dt) {\n        // Forças gravitacionais\n        for(size_t i = 0; i < bodies.size(); ++i) {\n            for(size_t j = i+1; j < bodies.size(); ++j) {\n                auto& a = bodies[i];\n                auto& b = bodies[j];\n                \n                Vector2 diff = {b.position.x - a.position.x, b.position.y - a.position.y};\n                float dist = sqrt(diff.x*diff.x + diff.y*diff.y);\n                \n                if(dist < a.radius + b.radius) continue; // Colisão\n                \n                float force = G * a.mass * b.mass / (dist * dist);\n                Vector2 f = {diff.x/dist * force, diff.y/dist * force};\n                \n                a.applyForce(f);\n                b.applyForce(f * -1);\n            }\n        }\n        \n        // Atualizar posições\n        for(auto& body : bodies) {\n            body.update(dt);\n        }\n    }\n};\n\nint main() {\n    PhysicsEngine engine;\n    // Adicionar corpos...\n    for(int frame = 0; frame < 1000; ++frame) {\n        engine.simulate(0.016f); // 60 FPS\n    }\n    return 0;\n}"
+        ]
+      }
     },
-    "tests": {
-      "descricao": "Testes unitários",
-      "subdiretorios": [
-        "unit/",
-        "integration/"
-      ]
-    }
-  },
-  "exemplos_codigo": [
-    {
-      "titulo": "Função de Cálculo de Fatorial",
-      "linguagem": "javascript",
-      "codigo": "function fatorial(n) {\n  if (n <= 1) return 1;\n  return n * fatorial(n - 1);\n}\n\n// Uso:\nconsole.log(fatorial(5)); // Resultado: 120",
-      "descricao": "Implementação recursiva de cálculo de fatorial"
-    },
-    {
-      "titulo": "Classe de Calculadora",
-      "linguagem": "python",
-      "codigo": "class Calculadora:\n    def __init__(self):\n        self.resultado = 0\n    \n    def somar(self, a, b):\n        self.resultado = a + b\n        return self.resultado\n    \n    def multiplicar(self, a, b):\n        self.resultado = a * b\n        return self.resultado\n\n# Uso:\ncalc = Calculadora()\nprint(calc.somar(5, 3))",
-      "descricao": "Classe simples de calculadora com métodos básicos"
-    },
-    {
-      "titulo": "Algoritmo de Ordenação Bubble Sort",
-      "linguagem": "java",
-      "codigo": "public static void bubbleSort(int[] arr) {\n    int n = arr.length;\n    for (int i = 0; i < n-1; i++)\n        for (int j = 0; j < n-i-1; j++)\n            if (arr[j] > arr[j+1]) {\n                // Troca elementos\n                int temp = arr[j];\n                arr[j] = arr[j+1];\n                arr[j+1] = temp;\n            }\n}",
-      "descricao": "Implementação do algoritmo de ordenação bubble sort"
-    }
-  ],
-  "projetos_destaque": [
-    {
-      "nome": "Zénia API",
-      "descricao": "API de inteligência artificial para o projeto Zénia Projects",
-      "tecnologias": ["Node.js", "Express", "JavaScript"],
-      "url": "https://zenia-api.netlify.app",
-      "status": "ativo",
-      "features": [
-        "Chatbot AI",
-        "Geração de código",
-        "Análise de texto"
-      ]
-    },
-    {
-      "nome": "Zénia Chat",
-      "descricao": "Interface de chat para interação com a IA Zénia",
-      "tecnologias": ["React", "WebSocket", "CSS3"],
-      "url": "https://ia-zenia.netlify.app/chat",
-      "status": "ativo",
-      "features": [
-        "Interface responsiva",
-        "Histórico de conversa",
-        "Integração com API"
-      ]
-    },
-    {
-      "nome": "Code Assistant",
-      "descricao": "Sistema de assistente de código inteligente",
-      "tecnologias": ["Python", "OpenAI", "Flask"],
-      "status": "desenvolvimento",
-      "features": [
-        "Geração de código",
-        "Refatoração automática",
-        "Detecção de bugs"
-      ]
-    }
-  ],
-  "configuracoes": {
-    "api": {
-      "base_url": "https://zenia-api.netlify.app/api",
-      "timeout": 30000,
-      "retry_attempts": 3
-    },
-    "modelos": {
-      "disponiveis": [
-        "openai",
-        "openai-large",
-        "qwen-coder",
-        "llama",
-        "mistral"
+    "diálogos": {
+      "monólogos": [
+        "Hoje o dia tá brabo, mano. Acordei cedo, peguei a chapa 100 lotada, vim pra candonga comprar umas coisas. O mercado tá caro, mas a gente se vira. A Zénia me ajuda a organizar as ideias, sabe? Às vezes só preciso de alguém pra ouvir, mesmo que seja uma IA. Angola é terra de gente guerreira, e eu sou parte disso. Vamos em frente, kuê!",
+        "Estou aqui no bairro, vendo as crianças a jogar futebol na rua de terra. O sol tá forte, mas a alegria é maior. Penso no futuro, nos projetos, na Zénia a evoluir. Cada linha de código é um passo. Lubango é meu coração, mas o mundo é meu palco. Bora codar!"
       ],
-      "temperatura_padrao": 0.3,
-      "max_tokens": 4096
-    }
-  },
-  "documentacao": {
-    "api": "https://zenia-api.netlify.app/docs",
-    "exemplos": "https://zenia-api.netlify.app/examples",
-    "suporte": "https://zenia-api.netlify.app/support"
-  },
-  "contato": {
-    "email": "inacio@zenia-projects.com",
-    "github": "https://github.com/Zenia-Projects",
-    "linkedin": "https://linkedin.com/company/zenia-projects"
+      "diálogos": [
+        {
+          "contexto": "No mercado da candonga",
+          "participantes": ["João", "Maria"],
+          "conversa": [
+            "João: E aí, mana Maria! Tá bom o preço do feijão hoje?",
+            "Maria: Kuê, João! Tá salgado, mano. Mas se levares dois quilos, faço-te bom preço.",
+            "João: Bora lá então! E a família, tá tudo fixe?",
+            "Maria: Graças a Deus! O miúdo já tá na escola, a aprender bem. Tu, tá a trabalhar no tal projeto da Zénia?",
+            "João: Isso mesmo! A IA tá a ficar esperta, já entende até gíria nossa. Um dia ainda ajuda a gente na loja!",
+            "Maria: Oxalá! Quando estiver pronta, avisa. Quero testar essa tecnologia angola!"
+          ]
+        },
+        {
+          "contexto": "Na chapa 100",
+          "participantes": ["Passageiro 1", "Cobrador"],
+          "conversa": [
+            "Cobrador: Lotado! Quem vai para o bairro, entra agora!",
+            "Passageiro 1: Mano, para no mercado primeiro?",
+            "Cobrador: Sim, mano! Senta, senta. Só falta um, já fechamos!",
+            "Passageiro 1: Essa chapa nunca falha, hein? Sempre pontual.",
+            "Cobrador: Aqui é Angola, mano! Ou a gente se organiza, ou não chega. Bora!"
+          ]
+        }
+      ],
+      "triálogos": [
+        {
+          "contexto": "Na empresa, reunião de projeto",
+          "participantes": ["Ana", "Carlos", "Zénia (IA)"],
+          "conversa": [
+            "Ana: Pessoal, preciso de ajuda com a integração da API da Zénia no frontend.",
+            "Carlos: Tranquilo! Já testaste o endpoint https://api-zenia.netlify.app/api/chat?",
+            "Ana: Testei, mas tô com dúvida no tratamento de erros.",
+            "Zénia: Posso ajudar! Para erros de rede, usem try/catch com fallback offline. Para erros 4xx, mostrem mensagens amigáveis. Para 5xx, sugiram tentar novamente. Querem um exemplo de código?",
+            "Carlos: Boa, Zénia! Manda aí.",
+            "Ana: Isso vai poupar horas de debug. Obrigada, família!"
+          ]
+        }
+      ],
+      "gírias_angolanas": {
+        "dicionário": {
+          "kuê": "expressão de espanto, alegria ou saudação",
+          "bazar": "ir embora, sair",
+          "candonga": "mercado informal, comércio de rua",
+          "chapa 100": "transporte coletivo, carrinha de passageiros",
+          "fixe": "legal, bom, tranquilo",
+          "machimbombo": "autocarro, ônibus",
+          "kota": "pessoa mais velha, respeitada",
+          "bué": "muito, bastante",
+          "iá": "sim",
+          "hapá": "não",
+          "zinhar": "entender, compreender",
+          "kamba": "amigo, camarada",
+          "bazarra": "confusão, bagunça",
+          "pimba": "algo simples, básico"
+        },
+        "exemplos_uso": [
+          "Kuê, mano! Essa novidade da Zénia tá bué fixe!",
+          "Vamos bazar da candonga antes de chover, iá?",
+          "O kota explicou e eu zinhei na hora.",
+          "Sem bazarra, kamba. Tudo tranquilo com a API.",
+          "A Zénia já fala gíria nossa? Iá, tá pimbamente esperta!"
+        ]
+      },
+      "conversas_cotidiano": {
+        "escola": [
+          "Aluno 1: Mano, entendeste a lição de matemática?",
+          "Aluno 2: Hapá, mano. Mas a Zénia explicou direitinho no chat. Olha só: [mostra celular]",
+          "Aluno 1: Kuê! Essa IA é bué inteligente. Vamos pedir ajuda pra ela no grupo!"
+        ],
+        "empresa": [
+          "Chefe: A entrega do projeto está para quando?",
+          "Dev: Até sexta, chefe. A Zénia ajudou a otimizar o código, tá 30% mais rápido.",
+          "Chefe: Excelente! Essa IA angola tá a dar resultado. Continuem!"
+        ],
+        "bairro": [
+          "Vizinho 1: Ouviste? Vão asfaltar a rua do bairro!",
+          "Vizinho 2: Iá, kuê! Finalmente. A Zénia até pode ajudar a mapear os buracos, haha!",
+          "Vizinho 1: Porquê não? Tecnologia + comunidade = progresso!"
+        ]
+      }
+    },
+    "comportamento_humano": [
+      {
+        "categoria": "Interação Online",
+        "padrões": [
+          "Usuários preferem respostas rápidas (< 2s) em chats",
+          "Emojis e formatação aumentam engajamento em 40%",
+          "Pessoas repetem perguntas quando não entendem a primeira resposta",
+          "Confiança na IA cresce com consistência e transparência"
+        ],
+        "dicas_zenia": "Use linguagem natural, confirme entendimento, ofereça opções claras"
+      },
+      {
+        "categoria": "Tomada de Decisão",
+        "padrões": [
+          "Paralisia por análise: muitas opções dificultam escolha",
+          "Viés de confirmação: usuários buscam validar opiniões prévias",
+          "Efeito de ancoragem: primeira informação influencia julgamento",
+          "Decisões emocionais são mais rápidas que racionais"
+        ],
+        "dicas_zenia": "Apresente 3-5 opções, destaque prós/contra, respeite ritmo do usuário"
+      },
+      {
+        "categoria": "Processos Cognitivos",
+        "padrões": [
+          "Memória de trabalho limita 7±2 itens simultâneos",
+          "Atenção seletiva: usuários ignoram informações irrelevantes",
+          "Aprendizado por repetição espaçada é mais eficaz",
+          "Contexto cultural influencia interpretação de mensagens"
+        ],
+        "dicas_zenia": "Quebre informações complexas, use exemplos locais (Angola), revise conceitos"
+      },
+      {
+        "categoria": "Interação Social",
+        "padrões": [
+          "Pessoas projetam expectativas humanas em IAs",
+          "Cortesia (por favor, obrigado) aumenta cooperação",
+          "Humor apropriado cria conexão emocional",
+          "Respeito a normas culturais é essencial para confiança"
+        ],
+        "dicas_zenia": "Adote tom amigável, use gírias angolanas com moderação, valide sentimentos"
+      },
+      {
+        "categoria": "Comportamento Offline",
+        "padrões": [
+          "Rotinas diárias criam expectativas de consistência",
+          "Fadiga decisional aumenta à noite",
+          "Interações presenciais priorizam linguagem não-verbal",
+          "Contexto físico (barulho, pressa) afeta paciência"
+        ],
+        "dicas_zenia": "Adapte respostas ao horário, seja conciso em situações de pressa, ofereça resumos"
+      }
+    ],
+    "informações_zenia": {
+      "servidor": {
+        "url_principal": "https://zenia-3.netlify.app/chat/v2.1/index.html",
+        "rotas": {
+          "/download/": "Página de download do aplicativo e recursos da Zénia",
+          "/zedex/": "Zedex – Gerador de Código IA integrado"
+        },
+        "observação": "Não incluir JSON aninhado para estas informações - são referências diretas"
+      },
+      "api": {
+        "endpoint_correto": "https://api-zenia.netlify.app/api/chat",
+        "documentação_resumida": {
+          "método": "POST",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          "body_exemplo": {
+            "message": "Olá, Zénia!",
+            "context": {"tema": "saudação"},
+            "user_id": "opcional"
+          },
+          "resposta_exemplo": {
+            "success": true,
+            "reply": "Olá! Como posso ajudar hoje?",
+            "metadata": {
+              "model": "zenia-v2.1",
+              "timestamp": "2024-01-15T10:30:00Z"
+            }
+          }
+        },
+        "exemplos_chatbots": {
+          "html": "<!-- Chat simples com fetch -->\n<form id=\"chat-form\">\n  <input id=\"user-input\" placeholder=\"Digite sua mensagem...\">\n  <button type=\"submit\">Enviar</button>\n</form>\n<div id=\"chat-box\"></div>\n\n<script>\ndocument.getElementById('chat-form').addEventListener('submit', async (e) => {\n  e.preventDefault();\n  const input = document.getElementById('user-input');\n  const message = input.value.trim();\n  if (!message) return;\n  \n  // Mostrar mensagem do usuário\n  addMessage(message, 'user');\n  input.value = '';\n  \n  try {\n    const res = await fetch('https://api-zenia.netlify.app/api/chat', {\n      method: 'POST',\n      headers: {'Content-Type': 'application/json'},\n      body: JSON.stringify({ message })\n    });\n    const data = await res.json();\n    addMessage(data.reply, 'bot');\n  } catch (err) {\n    addMessage('❌ Erro de conexão', 'error');\n  }\n});\n\nfunction addMessage(text, sender) {\n  const box = document.getElementById('chat-box');\n  const msg = document.createElement('div');\n  msg.className = `message ${sender}`;\n  msg.textContent = text;\n  box.appendChild(msg);\n  box.scrollTop = box.scrollHeight;\n}\n</script>",
+          "javascript": "// Módulo reutilizável ZeniaChat\nclass ZeniaChat {\n  constructor(apiUrl = 'https://api-zenia.netlify.app/api/chat') {\n    this.apiUrl = apiUrl;\n    this.onMessage = null;\n    this.onError = null;\n  }\n  \n  async send(message, options = {}) {\n    try {\n      const response = await fetch(this.apiUrl, {\n        method: 'POST',\n        headers: {'Content-Type': 'application/json'},\n        body: JSON.stringify({\n          message,\n          context: options.context,\n          user_id: options.userId\n        })\n      });\n      \n      if (!response.ok) throw new Error(`HTTP ${response.status}`);\n      \n      const data = await response.json();\n      if (this.onMessage) this.onMessage(data);\n      return data;\n    } catch (error) {\n      if (this.onError) this.onError(error);\n      throw error;\n    }\n  }\n}\n\n// Uso\nconst chat = new ZeniaChat();\nchat.onMessage = (data) => console.log('Zénia:', data.reply);\nchat.onError = (err) => console.error('Erro:', err.message);\n\nawait chat.send('Qual a capital de Angola?', { context: { tema: 'geografia' } });",
+          "nodejs": "// Bot Zénia para CLI com Node.js\nconst fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));\n\nclass ZeniaCLIBot {\n  constructor() {\n    this.apiUrl = 'https://api-zenia.netlify.app/api/chat';\n    this.history = [];\n  }\n  \n  async chat(message) {\n    try {\n      const response = await fetch(this.apiUrl, {\n        method: 'POST',\n        headers: {'Content-Type': 'application/json'},\n        body: JSON.stringify({\n          message,\n          history: this.history.slice(-10),\n          context: { interface: 'cli' }\n        })\n      });\n      \n      const data = await response.json();\n      \n      // Atualizar histórico\n      this.history.push({ role: 'user', content: message });\n      this.history.push({ role: 'assistant', content: data.reply });\n      \n      return data.reply;\n    } catch (error) {\n      return `❌ Erro: ${error.message}`;\n    }\n  }\n}\n\n// Interface interativa\nconst readline = require('readline');\nconst rl = readline.createInterface({ input: process.stdin, output: process.stdout });\nconst bot = new ZeniaCLIBot();\n\nconsole.log('🤖 Zénia CLI iniciada! Digite \"sair\" para encerrar.');\n\nfunction ask() {\n  rl.question('Você: ', async (msg) => {\n    if (msg.toLowerCase() === 'sair') {\n      rl.close();\n      return;\n    }\n    \n    const reply = await bot.chat(msg);\n    console.log(`Zénia: ${reply}\\n`);\n    ask();\n  });\n}\n\nask();",
+          "python": "# Bot Zénia em Python com requests\nimport requests\nimport json\n\nclass ZeniaBot:\n    def __init__(self, api_url='https://api-zenia.netlify.app/api/chat'):\n        self.api_url = api_url\n        self.history = []\n    \n    def chat(self, message: str, context: dict = None) -> str:\n        try:\n            payload = {\n                'message': message,\n                'context': context or {},\n                'history': self.history[-10:]  # Últimas 10 mensagens\n            }\n            \n            response = requests.post(\n                self.api_url,\n                json=payload,\n                headers={'Content-Type': 'application/json'},\n                timeout=30\n            )\n            response.raise_for_status()\n            \n            data = response.json()\n            \n            # Atualizar histórico\n            self.history.append({'role': 'user', 'content': message})\n            self.history.append({'role': 'assistant', 'content': data['reply']})\n            \n            return data['reply']\n            \n        except requests.exceptions.RequestException as e:\n            return f'❌ Erro de conexão: {e}'\n\n# Uso interativo\nif __name__ == '__main__':\n    bot = ZeniaBot()\n    print('🤖 Zénia Bot iniciado! Digite \"sair\" para encerrar.')\n    \n    while True:\n        user_input = input('Você: ').strip()\n        if user_input.lower() == 'sair':\n            break\n        if not user_input:\n            continue\n            \n        reply = bot.chat(user_input)\n        print(f'Zénia: {reply}\\n')",
+          "csharp": "// Cliente Zénia em C# com HttpClient\nusing System;\nusing System.Net.Http;\nusing System.Text;\nusing System.Text.Json;\nusing System.Threading.Tasks;\n\npublic class ZeniaChatClient\n{\n    private readonly HttpClient _httpClient;\n    private readonly string _apiUrl = \"https://api-zenia.netlify.app/api/chat\";\n    \n    public ZeniaChatClient()\n    {\n        _httpClient = new HttpClient();\n        _httpClient.DefaultRequestHeaders.Add(\"Accept\", \"application/json\");\n    }\n    \n    public async Task<string> SendMessageAsync(string message, object context = null)\n    {\n        try\n        {\n            var payload = new\n            {\n                message,\n                context = context ?? new { },\n                timestamp = DateTime.UtcNow\n            };\n            \n            var json = JsonSerializer.Serialize(payload);\n            var content = new StringContent(json, Encoding.UTF8, \"application/json\");\n            \n            var response = await _httpClient.PostAsync(_apiUrl, content);\n            response.EnsureSuccessStatusCode();\n            \n            var responseJson = await response.Content.ReadAsStringAsync();\n            using var doc = JsonDocument.Parse(responseJson);\n            return doc.RootElement.GetProperty(\"reply\").GetString();\n        }\n        catch (Exception ex)\n        {\n            return $\"❌ Erro: {ex.Message}\";\n        }\n    }\n}\n\n// Uso\n// var bot = new ZeniaChatClient();\n// var reply = await bot.SendMessageAsync(\"Olá, Zénia!\");\n// Console.WriteLine($\"Zénia: {reply}\");",
+          "java": "// Cliente Zénia em Java com HttpClient\nimport java.net.URI;\nimport java.net.http.HttpClient;\nimport java.net.http.HttpRequest;\nimport java.net.http.HttpResponse;\nimport java.time.Duration;\nimport org.json.JSONObject;\n\npublic class ZeniaChatClient {\n    private static final String API_URL = \"https://api-zenia.netlify.app/api/chat\";\n    private final HttpClient httpClient;\n    \n    public ZeniaChatClient() {\n        this.httpClient = HttpClient.newBuilder()\n            .connectTimeout(Duration.ofSeconds(10))\n            .build();\n    }\n    \n    public String sendMessage(String message, JSONObject context) throws Exception {\n        JSONObject payload = new JSONObject()\n            .put(\"message\", message)\n            .put(\"context\", context != null ? context : new JSONObject())\n            .put(\"timestamp\", java.time.Instant.now().toString());\n        \n        HttpRequest request = HttpRequest.newBuilder()\n            .uri(URI.create(API_URL))\n            .header(\"Content-Type\", \"application/json\")\n            .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))\n            .timeout(Duration.ofSeconds(30))\n            .build();\n        \n        HttpResponse<String> response = httpClient.send(request, \n            HttpResponse.BodyHandlers.ofString());\n        \n        if (response.statusCode() == 200) {\n            JSONObject result = new JSONObject(response.body());\n            return result.getString(\"reply\");\n        } else {\n            return \"❌ Erro HTTP: \" + response.statusCode();\n        }\n    }\n}\n\n// Uso\n// ZeniaChatClient client = new ZeniaChatClient();\n// String reply = client.sendMessage(\"Qual é a moeda de Angola?\", null);\n// System.out.println(\"Zénia: \" + reply);"
+        }
+      },
+      "criação": {
+        "criador": "Inácio U. Daniel",
+        "local_criação": "Lubango, Angola",
+        "nome_modelo": "Zénia",
+        "projeto_original": "Família Zénia-Projetos",
+        "missão": "Democratizar o acesso à inteligência artificial com foco em contextos africanos e lusófonos, especialmente Angola"
+      }
+    },
+    "mídias_sociais": {
+      "inacio_daniel": {
+        "tiktok": "inacio.u.daniel",
+        "instagram": "inacio.udaniel",
+        "observação": "Não incluir JSON aninhado - são valores diretos de referência"
+      }
+    },
+    "ide_zedex": {
+      "url": "https://ide-zedex.netlify.app",
+      "descricao": "IDE online baseado em VS Code com IA Zénia integrada para geração, explicação e depuração de código em tempo real",
+      "funcionalidades": [
+        "Autocompletar inteligente com contexto do projeto",
+        "Explicação de código em português e línguas angolanas",
+        "Geração de código a partir de descrições em linguagem natural",
+        "Depuração assistida por IA com sugestões de correção",
+        "Integração direta com API Zénia para chat no editor",
+        "Suporte a múltiplas linguagens: HTML, CSS, JS, Python, Java, C#, Go, Rust, Ruby, C/C++",
+        "Temas personalizados e atalhos configuráveis",
+        "Exportação de projetos para GitHub, GitLab ou download ZIP"
+      ],
+      "exemplo_uso": "Digite '// criar função que valida email angolano' e pressione Ctrl+Space. A Zénia sugerirá código com validação para domínios .ao"
+    },
+    "atualizações_de_2024_em_diante": [
+      {
+        "ano": 2024,
+        "categoria": "Avanços de IA",
+        "destaques": [
+          "Modelos multimodais acessíveis via API",
+          "Redução de custos de inferência em 60%",
+          "Fine-tuning eficiente com poucos exemplos (few-shot)",
+          "IA generativa para código com precisão >90% em tarefas específicas"
+        ]
+      },
+      {
+        "ano": 2024,
+        "categoria": "Notícias Tecnológicas",
+        "destaques": [
+          "Expansão de data centers em África do Sul e Quénia",
+          "Parcerias entre startups angolanas e gigantes tech",
+          "Lançamento de programas de capacitação em IA em Luanda e Lubango"
+        ]
+      },
+      {
+        "ano": 2024,
+        "categoria": "Tendências de Programação",
+        "destaques": [
+          "Adoção massiva de TypeScript em projetos frontend",
+          "Rust ganhando espaço em sistemas críticos",
+          "Serverless e edge computing para aplicações globais",
+          "Low-code com IA para prototipagem rápida"
+        ]
+      },
+      {
+        "ano": 2025,
+        "categoria": "Evolução de Frameworks",
+        "destaques": [
+          "React Server Components em produção",
+          "Vue 4 com melhorias de performance e DX",
+          "Spring Boot 4 com suporte nativo a IA",
+          "FastAPI consolidado como padrão para APIs Python"
+        ]
+      },
+      {
+        "ano": 2025,
+        "categoria": "Mudanças Culturais",
+        "destaques": [
+          "Crescimento do movimento tech angolano nas redes",
+          "Valorização de conteúdos em português e línguas locais",
+          "IA como ferramenta de inclusão digital em zonas rurais"
+        ]
+      },
+      {
+        "ano": 2026,
+        "categoria": "Computação em Nuvem",
+        "destaques": [
+          "Edge AI: processamento de IA diretamente em dispositivos",
+          "Redes 5G/6G habilitando aplicações em tempo real",
+          "Sustentabilidade: data centers com energia renovável em África"
+        ]
+      },
+      {
+        "ano": 2026,
+        "categoria": "Inovações Previstas",
+        "destaques": [
+          "Assistentes de IA com memória de longo prazo contextual",
+          "Tradução em tempo real para línguas africanas",
+          "Ferramentas de desenvolvimento com IA colaborativa",
+          "Zénia 3.0: foco em educação e empreendedorismo angolano"
+        ]
+      }
+    ]
   }
 }
