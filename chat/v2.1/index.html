@@ -2117,4 +2117,14 @@ var micBtn=document.getElementById('mic-btn'),micRec=null,micOn=false;
 if('SpeechRecognition'in window||'webkitSpeechRecognition'in window){
   var SRC=window.SpeechRecognition||window.webkitSpeechRecognition;micRec=new SRC();micRec.lang='pt-PT';
   micRec.onresult=e=>{inputEl.value=e.results[0][0].transcript;autoResize(inputEl);micOn=false;micBtn.style.color='';handleSend();};
-  micRec.onerror=()=>{micOn=false;micBtn.style.color='';};micRec.onend=()=>{micOn=false;
+  micRec.onerror=()=>{micOn=false;micBtn.style.color='';};micRec.onend=()=>{micOn=false;micBtn.style.color='';}
+  micBtn.onclick=()=>{if(micOn){micRec.stop();micOn=false;micBtn.style.color='';}else{try{micRec.start();micOn=true;micBtn.style.color='var(--accent-primary)';}catch(e){}}};
+}else{if(micBtn)micBtn.style.opacity='0.3';}
+
+// ==========================================
+// INIT FINAL
+// ==========================================
+showWelcome();
+</script>
+</body>
+</html>
