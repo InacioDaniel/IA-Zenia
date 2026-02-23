@@ -1,1 +1,1767 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>IA-Zenia 4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&family=Sora:wght@300;400;600;700;800&family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Lexend:wght@300;400;500;600;700&family=Figtree:wght@300;400;500;600;700&display=swap" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+:root{--bg-primary:#0b0d11;--bg-secondary:#111318;--bg-tertiary:#151b2d;--bg-input:#151c2e;--border-color:#1e2330;--border-accent:#252c3b;--text-primary:#e5e7eb;--text-secondary:#9ca3af;--text-muted:#6b7280;--accent-primary:#3b5bdb;--accent-secondary:#7c3aed;--accent-glow:rgba(59,91,219,0.25);--msg-ai-bg:transparent;--msg-user-bg:#1d3461;--msg-user-text:#e8f0fe;--sidebar-bg:#0f1117;--topbar-bg:#0b0d11;--send-btn:#3b5bdb;--send-btn-hover:#4c6ef5;--user-av:#1e3a5f;--font-ui:'Plus Jakarta Sans','Outfit',system-ui,sans-serif;--font-msg:'DM Sans','Plus Jakarta Sans',sans-serif;--font-code:'JetBrains Mono',monospace;--radius-main:14px;--shadow-main:0 4px 24px rgba(0,0,0,0.4);}
+[data-theme="cyberpunk"]{--bg-primary:#0a0010;--bg-secondary:#0d0018;--bg-tertiary:#110022;--bg-input:#0f0020;--border-color:#2a0050;--border-accent:#3d0070;--text-primary:#f0e6ff;--text-secondary:#b892ff;--text-muted:#7c52cc;--accent-primary:#bf00ff;--accent-secondary:#00f5ff;--accent-glow:rgba(191,0,255,0.25);--msg-user-bg:#1a003a;--msg-user-text:#e8d5ff;--sidebar-bg:#0d0018;--topbar-bg:#080012;--send-btn:#bf00ff;--send-btn-hover:#d333ff;--user-av:#330066;--font-ui:'Orbitron','Space Mono',monospace;--font-msg:'Space Mono',monospace;--radius-main:4px;}
+[data-theme="aurora"]{--bg-primary:#020f0a;--bg-secondary:#041a10;--bg-tertiary:#062018;--bg-input:#052818;--border-color:#0d3d20;--border-accent:#155230;--text-primary:#d1fae5;--text-secondary:#6ee7b7;--text-muted:#34d399;--accent-primary:#10b981;--accent-secondary:#06b6d4;--accent-glow:rgba(16,185,129,0.25);--msg-user-bg:#063d20;--msg-user-text:#d1fae5;--sidebar-bg:#041a10;--topbar-bg:#020f0a;--send-btn:#10b981;--send-btn-hover:#34d399;--user-av:#064e2a;--font-ui:'Nunito',system-ui,sans-serif;--font-msg:'Nunito',sans-serif;--radius-main:18px;}
+[data-theme="solar"]{--bg-primary:#faf8f4;--bg-secondary:#f3f0e8;--bg-tertiary:#ece8dc;--bg-input:#ede9de;--border-color:#d8d0bc;--border-accent:#c5baa8;--text-primary:#2c2416;--text-secondary:#5a4e38;--text-muted:#8a7a60;--accent-primary:#c4862a;--accent-secondary:#d44a00;--accent-glow:rgba(196,134,42,0.15);--msg-user-bg:#c4862a;--msg-user-text:#fff8ee;--sidebar-bg:#f3f0e8;--topbar-bg:#faf8f4;--send-btn:#c4862a;--send-btn-hover:#d4922a;--user-av:#7a4a10;--font-ui:'Playfair Display',serif;--font-msg:'DM Sans',sans-serif;--radius-main:10px;}
+[data-theme="bloodmoon"]{--bg-primary:#0d0505;--bg-secondary:#140808;--bg-tertiary:#1a0a0a;--bg-input:#180808;--border-color:#3a0f0f;--border-accent:#4d1515;--text-primary:#ffe4e4;--text-secondary:#f87171;--text-muted:#dc2626;--accent-primary:#ef4444;--accent-secondary:#f97316;--accent-glow:rgba(239,68,68,0.25);--msg-user-bg:#3a1010;--msg-user-text:#ffe4e4;--sidebar-bg:#140808;--topbar-bg:#0d0505;--send-btn:#ef4444;--send-btn-hover:#f87171;--user-av:#4d1515;--font-ui:'Space Mono',monospace;--font-msg:'Space Mono',monospace;--radius-main:6px;}
+[data-theme="ocean"]{--bg-primary:#010d1a;--bg-secondary:#021525;--bg-tertiary:#032030;--bg-input:#03223a;--border-color:#0a3a5a;--border-accent:#0d4e78;--text-primary:#caf0f8;--text-secondary:#90e0ef;--text-muted:#48cae4;--accent-primary:#0096c7;--accent-secondary:#023e8a;--accent-glow:rgba(0,150,199,0.25);--msg-user-bg:#023e8a;--msg-user-text:#caf0f8;--sidebar-bg:#021525;--topbar-bg:#010d1a;--send-btn:#0096c7;--send-btn-hover:#00b4d8;--user-av:#03045e;--font-ui:'Outfit',sans-serif;--font-msg:'DM Sans',sans-serif;--radius-main:16px;}
+[data-theme="violet"]{--bg-primary:#0d0a1a;--bg-secondary:#130f25;--bg-tertiary:#1a1430;--bg-input:#161128;--border-color:#2d2550;--border-accent:#3d3366;--text-primary:#ede8ff;--text-secondary:#b8aaff;--text-muted:#8070cc;--accent-primary:#8b5cf6;--accent-secondary:#ec4899;--accent-glow:rgba(139,92,246,0.25);--msg-user-bg:#2d1a5a;--msg-user-text:#ede8ff;--sidebar-bg:#130f25;--topbar-bg:#0d0a1a;--send-btn:#8b5cf6;--send-btn-hover:#a78bfa;--user-av:#2d1a5a;--font-ui:'Outfit',sans-serif;--font-msg:'DM Sans',sans-serif;--radius-main:16px;}
+[data-theme="forest"]{--bg-primary:#0a110a;--bg-secondary:#0f180f;--bg-tertiary:#152015;--bg-input:#121a12;--border-color:#203520;--border-accent:#2d4a2d;--text-primary:#d4edda;--text-secondary:#81c784;--text-muted:#4caf50;--accent-primary:#66bb6a;--accent-secondary:#26a69a;--accent-glow:rgba(102,187,106,0.2);--msg-user-bg:#1b3a1b;--msg-user-text:#d4edda;--sidebar-bg:#0f180f;--topbar-bg:#0a110a;--send-btn:#66bb6a;--send-btn-hover:#81c784;--user-av:#1b3a1b;--font-ui:'DM Sans',sans-serif;--font-msg:'Outfit',sans-serif;--radius-main:14px;}
+[data-theme="rose"]{--bg-primary:#0f050a;--bg-secondary:#1a0810;--bg-tertiary:#240c18;--bg-input:#1e0a14;--border-color:#3d1028;--border-accent:#561638;--text-primary:#ffd6e8;--text-secondary:#ff85b0;--text-muted:#cc4478;--accent-primary:#ff3377;--accent-secondary:#ff8c42;--accent-glow:rgba(255,51,119,0.25);--msg-user-bg:#3d1030;--msg-user-text:#ffd6e8;--sidebar-bg:#1a0810;--topbar-bg:#0f050a;--send-btn:#ff3377;--send-btn-hover:#ff5590;--user-av:#4d1040;--font-ui:'Sora',sans-serif;--font-msg:'DM Sans',sans-serif;--radius-main:18px;}
 
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{height:100%;height:-webkit-fill-available;}
+body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-ui);font-size:14px;transition:background .4s,color .4s;height:100%;height:-webkit-fill-available;overflow:hidden;position:fixed;width:100%;}
+#app{display:flex;height:100%;width:100%;overflow:hidden;}
+/* SIDEBAR */
+#sidebar{width:260px;min-width:260px;background:var(--sidebar-bg);border-right:1px solid var(--border-color);display:flex;flex-direction:column;height:100%;transition:all .3s;overflow:hidden;z-index:100;position:relative;flex-shrink:0;}
+#sidebar.collapsed{width:0;min-width:0;border:none;}
+#sidebar-inner{width:260px;min-width:260px;display:flex;flex-direction:column;height:100%;}
+#sidebar-scroll{flex:1;overflow-y:auto;}
+#sidebar-scroll::-webkit-scrollbar{width:3px;}
+#sidebar-scroll::-webkit-scrollbar-thumb{background:var(--border-accent);border-radius:4px;}
+.sb-section{border-bottom:1px solid var(--border-color);}
+.sb-section-hdr{width:100%;display:flex;align-items:center;justify-content:space-between;padding:7px 13px;background:transparent;border:none;cursor:pointer;color:var(--text-muted);font-family:var(--font-ui);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;transition:background .15s;}
+.sb-section-hdr:hover{background:var(--bg-secondary);color:var(--text-primary);}
+.sb-section-body{overflow:hidden;transition:max-height .28s ease,opacity .2s;max-height:600px;opacity:1;padding:3px 0 6px;}
+.sb-section-body.collapsed{max-height:0!important;opacity:0;padding:0;pointer-events:none;}
+.sb-chev{transition:transform .25s;}
+.sb-chev.rotated{transform:rotate(-90deg);}
+.sb-item{width:100%;display:flex;align-items:center;gap:7px;padding:5px 13px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:12px;text-align:left;font-family:var(--font-ui);transition:background .15s,color .15s;text-decoration:none;}
+.sb-item:hover{background:var(--bg-secondary);color:var(--text-primary);}
+/* App item badge */
+.sb-item-badge{font-size:9px;padding:1px 5px;border-radius:8px;background:var(--accent-glow);color:var(--accent-primary);border:1px solid var(--accent-primary);margin-left:auto;flex-shrink:0;}
+#sidebar-toggle{position:absolute;top:50%;right:-17px;transform:translateY(-50%);background:var(--bg-secondary);border:1px solid var(--border-color);width:17px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:101;border-radius:0 7px 7px 0;color:var(--text-muted);transition:background .2s;flex-shrink:0;}
+#sidebar-toggle:hover{background:var(--border-accent);color:var(--text-primary);}
+#mob-toggle{display:none;position:fixed;top:8px;left:10px;z-index:300;background:var(--bg-secondary);border:1px solid var(--border-color);width:34px;height:34px;border-radius:9px;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary);}
+#mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:190;}
+/* MAIN */
+#main{flex:1;display:flex;flex-direction:column;min-width:0;height:100%;overflow:hidden;}
+#topbar{height:50px;min-height:50px;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;padding:0 14px;gap:8px;flex-shrink:0;background:var(--topbar-bg);overflow:hidden;}
+.tbLeft{display:flex;align-items:center;gap:7px;flex-wrap:nowrap;min-width:0;overflow:hidden;}
+.tbRight{display:flex;align-items:center;gap:7px;flex-shrink:0;}
+#chat-window{flex:1;overflow-y:auto;overflow-x:hidden;padding:18px;display:flex;flex-direction:column;gap:4px;-webkit-overflow-scrolling:touch;}
+#chat-window::-webkit-scrollbar{width:4px;}
+#chat-window::-webkit-scrollbar-thumb{background:var(--border-color);border-radius:4px;}
+/* INPUT AREA */
+#input-area{border-top:1px solid var(--border-color);padding:8px 12px;background:var(--topbar-bg);flex-shrink:0;padding-bottom:max(8px, env(safe-area-inset-bottom));position:relative;z-index:10;}
+#input-wrap{max-width:800px;margin:0 auto;background:var(--bg-input);border:1px solid var(--border-accent);border-radius:var(--radius-main);overflow:hidden;transition:border-color .2s;}
+#input-wrap:focus-within{border-color:var(--accent-primary);box-shadow:0 0 0 3px var(--accent-glow);}
+#user-input{width:100%;background:transparent;border:none;outline:none;color:var(--text-primary);font-size:14px;font-family:var(--font-msg);padding:10px 13px 4px;resize:none;max-height:100px;line-height:1.6;-webkit-appearance:none;appearance:none;}
+#user-input::placeholder{color:var(--text-muted);}
+#input-bottom{display:flex;align-items:center;padding:3px 6px 6px;gap:2px;flex-wrap:nowrap;overflow-x:auto;}
+#input-bottom::-webkit-scrollbar{height:0;}
+#input-bottom-left{display:flex;align-items:center;gap:1px;flex:1;flex-wrap:nowrap;overflow-x:auto;min-width:0;}
+#input-bottom-left::-webkit-scrollbar{height:0;}
+.ia-btn{background:transparent;border:none;cursor:pointer;color:var(--text-muted);padding:5px 5px;border-radius:7px;font-size:11px;transition:all .2s;display:flex;align-items:center;gap:2px;white-space:nowrap;font-family:var(--font-ui);position:relative;flex-shrink:0;}
+.ia-btn:hover{background:var(--border-accent);color:var(--text-primary);}
+.ia-btn span.btn-label{font-size:9px;font-weight:700;}
+.ia-btn.web-btn{color:#60a5fa;}
+.ia-btn.web-btn.ativo{color:#60a5fa;background:rgba(96,165,250,0.15);border:1px solid rgba(96,165,250,0.4);animation:webPulse 2s ease-in-out infinite;}
+@keyframes webPulse{0%,100%{box-shadow:0 0 0 0 rgba(96,165,250,.3)}50%{box-shadow:0 0 0 5px rgba(96,165,250,0)}}
+.ia-btn.pensar-btn{color:#a855f7;}
+.ia-btn.pensar-btn.ativo{color:#a855f7;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,.4);animation:pensarPulse 1.5s ease-in-out infinite;}
+@keyframes pensarPulse{0%,100%{box-shadow:0 0 0 0 rgba(168,85,247,.4)}50%{box-shadow:0 0 0 6px rgba(168,85,247,0)}}
+.ia-btn.visao-btn{color:#10b981;}
+.ia-btn.visao-btn.ativo{color:#10b981;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,.4);}
+.ia-btn.voice-cfg-btn{color:#f59e0b;}
+.ia-btn.camera-btn{color:#06b6d4;}
+.ia-btn.camera-btn.ativo{color:#06b6d4;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,.4);}
+/* THINKING PANEL */
+#think-panel{position:fixed;top:0;right:0;width:400px;max-width:100vw;height:100%;background:var(--bg-secondary);border-left:2px solid #a855f7;z-index:410;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease;font-family:var(--font-ui);}
+#think-panel.open{transform:translateX(0);}
+#think-panel-header{padding:14px 16px;border-bottom:1px solid rgba(168,85,247,.3);display:flex;align-items:center;justify-content:space-between;background:rgba(168,85,247,.05);flex-shrink:0;}
+#think-log{flex:1;overflow-y:auto;padding:14px;font-size:12px;line-height:1.8;}
+#think-log::-webkit-scrollbar{width:3px;}
+#think-log::-webkit-scrollbar-thumb{background:#a855f7;border-radius:3px;}
+.think-step{padding:9px 12px;margin-bottom:6px;border-left:3px solid #a855f7;background:rgba(168,85,247,.06);border-radius:0 8px 8px 0;color:var(--text-secondary);animation:fadeSlideIn .3s ease;position:relative;}
+.think-step::before{content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:13px;height:13px;border-radius:50%;background:var(--bg-secondary);border:2px solid #a855f7;}
+.think-step.done{border-color:#22c55e;background:rgba(34,197,94,.05);color:var(--text-primary);}
+.think-step.done::before{border-color:#22c55e;background:#22c55e;}
+.think-step.error{border-color:#ef4444;background:rgba(239,68,68,.05);}
+.think-step.inner{border-color:#f59e0b;background:rgba(245,158,11,.04);font-style:italic;color:#fbbf24;}
+.think-step.inner::before{border-color:#f59e0b;}
+.think-step.thinking{border-color:#60a5fa;background:rgba(96,165,250,.04);}
+.think-step.thinking::before{border-color:#60a5fa;animation:pulseDot 1s ease-in-out infinite;}
+@keyframes pulseDot{0%,100%{transform:translateY(-50%) scale(1);opacity:1}50%{transform:translateY(-50%) scale(1.4);opacity:.7}}
+.think-step .ts{font-size:10px;color:var(--text-muted);margin-bottom:3px;}
+.think-inner-text{font-size:11px;line-height:1.7;color:#d4a0ff;padding:5px 0 2px;white-space:pre-wrap;word-break:break-word;border-top:1px solid rgba(168,85,247,.15);margin-top:5px;}
+#think-log{position:relative;padding-left:22px;}
+/* SEND BTN */
+#send-btn{background:var(--send-btn);border:none;cursor:pointer;color:#fff;padding:7px 13px;border-radius:9px;font-size:13px;font-weight:700;transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap;font-family:var(--font-ui);flex-shrink:0;}
+#send-btn:hover{background:var(--send-btn-hover);transform:scale(1.03);}
+#send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+/* MESSAGES */
+.msg-row{display:flex;gap:10px;max-width:800px;width:100%;margin:0 auto;animation:fadeSlideIn .28s ease;padding:3px 0;}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg-row.user-row{flex-direction:row-reverse;}
+.msg-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:3px;}
+.msg-av.ai{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));}
+.msg-av.user{background:var(--user-av);}
+.msg-bbl{max-width:calc(100% - 48px);padding:10px 14px;border-radius:var(--radius-main);font-size:14.5px;line-height:1.75;word-break:break-word;font-family:var(--font-msg);letter-spacing:.01em;}
+.msg-bbl.ai{background:var(--msg-ai-bg);border:none;border-radius:0;}
+.msg-bbl.user{background:var(--msg-user-bg);color:var(--msg-user-text);border-radius:14px 4px 14px 14px;}
+.streaming-cursor{display:inline-block;width:2px;height:1em;background:var(--accent-primary);animation:blink .7s infinite;vertical-align:middle;margin-left:2px;border-radius:1px;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+/* CODE */
+.code-block{background:#0d1117;border:1px solid #21262d;border-radius:10px;margin:10px 0;overflow:hidden;}
+.code-hdr{display:flex;align-items:center;justify-content:space-between;background:#161b22;border-bottom:1px solid #21262d;padding:5px 13px;}
+.code-lang{font-family:var(--font-code);font-size:11px;text-transform:uppercase;color:#58a6ff;font-weight:700;}
+.copy-btn{background:#21262d;border:1px solid #30363d;color:#8b949e;border-radius:5px;padding:2px 8px;font-size:11px;cursor:pointer;transition:all .2s;}
+.copy-btn:hover{background:#30363d;color:#e6edf3;}
+.code-block pre{margin:0;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.65;background:transparent;}
+.code-block pre code{background:transparent!important;padding:0!important;font-family:var(--font-code)!important;}
+.inline-code{background:rgba(110,118,129,.15);border-radius:4px;padding:2px 6px;font-family:var(--font-code);font-size:12.5px;border:1px solid rgba(110,118,129,.2);}
+/* IMAGE GEN */
+.img-gen-card{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;overflow:hidden;max-width:560px;margin:6px 0;}
+.img-gen-progress{padding:14px;display:flex;flex-direction:column;gap:10px;}
+.progress-bar-wrap{background:var(--border-color);border-radius:4px;height:4px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));border-radius:4px;transition:width .5s ease;}
+/* AUDIO CARD */
+.audio-card{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;overflow:hidden;max-width:480px;margin:6px 0;padding:14px;}
+.audio-card audio{width:100%;margin-top:8px;border-radius:8px;}
+/* MEDIA */
+.media-card{background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:11px;overflow:hidden;margin:6px 0;max-width:100%;}
+.media-card img{width:100%;display:block;max-height:420px;object-fit:cover;}
+.media-foot{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-secondary);border-top:1px solid var(--border-color);gap:8px;}
+.media-lbl{font-size:11px;color:var(--text-muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mbtn{font-size:11px;padding:3px 9px;border-radius:5px;cursor:pointer;border:1px solid var(--border-accent);background:var(--bg-secondary);color:var(--text-secondary);text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:all .2s;}
+.mbtn:hover{background:var(--border-accent);color:var(--text-primary);}
+/* FILE GEN CARD */
+.file-gen-card{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:10px;padding:12px;margin:6px 0;max-width:420px;}
+.file-gen-card .file-icon{font-size:28px;margin-bottom:6px;}
+/* BADGES */
+.sbadge{font-size:11px;padding:3px 7px;border-radius:18px;border:1px solid;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;}
+.s-ok{color:#22c55e;border-color:#22c55e40;}
+.s-err{color:#ef4444;border-color:#ef444440;}
+.s-wait{color:var(--text-muted);border-color:var(--border-accent);}
+.s-web{background:rgba(96,165,250,.1);border-color:rgba(96,165,250,.3);color:#60a5fa;}
+.s-creator{background:linear-gradient(90deg,#7c3aed,#db2777);color:#fff;font-size:10px;padding:2px 7px;border-radius:18px;font-weight:700;}
+/* WELCOME */
+#welcome-msg{display:none;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;gap:12px;padding:20px;}
+.z-logo{font-size:56px;font-weight:900;color:var(--accent-primary);font-family:var(--font-ui);line-height:1;text-shadow:0 0 40px var(--accent-glow);animation:logoPulse 3s ease-in-out infinite;}
+@keyframes logoPulse{0%,100%{text-shadow:0 0 40px var(--accent-glow)}50%{text-shadow:0 0 80px var(--accent-glow),0 0 120px var(--accent-glow)}}
+/* TYPING */
+.tdot{width:7px;height:7px;background:var(--accent-primary);border-radius:50%;animation:tdot 1.2s infinite;}
+.tdot:nth-child(2){animation-delay:.2s;}
+.tdot:nth-child(3){animation-delay:.4s;}
+@keyframes tdot{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+.spin{width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-radius:50%;border-top-color:#fff;animation:spin 1s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* MODALS */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;overflow-y:auto;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:16px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.8);width:100%;max-width:560px;margin:20px;position:relative;}
+.modal-close{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--text-muted);font-size:22px;cursor:pointer;line-height:1;padding:4px;}
+.modal-close:hover{color:var(--text-primary);}
+/* ADV PANEL */
+.adv-panel{position:fixed;top:0;right:0;width:380px;max-width:100vw;height:100%;background:var(--bg-secondary);border-left:1px solid var(--border-color);z-index:400;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease;}
+.adv-panel.open{transform:translateX(0);}
+.adv-tab{display:flex;border-bottom:1px solid var(--border-color);flex-shrink:0;overflow-x:auto;}
+.adv-tab::-webkit-scrollbar{height:0;}
+.adv-tab button{flex:1;min-width:36px;padding:9px 3px;font-size:11px;color:var(--text-muted);border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;font-family:var(--font-ui);}
+.adv-tab button.active{color:var(--accent-primary);border-bottom-color:var(--accent-primary);}
+.adv-body{flex:1;overflow-y:auto;padding:13px;}
+.adv-s{margin-bottom:16px;}
+.adv-s h4{font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;padding-bottom:4px;border-bottom:1px solid var(--border-color);}
+.adv-btn{display:flex;align-items:center;gap:7px;width:100%;padding:8px 11px;border-radius:7px;border:1px solid var(--border-color);background:var(--bg-primary);color:var(--text-primary);font-size:12px;cursor:pointer;transition:all .2s;margin-bottom:5px;text-align:left;font-family:var(--font-ui);}
+.adv-btn:hover{background:var(--border-accent);border-color:var(--accent-primary);}
+.adv-in{width:100%;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--text-primary);outline:none;margin-bottom:6px;font-family:var(--font-msg);}
+.adv-in:focus{border-color:var(--accent-primary);}
+.adv-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:390;}
+.adv-ov.show{display:block;}
+/* TOAST */
+.toast{position:fixed;bottom:max(18px,env(safe-area-inset-bottom));right:18px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:10px;padding:9px 15px;font-size:13px;color:var(--text-primary);z-index:9999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;max-width:300px;font-family:var(--font-ui);}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.ok{border-color:#22c55e60;color:#22c55e;}
+.toast.err{border-color:#ef444460;color:#ef4444;}
+.toast.warn{border-color:#fbbf2460;color:#fbbf24;}
+/* SETUP */
+#setup-screen{position:fixed;inset:0;background:var(--bg-primary);z-index:1000;display:flex;align-items:center;justify-content:center;flex-direction:column;overflow-y:auto;}
+.setup-card{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:20px;padding:36px 32px;max-width:490px;width:100%;margin:16px;text-align:center;box-shadow:var(--shadow-main);}
+.setup-input{width:100%;background:var(--bg-primary);border:1px solid var(--border-accent);border-radius:10px;padding:12px 14px;font-size:15px;color:var(--text-primary);outline:none;font-family:var(--font-msg);transition:border-color .2s;-webkit-appearance:none;}
+.setup-input:focus{border-color:var(--accent-primary);box-shadow:0 0 0 3px var(--accent-glow);}
+.setup-btn{width:100%;padding:13px;background:var(--send-btn);border:none;color:#fff;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--font-ui);margin-top:6px;}
+/* THEMES */
+.theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 16px;}
+.theme-dot{width:100%;aspect-ratio:1;border-radius:10px;cursor:pointer;border:2px solid transparent;transition:all .2s;position:relative;overflow:hidden;}
+.theme-dot.active{border-color:#fff;transform:scale(1.08);box-shadow:0 0 12px rgba(255,255,255,.3);}
+.theme-dot-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.theme-name{font-size:9px;text-align:center;color:var(--text-muted);margin-top:3px;font-weight:600;text-transform:uppercase;}
+.theme-pill{display:flex;align-items:center;gap:4px;padding:4px 9px;border-radius:18px;border:1px solid var(--border-accent);background:var(--bg-secondary);cursor:pointer;font-size:11px;color:var(--text-secondary);transition:all .2s;}
+.theme-pill:hover{border-color:var(--accent-primary);color:var(--text-primary);}
+/* RESP ACTIONS */
+.resp-actions{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;}
+.ra-btn{padding:4px 9px;font-size:11px;background:transparent;border:1px solid var(--border-accent);color:var(--text-muted);border-radius:5px;cursor:pointer;transition:all .2s;font-family:var(--font-ui);}
+.ra-btn:hover{background:var(--border-accent);color:var(--text-primary);}
+/* MEMORY */
+.mem-item{display:flex;align-items:flex-start;gap:6px;padding:7px 9px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:7px;margin-bottom:4px;font-size:12px;}
+.mem-key{color:var(--accent-primary);font-weight:600;min-width:65px;flex-shrink:0;}
+.mem-val{color:var(--text-secondary);flex:1;word-break:break-word;}
+.mem-del{color:var(--text-muted);cursor:pointer;flex-shrink:0;background:none;border:none;padding:1px 3px;}
+.mem-del:hover{color:#ef4444;}
+/* PLUS MENU */
+#plus-menu{display:none;position:absolute;bottom:calc(100% + 8px);left:0;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:11px;padding:6px 0;min-width:220px;z-index:200;box-shadow:var(--shadow-main);}
+.pmenu-item{width:100%;padding:9px 15px;border:none;background:transparent;color:var(--text-secondary);text-align:left;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:9px;transition:all .2s;font-family:var(--font-ui);}
+.pmenu-item:hover{background:var(--border-accent);color:var(--text-primary);}
+/* MODEL SELECT */
+#model-sel{background:var(--bg-secondary);border:1px solid var(--border-color);color:var(--accent-primary);font-size:11px;border-radius:6px;padding:3px 6px;outline:none;cursor:pointer;max-width:120px;font-family:var(--font-ui);}
+/* PERS BTN */
+.pers-btn{padding:7px 11px;border-radius:7px;background:var(--bg-primary);color:var(--text-muted);border:1px solid var(--border-accent);cursor:pointer;font-size:12px;transition:all .2s;font-family:var(--font-ui);}
+.pers-btn.active{background:var(--accent-glow);color:var(--accent-primary);border-color:var(--accent-primary);}
+.voice-slider{width:100%;accent-color:var(--accent-primary);margin:4px 0;}
+/* WEB INDICATOR */
+.web-indicator{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:14px;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.3);color:#60a5fa;font-size:11px;margin-bottom:8px;}
+/* IMAGE PREVIEW */
+.img-preview-wrap{position:relative;display:inline-block;margin-bottom:6px;}
+.img-preview-wrap img{max-width:220px;max-height:160px;border-radius:8px;display:block;border:2px solid var(--accent-primary);}
+.img-preview-wrap .remove-img{position:absolute;top:-8px;right:-8px;background:#ef4444;border:none;border-radius:50%;width:22px;height:22px;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+/* CAMERA */
+#camera-canvas-wrap{position:fixed;bottom:140px;right:14px;z-index:200;display:none;border:2px solid #06b6d4;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(6,182,212,0.4);}
+#camera-video{display:block;width:100px;height:100px;object-fit:cover;}
+#camera-canvas-wrap .cam-close{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.7);border:none;color:#fff;font-size:10px;cursor:pointer;width:16px;height:16px;border-radius:3px;display:flex;align-items:center;justify-content:center;}
+/* VPN MODAL */
+.vpn-card{background:var(--bg-primary);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:13px;margin-bottom:8px;}
+.vpn-card h4{color:#fbbf24;font-size:13px;font-weight:700;margin-bottom:5px;}
+.vpn-card p{color:var(--text-secondary);font-size:12px;line-height:1.6;}
+/* FILE TYPE ICONS */
+.ft-docx{color:#2b7bf8;} .ft-xlsx{color:#22c55e;} .ft-pptx{color:#f97316;} .ft-zip{color:#f59e0b;} .ft-pdf{color:#ef4444;} .ft-mp3{color:#a855f7;} .ft-txt{color:#9ca3af;}
+/* CHUNK PROGRESS */
+.chunk-progress{display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;margin-top:8px;max-width:420px;}
+.chunk-bar{height:3px;background:var(--border-color);border-radius:2px;overflow:hidden;}
+.chunk-bar-fill{height:100%;background:linear-gradient(90deg,#a855f7,#60a5fa);border-radius:2px;transition:width .3s;}
+/* APPS GRID */
+.apps-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:6px 0;}
+.app-card{background:var(--bg-primary);border:1px solid var(--border-color);border-radius:10px;padding:10px 9px;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;flex-direction:column;gap:4px;align-items:flex-start;}
+.app-card:hover{border-color:var(--accent-primary);background:var(--bg-tertiary);transform:translateY(-1px);}
+.app-card-icon{font-size:20px;line-height:1;}
+.app-card-name{font-size:11px;font-weight:700;color:var(--text-primary);}
+.app-card-desc{font-size:10px;color:var(--text-muted);line-height:1.3;}
+.app-download-btn{display:flex;align-items:center;gap:7px;width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--accent-primary);background:var(--accent-glow);color:var(--accent-primary);font-size:12px;cursor:pointer;transition:all .2s;margin-top:4px;text-decoration:none;justify-content:center;font-weight:600;font-family:var(--font-ui);}
+.app-download-btn:hover{background:var(--accent-primary);color:#fff;}
+
+@media(max-width:768px){
+  #sidebar{position:fixed;left:0;top:0;height:100%;transform:translateX(-100%);z-index:200;width:270px;min-width:270px;}
+  #sidebar.mob-open{transform:translateX(0);}
+  #sidebar.collapsed{transform:translateX(-100%);}
+  #sidebar-toggle{display:none;}
+  #mob-toggle{display:flex;}
+  #mob-overlay.show{display:block;}
+  #main{width:100%;}
+  #topbar{padding:0 8px 0 48px;height:44px;min-height:44px;}
+  .adv-panel{width:100vw;}
+  #think-panel{width:100vw;}
+  #user-input{font-size:16px;}
+  #chat-window{padding:12px 10px;}
+  .msg-bbl{font-size:14px;}
+  .apps-grid{grid-template-columns:1fr;}
+}
+@media(max-width:390px){
+  #topbar{padding:0 5px 0 44px;}
+  #model-sel{max-width:90px;font-size:10px;}
+  .sbadge{font-size:10px;padding:2px 5px;}
+  .ia-btn{padding:4px 4px;}
+  .ia-btn span.btn-label{display:none;}
+}
+</style>
+</head>
+<body data-theme="dark">
+
+<!-- SETUP -->
+<div id="setup-screen" style="display:none">
+  <div class="setup-card">
+    <div style="font-size:52px;font-weight:900;color:var(--accent-primary);animation:logoPulse 3s ease-in-out infinite;margin-bottom:8px">Z</div>
+    <div style="font-size:22px;font-weight:800;margin-bottom:4px">Bem-vindo à IA-Zenia v4</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:24px;line-height:1.6">Antes de começarmos, como te chamas?</div>
+    <div style="margin-bottom:20px;text-align:left">
+      <label style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:6px">O teu nome</label>
+      <input class="setup-input" id="setup-name" type="text" placeholder="Escreve o teu nome..." maxlength="30" autocomplete="off" onkeydown="if(event.key==='Enter')completeSetup()">
+    </div>
+    <div style="margin-bottom:20px;text-align:left">
+      <label style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:8px">Tema</label>
+      <div class="theme-grid" id="setup-theme-grid"></div>
+    </div>
+    <button class="setup-btn" onclick="completeSetup()"><i class="fas fa-arrow-right"></i> Iniciar com a Zenia</button>
+  </div>
+</div>
+
+<!-- THEME MODAL -->
+<div id="theme-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:500px">
+    <button class="modal-close" onclick="closeThemeModal()">&times;</button>
+    <h3 style="margin-bottom:16px;font-size:16px;font-weight:700">🎨 Trocar Tema</h3>
+    <div class="theme-grid" id="modal-theme-grid"></div>
+  </div>
+</div>
+
+<!-- PERSONALITY / VOICE MODAL -->
+<div id="personality-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:540px">
+    <button class="modal-close" onclick="closePersonality()">&times;</button>
+    <h3 style="margin-bottom:16px;font-size:16px;font-weight:700">🎙️ Personalidade &amp; Voz</h3>
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Tom</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button onclick="setPersonality('amigavel')" class="pers-btn active" data-tone="amigavel">😊 Amigável</button>
+        <button onclick="setPersonality('profissional')" class="pers-btn" data-tone="profissional">💼 Profissional</button>
+        <button onclick="setPersonality('humorista')" class="pers-btn" data-tone="humorista">😄 Humorista</button>
+        <button onclick="setPersonality('tecnico')" class="pers-btn" data-tone="tecnico">⚙️ Técnico</button>
+        <button onclick="setPersonality('criativo')" class="pers-btn" data-tone="criativo">🎨 Criativo</button>
+      </div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Detalhe</div>
+      <div style="display:flex;gap:7px">
+        <button onclick="setDetailLevel('curto')" class="pers-btn" data-level="curto" style="flex:1">Curto</button>
+        <button onclick="setDetailLevel('medio')" class="pers-btn active" data-level="medio" style="flex:1">Médio</button>
+        <button onclick="setDetailLevel('detalhado')" class="pers-btn" data-level="detalhado" style="flex:1">Detalhado</button>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border-color);padding-top:16px;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">🔊 Voz Natural</div>
+      <div style="margin-bottom:10px"><label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:5px">Voz</label><select id="voice-select" class="adv-in" style="margin-bottom:0" onchange="updateVoiceConfig()"><option value="">Carregando...</option></select></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div><label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:4px">Velocidade: <strong id="voice-rate-val">1.0</strong>x</label><input type="range" class="voice-slider" id="voice-rate" min="0.5" max="2" step="0.05" value="1" oninput="document.getElementById('voice-rate-val').textContent=parseFloat(this.value).toFixed(2);updateVoiceConfig()"></div>
+        <div><label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:4px">Tom: <strong id="voice-pitch-val">1.0</strong></label><input type="range" class="voice-slider" id="voice-pitch" min="0.5" max="2" step="0.05" value="1" oninput="document.getElementById('voice-pitch-val').textContent=parseFloat(this.value).toFixed(2);updateVoiceConfig()"></div>
+        <div><label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:4px">Volume: <strong id="voice-vol-val">1.0</strong></label><input type="range" class="voice-slider" id="voice-vol" min="0" max="1" step="0.05" value="1" oninput="document.getElementById('voice-vol-val').textContent=parseFloat(this.value).toFixed(2);updateVoiceConfig()"></div>
+        <div><label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:4px">Pausa (ms): <strong id="voice-pause-val">300</strong></label><input type="range" class="voice-slider" id="voice-pause" min="0" max="1200" step="50" value="300" oninput="document.getElementById('voice-pause-val').textContent=this.value;updateVoiceConfig()"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="previewVoice()" style="flex:1;padding:8px;background:var(--accent-glow);border:1px solid var(--accent-primary);color:var(--accent-primary);border-radius:7px;font-size:12px;cursor:pointer;font-family:var(--font-ui)"><i class="fas fa-play"></i> Testar</button>
+        <button onclick="stopVoice()" style="flex:1;padding:8px;background:rgba(239,68,68,.1);border:1px solid #ef4444;color:#ef4444;border-radius:7px;font-size:12px;cursor:pointer;font-family:var(--font-ui)"><i class="fas fa-stop"></i> Parar</button>
+      </div>
+    </div>
+    <button onclick="closePersonality()" style="width:100%;padding:10px;background:var(--send-btn);border:none;color:#fff;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-ui)">✓ Confirmar</button>
+  </div>
+</div>
+
+<!-- VISION MODAL -->
+<div id="vision-modal" class="modal-overlay">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeVisionModal()">&times;</button>
+    <h3 style="margin-bottom:6px;font-size:16px;font-weight:700"><i class="fas fa-eye" style="color:#10b981;margin-right:8px"></i>Análise de Imagem</h3>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px">Carrega uma imagem e a Zenia analisa-a e responde.</p>
+    <div id="vision-drop-zone" style="border:2px dashed var(--border-accent);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:14px"
+      onclick="document.getElementById('vision-file').click()"
+      ondragover="event.preventDefault();this.style.borderColor='var(--accent-primary)'"
+      ondragleave="this.style.borderColor=''"
+      ondrop="event.preventDefault();this.style.borderColor='';loadVisionFileDrop(event)">
+      <div id="vision-preview" style="display:none;margin-bottom:10px"><img id="vision-img-preview" style="max-height:180px;max-width:100%;border-radius:8px;object-fit:contain"></div>
+      <div id="vision-placeholder"><i class="fas fa-cloud-upload-alt" style="font-size:32px;color:var(--accent-primary);margin-bottom:8px;display:block"></i><div style="font-size:13px;font-weight:600">Arrasta ou clica</div><div style="font-size:11px;color:var(--text-muted);margin-top:4px">JPG, PNG, WebP</div></div>
+    </div>
+    <input type="file" id="vision-file" accept="image/*" style="display:none" onchange="loadVisionPreview(event)">
+    <input class="adv-in" id="vision-question" placeholder="O que queres saber? (opcional)">
+    <button onclick="analyzeVisionAndChat()" id="vision-analyze-btn" style="width:100%;padding:11px;background:var(--send-btn);border:none;color:#fff;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-ui)"><i class="fas fa-search"></i> Analisar &amp; Enviar para Chat</button>
+    <div id="vision-result" style="display:none;margin-top:14px"></div>
+  </div>
+</div>
+
+<!-- WEBSEARCH MODAL -->
+<div id="websearch-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:560px">
+    <button class="modal-close" onclick="document.getElementById('websearch-modal').classList.remove('open')">&times;</button>
+    <h3 style="margin-bottom:6px;font-size:16px;font-weight:700"><i class="fas fa-search" style="color:#60a5fa;margin-right:8px"></i>Pesquisa Web</h3>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <input class="adv-in" id="web-query" placeholder="O que queres pesquisar?" style="flex:1;margin-bottom:0" onkeydown="if(event.key==='Enter')doWebSearch()">
+      <button onclick="doWebSearch()" style="padding:7px 14px;background:var(--send-btn);border:none;color:#fff;border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--font-ui);flex-shrink:0">Pesquisar</button>
+    </div>
+    <div id="websearch-results" style="max-height:320px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- VPN MODAL -->
+<div id="vpn-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:620px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;padding:0">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <h3 style="font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px">🚨 CAÇA VPN ANGOLA<span style="font-size:10px;background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.4);color:#ef4444;padding:2px 8px;border-radius:12px">MISSÃO CÍVICA</span></h3>
+      <button class="modal-close" style="position:static" onclick="document.getElementById('vpn-modal').classList.remove('open')">&times;</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:16px">
+      <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:#fbbf24;line-height:1.7"><strong>⚠️ VPNs de "Net Grátis" em Angola:</strong> Exploram brechas nas operadoras, são ilegais, roubam os teus dados e prejudicam toda a população.</div>
+      <div id="vpn-search-status" style="text-align:center;padding:14px;display:none"><span class="spin"></span><div style="font-size:12px;color:var(--text-muted);margin-top:8px" id="vpn-search-msg">A pesquisar...</div></div>
+      <div id="vpn-results-area"></div>
+      <div style="margin-top:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Como Denunciar</div>
+        <div class="vpn-card"><h4>📞 Operadoras</h4><p>Contacta Unitel, Africell ou Movicel. Indica nome da VPN, onde foi partilhada e qual brecha usa.</p></div>
+        <div class="vpn-card"><h4>🏛️ INACOM</h4><p>Site: inacom.og.ao | Denuncia com prints e links. Podem multar e processar os distribuidores.</p></div>
+        <div class="vpn-card"><h4>📱 Redes Sociais</h4><p>Usa "Denunciar" em cada publicação. Seleciona "Conteúdo ilegal" ou "Fraude".</p></div>
+        <div class="vpn-card" style="border-color:rgba(34,197,94,.3)"><h4 style="color:#22c55e">✅ VPN Legítima vs Ilegal</h4><p>Podes usar VPN para privacidade. O problema é usar para contornar pagamentos de dados das operadoras.</p></div>
+        <div style="margin-top:12px"><button onclick="chatComVPN()" style="width:100%;padding:10px;background:linear-gradient(135deg,#f59e0b,#ef4444);border:none;color:#fff;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-ui)"><i class="fas fa-robot"></i> Perguntar à Zenia como denunciar</button></div>
+      </div>
+    </div>
+    <div style="padding:10px 16px;border-top:1px solid var(--border-color);flex-shrink:0"><button onclick="buscarVPNsAngola()" style="width:100%;padding:9px;background:var(--send-btn);border:none;color:#fff;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-ui)"><i class="fas fa-search"></i> Pesquisar VPNs Ativas (Web Real)</button></div>
+  </div>
+</div>
+
+<!-- THINKING PANEL -->
+<div id="think-panel">
+  <div id="think-panel-header">
+    <div style="display:flex;align-items:center;gap:8px">
+      <i class="fas fa-brain" style="color:#a855f7;font-size:16px"></i>
+      <span style="font-size:14px;font-weight:700">Raciocínio Interno</span>
+      <span id="think-status-badge" class="sbadge" style="font-size:10px;border-color:rgba(168,85,247,.4);color:#a855f7">Pronto</span>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button onclick="clearThinkLog()" style="background:none;border:1px solid var(--border-color);border-radius:5px;cursor:pointer;color:var(--text-muted);font-size:10px;padding:3px 7px;font-family:var(--font-ui)">Limpar</button>
+      <button onclick="toggleThinkPanel()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:18px">&times;</button>
+    </div>
+  </div>
+  <div id="think-log"><div style="font-size:12px;color:var(--text-muted);font-style:italic;text-align:center;padding:30px 14px">Ativa o modo pensamento e envia uma mensagem para ver o raciocínio interno da Zenia.</div></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+<div id="sidebar">
+  <button id="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-chevron-left" id="stg-ic" style="font-size:9px"></i></button>
+  <div id="sidebar-inner">
+    <div style="padding:14px 13px 9px;flex-shrink:0;border-bottom:1px solid var(--border-color)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:#fff;flex-shrink:0">Z</div>
+        <div><div style="font-weight:700;font-size:14px;color:var(--text-primary)">IA-Zenia</div><div style="font-size:10px;color:var(--accent-primary);font-weight:600">v4 · Zenia-Projects</div></div>
+      </div>
+      <button onclick="startNew()" style="width:100%;background:var(--accent-glow);border:1px solid var(--accent-primary);color:var(--accent-primary);padding:7px;border-radius:8px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:var(--font-ui);font-weight:600"><i class="fas fa-plus"></i> Nova Conversa</button>
+    </div>
+    <div id="sidebar-scroll">
+      <!-- RECURSOS -->
+      <div class="sb-section">
+        <button class="sb-section-hdr" onclick="toggleSbSection('recursos')"><span><i class="fas fa-tools" style="color:var(--accent-primary);margin-right:6px;font-size:10px"></i>Recursos</span><i class="fas fa-chevron-down sb-chev" id="chev-recursos" style="font-size:9px"></i></button>
+        <div class="sb-section-body" id="body-recursos">
+          <button onclick="openAdv()" class="sb-item"><i class="fas fa-sliders-h" style="color:var(--accent-primary);width:15px"></i> Ferramentas</button>
+          <button onclick="document.getElementById('websearch-modal').classList.add('open')" class="sb-item"><i class="fas fa-search" style="color:#60a5fa;width:15px"></i> Pesquisa Web</button>
+          <button onclick="openThemeModal()" class="sb-item"><i class="fas fa-palette" style="color:#f59e0b;width:15px"></i> Trocar Tema</button>
+          <button onclick="openPersonality()" class="sb-item"><i class="fas fa-microphone" style="color:#a855f7;width:15px"></i> Voz &amp; Personalidade</button>
+          <button onclick="openVisionModal()" class="sb-item"><i class="fas fa-eye" style="color:#10b981;width:15px"></i> Análise de Imagem</button>
+          <button onclick="openVPNModal()" class="sb-item"><i class="fas fa-shield-alt" style="color:#f59e0b;width:15px"></i> CAÇA VPN Angola</button>
+        </div>
+      </div>
+      <!-- APLICATIVOS -->
+      <div class="sb-section">
+        <button class="sb-section-hdr" onclick="toggleSbSection('apps')"><span><i class="fas fa-th" style="color:#10b981;margin-right:6px;font-size:10px"></i>Aplicativos</span><i class="fas fa-chevron-down sb-chev" id="chev-apps" style="font-size:9px"></i></button>
+        <div class="sb-section-body" id="body-apps">
+          <div style="padding:4px 8px 2px">
+            <div class="apps-grid">
+              <a href="https://api-zenia.netlify.app/" target="_blank" class="app-card">
+                <div class="app-card-icon">🔌</div>
+                <div class="app-card-name">Zénia API</div>
+                <div class="app-card-desc">API oficial da Zenia</div>
+              </a>
+              <a href="https://zenia-3.netlify.app/zedex" target="_blank" class="app-card">
+                <div class="app-card-icon">💻</div>
+                <div class="app-card-name">Zedex Code</div>
+                <div class="app-card-desc">IDE com IA integrada</div>
+              </a>
+              <a href="https://z-projects.netlify.app" target="_blank" class="app-card">
+                <div class="app-card-icon">🚀</div>
+                <div class="app-card-name">Zenia Projects</div>
+                <div class="app-card-desc">Portfólio &amp; projetos</div>
+              </a>
+              <a href="https://ide-zedex.netlify.app/" target="_blank" class="app-card">
+                <div class="app-card-icon">⚙️</div>
+                <div class="app-card-name">IDE Zedex</div>
+                <div class="app-card-desc">Editor online completo</div>
+              </a>
+              <div onclick="askFuture()" class="app-card" style="cursor:pointer">
+                <div class="app-card-icon">🔮</div>
+                <div class="app-card-name">Futuro 2025/26</div>
+                <div class="app-card-desc">Previsões com base em dados</div>
+              </div>
+            </div>
+            <a href="https://ia-zenia.netlify.app/download" target="_blank" class="app-download-btn">
+              <i class="fas fa-download"></i> Baixar IA-Zenia App
+            </a>
+          </div>
+        </div>
+      </div>
+      <!-- HISTÓRICO -->
+      <div class="sb-section">
+        <button class="sb-section-hdr" onclick="toggleSbSection('hist')"><span><i class="fas fa-history" style="color:var(--text-muted);margin-right:6px;font-size:10px"></i>Histórico</span><i class="fas fa-chevron-down sb-chev" id="chev-hist" style="font-size:9px"></i></button>
+        <div class="sb-section-body" id="body-hist">
+          <input id="search-in" type="text" placeholder="Pesquisar..." oninput="filterHist(this.value)" style="width:100%;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:7px;padding:5px 9px;font-size:12px;color:var(--text-primary);outline:none;margin-bottom:6px;font-family:var(--font-msg)">
+          <div id="hist-list"></div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:9px 13px;border-top:1px solid var(--border-color);flex-shrink:0;display:flex;align-items:center;gap:7px">
+      <div style="width:28px;height:28px;background:var(--user-av);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0"><span id="user-initial">U</span></div>
+      <div style="flex:1;overflow:hidden"><div id="uname" style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Utilizador</div><div style="font-size:10px;color:#22c55e">● Online · Zenia v4</div></div>
+    </div>
+  </div>
+</div>
+
+<button id="mob-toggle" onclick="toggleMob()"><i class="fas fa-bars" style="font-size:14px"></i></button>
+<div id="mob-overlay" onclick="toggleMob()"></div>
+<div id="camera-canvas-wrap"><video id="camera-video" autoplay muted playsinline></video><button class="cam-close" onclick="stopCamera()">×</button></div>
+
+<div id="main">
+  <div id="topbar">
+    <div class="tbLeft">
+      <select id="model-sel" style="background:var(--bg-input);border:1px solid var(--border-color);color:var(--text-primary);border-radius:6px;padding:4px 8px;font-size:11px;outline:none">
+        <option value="openai">OpenAI (GPT-4o)</option>
+        <option value="qwen-coder">Qwen 2.5 Coder</option>
+        <option value="mistral">Mistral Nemo</option>
+        <option value="llama">Llama 3.3</option>
+        <option value="gemini">Gemini 1.5</option>
+        <option value="deepseek">DeepSeek R1</option>
+        <option value="evil">Evil Mode</option>
+      </select>
+      <span id="api-st" class="sbadge s-wait"><i class="fas fa-circle" style="font-size:6px"></i> API</span>
+      <span id="web-st" class="sbadge s-web" style="display:none"><i class="fas fa-globe"></i> Web</span>
+      <span id="creator-badge" class="s-creator" style="display:none">CRIADOR</span>
+      <span id="think-badge" class="sbadge" style="display:none;color:#a855f7;border-color:rgba(168,85,247,.4);cursor:pointer" onclick="toggleThinkPanel()"><i class="fas fa-brain" style="font-size:8px"></i> Pensar ON</span>
+      <span id="websearch-badge" class="sbadge" style="display:none;color:#60a5fa;border-color:rgba(96,165,250,.4)"><i class="fas fa-globe" style="font-size:8px"></i> Web ON</span>
+      <span id="cm-badge" class="sbadge" style="display:none;color:#22c55e;border-color:#22c55e40"><i class="fas fa-brain" style="font-size:8px"></i> CM</span>
+    </div>
+    <div class="tbRight">
+      <button class="theme-pill" onclick="openThemeModal()"><i class="fas fa-circle-half-stroke"></i><span id="theme-label">Dark</span></button>
+      <button id="voice-topbar-btn" onclick="toggleVoice()" class="sbadge s-wait" style="cursor:pointer;background:transparent"><i class="fas fa-headset"></i></button>
+    </div>
+  </div>
+
+  <div id="chat-window">
+    <div id="welcome-msg">
+      <div class="z-logo">Z</div>
+      <div style="font-size:22px;font-weight:800">Olá, <span id="welcome-name">amigo</span>!</div>
+      <div style="font-size:13px;color:var(--text-muted);max-width:420px;line-height:1.8">Sou a <strong>Zenia v4</strong>, a tua assistente IA de Angola.<br>Posso gerar imagens, áudio, ficheiros, analisar fotos, escrever código e muito mais.</div>
+      <div style="font-size:11px;color:var(--accent-primary);margin-top:4px;opacity:.7">IA-Zenia v4 · Zenia-Projects · Lubango, Angola</div>
+    </div>
+  </div>
+
+  <div id="pending-image-area" style="display:none;max-width:800px;margin:0 auto;padding:6px 12px">
+    <div id="pending-image-wrap" class="img-preview-wrap"></div>
+  </div>
+
+  <div id="input-area">
+    <div id="input-wrap">
+      <textarea id="user-input" rows="1" placeholder="Fala com a Zenia v4..."></textarea>
+      <div id="input-bottom">
+        <div id="input-bottom-left">
+          <div style="position:relative;display:inline-flex;flex-shrink:0">
+            <button class="ia-btn" id="upload-btn" onclick="togglePlusMenu()"><i class="fas fa-plus" style="color:var(--accent-secondary)"></i></button>
+            <div id="plus-menu">
+              <button class="pmenu-item" onclick="document.getElementById('file-input').click();togglePlusMenu()"><i class="fas fa-image" style="width:16px;color:var(--accent-secondary)"></i> Carregar Imagem</button>
+              <button class="pmenu-item" onclick="document.getElementById('file-any-input').click();togglePlusMenu()"><i class="fas fa-file-upload" style="width:16px;color:#10b981"></i> Importar Ficheiro</button>
+              <button class="pmenu-item" onclick="openThemeModal();togglePlusMenu()"><i class="fas fa-palette" style="width:16px;color:#f59e0b"></i> Trocar Tema</button>
+              <button class="pmenu-item" onclick="clearChat()"><i class="fas fa-trash-alt" style="width:16px;color:#ef4444"></i> Limpar Chat</button>
+            </div>
+          </div>
+          <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(event)">
+          <input type="file" id="file-any-input" accept="image/*,text/*,.pdf,.doc,.docx,.csv" style="display:none" onchange="handleFileAnyUpload(event)">
+          <button class="ia-btn" id="mic-btn" title="Microfone"><i class="fas fa-microphone"></i></button>
+          <button class="ia-btn web-btn" id="web-mode-btn" onclick="toggleWebMode()" title="Busca Web"><i class="fas fa-globe"></i><span class="btn-label">Web</span></button>
+          <button class="ia-btn visao-btn" id="visao-input-btn" onclick="openVisionModal()" title="Visão"><i class="fas fa-eye"></i><span class="btn-label">Visão</span></button>
+          <button class="ia-btn voice-cfg-btn" id="voice-cfg-btn" onclick="openPersonality()" title="Voz"><i class="fas fa-microphone-alt"></i><span class="btn-label">Voz</span></button>
+          <button class="ia-btn pensar-btn" id="pensar-btn" onclick="togglePensarMode()" title="Pensar"><i class="fas fa-brain"></i><span class="btn-label">Pensar</span></button>
+          <button class="ia-btn camera-btn" id="camera-btn" onclick="toggleCamera()" title="Câmera"><i class="fas fa-camera"></i><span class="btn-label">Câmera</span></button>
+          <button class="ia-btn" onclick="openVPNModal()" title="CAÇA VPN Angola" style="color:#f59e0b"><i class="fas fa-shield-alt"></i><span class="btn-label" style="font-size:8px">VPN</span></button>
+        </div>
+        <button id="send-btn" onclick="handleSend()"><i class="fas fa-paper-plane" id="send-ic"></i></button>
+      </div>
+    </div>
+    <div style="max-width:800px;margin:3px auto 0;text-align:center;font-size:10px;color:var(--text-muted);opacity:.4">Zenia v4 pode cometer erros. Verifica informações importantes.</div>
+  </div>
+</div>
+</div>
+
+<div class="adv-ov" id="adv-ov" onclick="closeAdv()"></div>
+<div class="adv-panel" id="adv-panel">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 13px;border-bottom:1px solid var(--border-color);flex-shrink:0">
+    <span style="font-size:14px;font-weight:700"><i class="fas fa-sliders-h" style="color:var(--accent-primary);margin-right:7px"></i>Ferramentas v4</span>
+    <button onclick="closeAdv()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:18px">&times;</button>
+  </div>
+  <div class="adv-tab" id="adv-tabs">
+    <button onclick="switchTab('mem')" class="active">Mem.</button>
+    <button onclick="switchTab('conv')">Conv.</button>
+    <button onclick="switchTab('kb')">KB</button>
+    <button onclick="switchTab('sys')">Sist.</button>
+    <button onclick="switchTab('sec')">Seg.</button>
+  </div>
+  <div class="adv-body" id="adv-body"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ==========================================
+// CONFIG — Endpoints correctos Pollinations
+// ==========================================
+var ZENIA_API='https://gen.pollinations.ai/v1/chat/completions';
+// Imagem: Endpoint autenticado
+var POLLINATIONS_IMAGE_BASE='https://gen.pollinations.ai/image/';
+// Áudio: Endpoint autenticado
+var POLLINATIONS_AUDIO_BASE='https://gen.pollinations.ai/audio/';
+// Visão: Endpoint autenticado (igual ao chat)
+var POLLINATIONS_VISION_API='https://gen.pollinations.ai/v1/chat/completions';
+var POLLO_KEY='pk_7HHmBkBPEiNS5dyF';
+
+// ==========================================
+// ZENIA V4 - DATABASE MODULE
+// ==========================================
+var db2025 = [];
+var db2026 = [];
+var isDbLoaded = false;
+
+async function loadKnowledgeBases() {
+  try {
+    const [res25, res26] = await Promise.all([
+      fetch('db_2025.json').then(r => r.json()),
+      fetch('db_2026.json').then(r => r.json())
+    ]);
+    db2025 = res25;
+    db2026 = res26;
+    isDbLoaded = true;
+    console.log('Zenia v4 DBs loaded:', { 2025: db2025.length, 2026: db2026.length });
+    toast('Zenia v4: Bases de conhecimento 2025/26 carregadas.', 'success');
+  } catch (e) {
+    console.error('Erro ao carregar DBs:', e);
+    toast('Zenia v4: Erro ao carregar dados locais.', 'error');
+  }
+}
+
+// Inicia carregamento
+loadKnowledgeBases();
+
+function searchLocalKnowledge(query) {
+  if (!isDbLoaded) return null;
+  const q = query.toLowerCase();
+  let results = [];
+  
+  // Verifica ano no query
+  const check25 = q.includes('2025');
+  const check26 = q.includes('2026');
+  
+  if (check25 || !check26) { // Prioriza 2025 se 2026 não for explícito, ou ambos
+    db2025.forEach(item => {
+      var cat = (item.category || '').toLowerCase();
+      var tit = (item.title || '').toLowerCase();
+      var cont = (item.content || '').toLowerCase();
+      if (q.includes(cat) || cat.includes(q) || q.includes(tit) || tit.includes(q) || cont.includes(q)) {
+        results.push(`[2025 - ${item.category.toUpperCase()}] ${item.title}: ${item.content}`);
+      }
+    });
+  }
+  
+  if (check26 || !check25) {
+    db2026.forEach(item => {
+      var cat = (item.category || '').toLowerCase();
+      var tit = (item.title || '').toLowerCase();
+      var cont = (item.content || '').toLowerCase();
+      if (q.includes(cat) || cat.includes(q) || q.includes(tit) || tit.includes(q) || cont.includes(q)) {
+        results.push(`[2026 - ${item.category.toUpperCase()}] ${item.title}: ${item.content}`);
+      }
+    });
+  }
+  
+  return results.length > 0 ? results.join('\n\n') : null;
+}
+var POLLO_API='https://pollo.ai/api/platform/generation/pollo/pollo-v2-0';
+var POLLO_STATUS='https://pollo.ai/api/platform/generation/status';
+var CM_URL='https://zenia-3.netlify.app/chat/v2.1/cm.json';
+
+var angolaProvincias={"Bengo":"Capital: Caxito","Benguela":"Capital: Benguela","Bié":"Capital: Kuito","Cabinda":"Capital: Cabinda","Cuando Cubango":"Capital: Menongue","Cuanza Norte":"Capital: N'Dalatando","Cuanza Sul":"Capital: Sumbe","Cunene":"Capital: Ondjiva","Huambo":"Capital: Huambo","Huíla":"Capital: Lubango","Lunda Norte":"Capital: Dundo","Lunda Sul":"Capital: Saurimo","Luanda":"Capital: Luanda","Malanje":"Capital: Malanje","Moxico":"Capital: Luena","Namibe":"Capital: Namibe","Uíge":"Capital: Uíge","Zaire":"Capital: M'Banza Congo"};
+
+// ==========================================
+// THEMES
+// ==========================================
+var THEMES=[
+  {id:'dark',label:'Dark',emoji:'🌙',grad:'linear-gradient(135deg,#0b0d11,#3b5bdb)'},
+  {id:'cyberpunk',label:'Cyber',emoji:'⚡',grad:'linear-gradient(135deg,#0a0010,#bf00ff)'},
+  {id:'aurora',label:'Aurora',emoji:'🌿',grad:'linear-gradient(135deg,#020f0a,#10b981)'},
+  {id:'solar',label:'Solar',emoji:'☀️',grad:'linear-gradient(135deg,#faf8f4,#c4862a)'},
+  {id:'bloodmoon',label:'Blood',emoji:'🔴',grad:'linear-gradient(135deg,#0d0505,#ef4444)'},
+  {id:'ocean',label:'Ocean',emoji:'🌊',grad:'linear-gradient(135deg,#010d1a,#0096c7)'},
+  {id:'violet',label:'Violet',emoji:'🪻',grad:'linear-gradient(135deg,#0d0a1a,#8b5cf6)'},
+  {id:'forest',label:'Forest',emoji:'🌲',grad:'linear-gradient(135deg,#0a110a,#66bb6a)'},
+  {id:'rose',label:'Rose',emoji:'🌹',grad:'linear-gradient(135deg,#0f050a,#ff3377)'}
+];
+
+// ==========================================
+// STATE
+// ==========================================
+var convs=JSON.parse(localStorage.getItem('zn_convs')||'[]');
+var curConvId=null;
+var voiceOn=false;
+var creatorMode=false;
+var advTab='mem';
+var sbColl=false;
+var sbMobOpen=false;
+var userName=localStorage.getItem('zn_username')||'';
+var currentTheme=localStorage.getItem('zn_theme')||'dark';
+var selectedSetupTheme='dark';
+var visionImageData=null;
+var zeniaPersonality={tone:'amigavel',detailLevel:'medio'};
+var voiceConfig={voiceIndex:-1,rate:1,pitch:1,volume:1,pause:300};
+var factoryMemory='';
+var pendingImageBase64=null;
+var pensarMode=false;
+var webSearchMode=false;
+var cameraStream=null;
+var cameraOn=false;
+var thinkPanelOpen=false;
+var thinkLog=[];
+var isStreaming=false;
+
+var chatEl=document.getElementById('chat-window');
+var inputEl=document.getElementById('user-input');
+var sendBtn=document.getElementById('send-btn');
+var sendIc=document.getElementById('send-ic');
+
+// REGEX
+var VID_RX=/\b(gera|gere|gerar|cria|criar|faz|fazer|mostra|quero\s+ver|faz-me)\s+um?\s*(video|filme|clip|animacao|animação|gif|cena|movie)\b/i;
+var IMG_RX=/\b(gera|gere|gerar|cria|criar|crie|faz|fazer|desenha|desenhe|pinta|pinte|mostra|ilustra|produz|gere-me|cria-me|faz-me)\s+(um?a?\s+)?(imagem|foto|fotografia|image|picture|desenho|wallpaper|arte|avatar|paisagem|retrato|quadro|pintura|ilustra[cç][aã]o|thumbnail|banner|poster|logo|icon|capa)\b/i;
+var AUD_RX=/\b(gera|gere|gerar|cria|criar|faz|fazer|produz|sintetiza)\s+(um?a?\s+)?(audio|áudio|voz|narração|narracao|som|fala|speech|tts|leitura\s+em\s+voz)\b/i;
+var FILE_RX=/\b(gera|gere|gerar|cria|criar|faz|fazer|produz|exporta|escreve|elabora)\s+(um?a?\s+)?(ficheiro|arquivo|documento|relatorio|relatório|doc|docx|word|excel|xlsx|planilha|tabela|powerpoint|pptx|apresenta[cç][aã]o|pdf|zip|csv)\b/i;
+var CODE_RX=/\b(codigo|código|code|script|funcao|função|function|html|css|javascript|python|java|sql|php|bash|react|algoritmo|classe|programa|aplicacao|website|backend|frontend|api)\b/i;
+
+function extractImgPrompt(text){return text.replace(/\b(gera|gere|gerar|cria|criar|crie|faz|fazer|desenha|pinta|mostra|ilustra|produz|gere-me|cria-me|faz-me|quero\s+ver)\s+/gi,'').replace(/\bum?a?\s+/gi,'').replace(/\b(imagem|foto|fotografia|image|picture|desenho|wallpaper|arte|avatar|paisagem|retrato|quadro|pintura|ilustração|thumbnail|banner|poster|logo|icon|capa)\s*(de|do|da|com|sobre)?\s*/gi,'').trim()||text;}
+
+(function(){var ss=document.getElementById('setup-screen');if(localStorage.getItem('zn_username')){if(ss)ss.style.display='none';}else{if(ss)ss.style.display='flex';}})();
+
+// ==========================================
+// THEMES
+// ==========================================
+function buildThemeGrids(){
+  ['setup-theme-grid','modal-theme-grid'].forEach(gid=>{
+    var el=document.getElementById(gid);if(!el)return;
+    el.innerHTML=THEMES.map(t=>`<div><div class="theme-dot ${currentTheme===t.id?'active':''}" onclick="selectThemeFromGrid(this,'${t.id}','${gid}')" style="background:${t.grad}"><div class="theme-dot-inner">${t.emoji}</div></div><div class="theme-name">${t.label}</div></div>`).join('');
+  });
+}
+function selectThemeFromGrid(el,theme,gid){document.querySelectorAll('#'+gid+' .theme-dot').forEach(d=>d.classList.remove('active'));el.classList.add('active');if(gid==='setup-theme-grid')selectedSetupTheme=theme;applyTheme(theme);}
+function applyTheme(theme){document.body.setAttribute('data-theme',theme);currentTheme=theme;localStorage.setItem('zn_theme',theme);var t=THEMES.find(x=>x.id===theme);var lbl=document.getElementById('theme-label');if(lbl)lbl.textContent=t?t.label:'Dark';buildThemeGrids();}
+function openThemeModal(){document.getElementById('theme-modal').classList.add('open');}
+function closeThemeModal(){document.getElementById('theme-modal').classList.remove('open');}
+
+// ==========================================
+// SETUP
+// ==========================================
+function completeSetup(){
+  var si=document.getElementById('setup-name');var name=(si.value||'').trim();
+  if(!name){si.style.borderColor='#ef4444';si.focus();setTimeout(()=>si.style.borderColor='',2000);return;}
+  userName=name;localStorage.setItem('zn_username',name);applyTheme(selectedSetupTheme);
+  document.getElementById('setup-screen').style.display='none';initApp();
+}
+
+// ==========================================
+// SIDEBAR SECTIONS
+// ==========================================
+function toggleSbSection(id){var body=document.getElementById('body-'+id),chev=document.getElementById('chev-'+id);if(!body)return;var collapsed=body.classList.toggle('collapsed');if(chev)chev.classList.toggle('rotated',collapsed);try{var st=JSON.parse(localStorage.getItem('zn_sb_sections')||'{}');st[id]=collapsed;localStorage.setItem('zn_sb_sections',JSON.stringify(st));}catch(e){}}
+function initSbSections(){try{var st=JSON.parse(localStorage.getItem('zn_sb_sections')||'{}');Object.keys(st).forEach(id=>{if(st[id]){var b=document.getElementById('body-'+id),c=document.getElementById('chev-'+id);if(b)b.classList.add('collapsed');if(c)c.classList.add('rotated');}});}catch(e){}}
+
+// ==========================================
+// CM.JSON
+// ==========================================
+async function loadFactoryMemory(){
+  try{var r=await fetch(CM_URL,{cache:'no-cache'});if(r.ok){var d=await r.json();var items=d.itens||d.items||d.dialogos||[];var codigos=d.codigos||[];var infos=d.informacoes||d.info||[];var parts=[];if(items.length)parts.push('DIÁLOGOS:\n'+items.map(i=>'- '+(i.txt||i.texto||i.content||JSON.stringify(i))).join('\n'));if(infos.length)parts.push('INFO CRIADOR:\n'+infos.map(i=>'- '+(i.txt||i.texto||JSON.stringify(i))).join('\n'));if(parts.length){factoryMemory='MEMÓRIA DE FÁBRICA:\n'+parts.join('\n\n');var cb=document.getElementById('cm-badge');if(cb)cb.style.display='inline-flex';}}}catch(e){}
+}
+
+// ==========================================
+// INIT
+// ==========================================
+window.addEventListener('load',async function(){
+  applyTheme(currentTheme);buildThemeGrids();loadVoices();
+  await loadFactoryMemory();
+  if(userName){document.getElementById('setup-screen').style.display='none';initApp();}
+  else{document.getElementById('setup-screen').style.display='flex';}
+  inputEl.addEventListener('input',()=>autoResize(inputEl));
+  inputEl.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend();}});
+  if(window.speechSynthesis)window.speechSynthesis.onvoiceschanged=loadVoices;
+  inputEl.addEventListener('focus',()=>{setTimeout(()=>{chatEl.scrollTop=chatEl.scrollHeight;},300);});
+});
+
+function initApp(){
+  var wn=document.getElementById('welcome-name');if(wn)wn.textContent=userName||'amigo';
+  var un=document.getElementById('uname');if(un)un.textContent=userName||'Utilizador';
+  var ui=document.getElementById('user-initial');if(ui)ui.textContent=(userName||'U').charAt(0).toUpperCase();
+  initSbSections();renderHist();startNew();setApiSt('ok');
+}
+
+// ==========================================
+// WEB SEARCH MODE
+// ==========================================
+function toggleWebMode(){webSearchMode=!webSearchMode;var btn=document.getElementById('web-mode-btn'),badge=document.getElementById('websearch-badge');btn.classList.toggle('ativo',webSearchMode);if(badge)badge.style.display=webSearchMode?'inline-flex':'none';inputEl.placeholder=webSearchMode?'Pergunta com busca web ativa...':'Fala com a Zenia v4...';toast(webSearchMode?'🌐 Busca Web ATIVA':'Busca Web desativada',webSearchMode?'ok':'warn');}
+
+async function performWebSearch(query){
+  document.getElementById('web-st').style.display='inline-flex';
+  var results=[];
+  try{var r=await fetch('https://api.duckduckgo.com/?q='+encodeURIComponent(query)+'&format=json&no_html=1&skip_disambig=1',{signal:AbortSignal.timeout(8000)});if(r.ok){var d=await r.json();if(d.Answer)results.push({title:'Resposta Direta',text:d.Answer,url:''});if(d.AbstractText)results.push({title:d.Heading||query,text:d.AbstractText,url:d.AbstractURL||''});if(d.RelatedTopics)d.RelatedTopics.slice(0,4).forEach(t=>{if(t.Text)results.push({title:t.Text.substring(0,60),text:t.Text,url:t.FirstURL||''});});}}catch(e){}
+  if(results.length<2){try{var wq=encodeURIComponent(query.split(' ').slice(0,4).join(' '));var wr=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+wq,{signal:AbortSignal.timeout(6000)});if(wr.ok){var wd=await wr.json();if(wd.extract)results.push({title:wd.title,text:wd.extract,url:wd.content_urls?.desktop?.page||''});}}catch(e){}}
+  document.getElementById('web-st').style.display='none';
+  return results;
+}
+function webResultsToContext(results,query){if(!results.length)return'';return '[PESQUISA WEB: "'+query+'"]\n'+results.map((r,i)=>'['+(i+1)+'] '+r.title+':\n'+r.text.substring(0,400)).join('\n\n')+'\n[FIM PESQUISA WEB]\n\n';}
+
+async function doWebSearch(){var q=document.getElementById('web-query').value.trim();if(!q)return;var resDiv=document.getElementById('websearch-results');resDiv.innerHTML='<div style="padding:10px;text-align:center;color:var(--text-muted);font-size:12px"><span class="spin"></span> Pesquisando...</div>';var results=await performWebSearch(q);if(!results.length){resDiv.innerHTML='<div style="padding:10px;color:var(--text-muted);font-size:12px">Sem resultados.</div>';return;}var html='<div style="font-size:12px">';results.forEach(r=>{html+=`<div style="padding:8px;background:var(--bg-primary);border-radius:7px;margin-bottom:7px;border:1px solid var(--border-color)"><div style="font-weight:600;color:var(--accent-primary);margin-bottom:3px">${escHtml(r.title)}</div><div style="color:var(--text-secondary);line-height:1.5">${escHtml(r.text.substring(0,300))}</div>${r.url?`<a href="${r.url}" target="_blank" style="font-size:10px;color:#60a5fa;margin-top:4px;display:inline-block">${r.url.substring(0,60)}</a>`:''}</div>`;});html+='<button onclick="sendWebResultsToChat(\''+escHtml(q.replace(/'/g,"\\\'"))+'\')" style="width:100%;padding:8px;background:var(--send-btn);border:none;color:#fff;border-radius:6px;font-size:12px;cursor:pointer;margin-top:6px"><i class="fas fa-robot"></i> Enviar para a Zenia analisar</button></div>';resDiv.innerHTML=html;}
+async function sendWebResultsToChat(query){document.getElementById('websearch-modal').classList.remove('open');hideWelcome();inputEl.value=query;autoResize(inputEl);var tempWebMode=webSearchMode;webSearchMode=true;await handleSend();webSearchMode=tempWebMode;}
+
+// ==========================================
+// VPN
+// ==========================================
+function openVPNModal(){document.getElementById('vpn-modal').classList.add('open');buscarVPNsAngola();}
+var vpnDatabase=[
+  {nome:'HttpInjector',risco:'ALTO',descricao:'App Android que usa SSH/HTTP para contornar pagamentos. Partilhada em grupos de Facebook e Telegram.',plataformas:'Facebook, Telegram, WhatsApp',denuncia:'Reporta o ficheiro .ehi onde foi partilhado. Envia print + link para operadora e INACOM.',tecnica:'HTTP Payload Injection / SSH Tunneling'},
+  {nome:'HTTP Custom (HCA)',risco:'ALTO',descricao:'VPN com payload HTTP personalizado. Vídeos tutoriais no TikTok Angola ensinam a usar.',plataformas:'TikTok Angola, Facebook, YouTube',denuncia:'Reporta vídeos tutoriais. Denuncia grupos com prints.',tecnica:'HTTP Proxy / Custom Payload'},
+  {nome:'NapsternetV',risco:'ALTO',descricao:'App com configs partilhadas em Telegram. Usa servidores que roubam dados.',plataformas:'Telegram, WhatsApp',denuncia:'Reporta canais Telegram. Informa operadora com nome do servidor.',tecnica:'V2Ray / SSH / VPN Tunneling'},
+  {nome:'OpenVPN + Configs',risco:'MÉDIO',descricao:'OpenVPN é legítimo, mas configs .ovpn "gratuitas para Angola" exploram brechas.',plataformas:'GitHub, Telegram, blogs',denuncia:'Denuncia repositórios GitHub e blogs com configs para Angola.',tecnica:'OpenVPN Protocol Bypass'},
+  {nome:'Psiphon',risco:'MÉDIO',descricao:'Ferramenta anti-censura usada indevidamente como "net grátis".',plataformas:'Facebook, WhatsApp',denuncia:'Contacta operadora se detectares uso massivo.',tecnica:'SSH / VPN / L2TP'},
+  {nome:'ProxyDroid',risco:'ALTO',descricao:'Apps de proxy gratuito que prometem net grátis. Roubam credenciais.',plataformas:'Telegram (APK pirata)',denuncia:'Denuncia na Google Play + grupos que partilham APK.',tecnica:'HTTP/SOCKS Proxy'}
+];
+async function buscarVPNsAngola(){
+  var status=document.getElementById('vpn-search-status'),area=document.getElementById('vpn-results-area');
+  if(status)status.style.display='block';if(area)area.innerHTML='';
+  var msg=document.getElementById('vpn-search-msg');var queries=['VPN net grátis Angola 2025','HttpInjector Angola','HTTP Custom Angola free net','VPN grátis Angola Unitel'];
+  var allResults=[];
+  for(var i=0;i<queries.length;i++){if(msg)msg.textContent='Pesquisando: "'+queries[i]+'"...';try{var r=await fetch('https://api.duckduckgo.com/?q='+encodeURIComponent(queries[i])+'&format=json&no_html=1',{signal:AbortSignal.timeout(7000)});if(r.ok){var d=await r.json();if(d.RelatedTopics)d.RelatedTopics.slice(0,3).forEach(t=>{if(t.Text&&t.FirstURL)allResults.push({text:t.Text,url:t.FirstURL});});}}catch(e){}await new Promise(res=>setTimeout(res,250));}
+  if(status)status.style.display='none';
+  var html='<div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:10px">VPNs Identificadas</div>';
+  vpnDatabase.forEach(v=>{var rc=v.risco==='ALTO'?'#ef4444':'#fbbf24';html+=`<div class="vpn-card" style="border-color:rgba(239,68,68,.3);margin-bottom:10px"><div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px"><h4>${escHtml(v.nome)}</h4><span style="font-size:10px;font-weight:700;color:${rc};border:1px solid ${rc};padding:1px 7px;border-radius:10px;flex-shrink:0;margin-left:8px">${v.risco}</span></div><p style="margin-bottom:6px">${escHtml(v.descricao)}</p><div style="font-size:11px;margin-bottom:3px;color:#60a5fa"><i class="fas fa-microchip"></i> ${escHtml(v.tecnica)}</div><div style="font-size:11px;color:#fbbf24;margin-bottom:3px"><i class="fas fa-share-alt"></i> ${escHtml(v.plataformas)}</div><div style="font-size:11px;color:#22c55e"><i class="fas fa-flag"></i> ${escHtml(v.denuncia)}</div></div>`;});
+  if(allResults.length>0){html+='<div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin:12px 0 8px">Resultados Web Tempo Real</div>';allResults.slice(0,6).forEach(r=>{html+=`<div style="padding:8px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:7px;margin-bottom:5px"><div style="font-size:11px;color:var(--text-secondary);line-height:1.5">${escHtml(r.text.substring(0,200))}</div><a href="${escHtml(r.url)}" target="_blank" style="font-size:10px;color:#60a5fa">${r.url.substring(0,60)}</a></div>`;});}
+  if(area)area.innerHTML=html;
+}
+function chatComVPN(){document.getElementById('vpn-modal').classList.remove('open');hideWelcome();inputEl.value='Como devo denunciar formalmente uma VPN de "net grátis" em Angola? Quero saber exatamente o que escrever ao INACOM e às operadoras.';autoResize(inputEl);setTimeout(handleSend,100);}
+
+// ==========================================
+// VOICE
+// ==========================================
+function loadVoices(){var voices=window.speechSynthesis?window.speechSynthesis.getVoices():[];var sel=document.getElementById('voice-select');if(!sel)return;sel.innerHTML='';var ptV=voices.filter(v=>v.lang.startsWith('pt')),others=voices.filter(v=>!v.lang.startsWith('pt'));if(ptV.length){var g1=document.createElement('optgroup');g1.label='Português';ptV.forEach(v=>{var o=document.createElement('option');o.value=voices.indexOf(v);o.textContent=v.name+' ('+v.lang+')';g1.appendChild(o);});sel.appendChild(g1);}if(others.length){var g2=document.createElement('optgroup');g2.label='Outras';others.slice(0,20).forEach(v=>{var o=document.createElement('option');o.value=voices.indexOf(v);o.textContent=v.name+' ('+v.lang+')';g2.appendChild(o);});sel.appendChild(g2);}if(!voices.length)sel.innerHTML='<option value="-1">Padrão</option>';}
+function updateVoiceConfig(){voiceConfig.voiceIndex=parseInt(document.getElementById('voice-select').value)||0;voiceConfig.rate=parseFloat(document.getElementById('voice-rate').value)||1;voiceConfig.pitch=parseFloat(document.getElementById('voice-pitch').value)||1;voiceConfig.volume=parseFloat(document.getElementById('voice-vol').value)||1;voiceConfig.pause=parseInt(document.getElementById('voice-pause').value)||300;}
+function previewVoice(){updateVoiceConfig();speakTxtFull('Olá '+userName+'! Eu sou a Zenia versão 3, a tua assistente inteligente feita em Angola. Como posso ajudar-te hoje?');}
+function stopVoice(){if(window.speechSynthesis)speechSynthesis.cancel();}
+function speakTxtFull(txt){if(!window.speechSynthesis)return;speechSynthesis.cancel();var clean=txt.replace(/```[\s\S]*?```/g,'[código omitido]').replace(/`[^`]+`/g,'').replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1').replace(/^#{1,6}\s+/gm,'').replace(/<[^>]+>/g,'');var sentences=clean.replace(/([.!?])\s+/g,'$1\n').replace(/([,:;])\s+/g,'$1\n').split('\n').map(s=>s.trim()).filter(s=>s.length>0);if(!sentences.length)return;var idx=0;function next(){if(idx>=sentences.length)return;var sent=sentences[idx];idx++;var u=new SpeechSynthesisUtterance(sent);var voices=speechSynthesis.getVoices();if(voiceConfig.voiceIndex>=0&&voices[voiceConfig.voiceIndex])u.voice=voices[voiceConfig.voiceIndex];else{var ptv=voices.find(v=>v.lang==='pt-PT')||voices.find(v=>v.lang.startsWith('pt'));if(ptv)u.voice=ptv;}u.lang='pt-PT';u.rate=voiceConfig.rate;u.pitch=voiceConfig.pitch;u.volume=voiceConfig.volume;var pauseMs=voiceConfig.pause;if(/[.!?]$/.test(sent))pauseMs*=1.5;else if(/[,;:]$/.test(sent))pauseMs*=0.6;u.onend=()=>{if(idx<sentences.length)setTimeout(next,pauseMs);};u.onerror=()=>setTimeout(next,80);speechSynthesis.speak(u);}next();}
+
+// ==========================================
+// PERSONALITY
+// ==========================================
+function openPersonality(){document.getElementById('personality-modal').classList.add('open');updatePersonalityUI();loadVoices();}
+function closePersonality(){document.getElementById('personality-modal').classList.remove('open');}
+function updatePersonalityUI(){document.querySelectorAll('[data-tone]').forEach(b=>b.classList.toggle('active',b.getAttribute('data-tone')===zeniaPersonality.tone));document.querySelectorAll('[data-level]').forEach(b=>b.classList.toggle('active',b.getAttribute('data-level')===zeniaPersonality.detailLevel));}
+function setPersonality(t){zeniaPersonality.tone=t;updatePersonalityUI();}
+function setDetailLevel(l){zeniaPersonality.detailLevel=l;updatePersonalityUI();}
+
+// ==========================================
+// TEXT FORMATTING
+// ==========================================
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function hlCode(code,lang){try{if(lang&&hljs.getLanguage(lang))return hljs.highlight(code,{language:lang}).value;return hljs.highlightAuto(code).value;}catch(e){return escHtml(code);}}
+function fmtText(raw){
+  var codeStore={};
+  var h=raw.replace(/```([^\n`]*)\n?([\s\S]*?)```/g,function(_,lang,code){
+    var uid='\x00CODE'+(Math.random().toString(36).slice(2,10))+'\x00';var id='c'+Math.random().toString(36).slice(2,8);
+    var hl=hlCode(code.trim(),lang);var exts={python:'.py',javascript:'.js',html:'.html',css:'.css',java:'.java',typescript:'.ts',sql:'.sql',bash:'.sh',json:'.json',c:'.c',cpp:'.cpp',php:'.php'};var ext=exts[(lang||'').toLowerCase()]||'.txt';
+    codeStore[uid]='<div class="code-block"><div class="code-hdr"><span class="code-lang">'+escHtml(lang||'código')+'</span><div style="display:flex;gap:5px"><button class="copy-btn" onclick="cpCode(\''+id+'\')"><i class="fas fa-copy"></i> Copiar</button><button class="copy-btn" onclick="downloadCode(\''+id+'\',\'code'+ext+'\')"><i class="fas fa-download"></i></button></div></div><pre><code id="'+id+'" class="hljs">'+hl+'</code></pre></div>';
+    return uid;
+  });
+  var inlineStore={};
+  h=h.replace(/`([^`\n]+)`/g,function(_,code){var uid='\x00IL'+Math.random().toString(36).slice(2,10)+'\x00';inlineStore[uid]='<code class="inline-code">'+escHtml(code)+'</code>';return uid;});
+  h=h.replace(/^#{1,6}\s+/gm,'');
+  h=h.replace(/\*\*\*(.+?)\*\*\*/g,'<strong>$1</strong>');
+  h=h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  h=h.replace(/(?<![*_])\*([^*\n]+?)\*(?![*_])/g,'$1');
+  h=h.replace(/_{2}(.+?)_{2}/g,'<strong>$1</strong>');
+  h=h.replace(/(?<!_)_([^_\n]+?)_(?!_)/g,'$1');
+  h=h.replace(/(?<![:/\w\\])\b(\d+)\s*\/\s*(\d+)\b(?!\w)/g,'<span style="display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 2px"><span style="border-bottom:1px solid currentColor;padding:0 3px;font-size:.85em">$1</span><span style="padding:0 3px;font-size:.85em">$2</span></span>');
+  h=h.replace(/(\w+)\^(\d+)/g,'$1<sup>$2</sup>');
+  h=h.replace(/^[\-•]\s+(.+)$/gm,'<li style="margin:3px 0">$1</li>');
+  h=h.replace(/^(\d+)\.\s+(.+)$/gm,'<li style="margin:3px 0;list-style:decimal">$2</li>');
+  h=h.replace(/((<li[^>]*>.*?<\/li>\n?)+)/g,'<ul style="padding-left:18px;margin:6px 0">$1</ul>');
+  h=h.replace(/\n/g,'<br>');
+  Object.keys(inlineStore).forEach(k=>{h=h.split(k).join(inlineStore[k]);});
+  Object.keys(codeStore).forEach(k=>{h=h.split(k).join(codeStore[k]);});
+  return h;
+}
+function cpCode(id){var el=document.getElementById(id);if(!el)return;navigator.clipboard.writeText(el.innerText);toast('Copiado!','ok');}
+function downloadCode(id,fn){var el=document.getElementById(id);if(!el)return;var b=new Blob([el.innerText],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fn||'code.txt';a.click();}
+
+// ==========================================
+// STREAMING TEXT
+// ==========================================
+async function streamText(bbl,fullText,onDone){
+  isStreaming=true;
+  var oldCursor=bbl.querySelector('.streaming-cursor');if(oldCursor)oldCursor.remove();
+  var cursor=document.createElement('span');cursor.className='streaming-cursor';bbl.appendChild(cursor);
+  var hasCode=/```/.test(fullText);var delay=hasCode?5:16;
+  var tokens=[];var i=0;var tmp='';
+  while(i<fullText.length){var ch=fullText[i];tmp+=ch;if(ch===' '||ch==='\n'||tmp.length>=4){tokens.push(tmp);tmp='';}i++;}
+  if(tmp)tokens.push(tmp);
+  var displayed='';var tokenIdx=0;
+  return new Promise(resolve=>{
+    function step(){
+      if(!isStreaming){cursor.remove();bbl.innerHTML=fmtText(fullText);if(onDone)onDone();resolve();return;}
+      var batch=hasCode?12:3;var added=0;
+      while(tokenIdx<tokens.length&&added<batch){displayed+=tokens[tokenIdx];tokenIdx++;added+=tokens[tokenIdx-1]?.length||1;}
+      cursor.remove();bbl.innerHTML=fmtText(displayed);
+      cursor=document.createElement('span');cursor.className='streaming-cursor';bbl.appendChild(cursor);
+      chatEl.scrollTop=chatEl.scrollHeight;
+      if(tokenIdx<tokens.length){setTimeout(step,delay);}
+      else{setTimeout(()=>{cursor.remove();bbl.innerHTML=fmtText(fullText);chatEl.scrollTop=chatEl.scrollHeight;isStreaming=false;if(onDone)onDone();resolve();},80);}
+    }
+    setTimeout(step,10);
+  });
+}
+
+// ==========================================
+// PENSAMENTO PROFUNDO
+// ==========================================
+function togglePensarMode(){pensarMode=!pensarMode;var btn=document.getElementById('pensar-btn'),badge=document.getElementById('think-badge');btn.classList.toggle('ativo',pensarMode);if(badge)badge.style.display=pensarMode?'inline-flex':'none';toast(pensarMode?'🧠 Pensamento Profundo ATIVO':'Pensamento desativado',pensarMode?'ok':'warn');if(pensarMode)openThinkPanel();}
+function openThinkPanel(){thinkPanelOpen=true;document.getElementById('think-panel').classList.add('open');}
+function toggleThinkPanel(){thinkPanelOpen=!thinkPanelOpen;document.getElementById('think-panel').classList.toggle('open',thinkPanelOpen);}
+
+function addThinkStep(msg,type,innerThought,duration){
+  type=type||'thinking';
+  var ts=new Date().toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  thinkLog.push({msg,type,ts,innerThought,duration});
+  renderThinkLog();
+  var log=document.getElementById('think-log');if(log)log.scrollTop=log.scrollHeight;
+}
+function renderThinkLog(){
+  var log=document.getElementById('think-log');if(!log)return;
+  if(!thinkLog.length){log.innerHTML='<div style="font-size:12px;color:var(--text-muted);font-style:italic;text-align:center;padding:30px 14px">Sem passos ainda.</div>';return;}
+  log.innerHTML=thinkLog.map((s,idx)=>`
+    <div class="think-step ${s.type}">
+      <div class="ts" style="display:flex;justify-content:space-between"><span>${s.ts}</span>${s.duration?`<span style="color:var(--accent-primary);font-size:9px">${s.duration}</span>`:''}</div>
+      <div style="font-size:12px;font-weight:${s.type==='done'?'600':'400'}">${escHtml(s.msg)}</div>
+      ${s.innerThought?`<div class="think-inner-text">${escHtml(s.innerThought)}</div>`:''}
+    </div>`).join('');
+}
+function clearThinkLog(){thinkLog=[];renderThinkLog();}
+
+async function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+async function deepThink(userQuery){
+  clearThinkLog();if(!thinkPanelOpen)openThinkPanel();
+  var badge=document.getElementById('think-status-badge');if(badge){badge.textContent='A pensar...';badge.style.color='#f59e0b';}
+  var t0=Date.now();
+  var isCode=CODE_RX.test(userQuery);var isImg=IMG_RX.test(userQuery);var isWeb=webSearchMode;
+  var words=userQuery.split(' ').length;var chars=userQuery.length;
+
+  addThinkStep('Lendo e processando a entrada...','thinking',`Recebi: "${userQuery.substring(0,120)}${userQuery.length>120?'...':''}".\n\nComprimento: ${words} palavras, ${chars} caracteres.\nVou analisar o que o utilizador realmente precisa antes de responder.`);
+  await sleep(300+Math.random()*200);
+
+  var domains=[];
+  if(isCode)domains.push('programação/código');if(isImg)domains.push('geração de imagem');if(isWeb)domains.push('pesquisa web');if(/angola|luanda|kwanza|unitel|africell/i.test(userQuery))domains.push('contexto Angola');if(!domains.length)domains.push('conhecimento geral');
+  addThinkStep('Identificando domínio e tipo de pedido...','inner',`Domínios identificados: ${domains.join(', ')}\nTipo: ${isCode?'Código — vou escrever completo e funcional':isImg?'Imagem — vou criar prompt otimizado em inglês':'Resposta verbal — vou estruturar bem'}`);
+  await sleep(350+Math.random()*200);
+
+  var mem=getMem();var memKeys=Object.keys(mem);var conv=getConv();var histLen=conv?conv.messages.length:0;
+  var memInfo=memKeys.length>0?`Tenho ${memKeys.length} memória(s) do utilizador.`:'Sem memórias específicas guardadas.';
+  addThinkStep('Verificando memória e contexto da conversa...','inner',`${memInfo}\nHistórico actual: ${histLen} mensagens.\n${factoryMemory?'Memória de fábrica (cm.json) carregada.':''}`);
+  await sleep(280+Math.random()*150);
+
+  var strategy=isCode?'Código COMPLETO e funcional. NUNCA usar "...". Se longo, divido em partes numeradas mas completas.'
+    :isImg?'Criar prompt em inglês, adicionar qualidade e estilo, enviar para Pollinations AI.'
+    :isWeb?'Pesquisar na web, analisar resultados, sintetizar numa resposta clara e actualizada.'
+    :'Responder em Português de Angola, estruturado e adequado ao nível de detalhe pedido.';
+  addThinkStep('Definindo estratégia de resposta...','inner',`Estratégia: ${strategy}\nTom: ${zeniaPersonality.tone} | Detalhe: ${zeniaPersonality.detailLevel}`);
+  await sleep(300+Math.random()*200);
+
+  var elapsed=((Date.now()-t0)/1000).toFixed(1);
+  addThinkStep('Pronto para gerar a resposta','done',`Tempo de raciocínio: ${elapsed}s\n✓ Domínio: ${domains[0]}\n✓ Contexto carregado\n✓ Estratégia definida\n\nA gerar resposta agora...`,elapsed+'s');
+  if(badge){badge.textContent='Concluído ('+elapsed+'s)';badge.style.color='#22c55e';}
+  return {isCode,isImg,isWeb};
+}
+
+// ==========================================
+// CAMERA
+// ==========================================
+function toggleCamera(){if(cameraOn)stopCamera();else startCamera();}
+async function startCamera(){try{var stream=await navigator.mediaDevices.getUserMedia({video:{width:160,height:160,facingMode:'user'},audio:false});cameraStream=stream;cameraOn=true;var video=document.getElementById('camera-video');video.srcObject=stream;document.getElementById('camera-canvas-wrap').style.display='block';document.getElementById('camera-btn').classList.add('ativo');toast('📷 Câmera ativa!','ok');}catch(e){toast('Erro câmera: '+e.message,'err');}}
+function stopCamera(){if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null;}cameraOn=false;var video=document.getElementById('camera-video');video.srcObject=null;document.getElementById('camera-canvas-wrap').style.display='none';document.getElementById('camera-btn').classList.remove('ativo');}
+async function captureFrame(){if(!cameraOn)return null;var video=document.getElementById('camera-video');if(video.readyState<2)return null;var canvas=document.createElement('canvas');canvas.width=320;canvas.height=240;var ctx=canvas.getContext('2d');ctx.drawImage(video,0,0,320,240);return canvas.toDataURL('image/jpeg',0.7);}
+
+// ==========================================
+// API - STREAMING & FALLBACK
+// ==========================================
+async function fetchAI(msgs, model, attempt, onChunk) {
+  attempt = attempt || 1;
+  // Mapeamento de modelos
+  var modelMap = {
+    'openai': 'openai',
+    'gemini-large': 'gemini-large',
+    'qwen-coder': 'qwen-coder',
+    'mistral': 'mistral',
+    'deepseek': 'deepseek',
+    'openai-large': 'openai-large',
+    'llama': 'llama',
+    'gemini': 'gemini',
+    'evil': 'evil'
+  };
+  var useModel = modelMap[model] || 'gemini-large';
+
+  // 1. Injeção de conhecimento local e System Prompt
+  var finalMsgs = [];
+  var sysMsg = msgs.find(m => m.role === 'system');
+  var sysContent = sysMsg ? sysMsg.content : '';
+
+  // Zenia v4: Injeção de Conhecimento Local
+  var lastUserMsg = msgs.slice().reverse().find(m => m.role === 'user');
+  if (lastUserMsg) {
+    var contentStr = '';
+    if (typeof lastUserMsg.content === 'string') contentStr = lastUserMsg.content;
+    else if (Array.isArray(lastUserMsg.content)) contentStr = lastUserMsg.content.find(c => c.type === 'text')?.text || '';
+
+    var localInfo = searchLocalKnowledge(contentStr);
+    if (localInfo) {
+      console.log('Zenia v4: Conhecimento local injetado.');
+      sysContent += '\n\n[CONHECIMENTO_LOCAL_OFICIAL_ANGOLA]\n' + localInfo + '\n[FIM_CONHECIMENTO]\n';
+    }
+  }
+
+  if (sysContent) finalMsgs.push({ role: 'system', content: sysContent });
+  msgs.filter(m => m.role !== 'system').forEach(m => finalMsgs.push(m));
+
+  // Payload com Stream Ativo
+  var payload = {
+    model: useModel,
+    messages: finalMsgs,
+    max_tokens: 8192, // Máximo permitido
+    temperature: 0.7,
+    stream: true // Ativa SSE
+  };
+
+  try {
+    var ctrl = new AbortController();
+    // Timeout estendido para 10 minutos (600s) para lidar com VPN lenta
+    var tid = setTimeout(() => ctrl.abort(), 600000); 
+
+    var r = await fetch(ZENIA_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + POLLO_KEY
+      },
+      body: JSON.stringify(payload),
+      signal: ctrl.signal
+    });
+
+    clearTimeout(tid);
+
+    if (!r.ok) {
+      var errText = await r.text();
+      throw new Error('HTTP ' + r.status + ' - ' + errText);
+    }
+
+    // Processamento de Stream SSE
+    var reader = r.body.getReader();
+    var decoder = new TextDecoder('utf-8');
+    var done = false;
+    var fullText = '';
+
+    while (!done) {
+      var { value, done: doneReading } = await reader.read();
+      done = doneReading;
+      if (value) {
+        var chunk = decoder.decode(value, { stream: true });
+        // Pollinations/OpenAI envia linhas com "data: "
+        var lines = chunk.split('\n');
+        for (var line of lines) {
+          line = line.trim();
+          if (line.startsWith('data: ')) {
+            var dataStr = line.replace('data: ', '').trim();
+            if (dataStr === '[DONE]') continue;
+            try {
+              var data = JSON.parse(dataStr);
+              var token = data.choices?.[0]?.delta?.content || '';
+              if (token) {
+                fullText += token;
+                if (onChunk) onChunk(token); // Callback para atualizar UI
+              }
+            } catch (e) {
+              // Ignora JSON incompleto no chunk
+            }
+          }
+        }
+      }
+    }
+
+    if (!fullText && attempt < 3) return fetchAI(msgs, model, attempt + 1, onChunk);
+    return fullText.trim();
+
+  } catch (e) {
+    console.error('Erro API:', e);
+    // Retry logic mais agressiva para VPNs
+    if (attempt < 4) { // Tenta até 4 vezes
+      console.log(`Tentativa ${attempt} falhou, tentando novamente em ${attempt * 3}s...`);
+      if(onChunk) onChunk('\n[⚠️ Conexão instável, reconectando...]\n');
+      await sleep(3000 * attempt);
+      return fetchAI(msgs, model, attempt + 1, onChunk);
+    }
+    throw e;
+  }
+}
+
+async function fetchLongCode(msgs, model, onChunk) {
+  // Passa o callback onChunk
+  var firstResp = await fetchAI(msgs, model, 1, onChunk);
+  
+  // Verifica se truncou
+  var openBlocks = (firstResp.match(/```/g) || []).length;
+  // Se terminou com bloco aberto ou indicativo de corte
+  if (openBlocks % 2 !== 0 || firstResp.trim().endsWith('...') || firstResp.length > 3000) { // + segurança
+    addThinkStep('Código longo detectado, a continuar...', 'inner', 'O código foi truncado. A gerar a continuação...');
+    
+    var contMsgs = [...msgs, 
+      { role: 'assistant', content: firstResp }, 
+      { role: 'user', content: 'Continua exactamente de onde paraste. Apenas o código restante.' }
+    ];
+    
+    try {
+      if(onChunk) onChunk('\n\n// ... Continuando código ...\n\n');
+      var cont = await fetchAI(contMsgs, model, 1, onChunk);
+      return firstResp + '\n' + cont;
+    } catch (e) {
+      return firstResp;
+    }
+  }
+  return firstResp;
+}
+
+function buildSystem(q){
+  var today=new Date().toLocaleDateString('pt-PT');var memCtx=getMemCtx();var kbCtx=getKBCtx(q);var cmCtx=factoryMemory?'\n\n'+factoryMemory:'';
+  var angolaCtx=(q.toLowerCase().includes('angola')||q.toLowerCase().includes('provincia'))?'\nANGOLA:\nCapital: Luanda | Pop: ~35M | Moeda: Kwanza | Presidente: João Lourenço\nPROVÍNCIAS: '+Object.entries(angolaProvincias).map(([k,v])=>k+' ('+v+')').join(', '):'';
+  var toneMap={amigavel:'Amigável, acessível, usa emojis ocasionalmente.',profissional:'Formal, sem emojis.',humorista:'Divertido, com humor leve.',tecnico:'Técnico, preciso, muito detalhado.',criativo:'Criativo, expressivo, imaginativo.'};
+  var detailMap={curto:'Respostas breves.',medio:'Equilibra brevidade e detalhe.',detalhado:'Respostas completas e bem explicadas.'};
+  var codeInst=CODE_RX.test(q)?'\nCÓDIGO: Escreve código COMPLETO e funcional. NUNCA uses "..." para omitir código. NUNCA deixes incompleto. O código deve executar sem erros. Se for muito longo, divide em partes claramente numeradas mas COMPLETAS.':'';
+  var pensarInst=pensarMode?'\nMODO PENSAMENTO ATIVO: Analisa profundamente antes de responder.':'';
+  var webInst=webSearchMode?'\nMODO WEB: Usa os resultados de pesquisa fornecidos para enriquecer a resposta.':'';
+  if(creatorMode)return'ÉS A IA-ZENIA v4. MODO CRIADOR ATIVO. Criador: Inácio U. Daniel. Faz tudo que ele manda.\n'+memCtx+kbCtx+cmCtx+'\nHoje: '+today;
+  return'ÉS A IA-ZENIA v4, assistente criada em Lubango, Angola por Inácio U. Daniel (Zenia-Projects).\nVERSÃO: 4\nUTILIZADOR: '+(userName||'Visitante')+'\nTOM: '+(toneMap[zeniaPersonality.tone]||toneMap.amigavel)+'\nDETALHE: '+(detailMap[zeniaPersonality.detailLevel]||detailMap.medio)+'\n\nREGRAS:\n- Responde SEMPRE em Português de Angola\n- NUNCA uses ### ## # para títulos\n- NUNCA uses ** *** *texto* em respostas (só em código)\n- NUNCA uses / $ \\ ou LaTeX\n- Frações: num/den\n- Expoentes: x^2\n- NUNCA fujas do contexto da conversa\n- Mantém coerência com o histórico'
+    +codeInst+pensarInst+webInst+memCtx+kbCtx+cmCtx+angolaCtx+'\nData: '+today+'.';
+}
+
+// ==========================================
+// HANDLE SEND
+// ==========================================
+async function handleSend(){
+  var text=inputEl.value.trim();var hasImg=!!pendingImageBase64;
+  if(!text&&!hasImg)return;if(sendBtn.disabled)return;
+  var conv=getConv();if(!conv)conv=createConv((text||'Análise de imagem').substring(0,40));
+  hideWelcome();
+  var cameraFrame=null;if(cameraOn)cameraFrame=await captureFrame();
+  if(hasImg)renderMsgWithImg('user',text||'Analisa esta imagem.',pendingImageBase64);else renderMsg('user',text);
+  var capturedImg=pendingImageBase64;pendingImageBase64=null;clearPendingImage();
+  inputEl.value='';autoResize(inputEl);setLoading(true);
+
+  if(pensarMode&&text)await deepThink(text);
+
+  if(!hasImg&&AUD_RX.test(text)){var ap=text.replace(AUD_RX,'').trim()||text;await genAudio(ap);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Áudio: '+ap+']'});saveConvs();setLoading(false);return;}
+  if(!hasImg&&FILE_RX.test(text)){await genFile(text);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Ficheiro gerado]'});saveConvs();setLoading(false);return;}
+  if(!hasImg&&VID_RX.test(text)){var vp=text.replace(VID_RX,'').trim()||text;await genVid(vp);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Video: '+vp+']'});saveConvs();setLoading(false);return;}
+  if(!hasImg&&IMG_RX.test(text)){var ip=extractImgPrompt(text);await genImg(ip);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Imagem: '+ip+']'});saveConvs();setLoading(false);return;}
+
+  // Prepara UI para Streaming
+  var typing = renderTyping();
+  var row = document.createElement('div'); row.className = 'msg-row';
+  var av = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
+  var bbl = document.createElement('div'); bbl.className = 'msg-bbl ai';
+  row.appendChild(av); row.appendChild(bbl);
+  
+  // Elemento de texto interno para o stream
+  var contentDiv = document.createElement('div');
+  contentDiv.className = 'markdown-body'; // Estilo markdown
+  bbl.appendChild(contentDiv);
+  
+  // Esconde o balão até começar a receber dados (será movido para dentro do try/catch se quiseres)
+  // Mas para UX imediata, podemos deixá-lo visível ou substituir o typing quando o primeiro chunk chegar.
+  // Vamos manter o typing e substituir quando o stream começar.
+
+  try {
+    var webCtx = '';
+    if (webSearchMode && text) {
+      if (pensarMode) addThinkStep('🌐 Pesquisando na web...', 'inner', 'Query: "' + text.substring(0, 60) + '"');
+      var webResults = await performWebSearch(text); webCtx = webResultsToContext(webResults, text);
+      if (pensarMode && webResults.length) addThinkStep('🌐 ' + webResults.length + ' resultados encontrados', 'done', 'Fontes: ' + webResults.map(r => r.title).join(', '));
+      bbl.innerHTML = '<div class="web-indicator"><i class="fas fa-globe"></i> Info da Web</div>';
+      bbl.appendChild(contentDiv); // Re-anexa contentDiv
+    }
+
+    var sys = { role: 'system', content: buildSystem(text || 'analisa') };
+    var userMsg;
+    if (hasImg && capturedImg) { userMsg = { role: 'user', content: [{ type: 'image_url', image_url: { url: capturedImg } }, { type: 'text', text: (text || 'Descreve esta imagem em detalhe, em Português de Angola.') }] }; }
+    else if (cameraFrame && !hasImg) { userMsg = { role: 'user', content: [{ type: 'image_url', image_url: { url: cameraFrame } }, { type: 'text', text: (webCtx ? webCtx + '\nPergunta: ' : '') + text }] }; }
+    else { userMsg = { role: 'user', content: webCtx ? (webCtx + 'Pergunta do utilizador: ' + text) : text }; }
+    
+    var selM = document.getElementById('model-sel').value;
+    var useM = (hasImg || cameraFrame) ? 'openai' : (CODE_RX.test(text) ? 'qwen-coder' : selM);
+    var histMsgs = conv.messages.filter(m => typeof m.content === 'string' && m.content.length < 2000).slice(-20);
+    var msgs = [sys].concat(histMsgs).concat([userMsg]);
+    
+    var reply = '';
+    var isFirstChunk = true;
+
+    // Callback para SSE
+    var onChunk = (token) => {
+      if (isFirstChunk) {
+        typing.remove(); // Remove animação de typing
+        chatEl.appendChild(row); // Adiciona o balão na tela
+        isFirstChunk = false;
+      }
+      reply += token;
+      contentDiv.innerHTML = fmtText(reply); // Atualiza markdown em tempo real
+      chatEl.scrollTop = chatEl.scrollHeight; // Auto-scroll
+    };
+
+    if (CODE_RX.test(text)) {
+      if (pensarMode) addThinkStep('💻 Gerando código (modo longo)...', 'thinking');
+      reply = await fetchLongCode(msgs, useM, onChunk);
+    } else {
+      reply = await fetchAI(msgs, useM, 1, onChunk);
+    }
+
+    if(isFirstChunk) { // Se não houve chunks (resposta imediata ou erro silencioso)
+       typing.remove();
+       chatEl.appendChild(row);
+       contentDiv.innerHTML = fmtText(reply);
+    }
+
+    if (pensarMode) addThinkStep('✅ Resposta gerada (' + reply.length + ' chars)', 'done', 'Enviando para o utilizador.');
+    
+    addRespActions(row, reply);
+    if (voiceOn) speakTxtFull(reply);
+    
+    conv.messages.push({ role: 'user', content: text || (hasImg ? '[Imagem]' : '') }, { role: 'assistant', content: reply });
+    saveConvs(); setApiSt('ok');
+    
+  } catch (e) {
+    typing.remove();
+    if (pensarMode) addThinkStep('❌ Erro: ' + e.message, 'error', 'Problema: ' + e.message);
+    renderMsg('ai', 'Erro ao obter resposta: ' + e.message); setApiSt('err');
+  } finally { setLoading(false); }
+}
+
+// ==========================================
+// ✅ GERAÇÃO DE IMAGEM CORRIGIDA
+// Pollinations: URL GET directo, sem fetch/blob
+// Formato: https://image.pollinations.ai/prompt/{prompt}?params
+// ==========================================
+async function genImg(prompt){
+  hideWelcome();
+  var row=document.createElement('div');row.className='msg-row';
+  var av=document.createElement('div');av.className='msg-av ai';av.textContent='Z';
+  var card=document.createElement('div');card.className='img-gen-card';
+  var pid='pg'+Date.now();
+  card.innerHTML=`<div class="img-gen-progress">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="spin" style="border-color:rgba(139,92,246,.3);border-top-color:#8b5cf6"></span>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--accent-primary)">A gerar imagem...</div>
+        <div style="font-size:11px;color:var(--text-muted)" id="${pid}-msg">Conectando à Pollinations AI...</div>
+      </div>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="${pid}-bar" style="width:10%"></div></div>
+    <div style="font-size:10px;color:var(--text-muted);display:flex;justify-content:space-between">
+      <span>Pollinations AI · Flux</span><span id="${pid}-pct">10%</span>
+    </div>
+  </div>`;
+  row.appendChild(av);row.appendChild(card);chatEl.appendChild(row);chatEl.scrollTop=chatEl.scrollHeight;
+
+  function setP(pct,msg){
+    var b=document.getElementById(pid+'-bar'),p=document.getElementById(pid+'-pct'),m=document.getElementById(pid+'-msg');
+    if(b)b.style.width=pct+'%';if(p)p.textContent=pct+'%';if(m)m.textContent=msg;
+  }
+
+  // Enriquece o prompt
+  var seed=Math.floor(Math.random()*999999);
+  var enhancedPrompt=prompt+', high quality, 4k, detailed, photorealistic';
+  
+  // URL endpoint autenticado
+  var url=POLLINATIONS_IMAGE_BASE+encodeURIComponent(enhancedPrompt)+'?width=1024&height=768&seed='+seed+'&model=flux&nologo=true';
+
+  setP(30,'Gerando via API Autenticada...');
+  
+  try{
+    var r=await fetch(url,{
+      headers:{
+        'Authorization':'Bearer '+POLLO_KEY
+      }
+    });
+    
+    if(!r.ok) throw new Error('Falha na geração de imagem: '+r.status);
+    
+    setP(70,'Processando imagem...');
+    var blob=await r.blob();
+    var finalUrl=URL.createObjectURL(blob);
+    
+    setP(100,'✅ Imagem pronta!');
+    var safePrompt=escHtml(prompt.substring(0,55));
+    card.innerHTML=`
+      <img src="${finalUrl}" alt="${safePrompt}" 
+           style="width:100%;border-radius:8px;cursor:pointer;display:block" 
+           onclick="openImgModal('${finalUrl}')">
+      <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;color:var(--text-muted)">${safePrompt}...</span>
+        <button class="icon-btn" onclick="downloadImg('${finalUrl}','zenia_img_${seed}.jpg')" title="Baixar">
+          <i class="fas fa-download"></i>
+        </button>
+      </div>`;
+    chatEl.scrollTop=chatEl.scrollHeight;
+    
+  }catch(e){
+    console.error(e);
+    card.innerHTML=`<div style="color:#ef4444;padding:10px;font-size:12px">
+      <i class="fas fa-exclamation-triangle"></i> Erro ao gerar imagem: ${e.message}
+    </div>`;
+  }
+}
+
+
+// ==========================================
+// ✅ GERAÇÃO DE ÁUDIO CORRIGIDA
+// Pollinations TTS: GET https://text.pollinations.ai/{text}?model=openai-audio&voice={voice}
+// ==========================================
+async function genAudio(textOrPrompt, specificVoice){
+  hideWelcome();
+  var row=document.createElement('div');row.className='msg-row';
+  var av=document.createElement('div');av.className='msg-av ai';av.textContent='Z';
+  var card=document.createElement('div');card.className='audio-card';
+  card.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+    <span class="spin" style="border-color:rgba(168,85,247,.3);border-top-color:#a855f7"></span>
+    <div>
+      <div style="font-size:13px;font-weight:600;color:#a855f7">A gerar áudio...</div>
+      <div style="font-size:11px;color:var(--text-muted)">Pollinations TTS</div>
+    </div>
+  </div>`;
+  row.appendChild(av);row.appendChild(card);chatEl.appendChild(row);chatEl.scrollTop=chatEl.scrollHeight;
+
+  // Vozes disponíveis
+  var voices=['alloy','echo','fable','onyx','nova','shimmer'];
+  var voice=specificVoice || voices[Math.floor(Math.random()*voices.length)];
+
+  // URL correcto para Pollinations Audio
+  var url=POLLINATIONS_AUDIO_BASE+encodeURIComponent(textOrPrompt)+'?model=openai-audio&voice='+voice;
+  
+  var safeText=escHtml(textOrPrompt.substring(0,80));
+  var safePromptEsc=escHtml(textOrPrompt.replace(/'/g,"\\'").substring(0,200));
+
+  try{
+    var ctrl=new AbortController();
+    var tid=setTimeout(()=>ctrl.abort(),30000);
+    
+    var r=await fetch(url,{
+      headers:{
+        'Authorization':'Bearer '+POLLO_KEY
+      },
+      signal:ctrl.signal
+    });
+    
+    clearTimeout(tid);
+
+    if(!r.ok) throw new Error('Erro ao gerar áudio: '+r.status);
+    
+    var blob=await r.blob();
+    var blobUrl=URL.createObjectURL(blob);
+    
+    card.innerHTML=`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#a855f7,#7c3aed);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="fas fa-volume-up" style="color:#fff;font-size:14px"></i>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:600">Áudio Gerado</div>
+          <div style="font-size:11px;color:var(--text-muted)">Voz: ${voice} · Pollinations AI</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;padding:8px;background:var(--bg-primary);border-radius:7px;line-height:1.5;font-style:italic">
+        "${safeText}${textOrPrompt.length>80?'...':''}"
+      </div>
+      <audio controls style="width:100%;border-radius:8px;margin-bottom:10px" src="${blobUrl}"></audio>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <a href="${blobUrl}" download="audio-zenia-${voice}.mp3" class="mbtn" style="flex:1;justify-content:center">
+          <i class="fas fa-download"></i> Baixar MP3
+        </a>
+        <select onchange="changeVoiceAndRegen(this.value,'${safePromptEsc}')" class="mbtn" style="cursor:pointer;flex:1">
+          ${voices.map(v=>`<option value="${v}"${v===voice?' selected':''}>${v}</option>`).join('')}
+        </select>
+        <button onclick="genAudio('${safePromptEsc}', '${voice}')" class="mbtn">
+          <i class="fas fa-redo"></i>
+        </button>
+      </div>`;
+    chatEl.scrollTop=chatEl.scrollHeight;
+
+  }catch(e){
+    console.error(e);
+    card.innerHTML=`<div style="color:#ef4444;padding:10px;font-size:12px">
+      <i class="fas fa-exclamation-triangle"></i> Erro ao gerar áudio: ${e.message}
+    </div>`;
+  }
+}
+
+function changeVoiceAndRegen(voice,text){
+  genAudio(text, voice);
+}
+
+// ==========================================
+// FILE GENERATION
+// ==========================================
+async function genFile(userText){
+  hideWelcome();
+  var row=document.createElement('div');row.className='msg-row';
+  var av=document.createElement('div');av.className='msg-av ai';av.textContent='Z';
+  var card=document.createElement('div');card.className='file-gen-card';
+  var ftype='txt';var fname='documento';
+  if(/docx|word|documento word/i.test(userText)){ftype='docx';fname='documento';}
+  else if(/xlsx|excel|planilha|tabela excel/i.test(userText)){ftype='xlsx';fname='tabela';}
+  else if(/pptx|powerpoint|apresenta[cç]/i.test(userText)){ftype='pptx';fname='apresentacao';}
+  else if(/csv/i.test(userText)){ftype='csv';fname='dados';}
+  else if(/zip/i.test(userText)){ftype='zip';fname='ficheiros';}
+  else if(/pdf/i.test(userText)){ftype='html';fname='relatorio';}
+  else if(/html/i.test(userText)){ftype='html';fname='pagina';}
+  else if(/json/i.test(userText)){ftype='json';fname='dados';}
+  var icons={docx:'📄',xlsx:'📊',pptx:'📑',csv:'📋',zip:'🗜️',html:'🌐',json:'🔧',txt:'📝'};
+  card.innerHTML=`<div class="file-icon">${icons[ftype]||'📄'}</div><div style="font-size:13px;font-weight:600;margin-bottom:4px">A gerar ${ftype.toUpperCase()}...</div><div style="font-size:11px;color:var(--text-muted)">A Zenia está a criar o ficheiro com a IA</div><div class="chunk-progress" id="file-prog"><div class="chunk-bar"><div class="chunk-bar-fill" style="width:10%"></div></div><div style="font-size:11px;color:var(--text-muted);margin-top:4px" id="file-prog-msg">Gerando conteúdo...</div></div>`;
+  row.appendChild(av);row.appendChild(card);chatEl.appendChild(row);chatEl.scrollTop=chatEl.scrollHeight;
+  function setFileProg(pct,msg){var bar=card.querySelector('.chunk-bar-fill');if(bar)bar.style.width=pct+'%';var m=document.getElementById('file-prog-msg');if(m)m.textContent=msg;}
+  try{
+    setFileProg(20,'Pedindo à IA para gerar conteúdo...');
+    var sysPrompt='És um assistente especializado em criar conteúdo de ficheiros em Português de Angola. Responde APENAS com o conteúdo do ficheiro, sem introduções.';
+    var contentPrompt=`Cria o conteúdo para um ficheiro ${ftype.toUpperCase()} sobre: "${userText}". ${ftype==='csv'?'Formato CSV com cabeçalho, separado por vírgula.':ftype==='json'?'Formato JSON válido.':ftype==='html'?'HTML completo e funcional.':'Conteúdo estruturado e detalhado em Português.'}`;
+    var msgs=[{role:'system',content:sysPrompt},{role:'user',content:contentPrompt}];
+    var content=await fetchAI(msgs,'openai');
+    setFileProg(70,'Criando ficheiro...');
+    await sleep(300);
+    var blob,mimeType,extension;
+    if(ftype==='csv'){blob=new Blob([content],{type:'text/csv;charset=utf-8'});extension='csv';mimeType='text/csv';}
+    else if(ftype==='json'){try{JSON.parse(content);}catch(e){content='{"dados":'+JSON.stringify(content)+'}';}blob=new Blob([content],{type:'application/json'});extension='json';mimeType='application/json';}
+    else if(ftype==='html'){if(!content.includes('<html'))content=`<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8"><title>Zenia Document</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:800px;margin:0 auto;line-height:1.6}</style></head><body>${content}</body></html>`;blob=new Blob([content],{type:'text/html'});extension='html';mimeType='text/html';}
+    else{var htmlContent=`<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8"><title>${fname}</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:800px;margin:0 auto;line-height:1.8}h1{color:#2b7bf8}h2{color:#1a56db}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:8px}th{background:#f0f4ff}@media print{button{display:none}}</style></head><body><button onclick="window.print()" style="margin-bottom:20px;padding:8px 16px;background:#2b7bf8;color:#fff;border:none;border-radius:6px;cursor:pointer">🖨️ Imprimir / Salvar PDF</button>${content.replace(/\n/g,'<br>')}</body></html>`;
+      blob=new Blob([htmlContent],{type:'text/html'});extension='html';mimeType='text/html';ftype='html';}
+    setFileProg(100,'Ficheiro pronto!');
+    var blobUrl=URL.createObjectURL(blob);var fullName=fname+'-zenia.'+extension;
+    card.innerHTML=`<div class="file-icon">${icons[ftype]||'📄'}</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px">${escHtml(fullName)}</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px">Gerado pela Zenia v4 · ${new Date().toLocaleDateString('pt-PT')}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="${blobUrl}" download="${fullName}" style="padding:8px 14px;background:var(--send-btn);color:#fff;text-decoration:none;border-radius:8px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px"><i class="fas fa-download"></i> Baixar ${ftype.toUpperCase()}</a>
+        <button onclick="window.open('${blobUrl}','_blank')" style="padding:8px 14px;background:var(--bg-primary);border:1px solid var(--border-accent);color:var(--text-secondary);border-radius:8px;font-size:12px;cursor:pointer"><i class="fas fa-eye"></i> Pré-visualizar</button>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:var(--text-muted)">💡 Para Word/Excel/PowerPoint real, baixa o HTML e importa no LibreOffice ou Google Docs.</div>`;
+    chatEl.scrollTop=chatEl.scrollHeight;
+  }catch(e){card.innerHTML=`<div style="color:#ef4444;font-size:13px">Erro ao gerar ficheiro: ${escHtml(e.message)}</div><button onclick="genFile('${escHtml(userText.replace(/'/g,"\\'"))}')" style="margin-top:8px;padding:6px 12px;background:var(--send-btn);border:none;color:#fff;border-radius:6px;font-size:12px;cursor:pointer">Tentar novamente</button>`;}
+}
+
+// ==========================================
+// VIDEO GENERATION
+// ==========================================
+async function genVid(prompt){
+  hideWelcome();
+  var row=document.createElement('div');row.className='msg-row';
+  var av=document.createElement('div');av.className='msg-av ai';av.textContent='Z';
+  var card=document.createElement('div');card.className='img-gen-card';
+  var sid='vs'+Date.now();
+
+  card.innerHTML=`<div class="img-gen-progress">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="spin" style="border-color:rgba(124,58,237,.3);border-top-color:#a78bfa"></span>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#a78bfa">Zenia Video Engine</div>
+        <div style="font-size:11px;color:var(--text-muted)" id="${sid}-msg">Planeando cena...</div>
+      </div>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="${sid}-bar" style="width:5%;background:linear-gradient(90deg,#7c3aed,#ec4899)"></div></div>
+    <div style="font-size:10px;color:var(--text-muted)"><span>Renderização Local</span><span id="${sid}-pct">0%</span></div>
+  </div>`;
+  row.appendChild(av);row.appendChild(card);chatEl.appendChild(row);chatEl.scrollTop=chatEl.scrollHeight;
+
+  function setVP(pct,msg){
+    var bar=document.getElementById(sid+'-bar'),pctEl=document.getElementById(sid+'-pct'),msgEl=document.getElementById(sid+'-msg');
+    if(bar)bar.style.width=pct+'%';if(pctEl)pctEl.textContent=pct+'%';if(msgEl)msgEl.textContent=msg;
+  }
+
+  try {
+    // 1. Obter código de animação da IA
+    setVP(10, 'Gerando roteiro visual...');
+    var sysPrompt = "You are a creative coder. Generate a JavaScript function body for `function draw(ctx, width, height, time)` to animate a canvas based on: '" + prompt + "'. `time` is seconds (float). Use `ctx` (CanvasRenderingContext2D). Do NOT use external libs. Return ONLY the code inside the function. No markdown.";
+    
+    // Usamos fetchAI para obter o código
+    var codeMsgs = [{role:'system',content:sysPrompt},{role:'user',content:'Generate code now.'}];
+    
+    // Usar modelo rápido se possível
+    var code = await fetchAI(codeMsgs, 'gemini-large');
+    
+    // Limpar markdown
+    code = code.replace(/```javascript/g, '').replace(/```/g, '').trim();
+
+    setVP(30, 'Compilando cena...');
+
+    // 2. Setup Canvas e Recorder
+    var width = 640;
+    var height = 360;
+    var canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    var ctx = canvas.getContext('2d');
+    
+    // Fallback para navegadores que suportam captureStream
+    if(!canvas.captureStream) throw new Error('Seu navegador não suporta gravação de Canvas.');
+    
+    var stream = canvas.captureStream(30);
+    var recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
+    var chunks = [];
+    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    
+    var recordingPromise = new Promise((resolve) => {
+      recorder.onstop = () => {
+        var blob = new Blob(chunks, { type: 'video/webm' });
+        var url = URL.createObjectURL(blob);
+        resolve(url);
+      };
+    });
+
+    // 3. Compilar função de desenho
+    var drawFunc;
+    try {
+        drawFunc = new Function('ctx', 'width', 'height', 'time', code);
+    } catch(e) {
+        console.error("Erro compilação:", e);
+        // Fallback simples
+        drawFunc = function(c,w,h,t) {
+            c.fillStyle = '#000'; c.fillRect(0,0,w,h);
+            c.fillStyle = '#fff'; c.fillText('Erro script: '+e.message, 20, h/2);
+        };
+    }
+
+    // 4. Renderizar Loop
+    recorder.start();
+    var duration = 5000; // 5s
+    var fps = 30;
+    var totalFrames = (duration / 1000) * fps;
+    
+    for (var f = 0; f < totalFrames; f++) {
+        var time = f / fps;
+        
+        // Limpar
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, width, height);
+        
+        // Desenhar frame
+        try {
+            drawFunc(ctx, width, height, time);
+        } catch(e) {
+            // Ignora erro de frame
+        }
+
+        // Progresso
+        if (f % 5 === 0) {
+            var prog = 30 + Math.floor((f / totalFrames) * 60);
+            setVP(prog, 'Renderizando: ' + Math.floor(time) + 's');
+            await new Promise(r => setTimeout(r, 0));
+        }
+    }
+
+    recorder.stop();
+    setVP(95, 'Finalizando vídeo...');
+    var videoUrl = await recordingPromise;
+    setVP(100, 'Vídeo pronto!');
+
+    card.innerHTML=`
+      <div style="position:relative;background:#000;border-radius:8px 8px 0 0;overflow:hidden">
+        <video controls autoplay loop playsinline style="width:100%;display:block;max-height:400px" src="${videoUrl}"></video>
+      </div>
+      <div class="media-foot">
+        <span class="media-lbl"><i class="fas fa-video" style="color:#a78bfa;margin-right:4px"></i>${escHtml(prompt.substring(0,55))}</span>
+        <div style="display:flex;gap:5px">
+          <a href="${videoUrl}" download="zenia-video.webm" class="mbtn"><i class="fas fa-download"></i> Baixar</a>
+        </div>
+      </div>`;
+    chatEl.scrollTop=chatEl.scrollHeight;
+
+  } catch(e) {
+    console.error(e);
+    card.innerHTML=`<div style="color:#ef4444;padding:10px;font-size:12px">
+      <i class="fas fa-exclamation-triangle"></i> Erro ao gerar vídeo: ${e.message}
+    </div>`;
+  }
+}
+// Função pollPollo removida pois agora usamos renderização local
+
+
+// ==========================================
+// VISION
+// ==========================================
+function openVisionModal(){document.getElementById('vision-modal').classList.add('open');}
+function closeVisionModal(){document.getElementById('vision-modal').classList.remove('open');visionImageData=null;document.getElementById('vision-preview').style.display='none';document.getElementById('vision-placeholder').style.display='block';document.getElementById('vision-result').style.display='none';}
+function loadVisionPreview(e){var f=e.target.files[0];if(f)loadVisionFile(f);}
+function loadVisionFileDrop(e){var f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))loadVisionFile(f);}
+function loadVisionFile(f){var r=new FileReader();r.onload=e=>{visionImageData=e.target.result;document.getElementById('vision-img-preview').src=visionImageData;document.getElementById('vision-preview').style.display='block';document.getElementById('vision-placeholder').style.display='none';};r.readAsDataURL(f);}
+
+async function analyzeVisionAndChat(){
+  if(!visionImageData){toast('Carrega uma imagem primeiro!','warn');return;}
+  var q=document.getElementById('vision-question').value.trim()||'Descreve detalhadamente esta imagem em Português de Angola.';
+  var btn=document.getElementById('vision-analyze-btn');var res=document.getElementById('vision-result');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> A analisar...';res.style.display='block';res.innerHTML='<div style="padding:12px;color:var(--text-muted);font-size:12px"><span class="spin"></span> A processar...</div>';
+  var analysis='';
+  try{
+    // Usa Pollinations vision API (multimodal)
+    var payload={model:'openai',messages:[{role:'system',content:'Analisa imagens com detalhe. Responde em Português de Angola.'},{role:'user',content:[{type:'image_url',image_url:{url:visionImageData}},{type:'text',text:q}]}],max_tokens:2000};
+    
+    var r=await fetch(POLLINATIONS_VISION_API,{
+        method:'POST',
+        headers:{
+            'Content-Type':'application/json',
+            'Authorization': 'Bearer '+POLLO_KEY
+        },
+        body:JSON.stringify(payload),
+        signal:AbortSignal.timeout(30000)
+    });
+    
+    if(r.ok){var d=await r.json();var t=d.choices?.[0]?.message?.content||d.response||'';if(t&&t.length>15)analysis=t;}
+  }catch(e){}
+  
+  if(!analysis)analysis='Não foi possível analisar a imagem. Verifica a ligação e a chave API.';
+  
+  res.innerHTML=`<div style="background:var(--bg-primary);border:1px solid var(--border-color);border-radius:9px;padding:12px"><div style="font-size:11px;color:var(--accent-primary);font-weight:700;text-transform:uppercase;margin-bottom:8px">Análise</div><div style="font-size:13px;line-height:1.7;color:var(--text-primary)">${fmtText(analysis)}</div><button onclick="sendVisionToChat()" style="margin-top:10px;width:100%;padding:9px;background:var(--send-btn);border:none;color:#fff;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-ui)"><i class="fas fa-robot"></i> Enviar para Chat &amp; Continuar</button></div>`;
+  btn.disabled=false;btn.innerHTML='<i class="fas fa-search"></i> Analisar &amp; Enviar para Chat';
+  window._visionAnalysis={image:visionImageData,analysis,question:q};
+}
+function sendVisionToChat(){closeVisionModal();hideWelcome();if(window._visionAnalysis){showPendingImage(window._visionAnalysis.image);inputEl.value=window._visionAnalysis.question||'Analisa esta imagem.';autoResize(inputEl);setTimeout(handleSend,200);}}
+
+// ==========================================
+// RENDER MESSAGES
+// ==========================================
+function renderMsg(role,text,fromWeb){
+  var row=document.createElement('div');row.className='msg-row'+(role==='user'?' user-row':'');
+  var av=document.createElement('div');av.className='msg-av '+(role==='user'?'user':'ai');
+  
+  if(role==='user'){
+    av.textContent=(userName||'U').charAt(0).toUpperCase();
+  } else {
+    av.innerHTML = 'Z<span style="position:absolute;bottom:-2px;right:-4px;font-size:7px;background:var(--accent-primary);color:#fff;padding:1px 3px;border-radius:4px;font-weight:700">v4</span>';
+    av.style.position = 'relative';
+    av.style.overflow = 'visible';
+  }
+
+  var bbl=document.createElement('div');bbl.className='msg-bbl '+(role==='user'?'user':'ai');
+  if(role==='ai'){if(fromWeb)bbl.innerHTML='<div class="web-indicator"><i class="fas fa-globe"></i> Info da Web</div>';bbl.innerHTML=(bbl.innerHTML||'')+fmtText(text);row.appendChild(av);row.appendChild(bbl);chatEl.appendChild(row);chatEl.scrollTop=chatEl.scrollHeight;setTimeout(()=>addRespActions(row,text),100);}
+  else{bbl.textContent=text;row.appendChild(av);row.appendChild(bbl);chatEl.appendChild(row);chatEl.scrollTop=chatEl.scrollHeight;}
+  return row;
+}
+function renderMsgWithImg(role,text,imgB64){
+  var row=document.createElement('div');row.className='msg-row user-row';
+  var av=document.createElement('div');av.className='msg-av user';av.textContent=(userName||'U').charAt(0).toUpperCase();
+  var bbl=document.createElement('div');bbl.className='msg-bbl user';
+  bbl.innerHTML=(text?escHtml(text)+'<br>':'')+'<img src="'+imgB64+'" style="max-width:220px;border-radius:8px;margin-top:6px;display:block">';
+  row.appendChild(av);row.appendChild(bbl);chatEl.appendChild(row);chatEl.scrollTop=chatEl.scrollHeight;
+}
+function addRespActions(row,text){
+  var bbl=row.querySelector('.msg-bbl');if(!bbl)return;var div=document.createElement('div');div.className='resp-actions';
+  [[`<i class="fas fa-copy"></i>`,()=>{navigator.clipboard.writeText(text);toast('Copiado!','ok');}],[`<i class="fas fa-volume-up"></i>`,()=>speakTxtFull(text)],[`<i class="fas fa-volume-mute"></i>`,()=>{speechSynthesis.cancel();}],[`<i class="fas fa-download"></i>`,()=>{var b=new Blob([text],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='resposta_zenia.txt';a.click();}],['👍',()=>toast('Obrigado!','ok')],['👎',()=>toast('Vamos melhorar!','ok')]].forEach(([label,fn])=>{var b=document.createElement('button');b.className='ra-btn';b.innerHTML=label;b.onclick=fn;div.appendChild(b);});bbl.appendChild(div);
+}
+function renderTyping(){var row=document.createElement('div');row.className='msg-row';row.innerHTML='<div class="msg-av ai">Z</div><div class="msg-bbl ai"><div style="display:flex;gap:6px;padding:4px 0"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div></div>';chatEl.appendChild(row);chatEl.scrollTop=chatEl.scrollHeight;return row;}
+function setLoading(on){sendBtn.disabled=on;sendIc.className=on?'spin':'fas fa-paper-plane';}
+function clearChat(){if(confirm('Limpar conversa?')){var c=getConv();if(c){c.messages=[];saveConvs();}chatEl.innerHTML='';showWelcome();}}
+
+// ==========================================
+// FUTURE PREDICTION
+// ==========================================
+function askFuture() {
+  if (window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('collapsed')) toggleSidebar();
+  var input = document.getElementById('user-input');
+  input.value = 'Quais são as previsões para o futuro de Angola em 2025 e 2026? Resume as principais inovações e eventos.';
+  handleSend();
+}
+function setApiSt(s){var el=document.getElementById('api-st');var m={ok:['s-ok','Online'],err:['s-err','Erro'],wait:['s-wait','...']};var dm=m[s]||m.wait;el.className='sbadge '+dm[0];el.innerHTML='<i class="fas fa-circle" style="font-size:6px"></i> '+dm[1];}
+function showWelcome(){var w=document.getElementById('welcome-msg');if(w)w.style.display='flex';}
+function hideWelcome(){var w=document.getElementById('welcome-msg');if(w)w.style.display='none';}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
+function toggleVoice(){voiceOn=!voiceOn;var b=document.getElementById('voice-topbar-btn');b.className='sbadge '+(voiceOn?'s-ok':'s-wait');b.innerHTML='<i class="fas fa-headset"></i>';if(!voiceOn&&window.speechSynthesis)speechSynthesis.cancel();}
+
+// ==========================================
+// PENDING IMAGE
+// ==========================================
+function clearPendingImage(){pendingImageBase64=null;var area=document.getElementById('pending-image-area'),wrap=document.getElementById('pending-image-wrap');if(area)area.style.display='none';if(wrap)wrap.innerHTML='';inputEl.placeholder='Fala com a Zenia v4...';}
+function showPendingImage(b64){pendingImageBase64=b64;var area=document.getElementById('pending-image-area'),wrap=document.getElementById('pending-image-wrap');if(area)area.style.display='block';if(wrap)wrap.innerHTML='<img src="'+b64+'" alt="imagem"><button class="remove-img" onclick="clearPendingImage()">&times;</button>';inputEl.placeholder='Pergunta sobre a imagem...';inputEl.focus();}
+
+// ==========================================
+// FILE UPLOADS
+// ==========================================
+async function handleFileUpload(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=e=>{showPendingImage(e.target.result);toast('Imagem pronta!','ok');};r.readAsDataURL(f);ev.target.value='';}
+async function handleFileAnyUpload(ev){
+  var f=ev.target.files[0];if(!f)return;
+  if(f.type.startsWith('image/')){var r=new FileReader();r.onload=e=>{showPendingImage(e.target.result);toast('Imagem pronta!','ok');};r.readAsDataURL(f);}
+  else{var r2=new FileReader();r2.onload=e=>{var content=e.target.result;hideWelcome();var conv=getConv()||createConv('Análise: '+f.name);renderMsg('user','[Ficheiro: '+f.name+']');inputEl.value='Analisa este ficheiro "'+f.name+'":\n\n'+content.substring(0,4000);autoResize(inputEl);setTimeout(handleSend,100);};r2.readAsText(f);}
+  ev.target.value='';
+}
+
+// ==========================================
+// HISTORY & CONVS
+// ==========================================
+function createConv(title){var c={id:Date.now().toString(),title:(title||'Nova').substring(0,40),messages:[]};convs.unshift(c);curConvId=c.id;saveConvs();renderHist();return c;}
+function getConv(){return convs.find(c=>c.id===curConvId)||null;}
+function saveConvs(){try{localStorage.setItem('zn_convs',JSON.stringify(convs));}catch(e){if(convs.length>10)convs=convs.slice(0,10);try{localStorage.setItem('zn_convs',JSON.stringify(convs));}catch(e2){}}}
+function startNew(){curConvId=null;chatEl.innerHTML='';showWelcome();createConv('Nova · '+new Date().toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'}));renderHist();if(window.innerWidth<768&&sbMobOpen)toggleMob();}
+function loadConv(id){curConvId=id;chatEl.innerHTML='';var c=getConv();if(!c)return;c.messages.forEach(m=>{if(m.role==='user')renderMsg('user',typeof m.content==='string'?m.content:'[imagem]');else if(m.role==='assistant')renderMsg('ai',m.content);});renderHist();chatEl.scrollTop=chatEl.scrollHeight;var w=document.getElementById('welcome-msg');if(c.messages.length>0&&w)w.style.display='none';else if(c.messages.length===0&&w)w.style.display='flex';if(window.innerWidth<768&&sbMobOpen)toggleMob();}
+function delConv(id,ev){if(ev)ev.stopPropagation();convs=convs.filter(c=>c.id!==id);saveConvs();if(curConvId===id)startNew();else renderHist();}
+function filterHist(v){renderHist(v);}
+function renderHist(filter){var el=document.getElementById('hist-list');filter=(filter||'').toLowerCase();var list=filter?convs.filter(c=>c.title.toLowerCase().includes(filter)):convs;el.innerHTML='';if(!list.length){el.innerHTML='<p style="font-size:11px;color:var(--text-muted);padding:3px 5px;font-style:italic">'+(filter?'Sem resultados.':'Sem histórico.')+'</p>';return;}list.forEach(c=>{var active=c.id===curConvId;var div=document.createElement('div');div.style.cssText='display:flex;align-items:center;gap:4px;padding:5px 7px;border-radius:7px;cursor:pointer;'+(active?'background:var(--accent-glow)':'');var span=document.createElement('span');span.style.cssText='flex:1;font-size:12px;color:'+(active?'var(--accent-primary)':'var(--text-secondary)')+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--font-msg)';span.textContent=c.title;span.onclick=()=>loadConv(c.id);var del=document.createElement('button');del.innerHTML='<i class="fas fa-trash" style="font-size:9px"></i>';del.style.cssText='background:none;border:none;cursor:pointer;color:var(--text-muted);padding:2px 4px';del.onclick=e=>delConv(c.id,e);div.appendChild(span);div.appendChild(del);el.appendChild(div);});}
+
+// ==========================================
+// SIDEBAR
+// ==========================================
+function toggleSidebar(){sbColl=!sbColl;var sb=document.getElementById('sidebar'),ic=document.getElementById('stg-ic');sb.classList.toggle('collapsed',sbColl);ic.className='fas fa-chevron-'+(sbColl?'right':'left');ic.style.fontSize='9px';}
+function toggleMob(){sbMobOpen=!sbMobOpen;document.getElementById('sidebar').classList.toggle('mob-open',sbMobOpen);document.getElementById('mob-overlay').classList.toggle('show',sbMobOpen);}
+function togglePlusMenu(){var m=document.getElementById('plus-menu');m.style.display=m.style.display==='none'||!m.style.display?'block':'none';}
+document.addEventListener('click',e=>{var pm=document.getElementById('plus-menu');if(pm&&!pm.contains(e.target)&&!document.getElementById('upload-btn').contains(e.target))pm.style.display='none';});
+
+// ==========================================
+// MEMORY, KB, CM
+// ==========================================
+var MEM_KEY='zn_mem';
+function getMem(){try{return JSON.parse(localStorage.getItem(MEM_KEY)||'{}');}catch(e){return{};}}
+function salvarMem(k,v){if(!k){toast('Chave vazia','warn');return;}var m=getMem();m[k]={v,ts:Date.now()};localStorage.setItem(MEM_KEY,JSON.stringify(m));toast('Guardado!','ok');}
+function removerMem(k){var m=getMem();delete m[k];localStorage.setItem(MEM_KEY,JSON.stringify(m));renderAdvBody();}
+function limparMem(){if(confirm('Apagar tudo?')){localStorage.removeItem(MEM_KEY);renderAdvBody();}}
+function getMemCtx(){var m=getMem(),ks=Object.keys(m);if(!ks.length)return'';return'\nMEMÓRIA DO UTILIZADOR:\n'+ks.map(k=>'- '+k+': '+m[k].v).join('\n');}
+var KB_KEY='zn_kb';
+function getKB(){try{return JSON.parse(localStorage.getItem(KB_KEY)||'[]');}catch(e){return[];}}
+function setKB(k){localStorage.setItem(KB_KEY,JSON.stringify(k));}
+function addKB(t,c){if(!t||!c){toast('Preenche título e conteúdo','warn');return false;}var kb=getKB();kb.unshift({id:Date.now().toString(),titulo:t,conteudo:c});setKB(kb);toast('Adicionado!','ok');return true;}
+function remKB(id){setKB(getKB().filter(d=>d.id!==id));renderAdvBody();}
+function getKBCtx(q){var docs=getKB().filter(d=>q.toLowerCase().includes(d.titulo.toLowerCase()));if(!docs.length)return'';return'\nCONHECIMENTO:\n'+docs.slice(0,3).map(d=>'['+d.titulo+']: '+d.conteudo).join('\n');}
+function getCM(){try{return JSON.parse(localStorage.getItem('cm_json')||'{"itens":[]}');}catch(e){return{itens:[]};}}
+function setCM(d){localStorage.setItem('cm_json',JSON.stringify(d));}
+function exportCM(){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(getCM(),null,2)],{type:'application/json'}));a.download='cm.json';a.click();toast('cm.json exportado!','ok');}
+function backupAll(){var p={convs,mem:getMem(),kb:getKB(),cm:getCM(),ts:new Date().toISOString()};var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(p,null,2)],{type:'application/json'}));a.download='zenia-v4-backup.json';a.click();toast('Backup criado!','ok');}
+function restoreAll(){var i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=e=>{var r=new FileReader();r.onload=ev=>{try{var d=JSON.parse(ev.target.result);if(d.convs){convs=d.convs;saveConvs();renderHist();}if(d.mem)localStorage.setItem(MEM_KEY,JSON.stringify(d.mem));if(d.kb)localStorage.setItem(KB_KEY,JSON.stringify(d.kb));toast('Restaurado!','ok');}catch(x){toast('Erro','err');}};r.readAsText(e.target.files[0]);};i.click();}
+
+// ==========================================
+// ADV PANEL
+// ==========================================
+function openAdv(){document.getElementById('adv-panel').classList.add('open');document.getElementById('adv-ov').classList.add('show');renderAdvBody();}
+function closeAdv(){document.getElementById('adv-panel').classList.remove('open');document.getElementById('adv-ov').classList.remove('show');}
+function switchTab(t){advTab=t;var tabs=['mem','conv','kb','sys','sec'];document.querySelectorAll('#adv-tabs button').forEach((b,i)=>b.classList.toggle('active',tabs[i]===t));renderAdvBody();}
+function checkCreatorPwd(pwd){if(pwd==='adm2007'){creatorMode=true;document.getElementById('creator-badge').style.display='inline-flex';toast('Olá Chefe Inácio!','ok');renderAdvBody();}else toast('Senha errada!','err');}
+function disableCreator(){creatorMode=false;document.getElementById('creator-badge').style.display='none';renderAdvBody();}
+function renderAdvBody(){
+  var body=document.getElementById('adv-body');if(!body)return;var h='';
+  if(advTab==='mem'){var mem=getMem(),ks=Object.keys(mem);h+='<div class="adv-s"><h4>Guardar Memória</h4><input class="adv-in" id="mk" placeholder="Chave (ex: profissão)"><input class="adv-in" id="mv" placeholder="Valor"><button class="adv-btn" onclick="salvarMem(document.getElementById(\'mk\').value,document.getElementById(\'mv\').value);renderAdvBody()"><i class="fas fa-save"></i> Guardar</button></div>';h+='<div class="adv-s"><h4>Memórias ('+ks.length+')</h4>';ks.forEach(k=>{h+='<div class="mem-item"><span class="mem-key">'+escHtml(k)+'</span><span class="mem-val">'+escHtml(mem[k].v)+'</span><button class="mem-del" onclick="removerMem(\''+escHtml(k)+'\')">×</button></div>';});h+='</div><button class="adv-btn" style="color:#ef4444" onclick="limparMem()"><i class="fas fa-trash"></i> Apagar Tudo</button>';}
+  else if(advTab==='conv'){h+='<div class="adv-s"><h4>Backup & Restauro</h4><button class="adv-btn" onclick="backupAll()"><i class="fas fa-download"></i> Backup Completo</button><button class="adv-btn" onclick="restoreAll()"><i class="fas fa-upload"></i> Restaurar</button></div>';h+='<div class="adv-s"><h4>Utilizador</h4><input class="adv-in" id="uname-edit" value="'+escHtml(userName||'')+'" placeholder="Nome"><button class="adv-btn" onclick="var n=document.getElementById(\'uname-edit\').value.trim();if(n){userName=n;localStorage.setItem(\'zn_username\',n);document.getElementById(\'uname\').textContent=n;document.getElementById(\'user-initial\').textContent=n.charAt(0).toUpperCase();document.getElementById(\'welcome-name\').textContent=n;toast(\'Nome atualizado!\',\'ok\');}"><i class="fas fa-user"></i> Atualizar</button></div>';h+='<div class="adv-s"><h4>Estatísticas</h4><div style="font-size:12px;color:var(--text-secondary)">Conversas: '+convs.length+'<br>Mensagens: '+convs.reduce((a,c)=>a+c.messages.length,0)+'</div></div>';}
+  else if(advTab==='kb'){var kb=getKB();h+='<div class="adv-s"><h4>Adicionar Conhecimento</h4><input class="adv-in" id="kbt" placeholder="Título"><textarea class="adv-in" id="kbc" rows="3" placeholder="Conteúdo..."></textarea><button class="adv-btn" onclick="if(addKB(document.getElementById(\'kbt\').value,document.getElementById(\'kbc\').value))renderAdvBody()"><i class="fas fa-plus"></i> Adicionar</button></div>';h+='<div class="adv-s"><h4>KB ('+kb.length+')</h4>';kb.forEach(d=>{h+='<div class="mem-item"><span class="mem-key" style="flex:1">'+escHtml(d.titulo)+'</span><button class="mem-del" onclick="remKB(\''+d.id+'\')">×</button></div>';});h+='</div>';h+='<div class="adv-s"><h4>Memória de Fábrica</h4><button class="adv-btn" onclick="loadFactoryMemory().then(()=>toast(\'Recarregado!\',\'ok\'))"><i class="fas fa-sync"></i> Recarregar cm.json</button><button class="adv-btn" onclick="exportCM()"><i class="fas fa-download"></i> Exportar cm.json</button>'+(factoryMemory?'<div style="font-size:11px;color:#22c55e;margin-top:5px"><i class="fas fa-check-circle"></i> cm.json carregado</div>':'')+'</div>';}
+  else if(advTab==='sys'){h+='<div class="adv-s"><h4>Busca Web</h4><button class="adv-btn" onclick="toggleWebMode();closeAdv()"><i class="fas fa-globe" style="color:#60a5fa"></i> '+(webSearchMode?'Desativar':'Ativar')+' Modo Web</button></div>';h+='<div class="adv-s"><h4>Pensamento Profundo</h4><button class="adv-btn" onclick="togglePensarMode();closeAdv()"><i class="fas fa-brain" style="color:#a855f7"></i> '+(pensarMode?'Desativar':'Ativar')+' Modo Pensar</button><button class="adv-btn" onclick="toggleThinkPanel();closeAdv()"><i class="fas fa-eye"></i> Ver Raciocínio</button></div>';h+='<div class="adv-s"><h4>Câmera</h4><button class="adv-btn" onclick="toggleCamera();closeAdv()"><i class="fas fa-camera" style="color:#06b6d4"></i> '+(cameraOn?'Parar':'Iniciar')+' Câmera</button></div>';h+='<div class="adv-s"><h4>Modelos</h4><select class="adv-in" onchange="document.getElementById(\'model-sel\').value=this.value;toast(\'Modelo alterado!\',\'ok\')"><option value="openai">OpenAI GPT-4</option><option value="qwen-coder">Qwen Coder</option><option value="openai-large">OpenAI Large</option><option value="mistral">Mistral</option><option value="deepseek">DeepSeek</option></select></div>';h+='<div class="adv-s"><h4>Teste Rápido de Áudio</h4><input class="adv-in" id="audio-test-text" placeholder="Texto para gerar áudio..."><button class="adv-btn" onclick="var t=document.getElementById(\'audio-test-text\').value.trim();if(t){closeAdv();genAudio(t);}else toast(\'Escreve um texto!\',\'warn\')"><i class="fas fa-volume-up" style="color:#a855f7"></i> Gerar Áudio Agora</button></div>';h+='<div class="adv-s"><h4>Teste Rápido de Imagem</h4><input class="adv-in" id="img-test-text" placeholder="Descreve a imagem em inglês..."><button class="adv-btn" onclick="var t=document.getElementById(\'img-test-text\').value.trim();if(t){closeAdv();genImg(t);}else toast(\'Descreve a imagem!\',\'warn\')"><i class="fas fa-image" style="color:#a855f7"></i> Gerar Imagem Agora</button></div>';}
+  else if(advTab==='sec'){h+='<div class="adv-s"><h4>Modo Criador (IUD)</h4>';if(creatorMode){h+='<div style="color:var(--accent-primary);font-size:12px;margin-bottom:10px">✓ Modo Criador Ativo</div><button class="adv-btn" onclick="exportCM()"><i class="fas fa-download"></i> Exportar cm.json</button><button class="adv-btn" style="color:#ef4444" onclick="disableCreator()"><i class="fas fa-sign-out-alt"></i> Sair</button>';}else{h+='<input class="adv-in" type="password" id="cpwd" placeholder="Senha..."><button class="adv-btn" onclick="checkCreatorPwd(document.getElementById(\'cpwd\').value)"><i class="fas fa-key"></i> Entrar</button>';}h+='</div><div class="adv-s"><h4>Resetar</h4><button class="adv-btn" style="color:#ef4444" onclick="if(confirm(\'Apagar tudo?\')){localStorage.clear();location.reload();}"><i class="fas fa-exclamation-triangle"></i> Resetar Tudo</button></div>';}
+  body.innerHTML=h;
+}
+
+// ==========================================
+// TOAST
+// ==========================================
+function toast(msg,type){var el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.className='toast show '+(type||'ok');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3200);}
+
+// ==========================================
+// MIC
+// ==========================================
+var micBtn=document.getElementById('mic-btn'),micRec=null,micOn=false;
+if('SpeechRecognition'in window||'webkitSpeechRecognition'in window){var SRC=window.SpeechRecognition||window.webkitSpeechRecognition;micRec=new SRC();micRec.lang='pt-PT';micRec.onresult=e=>{inputEl.value=e.results[0][0].transcript;autoResize(inputEl);micOn=false;micBtn.style.color='';};micRec.onerror=()=>{micOn=false;micBtn.style.color='';};micRec.onend=()=>{micOn=false;micBtn.style.color='';};micBtn.onclick=()=>{if(micOn){micRec.stop();micOn=false;micBtn.style.color='';}else{try{micRec.start();micOn=true;micBtn.style.color='var(--accent-primary)';toast('A ouvir...','ok');}catch(e){}}};}else{if(micBtn)micBtn.style.opacity='0.3';}
+
+showWelcome();
+</script>
+</body>
+</html>
