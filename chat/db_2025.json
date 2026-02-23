@@ -1,0 +1,32 @@
+[
+  {
+    "category": "tecnologia",
+    "title": "5G em Luanda",
+    "content": "Em 2025, a cobertura 5G atinge 80% da área urbana de Luanda, impulsionando startups e serviços digitais.",
+    "year": 2025
+  },
+  {
+    "category": "eventos",
+    "title": "Angola Tech Summit 2025",
+    "content": "O maior evento de tecnologia da África Austral, realizado em Talatona, com foco em IA e Blockchain.",
+    "year": 2025
+  },
+  {
+    "category": "economia",
+    "title": "Digitalização do Kwanza",
+    "content": "O Banco Nacional de Angola inicia testes piloto para o Kwanza Digital (e-Kwanza).",
+    "year": 2025
+  },
+  {
+    "category": "educação",
+    "title": "IA nas Escolas",
+    "content": "Programa nacional introduz assistentes de IA como tutores auxiliares em escolas secundárias selecionadas.",
+    "year": 2025
+  },
+  {
+    "category": "infraestrutura",
+    "title": "Energia Solar no Namibe",
+    "content": "Inauguração da maior central fotovoltaica do país na província do Namibe.",
+    "year": 2025
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "category": "tecnologia",
+    "title": "Cidades Inteligentes",
+    "content": "Em 2026, a Centralidade do Kilamba torna-se a primeira Smart City totalmente integrada de Angola, com gestão de tráfego e resíduos via IoT.",
+    "year": 2026
+  },
+  {
+    "category": "exploração espacial",
+    "title": "Angosat-3",
+    "content": "Anúncio oficial do projeto Angosat-3, focado em monitoramento climático e agricultura de precisão.",
+    "year": 2026
+  },
+  {
+    "category": "saúde",
+    "title": "Telemedicina 2.0",
+    "content": "Hospitais em Luanda começam a usar drones para entrega rápida de suprimentos médicos urgentes.",
+    "year": 2026
+  },
+  {
+    "category": "cultura",
+    "title": "Metaverso Cultural",
+    "content": "O Museu Nacional de Antropologia lança uma experiência imersiva completa no metaverso, acessível globalmente.",
+    "year": 2026
+  },
+  {
+    "category": "transporte",
+    "title": "Mobilidade Elétrica",
+    "content": "Primeira frota de autocarros elétricos de longo curso começa a operar entre Luanda e Benguela.",
+    "year": 2026
+  }
+]
