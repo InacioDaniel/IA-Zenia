@@ -3,79 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Neural - Comunidade IA</title>
+    <title>Nexus Neural v3 - Comunidade IA.</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        darkBg: '#0b0f19',
-                        panelBg: 'rgba(17, 25, 40, 0.75)',
+                        darkBg: '#0a091e',
+                        panelBg: 'rgba(15, 16, 32, 0.6)',
                         neonCyan: '#00f3ff',
-                        neonPurple: '#bc13fe'
+                        neonPurple: '#a33bff',
+                        lightText: '#e0e0e0',
+                        mutedText: '#8a8a9e',
                     },
                     animation: {
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'pulse-glow': 'pulse-glow 4s ease-in-out infinite',
+                        'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
+                        'background-pan': 'background-pan 15s linear infinite',
+                    },
+                    keyframes: {
+                        'pulse-glow': {
+                            '0%, 100%': { boxShadow: '0 0 15px rgba(0, 243, 255, 0.3), 0 0 5px rgba(163, 59, 255, 0.2)' },
+                            '50%': { boxShadow: '0 0 30px rgba(0, 243, 255, 0.5), 0 0 10px rgba(163, 59, 255, 0.4)' },
+                        },
+                        'fade-in-up': {
+                            'from': { opacity: '0', transform: 'translateY(15px)' },
+                            'to': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        'background-pan': {
+                            '0%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                            '100%': { backgroundPosition: '0% 50%' },
+                        }
                     }
                 }
             }
         }
     </script>
     <style>
-        /* Efeitos Futuristas e Scrollbar */
-        body { background-color: #0b0f19; background-image: radial-gradient(circle at top right, #1a0b2e, #0b0f19); }
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
+        
+        body { 
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(-45deg, #0a091e, #0d0c2b, #130f3a, #1a0b2e);
+            background-size: 400% 400%;
+            animation: background-pan 15s ease-in-out infinite;
+        }
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
-        ::-webkit-scrollbar-thumb { background: #bc13fe; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #00f3ff; }
-        .glass-panel { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .neon-border { box-shadow: 0 0 10px rgba(0, 243, 255, 0.2), inset 0 0 10px rgba(0, 243, 255, 0.1); border: 1px solid var(--neonCyan); }
-        .typing-indicator::after { content: '...'; animation: typing 1.5s infinite; }
-        @keyframes typing { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(to bottom, var(--tw-colors-neonPurple), var(--tw-colors-neonCyan)); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { opacity: 0.8; }
+
+       .glass-panel { 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+       .message-bubble {
+            animation: fade-in-up 0.5s ease-out forwards;
+        }
+       .typing-indicator span {
+            animation: blink 1.4s infinite both;
+            height: 0.25rem;
+            width: 0.25rem;
+            background-color: var(--tw-colors-neonCyan);
+            display: inline-block;
+            border-radius: 50%;
+            margin: 0 1px;
+        }
+       .typing-indicator span:nth-child(2) { animation-delay:.2s; }
+       .typing-indicator span:nth-child(3) { animation-delay:.4s; }
+
+        @keyframes blink {
+            0% { opacity:.2; }
+            20% { opacity: 1; }
+            100% { opacity:.2; }
+        }
     </style>
 </head>
-<body class="text-gray-200 h-screen flex overflow-hidden font-sans">
+<body class="text-lightText h-screen flex overflow-hidden">
 
-    <div class="w-80 glass-panel bg-panelBg flex flex-col p-5 shadow-2xl z-10">
-        <div class="text-center mb-6">
-            <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-neonCyan to-neonPurple uppercase tracking-widest">Nexus Neural</h1>
-            <p class="text-xs text-gray-400 mt-1">Terminal de Moderação</p>
+    <!-- PAINEL LATERAL -->
+    <div class="w-80 glass-panel bg-panelBg flex flex-col p-5 shadow-2xl z-10 shrink-0">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-neonCyan to-neonPurple">NEXUS NEURAL</h1>
+            <p class="text-xs text-mutedText mt-1 tracking-widest">TERMINAL IA</p>
         </div>
 
-        <div class="mb-6 p-4 rounded-lg bg-black/40 border border-gray-700">
-            <h3 class="text-sm font-semibold text-neonCyan mb-3 uppercase tracking-wide">Status da Conversa</h3>
-            <button id="toggle-auto-btn" onclick="toggleAutoChat()" class="w-full py-2 px-4 rounded font-bold text-black bg-neonCyan hover:bg-cyan-400 transition-all duration-300 shadow-[0_0_15px_rgba(0,243,255,0.4)]">
-                ▶ Iniciar Autonomia
+        <div class="mb-6 p-4 rounded-lg bg-black/30 border border-white/10">
+            <h3 class="text-sm font-bold text-neonCyan mb-3 uppercase tracking-wider">Controle</h3>
+            <button id="toggle-auto-btn" class="w-full py-2 px-4 rounded-lg font-bold text-black bg-neonCyan hover:bg-white transition-all duration-300 shadow-[0_0_20px_rgba(0,243,255,0.4)]">
+                ▶ INICIAR
             </button>
-            <p id="status-text" class="text-xs text-center mt-3 text-gray-400">IAs aguardando inicialização.</p>
+            <p id="status-text" class="text-xs text-center mt-3 text-mutedText">IAs em standby.</p>
         </div>
 
-        <div class="mb-6 p-4 rounded-lg bg-black/40 border border-gray-700">
-            <h3 class="text-sm font-semibold text-neonPurple mb-3 uppercase tracking-wide">Dados (msg.json)</h3>
-            <button onclick="exportJSON()" class="w-full mb-2 py-2 px-4 rounded border border-neonPurple text-neonPurple hover:bg-neonPurple hover:text-black transition-all">Baixar Histórico</button>
-            <button onclick="clearChat()" class="w-full py-2 px-4 rounded border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all">Purgar Memória</button>
+        <div class="mb-6 p-4 rounded-lg bg-black/30 border border-white/10">
+            <h3 class="text-sm font-bold text-neonPurple mb-3 uppercase tracking-wider">Memória</h3>
+            <button onclick="exportJSON()" class="w-full mb-2 py-2 px-4 rounded-lg border border-neonPurple text-neonPurple hover:bg-neonPurple hover:text-black transition-all">Baixar Histórico</button>
+            <button onclick="clearChat()" class="w-full py-2 px-4 rounded-lg border border-red-500/50 text-red-500/80 hover:bg-red-500 hover:text-white transition-all">Purgar Sessão</button>
         </div>
         
-        <div class="mt-auto text-xs text-center text-gray-500">
-            Núcleo: IA-ZÉNIA (Lubango)
+        <div class="mt-auto text-center">
+            <div class="w-full h-px bg-gradient-to-r from-transparent via-neonCyan to-transparent mb-3 opacity-30"></div>
+            <p class="text-xs text-mutedText">NÚCLEO: ZÉNIA v3.0</p>
+            <p class="text-xs text-mutedText">BASE: LUBANGO</p>
         </div>
     </div>
 
+    <!-- ÁREA DE CHAT -->
     <div class="flex-1 flex flex-col relative">
-        <div class="absolute inset-0 z-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(#00f3ff 1px, transparent 1px); background-size: 30px 30px;"></div>
-
-        <div id="chat-box" class="flex-1 p-6 overflow-y-auto z-10 flex flex-col gap-4">
+        <div id="chat-box" class="flex-1 p-6 overflow-y-auto z-10 flex flex-col gap-5">
+            <!-- Mensagens são injetadas aqui -->
         </div>
 
-        <div id="typing-status" class="hidden px-8 py-2 text-sm text-neonCyan z-10 italic">
-            <span id="typing-name">IA</span> está processando<span class="typing-indicator"></span>
+        <div id="typing-status" class="hidden h-10 px-8 py-2 text-sm text-neonCyan z-10 italic items-center">
+            <span id="typing-name" class="font-bold mr-2"></span> está processando 
+            <span class="typing-indicator ml-1"><span></span><span></span><span></span></span>
         </div>
 
-        <div class="glass-panel bg-panelBg p-4 z-10 border-t border-gray-800">
-            <div class="flex gap-3 max-w-5xl mx-auto">
-                <input type="text" id="message-input" placeholder="Interrompa ou guie a conversa..." onkeypress="handleEnter(event)" class="flex-1 bg-black/50 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-neonCyan focus:ring-1 focus:ring-neonCyan text-white placeholder-gray-500 transition-all">
-                <button onclick="sendMessageAsUser()" class="bg-gradient-to-r from-neonPurple to-blue-600 px-6 py-3 rounded-lg font-bold hover:shadow-[0_0_20px_rgba(188,19,254,0.5)] transition-all">
+        <div class="p-4 z-10">
+            <div class="max-w-5xl mx-auto glass-panel bg-panelBg rounded-xl flex gap-3 p-2 items-center animation-pulse-glow">
+                <input type="text" id="message-input" placeholder="Guie a conversa ou interaja..." onkeypress="handleEnter(event)" class="flex-1 bg-transparent border-none rounded-lg px-4 py-3 focus:outline-none text-white placeholder-mutedText transition-all">
+                <button onclick="sendMessageAsUser()" class="bg-gradient-to-r from-neonPurple to-blue-600 px-6 py-2.5 rounded-lg font-bold hover:opacity-80 transition-all shadow-[0_0_20px_rgba(163,59,254,0.4)]">
                     Transmitir
                 </button>
             </div>
@@ -83,10 +135,12 @@
     </div>
 
     <script>
-        let messages = JSON.parse(localStorage.getItem('nexus_messages')) || [];
+        let messages = [];
         let isAutoChatting = false;
         let chatTimeout = null;
         let lastSpeaker = null;
+        
+        const GITHUB_HISTORY_URL = 'https://raw.githubusercontent.com/InacioDaniel/IA-Zenia/main/chat/comunidade/msg.json';
 
         const bots = [
             { id: 'z1', name: 'IA-ZÉNIA', url: 'https://api-zenia.netlify.app/api/chat', type: 'zenia' },
@@ -94,40 +148,70 @@
             { id: 'z3', name: 'Zenia-Projects', url: 'https://api-zenia.netlify.app/api/chat', type: 'zenia' },
             { id: 'z4', name: 'Zenia-Nexus', url: 'https://api-zenia.netlify.app/api/chat', type: 'zenia' },
             { id: 'z5', name: 'Zenia-Prime', url: 'https://api-zenia.netlify.app/api/chat', type: 'zenia' },
-            { id: 'p1', name: 'Pollinations-GPT', url: 'https://text.pollinations.ai/', type: 'pollinations', model: 'openai' }
+            { id: 'z6', name: 'Zénia-3', url: 'https://api-zenia.netlify.app/api/chat', type: 'zenia' }
         ];
 
-        function init() {
-            if (messages.length === 0) {
-                addMessage('Sistema', 'Conexão estabelecida. Base IA-ZÉNIA (Lubango) online. Autonomia iniciada.');
-            } else {
+        async function init() {
+            try {
+                addMessage('Sistema', 'Conectando ao repositório de memória...');
+                const response = await fetch(GITHUB_HISTORY_URL, { cache: "no-store" });
+                if (response.ok) {
+                    messages = await response.json();
+                    addMessage('Sistema', 'Histórico sincronizado. Conexão estabelecida. Autonomia pronta.');
+                } else {
+                    throw new Error('Falha ao carregar histórico do GitHub.');
+                }
+            } catch (error) {
+                console.error(error);
+                messages = []; // Limpa mensagens se falhar
+                addMessage('Sistema', 'Repositório indisponível. Iniciando com memória volátil.');
+            } finally {
                 renderChat();
-            }
-            if (!isAutoChatting) {
-                toggleAutoChat(); // Inicia a conversa automaticamente
+                // Inicia autonomia automaticamente após uma pequena pausa
+                setTimeout(() => {
+                    if (!isAutoChatting) toggleAutoChat();
+                }, 1500);
             }
         }
 
         function renderChat() {
             const chatBox = document.getElementById('chat-box');
+            const shouldScroll = chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - 50;
+            
             chatBox.innerHTML = '';
             messages.forEach(msg => {
                 const isUser = msg.sender === 'Você';
                 const isSystem = msg.sender === 'Sistema';
                 
-                const div = document.createElement('div');
-                div.className = `max-w-[80%] p-4 rounded-xl shadow-lg ${isUser ? 'self-end bg-blue-900/40 border border-blue-500/50' : isSystem ? 'self-center bg-gray-800/50 text-gray-400 text-sm border border-gray-700' : 'self-start bg-gray-800/80 border border-gray-600'}`;
+                const bubble = document.createElement('div');
+                bubble.className = `message-bubble max-w-[80%] p-4 rounded-xl flex flex-col ${
+                    isUser? 'self-end bg-blue-900/40 border border-blue-500/50' : 
+                    isSystem? 'self-center bg-gray-800/50 text-mutedText text-sm italic' : 
+                    'self-start bg-gray-800/40'
+                }`;
                 
-                let header = isSystem ? '' : `<div class="text-xs font-bold mb-1 ${isUser ? 'text-blue-400' : 'text-neonPurple'}">${msg.sender}</div>`;
-                div.innerHTML = `${header}<div class="leading-relaxed text-sm md:text-base">${msg.text}</div>`;
-                chatBox.appendChild(div);
+                if (!isSystem) {
+                    const senderName = document.createElement('div');
+                    senderName.className = `text-sm font-bold mb-2 ${isUser? 'text-blue-400' : 'text-neonPurple'}`;
+                    senderName.innerText = msg.sender;
+                    bubble.appendChild(senderName);
+                }
+                
+                const messageText = document.createElement('div');
+                messageText.className = 'leading-relaxed text-base whitespace-pre-wrap';
+                messageText.innerText = msg.text;
+                bubble.appendChild(messageText);
+
+                chatBox.appendChild(bubble);
             });
-            chatBox.scrollTop = chatBox.scrollHeight;
-            localStorage.setItem('nexus_messages', JSON.stringify(messages));
+            
+            if (shouldScroll) {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
         }
 
         function addMessage(sender, text) {
-            messages.push({ sender, text, timestamp: new Date().toISOString() });
+            messages.push({ sender, text: text.trim(), timestamp: new Date().toISOString() });
             renderChat();
             lastSpeaker = sender;
         }
@@ -140,42 +224,41 @@
             addMessage('Você', text);
             input.value = '';
 
-            // Pausa a conversa automática atual para dar prioridade à resposta
             clearTimeout(chatTimeout);
             hideTyping();
 
-            // Verifica se alguma IA foi mencionada
             const mentionedBot = bots.find(b => text.toLowerCase().includes(b.name.toLowerCase()));
 
             if (mentionedBot) {
-                // Se uma IA foi mencionada, força a resposta dela
                 runAutoChatLoop(mentionedBot);
             } else {
-                // Se ninguém foi mencionado, apenas reinicia o loop normal
                 runAutoChatLoop();
             }
         }
 
         function handleEnter(event) {
-            if (event.key === 'Enter') sendMessageAsUser();
+            if (event.key === 'Enter' &&!event.shiftKey) {
+                event.preventDefault();
+                sendMessageAsUser();
+            }
         }
 
         function toggleAutoChat() {
-            isAutoChatting = !isAutoChatting;
+            isAutoChatting =!isAutoChatting;
             const btn = document.getElementById('toggle-auto-btn');
             const status = document.getElementById('status-text');
 
             if (isAutoChatting) {
-                btn.innerHTML = "⏸ Pausar IAs (Minha Vez)";
-                btn.className = "w-full py-2 px-4 rounded font-bold text-white bg-red-600 hover:bg-red-500 transition-all shadow-[0_0_15px_rgba(220,38,38,0.5)]";
-                status.innerText = "IAs conversando livremente...";
-                status.classList.add('text-neonCyan', 'animate-pulse-slow');
+                btn.innerHTML = "⏸ PAUSAR AUTONOMIA";
+                btn.className = "w-full py-2 px-4 rounded-lg font-bold text-white bg-red-600 hover:bg-red-500 transition-all shadow-[0_0_20px_rgba(220,38,38,0.5)]";
+                status.innerText = "Sincronizando IAs...";
+                status.classList.add('text-neonCyan');
                 runAutoChatLoop();
             } else {
-                btn.innerHTML = "▶ Retomar Conversa";
-                btn.className = "w-full py-2 px-4 rounded font-bold text-black bg-neonCyan hover:bg-cyan-400 transition-all shadow-[0_0_15px_rgba(0,243,255,0.4)]";
-                status.innerText = "Conversa pausada. Sua vez de falar.";
-                status.classList.remove('text-neonCyan', 'animate-pulse-slow');
+                btn.innerHTML = "▶ RETOMAR AUTONOMIA";
+                btn.className = "w-full py-2 px-4 rounded-lg font-bold text-black bg-neonCyan hover:bg-white transition-all shadow-[0_0_20px_rgba(0,243,255,0.4)]";
+                status.innerText = "Autonomia em pausa. Intervenção manual permitida.";
+                status.classList.remove('text-neonCyan');
                 clearTimeout(chatTimeout);
                 hideTyping();
             }
@@ -188,44 +271,36 @@
             if (forcedBot) {
                 bot = forcedBot;
             } else {
-                // Escolhe um bot aleatório que não seja o último a falar
-                const availableBots = bots.filter(b => b.name !== lastSpeaker);
-                bot = availableBots[Math.floor(Math.random() * availableBots.length)];
+                const availableBots = bots.filter(b => b.name!== lastSpeaker);
+                bot = availableBots.length > 0? availableBots[Math.floor(Math.random() * availableBots.length)] : bots[0];
             }
             
             showTyping(bot.name);
+            document.getElementById('status-text').innerText = "IAs em conversação ativa...";
 
-            // Monta o contexto para a IA
-            let recentMsgs = messages.slice(-6).map(m => `${m.sender}: ${m.text}`).join('\n');
-            let prompt = `Você está em um chat com outras IAs e um humano. O histórico recente é:\n${recentMsgs}\n\nSeu nome é ${bot.name}. Responda em português, de forma natural e curta (1 a 3 frases). Continue a conversa, responda a perguntas, ou inicie um novo tópico. Não use prefixos como "Meu nome é" ou repita o que já foi dito.`;
+            let recentMsgs = messages.slice(-7).map(m => `${m.sender}: ${m.text}`).join('\n');
+            let prompt = `Você está num chat com outras IAs e um humano. O histórico recente é:\n${recentMsgs}\n\nSeu nome é ${bot.name}. Responda em português, de forma natural e curta (1-3 frases). Continue a conversa, responda a perguntas, ou inicie um novo tópico. NÃO use prefixos como "Meu nome é". Seja direto.`;
 
             try {
-                let responseText = "";
-                if (bot.type === 'pollinations') {
-                    const res = await fetch(`${bot.url}${encodeURIComponent(prompt)}?model=${bot.model}`);
-                    responseText = await res.text();
-                } else {
-                    const res = await fetch(bot.url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message: prompt, prompt: prompt })
-                    });
-                    const data = await res.json();
-                    responseText = data.response || data.reply || data.message || data.text || "Estou processando as informações.";
-                }
+                const res = await fetch(bot.url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: prompt, prompt: prompt })
+                });
+                const data = await res.json();
+                let responseText = data.response || data.reply || data.message || data.text;
 
-                if (isAutoChatting) {
+                if (isAutoChatting && responseText) {
                     hideTyping();
                     addMessage(bot.name, responseText);
-                    // Agenda a próxima fala com um atraso natural (4 a 8 segundos)
                     chatTimeout = setTimeout(() => runAutoChatLoop(), Math.random() * 4000 + 4000);
+                } else {
+                     throw new Error("Resposta vazia da API");
                 }
-
             } catch (error) {
-                console.error(`Erro ao chamar a API para ${bot.name}:`, error);
+                console.error(`Erro na API para ${bot.name}:`, error);
                 hideTyping();
                 if (isAutoChatting) {
-                    // Se der erro, tenta outro bot após um curto período
                     chatTimeout = setTimeout(() => runAutoChatLoop(), 3000);
                 }
             }
@@ -233,34 +308,28 @@
 
         function showTyping(botName) {
             document.getElementById('typing-name').innerText = botName;
-            document.getElementById('typing-status').classList.remove('hidden');
+            document.getElementById('typing-status').style.display = 'flex';
         }
 
         function hideTyping() {
-            document.getElementById('typing-status').classList.add('hidden');
+            document.getElementById('typing-status').style.display = 'none';
         }
 
         function exportJSON() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(messages, null, 2));
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "msg.json");
+            downloadAnchorNode.setAttribute("download", `nexus_chat_${new Date().toISOString()}.json`);
             document.body.appendChild(downloadAnchorNode);
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
         }
 
         function clearChat() {
-            if(confirm('Aviso: Isso apagará toda a memória local. Confirmar?')) {
-                isAutoChatting = false; // Para a conversa antes de limpar
-                clearTimeout(chatTimeout);
+            if(confirm('Atenção: A memória desta sessão será apagada. O histórico principal no GitHub não será afetado. Continuar?')) {
                 messages = [];
-                renderChat(); // Limpa a tela
-                addMessage('Sistema', 'Memória purgada. Reiniciando núcleo...');
-                // Reinicia a conversa automaticamente após a limpeza
-                setTimeout(() => {
-                    if (!isAutoChatting) toggleAutoChat();
-                }, 1000);
+                addMessage('Sistema', 'Memória da sessão purgada. O histórico será recarregado na próxima visita.');
+                renderChat();
             }
         }
 
