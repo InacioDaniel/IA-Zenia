@@ -3,547 +3,625 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zedex IDE | Powered by IA-Zénia</title>
-    <!-- Styles -->
+    <title>Zedex Pro | Smart AI IDE</title>
+    <!-- Bibliotecas Externas -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Monaco Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+
     <style>
         :root {
-            --bg-activity-bar: #333333;
-            --bg-sidebar: #252526;
-            --bg-editor: #1e1e1e;
-            --bg-panel: #1e1e1e;
-            --bg-status-bar: #007acc;
-            --border-color: #3c3c3c;
-            --text-primary: #cccccc;
-            --text-selected: #ffffff;
-            --accent-color: #007acc;
-            --font-ui: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Tokyo Night / Deep Dark Palette */
+            --bg-deep: #0f111a;
+            --bg-glass: rgba(26, 27, 38, 0.7);
+            --bg-sidebar: #1a1b26;
+            --bg-editor: #1a1b26;
+            --accent-primary: #7aa2f7;
+            --accent-secondary: #bb9af7;
+            --text-main: #a9b1d6;
+            --text-bright: #c0caf5;
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --selection-bg: rgba(122, 162, 247, 0.2);
+            --font-ui: 'Inter', sans-serif;
             --font-code: 'JetBrains Mono', monospace;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body, html { height: 100%; overflow: hidden; background: var(--bg-editor); color: var(--text-primary); font-family: var(--font-ui); }
-
-        #zedex-container {
-            display: flex;
-            height: 100vh;
-            flex-direction: column;
+        body, html { 
+            height: 100%; 
+            overflow: hidden; 
+            background: var(--bg-deep); 
+            color: var(--text-main); 
+            font-family: var(--font-ui);
+            background-image: radial-gradient(circle at 50% 50%, #16161e 0%, #0f111a 100%);
         }
 
-        #main-layout {
+        #app-container {
             display: flex;
-            flex: 1;
-            overflow: hidden;
+            height: 100vh;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
         }
 
         /* Activity Bar */
         #activity-bar {
-            width: 48px;
-            background: var(--bg-activity-bar);
+            width: 54px;
+            background: rgba(15, 17, 26, 0.8);
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-top: 10px;
-            gap: 20px;
-            flex-shrink: 0;
+            padding-top: 15px;
+            gap: 25px;
+            border-right: 1px solid var(--border-glass);
+            z-index: 100;
         }
-        .activity-icon {
-            font-size: 24px;
-            color: rgba(255,255,255,0.4);
+        .activity-btn {
+            font-size: 22px;
+            color: var(--text-main);
             cursor: pointer;
-            transition: color 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             width: 100%;
             display: flex;
             justify-content: center;
-            padding: 10px 0;
+            padding: 8px 0;
         }
-        .activity-icon.active { color: #ffffff; border-left: 2px solid #ffffff; }
-        .activity-icon:hover { color: #ffffff; }
+        .activity-btn:hover { color: var(--accent-primary); transform: scale(1.1); }
+        .activity-btn.active { color: var(--accent-primary); }
+        .activity-btn.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 15%;
+            height: 70%;
+            width: 3px;
+            background: var(--accent-primary);
+            border-radius: 0 4px 4px 0;
+            box-shadow: 0 0 10px var(--accent-primary);
+        }
 
-        /* Sidebar Views */
-        .sidebar-view { display: none; height: 100%; flex-direction: column; }
-        .sidebar-view.active { display: flex; }
-
-        /* Sidebar */
+        /* Sidebar Explorer */
         #sidebar {
-            width: 260px;
+            width: 280px;
             background: var(--bg-sidebar);
-            border-right: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-glass);
             display: flex;
             flex-direction: column;
-            flex-shrink: 0;
+            transition: width 0.3s;
         }
         .sidebar-header {
-            padding: 10px 15px;
+            padding: 15px 20px;
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
-            color: var(--text-primary);
+            letter-spacing: 1.5px;
+            color: var(--text-bright);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        #file-explorer { flex: 1; overflow-y: auto; padding: 5px 0; }
-        .file-item {
-            padding: 4px 20px;
+        .vfs-controls {
+            padding: 5px 20px;
+            display: flex;
+            gap: 10px;
+            font-size: 14px;
+        }
+        .vfs-btn { cursor: pointer; opacity: 0.6; transition: 0.2s; }
+        .vfs-btn:hover { opacity: 1; color: var(--accent-primary); }
+
+        #file-tree {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0;
             font-size: 13px;
+        }
+        .tree-item {
+            padding: 6px 20px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            transition: background 0.2s;
+            user-select: none;
         }
-        .file-item:hover { background: #2a2d2e; }
-        .file-item.active { background: #37373d; color: var(--text-selected); }
+        .tree-item:hover { background: rgba(255,255,255,0.03); }
+        .tree-item.active { background: var(--selection-bg); color: var(--text-bright); }
+        .tree-folder i { color: #e0af68; }
+        .tree-file i { color: var(--accent-primary); }
 
-        /* Editor Area */
-        #editor-area {
+        /* Main Workspace */
+        #workspace {
             flex: 1;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
             background: var(--bg-editor);
+            overflow: hidden;
         }
-        #tabs-bar {
-            height: 35px;
-            background: #252526;
+        #tab-bar {
+            height: 40px;
+            background: #16161e;
             display: flex;
+            align-items: center;
             overflow-x: auto;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-glass);
         }
         .tab {
             padding: 0 15px;
             height: 100%;
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            background: #2d2d2d;
-            border-right: 1px solid var(--border-color);
-            cursor: pointer;
-            min-width: 120px;
-            max-width: 200px;
-        }
-        .tab.active { background: var(--bg-editor); color: var(--text-selected); border-top: 1px solid var(--accent-color); }
-        .tab-close { font-size: 10px; opacity: 0.6; }
-        .tab-close:hover { opacity: 1; }
-
-        #monaco-editor-container { flex: 1; position: relative; }
-
-        /* IA-Zénia Panel */
-        #zenia-panel {
-            width: 350px;
-            background: var(--bg-sidebar);
-            border-left: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-        }
-        .zenia-header {
-            padding: 12px;
-            background: #252526;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
             gap: 10px;
+            font-size: 12px;
+            background: #1a1b26;
+            border-right: 1px solid var(--border-glass);
+            cursor: pointer;
+            min-width: 140px;
+            position: relative;
         }
-        .zenia-logo {
-            width: 24px;
-            height: 24px;
-            background: linear-gradient(135deg, #7c3aed, #3b5bdb);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            color: white;
-            font-size: 14px;
-        }
-        #zenia-chat {
-            flex: 1;
-            overflow-y: auto;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .chat-msg {
-            font-size: 13px;
-            line-height: 1.6;
-            padding: 10px;
-            border-radius: 6px;
-        }
-        .chat-msg.ai { background: rgba(124, 58, 237, 0.1); border-left: 3px solid #7c3aed; }
-        .chat-msg.user { background: rgba(255, 255, 255, 0.05); align-self: flex-end; width: 90%; }
-
-        #zenia-input-container {
-            padding: 15px;
-            border-top: 1px solid var(--border-color);
-        }
-        #zenia-input {
+        .tab.active { background: var(--bg-editor); color: var(--text-bright); }
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
             width: 100%;
-            background: #3c3c3c;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            color: white;
-            padding: 8px 12px;
-            resize: none;
-            outline: none;
-            font-family: var(--font-ui);
-            min-height: 40px;
-            max-height: 150px;
+            height: 2px;
+            background: var(--accent-primary);
+        }
+        .tab-close { font-size: 10px; opacity: 0.5; transition: 0.2s; }
+        .tab-close:hover { opacity: 1; color: #f7768e; }
+
+        #editor-container {
+            flex: 1;
+            position: relative;
         }
 
-        /* Bottom Panel */
+        /* Bottom Panel / Terminal */
         #bottom-panel {
-            height: 200px;
-            background: var(--bg-panel);
-            border-top: 1px solid var(--border-color);
+            height: 240px;
+            background: #16161e;
+            border-top: 1px solid var(--border-glass);
             display: flex;
             flex-direction: column;
         }
-        .panel-header {
+        .panel-tabs {
             height: 35px;
-            background: #252526;
             display: flex;
-            padding: 0 15px;
+            padding: 0 20px;
             gap: 20px;
             align-items: center;
             font-size: 11px;
+            font-weight: 600;
             text-transform: uppercase;
-            font-weight: 700;
+            border-bottom: 1px solid var(--border-glass);
         }
         .panel-tab { cursor: pointer; opacity: 0.6; }
-        .panel-tab.active { opacity: 1; border-bottom: 1px solid var(--text-selected); height: 100%; display: flex; align-items: center; }
+        .panel-tab.active { opacity: 1; color: var(--accent-primary); }
+        
+        #terminal {
+            flex: 1;
+            background: #0f111a;
+            padding: 15px;
+            font-family: var(--font-code);
+            font-size: 13px;
+            color: #9ece6a;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+        .term-prompt { color: #bb9af7; }
 
-        #terminal-container { flex: 1; background: #000; padding: 10px; font-family: var(--font-code); font-size: 12px; color: #33ff33; }
-
-        /* Status Bar */
-        #status-bar {
-            height: 22px;
-            background: var(--bg-status-bar);
+        /* AI Chat Assistant (Right Side) */
+        #ai-sidebar {
+            width: 380px;
+            background: var(--bg-sidebar);
+            border-left: 1px solid var(--border-glass);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.3);
+        }
+        .ai-header {
+            padding: 20px;
+            background: rgba(15, 17, 26, 0.5);
+            border-bottom: 1px solid var(--border-glass);
             display: flex;
             align-items: center;
-            padding: 0 10px;
-            justify-content: space-between;
-            font-size: 12px;
-            color: white;
-            flex-shrink: 0;
+            gap: 15px;
         }
+        .ai-badge {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        #ai-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .msg {
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.6;
+            max-width: 90%;
+        }
+        .msg.ai { background: rgba(122, 162, 247, 0.08); border: 1px solid rgba(122, 162, 247, 0.1); align-self: flex-start; }
+        .msg.user { background: rgba(255, 255, 255, 0.05); align-self: flex-end; }
+        
+        .ai-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .ai-btn-action {
+            background: rgba(122, 162, 247, 0.15);
+            border: 1px solid var(--accent-primary);
+            color: var(--accent-primary);
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .ai-btn-action:hover { background: var(--accent-primary); color: white; }
+
+        #ai-input-area {
+            padding: 20px;
+            background: rgba(15, 17, 26, 0.5);
+            border-top: 1px solid var(--border-glass);
+        }
+        #ai-textarea {
+            width: 100%;
+            background: #16161e;
+            border: 1px solid var(--border-glass);
+            border-radius: 10px;
+            color: var(--text-bright);
+            padding: 12px;
+            font-family: var(--font-ui);
+            font-size: 13px;
+            resize: none;
+            outline: none;
+            min-height: 80px;
+            transition: border-color 0.3s;
+        }
+        #ai-textarea:focus { border-color: var(--accent-primary); }
+
+        /* Magic Fix Overlay */
+        #magic-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .magic-btn {
+            background: var(--accent-secondary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(187, 154, 247, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 4px 15px rgba(187, 154, 247, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 4px 25px rgba(187, 154, 247, 0.6); }
+            100% { transform: scale(1); box-shadow: 0 4px 15px rgba(187, 154, 247, 0.4); }
+        }
+
+        /* Utils */
+        .spin { animation: fa-spin 2s infinite linear; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
     </style>
 </head>
 <body>
-    <div id="zedex-container">
-        <div id="main-layout">
-            <!-- Activity Bar -->
-            <div id="activity-bar">
-                <i class="fas fa-files activity-icon active" title="Explorer"></i>
-                <i class="fas fa-search activity-icon" title="Search"></i>
-                <i class="fas fa-code-branch activity-icon" title="Source Control"></i>
-                <i class="fas fa-play activity-icon" title="Run and Debug"></i>
-                <i class="fas fa-puzzle-piece activity-icon" title="Extensions"></i>
-                <div style="margin-top: auto; margin-bottom: 15px;">
-                    <i class="fas fa-user-circle activity-icon"></i>
-                    <i class="fas fa-cog activity-icon" style="margin-top: 15px;"></i>
-                </div>
-            </div>
 
-            <!-- Sidebar -->
-            <div id="sidebar">
-                <!-- Explorer View -->
-                <div id="view-explorer" class="sidebar-view active">
-                    <div class="sidebar-header">
-                        <span>Explorer</span>
-                        <i class="fas fa-ellipsis-h"></i>
-                    </div>
-                    <div id="file-explorer">
-                        <div class="file-item active">
-                            <i class="fab fa-html5" style="color: #e34c26;"></i>
-                            <span>index.html</span>
-                        </div>
-                        <div class="file-item">
-                            <i class="fab fa-js-square" style="color: #f1e05a;"></i>
-                            <span>script.js</span>
-                        </div>
-                        <div class="file-item">
-                            <i class="fab fa-css3-alt" style="color: #569cd6;"></i>
-                            <span>style.css</span>
-                        </div>
-                    </div>
-                </div>
+<div id="app-container">
+    <!-- Activity Bar -->
+    <div id="activity-bar">
+        <div class="activity-btn active" title="Explorer"><i class="fas fa-copy"></i></div>
+        <div class="activity-btn" title="Search"><i class="fas fa-search"></i></div>
+        <div class="activity-btn" title="Source Control"><i class="fas fa-code-branch"></i></div>
+        <div class="activity-btn" title="Extensions"><i class="fas fa-puzzle-piece"></i></div>
+        <div style="margin-top: auto; padding-bottom: 20px;">
+            <div class="activity-btn" title="Settings"><i class="fas fa-cog"></i></div>
+        </div>
+    </div>
 
-                <!-- Search View -->
-                <div id="view-search" class="sidebar-view">
-                    <div class="sidebar-header">
-                        <span>Search</span>
-                    </div>
-                    <div style="padding: 10px;">
-                        <input type="text" placeholder="Search" style="width:100%; background:#3c3c3c; border:1px solid var(--border-color); color:white; padding:4px 8px; font-size:12px; outline:none;">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Editor Area -->
-            <div id="editor-area">
-                <div id="tabs-bar">
-                    <div class="tab active">
-                        <i class="fab fa-html5" style="color: #e34c26;"></i>
-                        <span>index.html</span>
-                        <i class="fas fa-times tab-close"></i>
-                    </div>
-                </div>
-                <div id="monaco-editor-container"></div>
-                
-                <!-- Bottom Panel -->
-                <div id="bottom-panel">
-                    <div class="panel-header">
-                        <span class="panel-tab">Problems</span>
-                        <span class="panel-tab">Output</span>
-                        <span class="panel-tab">Debug Console</span>
-                        <span class="panel-tab active">Terminal</span>
-                    </div>
-                    <div id="terminal-container">
-                        zedex@ia-zenia:~/workspace$ _
-                    </div>
-                </div>
-            </div>
-
-            <!-- IA-Zénia Panel -->
-            <div id="zenia-panel">
-                <div class="zenia-header">
-                    <div class="zenia-logo">Z</div>
-                    <span style="font-weight: 700; font-size: 13px;">IA-Zénia Assistant</span>
-                    <i class="fas fa-magic" style="margin-left: auto; color: #7c3aed;"></i>
-                </div>
-                <div id="zenia-chat">
-                    <div class="chat-msg ai">
-                        Olá! Eu sou a <strong>IA-Zénia</strong>, a sua assistente de programação integrada no Zedex IDE. Como posso ajudar com o seu código hoje?
-                    </div>
-                </div>
-                <div id="zenia-input-container">
-                    <textarea id="zenia-input" placeholder="Pergunte à Zénia ou use '/' para comandos..."></textarea>
-                </div>
+    <!-- Sidebar Explorer -->
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <span>Explorer</span>
+            <div class="vfs-controls">
+                <i class="fas fa-file-plus vfs-btn" onclick="vfs.createNewFile()" title="Novo Ficheiro"></i>
+                <i class="fas fa-folder-plus vfs-btn" onclick="vfs.createNewFolder()" title="Nova Pasta"></i>
+                <i class="fas fa-sync vfs-btn" onclick="vfs.refresh()" title="Atualizar"></i>
             </div>
         </div>
+        <div id="file-tree">
+            <!-- Arquivos serão injetados aqui via JS -->
+        </div>
+    </div>
 
-        <!-- Status Bar -->
-        <div id="status-bar">
-            <div style="display: flex; gap: 15px;">
-                <span><i class="fas fa-code-branch"></i> main*</span>
-                <span><i class="fas fa-sync"></i></span>
-                <span><i class="fas fa-times-circle"></i> 0 <i class="fas fa-exclamation-warning"></i> 0</span>
+    <!-- Main Workspace -->
+    <div id="workspace">
+        <div id="tab-bar">
+            <!-- Abas dinâmicas -->
+        </div>
+        <div id="editor-container">
+            <div id="magic-overlay">
+                <button class="magic-btn" onclick="iaAgent.magicFix()">
+                    <i class="fas fa-wand-magic-sparkles"></i> Magic Fix
+                </button>
             </div>
-            <div style="display: flex; gap: 15px;">
-                <span>Ln 1, Col 1</span>
-                <span>Spaces: 4</span>
-                <span>UTF-8</span>
-                <span>HTML</span>
-                <span><i class="fas fa-bell"></i></span>
+            <!-- Monaco Editor Container -->
+            <div id="monaco-mount" style="width:100%; height:100%;"></div>
+        </div>
+
+        <!-- Bottom Panel -->
+        <div id="bottom-panel">
+            <div class="panel-tabs">
+                <span class="panel-tab active">Terminal</span>
+                <span class="panel-tab">Output</span>
+                <span class="panel-tab">Problems</span>
+                <span class="panel-tab">Debug Console</span>
+            </div>
+            <div id="terminal">
+                <div><span class="term-prompt">zedex-pro@ia-zenia:</span> ~/workspace$ welcome --version v4.0.0</div>
+                <div><span style="color: #7aa2f7;">IA-Zénia System initialized. Welcome to the future of coding.</span></div>
+                <div id="term-content"></div>
             </div>
         </div>
     </div>
 
-    <!-- Monaco Editor Loader -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
-    <script>
-        // Configurações Globais
-        const ZENIA_API = 'https://gen.pollinations.ai/v1/chat/completions';
-        const POLLO_KEY = 'pk_7HHmBkBPEiNS5dyF';
-        let currentFile = 'index.html';
-        let editor;
+    <!-- AI Side Panel -->
+    <div id="ai-sidebar">
+        <div class="ai-header">
+            <div style="font-size: 24px; color: var(--accent-secondary);"><i class="fas fa-robot"></i></div>
+            <div>
+                <div style="font-weight: 700; color: var(--text-bright); font-size: 14px;">IA-Zénia Agent</div>
+                <div class="ai-badge">Deep Analysis Mode</div>
+            </div>
+        </div>
+        <div id="ai-messages">
+            <div class="msg ai">
+                Olá! Sou a **IA-Zénia**. Estou pronta para analisar o seu código, corrigir bugs e sugerir melhorias de performance. O que vamos construir hoje?
+            </div>
+        </div>
+        <div id="ai-input-area">
+            <textarea id="ai-textarea" placeholder="Ex: 'Crie uma função de validação de e-mail' ou 'Explique este código'"></textarea>
+            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 11px; opacity: 0.5;">Pressione Enter para enviar</span>
+                <button onclick="iaAgent.sendMessage()" style="background: var(--accent-primary); color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600;">Enviar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-        // Arquivos simulados para demonstração de performance
-        const files = {
-            'index.html': { lang: 'html', content: '<!DOCTYPE html>\n<html>\n<head>\n    <title>Zedex IDE</title>\n</head>\n<body>\n    <h1>Hello Zedex</h1>\n</body>\n</html>' },
-            'script.js': { lang: 'javascript', content: '// Zedex IDE Logic\nconsole.log("IA-Zénia ativada");\n\nfunction optimizeCode(code) {\n    return "Optimized: " + code;\n}' },
-            'style.css': { lang: 'css', content: 'body {\n    background-color: #1e1e1e;\n    color: #cccccc;\n    font-family: "Segoe UI", sans-serif;\n}' }
-        };
+<script>
+    // Configurações do Monaco
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
 
-        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+    let editor;
+    let currentFile = null;
 
-        require(['vs/editor/editor.main'], function () {
-            editor = monaco.editor.create(document.getElementById('monaco-editor-container'), {
-                value: files['index.html'].content,
-                language: 'html',
-                theme: 'vs-dark',
-                automaticLayout: true,
-                fontSize: 14,
-                fontFamily: 'JetBrains Mono',
-                minimap: { enabled: true },
-                scrollbar: {
-                    vertical: 'visible',
-                    horizontal: 'visible',
-                    useShadows: false,
-                    verticalScrollbarSize: 10,
-                    horizontalScrollbarSize: 10
-                },
-                // Otimizações para arquivos gigantes
-                bracketPairColorization: { enabled: true },
-                guides: { indentation: true },
-                renderWhitespace: 'selection',
-                smoothScrolling: true,
-                cursorBlinking: 'smooth',
-                cursorSmoothCaretAnimation: "on",
-                mouseWheelZoom: true,
-                wordWrap: "on"
-            });
-
-            // Inteligência Contextual (Sugestões Personalizadas Zénia)
-            monaco.languages.registerCompletionItemProvider('javascript', {
-                provideCompletionItems: (model, position) => {
-                    return {
-                        suggestions: [
-                            {
-                                label: 'zeniaHelp',
-                                kind: monaco.languages.CompletionItemKind.Function,
-                                insertText: 'zenia.ask("${1:pergunta}")',
-                                insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-                                detail: 'Pedir ajuda à IA-Zénia'
-                            }
-                        ]
-                    };
-                }
-            });
-        });
-
-        // Lógica de Arquivos e Abas
-        function switchFile(fileName) {
-            if (currentFile === fileName) return;
-            
-            // Salvar conteúdo atual
-            files[currentFile].content = editor.getValue();
-            
-            currentFile = fileName;
-            const fileData = files[fileName];
-            
-            // Atualizar Editor
-            monaco.editor.setModelLanguage(editor.getModel(), fileData.lang);
-            editor.setValue(fileData.content);
-            
-            // Atualizar UI
-            document.querySelectorAll('.file-item').forEach(el => {
-                el.classList.toggle('active', el.querySelector('span').textContent === fileName);
-            });
-            document.querySelector('.tab span').textContent = fileName;
-            document.querySelector('.tab i').className = getFileIcon(fileName);
-        }
-
-        function getFileIcon(name) {
-            if (name.endsWith('.html')) return 'fab fa-html5';
-            if (name.endsWith('.js')) return 'fab fa-js-square';
-            if (name.endsWith('.css')) return 'fab fa-css3-alt';
-            return 'fas fa-file-alt';
-        }
-
-        document.querySelectorAll('.file-item').forEach(item => {
-            item.onclick = () => switchFile(item.querySelector('span').textContent);
-        });
-
-        // Activity Bar Logic
-        document.querySelectorAll('.activity-icon').forEach((icon, index) => {
-            icon.onclick = () => {
-                const views = ['view-explorer', 'view-search'];
-                if (index < views.length) {
-                    document.querySelectorAll('.activity-icon').forEach(i => i.classList.remove('active'));
-                    icon.classList.add('active');
-                    document.querySelectorAll('.sidebar-view').forEach(v => v.classList.remove('active'));
-                    document.getElementById(views[index]).classList.add('active');
-                }
-            };
-        });
-
-        // Chat IA-Zénia (Real Fetch)
-        const chatInput = document.getElementById('zenia-input');
-        const chatBox = document.getElementById('zenia-chat');
-
-        chatInput.addEventListener('keydown', async (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                const text = chatInput.value.trim();
-                if (text) {
-                    addMessage('user', text);
-                    chatInput.value = '';
-                    await callZenia(text);
+    // VFS - Virtual File System
+    const vfs = {
+        files: JSON.parse(localStorage.getItem('zedex_vfs')) || {
+            'root': {
+                'index.html': { type: 'file', content: '<!DOCTYPE html>\n<html>\n<head>\n    <title>Zedex Pro</title>\n</head>\n<body>\n    <h1>Zenia AI IDE</h1>\n</body>\n</html>' },
+                'style.css': { type: 'file', content: 'body {\n    background: #1a1b26;\n    color: #a9b1d6;\n}' },
+                'app.js': { type: 'file', content: 'console.log("IA-Zenia Ready");' },
+                'src': {
+                    type: 'folder',
+                    children: {
+                        'utils.js': { type: 'file', content: 'export const sum = (a, b) => a + b;' }
+                    }
                 }
             }
-        });
+        },
 
-        function addMessage(role, text) {
-            const div = document.createElement('div');
-            div.className = `chat-msg ${role}`;
-            div.innerHTML = formatAIResponse(text);
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-            return div;
-        }
+        save() {
+            localStorage.setItem('zedex_vfs', JSON.stringify(this.files));
+        },
 
-        function formatAIResponse(text) {
-            return text
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/```([\s\S]*?)```/g, '<pre style="background:#000;padding:10px;border-radius:4px;margin:10px 0;overflow-x:auto;"><code>$1</code></pre>')
-                .replace(/`([^`]+)`/g, '<code style="background:rgba(255,255,255,0.1);padding:2px 4px;border-radius:3px;">$1</code>')
-                .replace(/\n/g, '<br>');
-        }
+        render() {
+            const tree = document.getElementById('file-tree');
+            tree.innerHTML = '';
+            this.renderRecursive(this.files.root, tree, '');
+        },
 
-        async function callZenia(query) {
-            const aiMsgDiv = addMessage('ai', '<i class="fas fa-spinner fa-spin"></i> Zénia está analisando o código...');
-            
-            const editorContext = editor.getValue();
-            const selection = editor.getSelection();
-            const selectedText = editor.getModel().getValueInRange(selection);
-
-            const systemPrompt = `Você é a IA-Zénia, assistente do Zedex IDE. 
-            Contexto do arquivo atual (${currentFile}):
-            \`\`\`
-            ${editorContext.substring(0, 2000)}
-            \`\`\`
-            ${selectedText ? `Trecho selecionado: "${selectedText}"` : ''}
-            Responda de forma técnica, útil e em Português de Angola.`;
-
-            try {
-                const response = await fetch(ZENIA_API, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + POLLO_KEY
-                    },
-                    body: JSON.stringify({
-                        model: 'openai',
-                        messages: [
-                            { role: 'system', content: systemPrompt },
-                            { role: 'user', content: query }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-
-                if (!response.ok) throw new Error('Erro na API');
+        renderRecursive(node, container, path) {
+            Object.keys(node).forEach(name => {
+                const item = node[name];
+                const div = document.createElement('div');
+                div.className = 'tree-item ' + (item.type === 'folder' ? 'tree-folder' : 'tree-file');
+                div.innerHTML = `<i class="fas ${item.type === 'folder' ? 'fa-folder' : 'fa-file-code'}"></i> <span>${name}</span>`;
                 
-                const data = await response.json();
-                const reply = data.choices[0].message.content;
-                aiMsgDiv.innerHTML = formatAIResponse(reply);
+                div.onclick = (e) => {
+                    e.stopPropagation();
+                    if (item.type === 'file') {
+                        this.openFile(name, item);
+                    }
+                };
+                
+                container.appendChild(div);
+                if (item.type === 'folder' && item.children) {
+                    const subContainer = document.createElement('div');
+                    subContainer.style.paddingLeft = '15px';
+                    container.appendChild(subContainer);
+                    this.renderRecursive(item.children, subContainer, path + name + '/');
+                }
+            });
+        },
 
-            } catch (err) {
-                aiMsgDiv.innerHTML = '<span style="color:#ef4444;">Erro ao conectar com a IA-Zénia. Verifique sua conexão.</span>';
+        openFile(name, file) {
+            currentFile = name;
+            document.querySelectorAll('.tree-item').forEach(el => el.classList.remove('active'));
+            // Lógica para marcar como ativo...
+            
+            if (editor) {
+                const lang = name.split('.').pop();
+                monaco.editor.setModelLanguage(editor.getModel(), lang === 'js' ? 'javascript' : lang);
+                editor.setValue(file.content);
+                this.updateTabs(name);
             }
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
+        },
 
-        // Terminal Simulado
-        function appendTerminal(text) {
-            const term = document.getElementById('terminal-container');
-            term.innerHTML += `<div>${text}</div>`;
-        }
+        updateTabs(name) {
+            const tabBar = document.getElementById('tab-bar');
+            tabBar.innerHTML = `
+                <div class="tab active">
+                    <i class="fab fa-js"></i>
+                    <span>${name}</span>
+                    <i class="fas fa-times tab-close"></i>
+                </div>
+            `;
+        },
 
-        // Auto-resize textarea
-        chatInput.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
+        createNewFile() {
+            const name = prompt('Nome do ficheiro (ex: main.py):');
+            if (name) {
+                this.files.root[name] = { type: 'file', content: '' };
+                this.save();
+                this.render();
+            }
+        }
+    };
+
+    // IA Agent Agent Logic
+    const iaAgent = {
+        async sendMessage() {
+            const input = document.getElementById('ai-textarea');
+            const text = input.value.trim();
+            if (!text) return;
+
+            this.addMsg('user', text);
+            input.value = '';
+
+            // Simulação de processamento
+            this.addMsg('ai', '<i class="fas fa-spinner fa-spin"></i> Analisando o seu código e o contexto do projeto...');
+            
+            setTimeout(() => {
+                const lastMsg = document.querySelector('#ai-messages .msg.ai:last-child');
+                if (text.toLowerCase().includes('auth') || text.toLowerCase().includes('autenticação')) {
+                    lastMsg.innerHTML = `Com base no seu pedido, gerei um boilerplate de autenticação JWT para o ficheiro \`auth.js\`. Deseja aplicar este código agora?
+                    <div class="ai-actions">
+                        <button class="ai-btn-action" onclick="iaAgent.executeAICodeAction('create_auth')">Aplicar Código</button>
+                        <button class="ai-btn-action">Explicar Lógica</button>
+                    </div>`;
+                } else {
+                    lastMsg.innerHTML = "Entendi o seu pedido. Posso ajudar a refatorar funções, encontrar bugs ou gerar testes unitários. O que prefere fazer?";
+                }
+            }, 1500);
+        },
+
+        addMsg(role, text) {
+            const container = document.getElementById('ai-messages');
+            const div = document.createElement('div');
+            div.className = `msg ${role}`;
+            div.innerHTML = text;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        },
+
+        executeAICodeAction(action) {
+            if (action === 'create_auth') {
+                const authCode = `// JWT Auth Service by IA-Zenia\nconst jwt = require('jsonwebtoken');\n\nconst login = (user) => {\n    return jwt.sign({ id: user.id }, process.env.SECRET);\n};`;
+                editor.setValue(authCode);
+                this.addMsg('ai', '✅ Código de autenticação aplicado com sucesso ao editor!');
+                vfs.terminalWrite('File auth.js updated by Zenia AI.');
+            }
+        },
+
+        magicFix() {
+            vfs.terminalWrite('Magic Fix: Scanning for syntax errors...');
+            setTimeout(() => {
+                const code = editor.getValue();
+                if (code.includes(';') === false) {
+                    vfs.terminalWrite('Warning: Missing semicolons detected. Fixing...');
+                    editor.setValue(code.split('\n').map(l => l.trim() && !l.endsWith('{') && !l.endsWith('}') ? l + ';' : l).join('\n'));
+                    vfs.terminalWrite('Success: Syntax corrected.');
+                } else {
+                    vfs.terminalWrite('No common errors found. Code looks clean!');
+                }
+            }, 1000);
+        }
+    };
+
+    // Terminal Utils
+    vfs.terminalWrite = (text) => {
+        const content = document.getElementById('term-content');
+        const line = document.createElement('div');
+        line.innerHTML = `<span class="term-prompt">ia-zenia@system:</span> ${text}`;
+        content.appendChild(line);
+        document.getElementById('terminal').scrollTop = 99999;
+    };
+
+    // Inicialização do Editor
+    require(['vs/editor/editor.main'], function() {
+        monaco.editor.defineTheme('tokyo-night', {
+            base: 'vs-dark',
+            inherit: true,
+            rules: [
+                { token: 'comment', foreground: '565f89', fontStyle: 'italic' },
+                { token: 'keyword', foreground: 'bb9af7' },
+                { token: 'string', foreground: '9ece6a' },
+                { token: 'number', foreground: 'ff9e64' },
+                { token: 'operator', foreground: '89ddff' },
+            ],
+            colors: {
+                'editor.background': '#1a1b26',
+                'editor.foreground': '#a9b1d6',
+                'editorCursor.foreground': '#c0caf5',
+                'editor.lineHighlightBackground': '#292e42',
+                'editorLineNumber.foreground': '#3b4261',
+                'editor.selectionBackground': '#33467c',
+            }
         });
-    </script>
+
+        editor = monaco.editor.create(document.getElementById('monaco-mount'), {
+            value: vfs.files.root['index.html'].content,
+            language: 'html',
+            theme: 'tokyo-night',
+            fontSize: 14,
+            fontFamily: 'JetBrains Mono',
+            automaticLayout: true,
+            minimap: { enabled: true },
+            padding: { top: 20 },
+            scrollbar: {
+                verticalScrollbarSize: 8,
+                horizontalScrollbarSize: 8
+            }
+        });
+
+        vfs.render();
+        vfs.terminalWrite('Editor Monaco v0.44.0 loaded successfully.');
+    });
+
+    // Chat Enter Handler
+    document.getElementById('ai-textarea').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            iaAgent.sendMessage();
+        }
+    });
+
+</script>
 </body>
 </html>
