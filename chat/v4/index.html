@@ -2240,8 +2240,10 @@ if('SpeechRecognition'in window||'webkitSpeechRecognition'in window){var SRC=win
 window.onload=()=>{
   renderHist();
   showPersonalizedGreeting();
-  if(window.innerWidth<768)sbColl=true;
-  toggleSidebar();
+  // Se for mobile (<768px), colapsamos o sidebar inicialmente
+  if(window.innerWidth < 768) {
+    toggleSidebar();
+  }
 };
 
 function showPersonalizedGreeting(){
@@ -2269,5 +2271,3 @@ showWelcome();
 </script>
 </body>
 </html>
-
-
