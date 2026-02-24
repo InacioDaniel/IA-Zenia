@@ -113,6 +113,9 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
 .s-cat-web{color:#9cdcfe!important;font-weight:700;}
 .s-cat-angola{color:#ce9178!important;font-weight:700;}
 .s-cat-file{color:#b5cea8!important;font-weight:700;}
+.canva-link-card{background:rgba(244,114,182,0.1);border:1px solid rgba(244,114,182,0.3);border-radius:10px;padding:12px;margin:10px 0;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all 0.2s;color:#f472b6;font-size:13px;font-family:var(--font-ui);}
+.canva-link-card:hover{background:rgba(244,114,182,0.15);border-color:#f472b6;transform:translateY(-1px);}
+.canva-link-card i{font-size:16px;}
 /* THINKING PANEL */
 #think-panel{position:fixed;top:0;right:0;width:400px;max-width:100vw;height:100%;background:var(--bg-secondary);border-left:2px solid #a855f7;z-index:410;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease;font-family:var(--font-ui);}
 #think-panel.open{transform:translateX(0);}
@@ -1030,17 +1033,28 @@ function hlCode(code,lang){
   }catch(e){return escHtml(code);}
 }
 function fmtText(raw, isStreaming){
+  // 1. Escapar HTML total para segurança (NUNCA interpretar código HTML no chat)
+  var h = escHtml(raw);
+  
   var codeStore={};
-  // Se estiver em streaming e tiver um bloco de código aberto, podemos querer tratar diferente, 
-  // mas por agora vamos focar em otimizar o highlightAuto que é o mais pesado.
-  var h=raw.replace(/```([^\n`]*)\n?([\s\S]*?)```/g,function(_,lang,code){
+  // Restaurar blocos de código (Markdown)
+  h=h.replace(/```([^\n`]*)\n?([\s\S]*?)```/g,function(_,lang,code){
     var uid='\x00CODE'+(Math.random().toString(36).slice(2,10))+'\x00';var id='c'+Math.random().toString(36).slice(2,8);
     var hl=hlCode(code.trim(),lang);var exts={python:'.py',javascript:'.js',html:'.html',css:'.css',java:'.java',typescript:'.ts',sql:'.sql',bash:'.sh',json:'.json',c:'.c',cpp:'.cpp',php:'.php'};var ext=exts[(lang||'').toLowerCase()]||'.txt';
-    codeStore[uid]='<div class="code-block" style="border:1px solid #3c3c3c;background:#1e1e1e;box-shadow:0 10px 30px rgba(0,0,0,0.5);"><div class="code-hdr" style="background:#252526;border-bottom:1px solid #3c3c3c;height:32px;padding:0 10px;"><span class="code-lang" style="color:#cccccc;font-size:11px;font-family:\'Segoe UI\';font-weight:400;">'+escHtml(lang||'código')+'</span><div style="display:flex;gap:5px"><button class="copy-btn" onclick="cpCode(\''+id+'\')" style="background:transparent;border:none;color:#cccccc;font-size:11px;cursor:pointer;"><i class="fas fa-copy"></i> Copiar</button><button class="copy-btn" onclick="downloadCode(\''+id+'\',\'code'+ext+'\')" style="background:transparent;border:none;color:#cccccc;font-size:11px;cursor:pointer;"><i class="fas fa-download"></i></button></div></div><pre style="margin:0;padding:12px;overflow-x:auto;"><code id="'+id+'" class="hljs" style="font-family:\'JetBrains Mono\';font-size:13px;background:transparent!important;">'+hl+'</code></pre></div>';
+    codeStore[uid]='<div class="code-block" style="border:1px solid #3c3c3c;background:#1e1e1e;box-shadow:0 10px 30px rgba(0,0,0,0.5);margin:10px 0;"><div class="code-hdr" style="background:#252526;border-bottom:1px solid #3c3c3c;height:32px;padding:0 10px;display:flex;align-items:center;justify-content:space-between;"><span class="code-lang" style="color:#cccccc;font-size:11px;font-family:\'Segoe UI\';font-weight:400;">'+(lang||'código')+'</span><div style="display:flex;gap:5px"><button class="copy-btn" onclick="cpCode(\''+id+'\')" style="background:transparent;border:none;color:#cccccc;font-size:11px;cursor:pointer;"><i class="fas fa-copy"></i> Copiar</button><button class="copy-btn" onclick="downloadCode(\''+id+'\',\'code'+ext+'\')" style="background:transparent;border:none;color:#cccccc;font-size:11px;cursor:pointer;"><i class="fas fa-download"></i></button></div></div><pre style="margin:0;padding:12px;overflow-x:auto;"><code id="'+id+'" class="hljs" style="font-family:\'JetBrains Mono\';font-size:13px;background:transparent!important;">'+hl+'</code></pre></div>';
     return uid;
   });
+  
   var inlineStore={};
-  h=h.replace(/`([^`\n]+)`/g,function(_,code){var uid='\x00IL'+Math.random().toString(36).slice(2,10)+'\x00';inlineStore[uid]='<code class="inline-code">'+escHtml(code)+'</code>';return uid;});
+  h=h.replace(/`([^`\n]+)`/g,function(_,code){var uid='\x00IL'+Math.random().toString(36).slice(2,10)+'\x00';inlineStore[uid]='<code class="inline-code">'+code+'</code>';return uid;});
+  
+  // 2. Restaurar tags de síntese (que agora estão escapadas)
+  h=h.replace(/&lt;ia&gt;([\s\S]*?)&lt;\/ia&gt;/gi, '<span class="s-cat-ia">$1</span>');
+  h=h.replace(/&lt;code&gt;([\s\S]*?)&lt;\/code&gt;/gi, '<span class="s-cat-code">$1</span>');
+  h=h.replace(/&lt;web&gt;([\s\S]*?)&lt;\/web&gt;/gi, '<span class="s-cat-web">$1</span>');
+  h=h.replace(/&lt;angola&gt;([\s\S]*?)&lt;\/angola&gt;/gi, '<span class="s-cat-angola">$1</span>');
+  h=h.replace(/&lt;file&gt;([\s\S]*?)&lt;\/file&gt;/gi, '<span class="s-cat-file">$1</span>');
+
   h=h.replace(/^#{1,6}\s+/gm,'');
   h=h.replace(/\*\*\*(.+?)\*\*\*/g,'<strong>$1</strong>');
   h=h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
@@ -1053,13 +1067,6 @@ function fmtText(raw, isStreaming){
   h=h.replace(/^(\d+)\.\s+(.+)$/gm,'<li style="margin:3px 0;list-style:decimal">$2</li>');
   h=h.replace(/((<li[^>]*>.*?<\/li>\n?)+)/g,'<ul style="padding-left:18px;margin:6px 0">$1</ul>');
   
-  // Sintese Coloring Tags
-  h=h.replace(/<ia>([\s\S]*?)<\/ia>/gi, '<span class="s-cat-ia">$1</span>');
-  h=h.replace(/<code>([\s\S]*?)<\/code>/gi, '<span class="s-cat-code">$1</span>');
-  h=h.replace(/<web>([\s\S]*?)<\/web>/gi, '<span class="s-cat-web">$1</span>');
-  h=h.replace(/<angola>([\s\S]*?)<\/angola>/gi, '<span class="s-cat-angola">$1</span>');
-  h=h.replace(/<file>([\s\S]*?)<\/file>/gi, '<span class="s-cat-file">$1</span>');
-
   h=h.replace(/\n/g,'<br>');
   Object.keys(inlineStore).forEach(k=>{h=h.split(k).join(inlineStore[k]);});
   Object.keys(codeStore).forEach(k=>{h=h.split(k).join(codeStore[k]);});
@@ -1107,6 +1114,7 @@ function openCanvaEditor(content,type){
   if(type === 'html') name = 'index.html';
   else if(type === 'js') name = 'script.js';
   else if(type === 'css') name = 'style.css';
+  else if(type === 'json') name = 'data.json';
   
   var newFile = { id, name, content, type };
   canvaFiles.push(newFile);
@@ -1115,6 +1123,18 @@ function openCanvaEditor(content,type){
   document.getElementById('canva-editor-modal').classList.add('open');
   renderCanvaFilesList();
   updateCanvaContent();
+  return id;
+}
+function reopenCanvaFile(id){
+  var file = canvaFiles.find(f => f.id === id);
+  if(file){
+    curCanvaFileId = id;
+    document.getElementById('canva-editor-modal').classList.add('open');
+    renderCanvaFilesList();
+    updateCanvaContent();
+  } else {
+    toast('Ficheiro não encontrado no histórico do Canva','warn');
+  }
 }
 function renderCanvaFilesList(){
   var container = document.getElementById('canva-files-list');
@@ -1431,22 +1451,30 @@ async function handleSend(){
   // Otimização: Resposta rápida para perguntas curtas/simples
   var isSimple = text.length < 50 && !hasImg && !CODE_RX.test(text) && !IMG_RX.test(text) && !VID_RX.test(text);
   
-  var conv=getConv();if(!conv)conv=createConv((text||'Análise de imagem').substring(0,40));
+  // Lazy conversation creation: only create if it doesn't exist
+  var conv=getConv();
+  if(!conv) {
+    conv=createConv((text||'Análise de imagem').substring(0,40));
+    // Remove from history list if it was empty, will be added properly later
+  }
+  
   hideWelcome();
   var cameraFrame=null;if(cameraOn)cameraFrame=await captureFrame();
   if(hasImg)renderMsgWithImg('user',text||'Analisa esta imagem.',pendingImageBase64);else renderMsg('user',text);
   var capturedImg=pendingImageBase64;pendingImageBase64=null;clearPendingImage();
   inputEl.value='';autoResize(inputEl);setLoading(true);
 
+  // UI Feedback imediato para evitar "travamento"
+  var typing = renderTyping();
+  chatEl.scrollTop = chatEl.scrollHeight;
+
   if(pensarMode&&text&&!isSimple)await deepThink(text);
 
-  if(!hasImg&&AUD_RX.test(text)){var ap=text.replace(AUD_RX,'').trim()||text;await genAudio(ap);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Áudio: '+ap+']'});saveConvs();setLoading(false);return;}
-  if(!hasImg&&FILE_RX.test(text)){await genFile(text);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Ficheiro gerado]'});saveConvs();setLoading(false);return;}
-  if(!hasImg&&VID_RX.test(text)){var vp=text.replace(VID_RX,'').trim()||text;await genVid(vp);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Video: '+vp+']'});saveConvs();setLoading(false);return;}
-  if(!hasImg&&IMG_RX.test(text)){var ip=extractImgPrompt(text);await genImg(ip);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Imagem: '+ip+']'});saveConvs();setLoading(false);return;}
+  if(!hasImg&&AUD_RX.test(text)){var ap=text.replace(AUD_RX,'').trim()||text;await genAudio(ap);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Áudio: '+ap+']'});saveConvs();setLoading(false);typing.remove();return;}
+  if(!hasImg&&FILE_RX.test(text)){await genFile(text);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Ficheiro gerado]'});saveConvs();setLoading(false);typing.remove();return;}
+  if(!hasImg&&VID_RX.test(text)){var vp=text.replace(VID_RX,'').trim()||text;await genVid(vp);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Video: '+vp+']'});saveConvs();setLoading(false);typing.remove();return;}
+  if(!hasImg&&IMG_RX.test(text)){var ip=extractImgPrompt(text);await genImg(ip);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Imagem: '+ip+']'});saveConvs();setLoading(false);typing.remove();return;}
 
-  // Prepara UI para Streaming
-  var typing = renderTyping();
   var row = document.createElement('div'); row.className = 'msg-row';
   var av = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
   var bbl = document.createElement('div'); bbl.className = 'msg-bbl ai';
@@ -1488,7 +1516,6 @@ async function handleSend(){
       }
       reply += token;
       
-      // Se estiver em modo Canva e for código, abrimos o editor quando terminar
       if(!canvaMode) {
         contentDiv.innerHTML = fmtText(reply, true);
         chatEl.scrollTop = chatEl.scrollHeight;
@@ -1513,8 +1540,8 @@ async function handleSend(){
       var codeOnly = codeMatch ? codeMatch[1] : reply;
       var langMatch = reply.match(/```([^\n]*)/);
       var lang = langMatch ? langMatch[1].trim() : 'text';
-      openCanvaEditor(codeOnly, lang);
-      contentDiv.innerHTML = fmtText(reply.replace(/```[\s\S]*?```/g, '\n[Código enviado para o Canva Editor]'));
+      var fileId = openCanvaEditor(codeOnly, lang);
+      contentDiv.innerHTML = fmtText(reply.replace(/```[\s\S]*?```/g, '\n\n<div class="canva-link-card" onclick="reopenCanvaFile(\''+fileId+'\')"><i class="fas fa-magic"></i> Ver no Canva Editor: <strong>'+lang+'</strong></div>'));
     } else {
       contentDiv.innerHTML = fmtText(reply);
     }
@@ -1986,6 +2013,25 @@ async function handleFileUpload(ev){var f=ev.target.files[0];if(!f)return;var r=
 async function handleFileAnyUpload(ev){
   var f=ev.target.files[0];if(!f)return;
   if(f.type.startsWith('image/')){var r=new FileReader();r.onload=e=>{showPendingImage(e.target.result);toast('Imagem pronta!','ok');};r.readAsDataURL(f);}
+  else if(f.type === 'application/pdf' || f.name.endsWith('.pdf')) {
+    toast('PDF detectado. A processar...','ok');
+    // Implementação básica de PDF seria extrair texto via pdf.js se disponível,
+    // mas por agora vamos tratar como documento para o Canva
+    var r = new FileReader();
+    r.onload = e => {
+      openCanvaEditor(e.target.result, 'pdf');
+      toast('PDF aberto no Canva!','ok');
+    };
+    r.readAsArrayBuffer(f);
+  }
+  else if(f.name.endsWith('.docx') || f.name.endsWith('.xlsx')) {
+    var r = new FileReader();
+    r.onload = e => {
+      openCanvaEditor(e.target.result, f.name.endsWith('.docx')?'docx':'xlsx');
+      toast('Documento aberto no Canva!','ok');
+    };
+    r.readAsArrayBuffer(f);
+  }
   else{var r2=new FileReader();r2.onload=e=>{var content=e.target.result;hideWelcome();var conv=getConv()||createConv('Análise: '+f.name);renderMsg('user','[Ficheiro: '+f.name+']');inputEl.value='Analisa este ficheiro "'+f.name+'":\n\n'+content.substring(0,4000);autoResize(inputEl);setTimeout(handleSend,100);};r2.readAsText(f);}
   ev.target.value='';
 }
@@ -2087,7 +2133,37 @@ function toast(msg,type){var el=document.getElementById('toast');if(!el)return;e
 var micBtn=document.getElementById('mic-btn'),micRec=null,micOn=false;
 if('SpeechRecognition'in window||'webkitSpeechRecognition'in window){var SRC=window.SpeechRecognition||window.webkitSpeechRecognition;micRec=new SRC();micRec.lang='pt-PT';micRec.onresult=e=>{inputEl.value=e.results[0][0].transcript;autoResize(inputEl);micOn=false;micBtn.style.color='';};micRec.onerror=()=>{micOn=false;micBtn.style.color='';};micRec.onend=()=>{micOn=false;micBtn.style.color='';};micBtn.onclick=()=>{if(micOn){micRec.stop();micOn=false;micBtn.style.color='';}else{try{micRec.start();micOn=true;micBtn.style.color='var(--accent-primary)';toast('A ouvir...','ok');}catch(e){}}};}else{if(micBtn)micBtn.style.opacity='0.3';}
 
+window.onload=()=>{
+  renderHist();
+  showPersonalizedGreeting();
+  if(window.innerWidth<768)sbColl=true;
+  toggleSidebar();
+};
+
+function showPersonalizedGreeting(){
+  var mem = getMem();
+  var name = userName || 'amigo';
+  var greeting = 'Olá, ' + name + '! ';
+  var demos = [
+    'Queres gerar um código HTML no Canva?',
+    'Posso analisar uma foto tua?',
+    'Que tal criarmos um vídeo com Qwen-Coder?',
+    'Podes carregar documentos (PDF, DOCX) no botão + para eu analisar!'
+  ];
+  
+  if(mem.profissão) demos.push('Posso ajudar-te no teu trabalho como ' + mem.profissão.v + '?');
+  if(mem.interesse) demos.push('Vi que gostas de ' + mem.interesse.v + '. Queres explorar algo novo hoje?');
+  
+  document.getElementById('welcome-name').textContent = name;
+  var welcomeText = document.querySelector('#welcome-msg div:nth-child(3)');
+  if(welcomeText) {
+    welcomeText.innerHTML = greeting + 'Sou a <strong>Zenia v4</strong>. ' + demos[Math.floor(Math.random()*demos.length)];
+  }
+}
+
 showWelcome();
 </script>
 </body>
 </html>
+
+
