@@ -2256,8 +2256,12 @@ if('SpeechRecognition'in window||'webkitSpeechRecognition'in window){var SRC=win
 window.onload=()=>{
   renderHist();
   showPersonalizedGreeting();
-  if(window.innerWidth<768)sbColl=true;
-  toggleSidebar();
+  // No desktop o sidebar fica aberto por defeito (sbColl=false)
+  // No mobile, colapsamos para não ocupar espaço
+  if(window.innerWidth < 768) {
+    sbColl = false;
+    toggleSidebar();
+  }
 };
 
 function showPersonalizedGreeting(){
