@@ -11,6 +11,11 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<!-- Doc Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root{--bg-primary:#0b0d11;--bg-secondary:#111318;--bg-tertiary:#151b2d;--bg-input:#151c2e;--border-color:#1e2330;--border-accent:#252c3b;--text-primary:#e5e7eb;--text-secondary:#9ca3af;--text-muted:#6b7280;--accent-primary:#3b5bdb;--accent-secondary:#7c3aed;--accent-glow:rgba(59,91,219,0.25);--msg-ai-bg:transparent;--msg-user-bg:#1d3461;--msg-user-text:#e8f0fe;--sidebar-bg:#0f1117;--topbar-bg:#0b0d11;--send-btn:#3b5bdb;--send-btn-hover:#4c6ef5;--user-av:#1e3a5f;--font-ui:'Plus Jakarta Sans','Outfit',system-ui,sans-serif;--font-msg:'DM Sans','Plus Jakarta Sans',sans-serif;--font-code:'JetBrains Mono',monospace;--radius-main:14px;--shadow-main:0 4px 24px rgba(0,0,0,0.4);}
 [data-theme="cyberpunk"]{--bg-primary:#0a0010;--bg-secondary:#0d0018;--bg-tertiary:#110022;--bg-input:#0f0020;--border-color:#2a0050;--border-accent:#3d0070;--text-primary:#f0e6ff;--text-secondary:#b892ff;--text-muted:#7c52cc;--accent-primary:#bf00ff;--accent-secondary:#00f5ff;--accent-glow:rgba(191,0,255,0.25);--msg-user-bg:#1a003a;--msg-user-text:#e8d5ff;--sidebar-bg:#0d0018;--topbar-bg:#080012;--send-btn:#bf00ff;--send-btn-hover:#d333ff;--user-av:#330066;--font-ui:'Orbitron','Space Mono',monospace;--font-msg:'Space Mono',monospace;--radius-main:4px;}
@@ -80,6 +85,22 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
 .ia-btn.voice-cfg-btn{color:#f59e0b;}
 .ia-btn.camera-btn{color:#06b6d4;}
 .ia-btn.camera-btn.ativo{color:#06b6d4;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,.4);}
+.ia-btn.canva-btn{color:#f472b6;}
+.ia-btn.canva-btn.ativo{color:#f472b6;background:rgba(244,114,182,0.15);border:1px solid rgba(244,114,182,.4);animation:canvaPulse 2s ease-in-out infinite;}
+@keyframes canvaPulse{0%,100%{box-shadow:0 0 0 0 rgba(244,114,182,.3)}50%{box-shadow:0 0 0 5px rgba(244,114,182,0)}}
+/* CANVA EDITOR */
+#canva-editor-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:600;flex-direction:column;}
+#canva-editor-modal.open{display:flex;}
+#canva-hdr{height:50px;background:var(--bg-secondary);border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0;}
+#canva-body{flex:1;display:flex;overflow:hidden;background:#fff;}
+#canva-sidebar{width:220px;background:var(--bg-secondary);border-right:1px solid var(--border-color);padding:12px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;}
+#canva-main{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;background:#f3f4f6;}
+#canva-txt-editor{width:100%;height:100%;border:none;outline:none;padding:20px;font-family:var(--font-code);font-size:14px;resize:none;display:none;background:#fff;color:#111;}
+#canva-viewer{width:100%;height:100%;overflow:auto;padding:20px;display:none;background:#fff;color:#111;}
+#canva-html-preview{width:100%;height:100%;border:none;display:none;background:#fff;}
+.canva-tool-btn{padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border-color);color:var(--text-primary);border-radius:6px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;}
+.canva-tool-btn:hover{background:var(--border-accent);border-color:var(--accent-primary);}
+.canva-tool-btn.active{background:var(--accent-glow);border-color:var(--accent-primary);color:var(--accent-primary);}
 /* THINKING PANEL */
 #think-panel{position:fixed;top:0;right:0;width:400px;max-width:100vw;height:100%;background:var(--bg-secondary);border-left:2px solid #a855f7;z-index:410;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease;font-family:var(--font-ui);}
 #think-panel.open{transform:translateX(0);}
@@ -645,6 +666,7 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
           <button class="ia-btn visao-btn" id="visao-input-btn" onclick="openVisionModal()" title="Visão"><i class="fas fa-eye"></i><span class="btn-label">Visão</span></button>
           <button class="ia-btn voice-cfg-btn" id="voice-cfg-btn" onclick="openPersonality()" title="Voz"><i class="fas fa-microphone-alt"></i><span class="btn-label">Voz</span></button>
           <button class="ia-btn pensar-btn" id="pensar-btn" onclick="togglePensarMode()" title="Pensar"><i class="fas fa-brain"></i><span class="btn-label">Pensar</span></button>
+          <button class="ia-btn canva-btn" id="canva-mode-btn" onclick="toggleCanvaMode()" title="Modo Canva"><i class="fas fa-magic"></i><span class="btn-label">Canva</span></button>
           <button class="ia-btn camera-btn" id="camera-btn" onclick="toggleCamera()" title="Câmera"><i class="fas fa-camera"></i><span class="btn-label">Câmera</span></button>
           <button class="ia-btn" onclick="openVPNModal()" title="CAÇA VPN Angola" style="color:#f59e0b"><i class="fas fa-shield-alt"></i><span class="btn-label" style="font-size:8px">VPN</span></button>
         </div>
@@ -672,6 +694,39 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
   <div class="adv-body" id="adv-body"></div>
 </div>
 <div class="toast" id="toast"></div>
+
+<!-- CANVA EDITOR MODAL -->
+<div id="canva-editor-modal">
+  <div id="canva-hdr">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#f472b6,#db2777);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900">C</div>
+      <span style="font-weight:700;font-size:14px;color:var(--text-primary)">Canva Editor & Visualizador</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="ia-btn" onclick="closeCanvaEditor()" style="font-size:20px">&times;</button>
+    </div>
+  </div>
+  <div id="canva-body">
+    <div id="canva-sidebar">
+      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px">Ações</div>
+      <button class="canva-tool-btn active" id="canva-btn-edit" onclick="setCanvaMode('edit')"><i class="fas fa-edit"></i> Editar</button>
+      <button class="canva-tool-btn" id="canva-btn-code" onclick="setCanvaMode('code')"><i class="fas fa-code"></i> Código</button>
+      <button class="canva-tool-btn" id="canva-btn-view" onclick="setCanvaMode('view')" style="display:none"><i class="fas fa-eye"></i> Ver HTML</button>
+      <div style="height:1px;background:var(--border-color);margin:8px 0"></div>
+      <button class="canva-tool-btn" onclick="saveCanva()"><i class="fas fa-save"></i> Salvar</button>
+      <button class="canva-tool-btn" onclick="downloadCanva()"><i class="fas fa-download"></i> Baixar</button>
+      <button class="canva-tool-btn" onclick="exportCanvaPDF()"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+      <div style="margin-top:auto;font-size:10px;color:var(--text-muted);line-height:1.4">
+        Suporta: TXT, HTML, JS, CSS, JSON, DOCX, XLSX, PDF.
+      </div>
+    </div>
+    <div id="canva-main">
+      <textarea id="canva-txt-editor" spellcheck="false"></textarea>
+      <div id="canva-viewer"></div>
+      <iframe id="canva-html-preview"></iframe>
+    </div>
+  </div>
+</div>
 
 <script>
 // ==========================================
@@ -786,6 +841,7 @@ var voiceConfig={voiceIndex:-1,rate:1,pitch:1,volume:1,pause:300};
 var factoryMemory='';
 var pendingImageBase64=null;
 var pensarMode=false;
+var canvaMode=false;
 var webSearchMode=false;
 var cameraStream=null;
 var cameraOn=false;
@@ -932,10 +988,23 @@ function setDetailLevel(l){zeniaPersonality.detailLevel=l;updatePersonalityUI();
 // ==========================================
 // TEXT FORMATTING
 // ==========================================
+var hlCache = {};
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function hlCode(code,lang){try{if(lang&&hljs.getLanguage(lang))return hljs.highlight(code,{language:lang}).value;return hljs.highlightAuto(code).value;}catch(e){return escHtml(code);}}
-function fmtText(raw){
+function hlCode(code,lang){
+  var cacheKey = lang + ':' + code;
+  if(hlCache[cacheKey]) return hlCache[cacheKey];
+  try{
+    var res;
+    if(lang&&hljs.getLanguage(lang)) res = hljs.highlight(code,{language:lang}).value;
+    else res = hljs.highlightAuto(code).value;
+    hlCache[cacheKey] = res;
+    return res;
+  }catch(e){return escHtml(code);}
+}
+function fmtText(raw, isStreaming){
   var codeStore={};
+  // Se estiver em streaming e tiver um bloco de código aberto, podemos querer tratar diferente, 
+  // mas por agora vamos focar em otimizar o highlightAuto que é o mais pesado.
   var h=raw.replace(/```([^\n`]*)\n?([\s\S]*?)```/g,function(_,lang,code){
     var uid='\x00CODE'+(Math.random().toString(36).slice(2,10))+'\x00';var id='c'+Math.random().toString(36).slice(2,8);
     var hl=hlCode(code.trim(),lang);var exts={python:'.py',javascript:'.js',html:'.html',css:'.css',java:'.java',typescript:'.ts',sql:'.sql',bash:'.sh',json:'.json',c:'.c',cpp:'.cpp',php:'.php'};var ext=exts[(lang||'').toLowerCase()]||'.txt';
@@ -994,6 +1063,15 @@ async function streamText(bbl,fullText,onDone){
 // PENSAMENTO PROFUNDO
 // ==========================================
 function togglePensarMode(){pensarMode=!pensarMode;var btn=document.getElementById('pensar-btn'),badge=document.getElementById('think-badge');btn.classList.toggle('ativo',pensarMode);if(badge)badge.style.display=pensarMode?'inline-flex':'none';toast(pensarMode?'🧠 Pensamento Profundo ATIVO':'Pensamento desativado',pensarMode?'ok':'warn');if(pensarMode)openThinkPanel();}
+
+function toggleCanvaMode(){canvaMode=!canvaMode;var btn=document.getElementById('canva-mode-btn');btn.classList.toggle('ativo',canvaMode);toast(canvaMode?'🎨 Modo Canva ATIVO':'Modo Canva desativado',canvaMode?'ok':'warn');}
+function openCanvaEditor(content,type){document.getElementById('canva-editor-modal').classList.add('open');var editor=document.getElementById('canva-txt-editor');var viewer=document.getElementById('canva-viewer');var htmlPreview=document.getElementById('canva-html-preview');editor.value=content;editor.style.display='block';viewer.style.display='none';htmlPreview.style.display='none';window._canvaType=type||'text';if(window._canvaType==='html')document.getElementById('canva-btn-view').style.display='flex';else document.getElementById('canva-btn-view').style.display='none';if(type==='docx'){mammoth.convertToHtml({arrayBuffer:content}).then(res=>{viewer.innerHTML=res.value;editor.style.display='none';viewer.style.display='block';}).catch(e=>toast('Erro ao abrir DOCX','err'));}else if(type==='xlsx'){var workbook=XLSX.read(content,{type:'array'});var sheet=workbook.Sheets[workbook.SheetNames[0]];viewer.innerHTML=XLSX.utils.sheet_to_html(sheet);editor.style.display='none';viewer.style.display='block';}setCanvaMode('edit');}
+function closeCanvaEditor(){document.getElementById('canva-editor-modal').classList.remove('open');}
+function setCanvaMode(mode){var edit=document.getElementById('canva-txt-editor'),view=document.getElementById('canva-viewer'),html=document.getElementById('canva-html-preview');edit.style.display='none';view.style.display='none';html.style.display='none';document.querySelectorAll('.canva-tool-btn').forEach(b=>b.classList.remove('active'));if(mode==='edit'){edit.style.display='block';document.getElementById('canva-btn-edit').classList.add('active');}else if(mode==='code'){edit.style.display='block';document.getElementById('canva-btn-code').classList.add('active');}else if(mode==='view'){html.style.display='block';var doc=html.contentDocument||html.contentWindow.document;doc.open();doc.write(edit.value);doc.close();document.getElementById('canva-btn-view').classList.add('active');}}
+async function downloadCanva(){var content=document.getElementById('canva-txt-editor').value;var ext=window._canvaType==='html'?'.html':window._canvaType==='js'?'.js':window._canvaType==='css'?'.css':'.txt';var blob=new Blob([content],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='canva_file'+ext;a.click();}
+async function saveCanva(){toast('Salvo com sucesso!','ok');}
+async function exportCanvaPDF(){var main=document.getElementById('canva-main');html2canvas(main).then(canvas=>{var imgData=canvas.toDataURL('image/png');var pdf=new jspdf.jsPDF();var imgProps=pdf.getImageProperties(imgData);var pdfWidth=pdf.internal.pageSize.getWidth();var pdfHeight=(imgProps.height*pdfWidth)/imgProps.width;pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);pdf.save('canva_export.pdf');});}
+
 function openThinkPanel(){thinkPanelOpen=true;document.getElementById('think-panel').classList.add('open');}
 function toggleThinkPanel(){thinkPanelOpen=!thinkPanelOpen;document.getElementById('think-panel').classList.toggle('open',thinkPanelOpen);}
 
@@ -1225,6 +1303,10 @@ function buildSystem(q){
 async function handleSend(){
   var text=inputEl.value.trim();var hasImg=!!pendingImageBase64;
   if(!text&&!hasImg)return;if(sendBtn.disabled)return;
+  
+  // Otimização: Resposta rápida para perguntas curtas/simples
+  var isSimple = text.length < 50 && !hasImg && !CODE_RX.test(text) && !IMG_RX.test(text) && !VID_RX.test(text);
+  
   var conv=getConv();if(!conv)conv=createConv((text||'Análise de imagem').substring(0,40));
   hideWelcome();
   var cameraFrame=null;if(cameraOn)cameraFrame=await captureFrame();
@@ -1232,7 +1314,7 @@ async function handleSend(){
   var capturedImg=pendingImageBase64;pendingImageBase64=null;clearPendingImage();
   inputEl.value='';autoResize(inputEl);setLoading(true);
 
-  if(pensarMode&&text)await deepThink(text);
+  if(pensarMode&&text&&!isSimple)await deepThink(text);
 
   if(!hasImg&&AUD_RX.test(text)){var ap=text.replace(AUD_RX,'').trim()||text;await genAudio(ap);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Áudio: '+ap+']'});saveConvs();setLoading(false);return;}
   if(!hasImg&&FILE_RX.test(text)){await genFile(text);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Ficheiro gerado]'});saveConvs();setLoading(false);return;}
@@ -1246,23 +1328,18 @@ async function handleSend(){
   var bbl = document.createElement('div'); bbl.className = 'msg-bbl ai';
   row.appendChild(av); row.appendChild(bbl);
   
-  // Elemento de texto interno para o stream
   var contentDiv = document.createElement('div');
-  contentDiv.className = 'markdown-body'; // Estilo markdown
+  contentDiv.className = 'markdown-body';
   bbl.appendChild(contentDiv);
   
-  // Esconde o balão até começar a receber dados (será movido para dentro do try/catch se quiseres)
-  // Mas para UX imediata, podemos deixá-lo visível ou substituir o typing quando o primeiro chunk chegar.
-  // Vamos manter o typing e substituir quando o stream começar.
-
   try {
     var webCtx = '';
-    if (webSearchMode && text) {
+    if (webSearchMode && text && !isSimple) {
       if (pensarMode) addThinkStep('🌐 Pesquisando na web...', 'inner', 'Query: "' + text.substring(0, 60) + '"');
       var webResults = await performWebSearch(text); webCtx = webResultsToContext(webResults, text);
       if (pensarMode && webResults.length) addThinkStep('🌐 ' + webResults.length + ' resultados encontrados', 'done', 'Fontes: ' + webResults.map(r => r.title).join(', '));
       bbl.innerHTML = '<div class="web-indicator"><i class="fas fa-globe"></i> Info da Web</div>';
-      bbl.appendChild(contentDiv); // Re-anexa contentDiv
+      bbl.appendChild(contentDiv);
     }
 
     var sys = { role: 'system', content: buildSystem(text || 'analisa') };
@@ -1272,23 +1349,26 @@ async function handleSend(){
     else { userMsg = { role: 'user', content: webCtx ? (webCtx + 'Pergunta do utilizador: ' + text) : text }; }
     
     var selM = document.getElementById('model-sel').value;
-    var useM = (hasImg || cameraFrame) ? 'openai' : (CODE_RX.test(text) ? 'qwen-coder' : selM);
+    var useM = (hasImg || cameraFrame) ? 'openai' : (CODE_RX.test(text) ? 'qwen-coder' : (isSimple ? 'openai' : selM));
     var histMsgs = conv.messages.filter(m => typeof m.content === 'string' && m.content.length < 2000).slice(-20);
     var msgs = [sys].concat(histMsgs).concat([userMsg]);
     
     var reply = '';
     var isFirstChunk = true;
 
-    // Callback para SSE
     var onChunk = (token) => {
       if (isFirstChunk) {
-        typing.remove(); // Remove animação de typing
-        chatEl.appendChild(row); // Adiciona o balão na tela
+        typing.remove();
+        chatEl.appendChild(row);
         isFirstChunk = false;
       }
       reply += token;
-      contentDiv.innerHTML = fmtText(reply); // Atualiza markdown em tempo real
-      chatEl.scrollTop = chatEl.scrollHeight; // Auto-scroll
+      
+      // Se estiver em modo Canva e for código, abrimos o editor quando terminar
+      if(!canvaMode) {
+        contentDiv.innerHTML = fmtText(reply, true);
+        chatEl.scrollTop = chatEl.scrollHeight;
+      }
     };
 
     if (CODE_RX.test(text)) {
@@ -1298,10 +1378,21 @@ async function handleSend(){
       reply = await fetchAI(msgs, useM, 1, onChunk);
     }
 
-    if(isFirstChunk) { // Se não houve chunks (resposta imediata ou erro silencioso)
+    if(isFirstChunk) {
        typing.remove();
        chatEl.appendChild(row);
-       contentDiv.innerHTML = fmtText(reply);
+    }
+
+    // Pós-processamento para Modo Canva
+    if(canvaMode && (CODE_RX.test(text) || reply.includes('```'))) {
+      var codeMatch = reply.match(/```(?:[^\n]*)\n?([\s\S]*?)```/);
+      var codeOnly = codeMatch ? codeMatch[1] : reply;
+      var langMatch = reply.match(/```([^\n]*)/);
+      var lang = langMatch ? langMatch[1].trim() : 'text';
+      openCanvaEditor(codeOnly, lang);
+      contentDiv.innerHTML = fmtText(reply.replace(/```[\s\S]*?```/g, '\n[Código enviado para o Canva Editor]'));
+    } else {
+      contentDiv.innerHTML = fmtText(reply);
     }
 
     if (pensarMode) addThinkStep('✅ Resposta gerada (' + reply.length + ' chars)', 'done', 'Enviando para o utilizador.');
@@ -1313,7 +1404,7 @@ async function handleSend(){
     saveConvs(); setApiSt('ok');
     
   } catch (e) {
-    typing.remove();
+    if(typing) typing.remove();
     if (pensarMode) addThinkStep('❌ Erro: ' + e.message, 'error', 'Problema: ' + e.message);
     renderMsg('ai', 'Erro ao obter resposta: ' + e.message); setApiSt('err');
   } finally { setLoading(false); }
@@ -1543,8 +1634,8 @@ async function genVid(prompt){
     <div style="display:flex;align-items:center;gap:10px">
       <span class="spin" style="border-color:rgba(124,58,237,.3);border-top-color:#a78bfa"></span>
       <div>
-        <div style="font-size:13px;font-weight:600;color:#a78bfa">Zenia Video Engine</div>
-        <div style="font-size:11px;color:var(--text-muted)" id="${sid}-msg">Planeando cena...</div>
+        <div style="font-size:13px;font-weight:600;color:#a78bfa">Zenia Video Engine (Qwen-Coder)</div>
+        <div style="font-size:11px;color:var(--text-muted)" id="${sid}-msg">Planeando cena com Qwen...</div>
       </div>
     </div>
     <div class="progress-bar-wrap"><div class="progress-bar-fill" id="${sid}-bar" style="width:5%;background:linear-gradient(90deg,#7c3aed,#ec4899)"></div></div>
@@ -1565,19 +1656,12 @@ async function genVid(prompt){
     var totalFrames = Math.floor((duration / 1000) * fps);
     if(totalFrames<30) totalFrames = 150;
     setVP(6, 'A preparar...');
-    var sysPromptA = "You output only JavaScript statements to draw a frame for function draw(ctx,width,height,time). No imports. No top-level await. No DOM. Use only Canvas 2D API. Use deterministic math. Avoid creating Image(). time is seconds float. Never declare function draw; return only statements inside the body.";
-    var sysPrompt = sysPromptA+" Create an animation for: '"+prompt+"'.";
-    setVP(10, 'Gerando roteiro visual...');
-    var codeMsgs = [{role:'system',content:sysPrompt},{role:'user',content:'Generate code now.'}];
-    var code = '';
-    try{
-      code = await fetchAI(codeMsgs, 'qwen-coder');
-    }catch(e){
-      code = await fetchAI(codeMsgs, 'openai');
-    }
+    var sysPrompt = "You are Qwen-Coder. Output only JavaScript statements to draw an animation frame for a function draw(ctx,width,height,time). No imports. Use only Canvas 2D API. Create an animation for: '"+prompt+"'. return only the code inside the function.";
+    setVP(15, 'Gerando animação com Qwen-Coder...');
+    var code = await fetchAI([{role:'system',content:sysPrompt},{role:'user',content:'Generate JS canvas code for: '+prompt}], 'qwen-coder');
     code = code.replace(/```javascript/g, '').replace(/```/g, '').trim();
 
-    setVP(30, 'Compilando cena...');
+    setVP(40, 'Compilando cena...');
 
     var width = 640;
     var height = 360;
