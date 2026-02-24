@@ -1559,7 +1559,7 @@ async function genVid(prompt){
 
   try {
     var duration = 5000;
-    var m = /(?:\\b|\\D)(\\d{1,3})\\s*(?:s|seg|seconds?)/i.exec(prompt||'');
+    var m = /(?:\b|\D)(\d{1,3})\s*(?:s|seg|seconds?)/i.exec(prompt||'');
     if(m){duration = Math.min(20000, Math.max(2000, parseInt(m[1],10)*1000));}
     var fps = 30;
     var totalFrames = Math.floor((duration / 1000) * fps);
@@ -1604,11 +1604,11 @@ async function genVid(prompt){
     var drawFunc;
     function makeDrawFunc(src){
       var s = (src||'').trim();
-      s = s.replace(/^export\\s+default\\s+/,'').trim();
-      var m1 = s.match(/function\\s+draw\\s*\\([^)]*\\)\\s*\\{([\\s\\S]*)\\}\\s*$/);
+      s = s.replace(/^export\s+default\s+/,'').trim();
+      var m1 = s.match(/function\s+draw\s*\([^)]*\)\s*\{([\s\S]*)\}\s*$/);
       if(m1){ s = m1[1]; }
       try{
-        var f1 = new Function('return (function(ctx,width,height,time){\\n'+s+'\\n});');
+        var f1 = new Function('return (function(ctx,width,height,time){\n'+s+'\n});');
         return f1();
       }catch(e){}
       try{
@@ -1805,8 +1805,8 @@ function teacherToggleVoice(){if(teacherListening){teacherStopVoice();return;}te
 function teacherStartVoice(){if('SpeechRecognition'in window||'webkitSpeechRecognition'in window){var SRC=window.SpeechRecognition||window.webkitSpeechRecognition;teacherRec=new SRC();var l=document.getElementById('teacher-language');teacherRec.lang=l?l.value:'pt-PT';teacherRec.onresult=e=>{var t=e.results[0][0].transcript;var i=document.getElementById('teacher-input');if(i)i.value=t;teacherListening=false;var b=document.getElementById('teacher-voice-btn');if(b)b.classList.remove('active');teacherSend();};teacherRec.onerror=()=>{teacherListening=false;var b=document.getElementById('teacher-voice-btn');if(b)b.classList.remove('active');};teacherRec.onend=()=>{teacherListening=false;var b=document.getElementById('teacher-voice-btn');if(b)b.classList.remove('active');};try{teacherRec.start();teacherListening=true;var b=document.getElementById('teacher-voice-btn');if(b)b.classList.add('active');}catch(e){}}}
 function teacherStopVoice(){try{if(teacherRec)teacherRec.stop();}catch(e){}teacherListening=false;var b=document.getElementById('teacher-voice-btn');if(b)b.classList.remove('active');}
 function teacherAppend(role,html){var c=document.getElementById('teacher-chat');if(!c)return;var div=document.createElement('div');div.style.cssText='display:flex;gap:8px;align-items:flex-start';var av=document.createElement('div');av.style.cssText='width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;background:'+(role==='user'?'#64748b':'linear-gradient(135deg,#a855f7,#7c3aed)');av.textContent=role==='user'?(userName||'U').charAt(0).toUpperCase():'Z';var b=document.createElement('div');b.style.cssText='flex:1;font-size:12px;line-height:1.7;background:var(--bg-primary);border:1px solid var(--border-color);padding:10px;border-radius:8px;color:var(--text-primary)';b.innerHTML=html;div.appendChild(av);div.appendChild(b);c.appendChild(div);c.scrollTop=c.scrollHeight;}
-function teacherHandleFiles(ev){var list=document.getElementById('teacher-files-list');var files=[...ev.target.files];files.forEach(f=>{var item=document.createElement('div');item.style.cssText='font-size:12px;color:var(--text-secondary);padding:6px;border:1px solid var(--border-color);border-radius:7px;margin-bottom:6px;display:flex;justify-content:space-between;gap:8px';var name=document.createElement('span');name.textContent=f.name;item.appendChild(name);list.appendChild(item);if(/^text\\//.test(f.type)||/csv|json|txt/i.test(f.name)){var r=new FileReader();r.onload=e=>{teacherFilesData.push({name:f.name,content:(e.target.result||'').slice(0,6000)});};r.readAsText(f);}else{teacherFilesData.push({name:f.name,content:'[conteúdo binário]'});}});ev.target.value='';}
-async function teacherSend(){var i=document.getElementById('teacher-input');if(!i)return;var q=(i.value||'').trim();if(!q)return;i.value='';teacherAppend('user',escHtml(q));var area=(document.getElementById('teacher-area')||{}).value||'Geral';var lang=(document.getElementById('teacher-language')||{}).value||'pt-PT';var ctxDocs=teacherFilesData.slice(-5).map(d=>'- '+d.name+': '+(d.content||'').slice(0,500)).join('\\n');var sys='És uma professora paciente e clara. Responde em '+lang+'. Área: '+area+'. Usa exemplos de Angola quando possível.'+(ctxDocs?('\\nMATERIAIS:\\n'+ctxDocs):'');var msgs=[{role:'system',content:sys},{role:'user',content:q}];var tp=renderTyping();try{var txt=await fetchAI(msgs,'openai');tp.remove();teacherAppend('ai',fmtText(txt));teacherSpeak(txt);}catch(e){tp.remove();teacherAppend('ai','<span style=\"color:#ef4444\">Erro: '+escHtml(e.message)+'</span>');}}
+function teacherHandleFiles(ev){var list=document.getElementById('teacher-files-list');var files=[...ev.target.files];files.forEach(f=>{var item=document.createElement('div');item.style.cssText='font-size:12px;color:var(--text-secondary);padding:6px;border:1px solid var(--border-color);border-radius:7px;margin-bottom:6px;display:flex;justify-content:space-between;gap:8px';var name=document.createElement('span');name.textContent=f.name;item.appendChild(name);list.appendChild(item);if(/^text\//.test(f.type)||/csv|json|txt/i.test(f.name)){var r=new FileReader();r.onload=e=>{teacherFilesData.push({name:f.name,content:(e.target.result||'').slice(0,6000)});};r.readAsText(f);}else{teacherFilesData.push({name:f.name,content:'[conteúdo binário]'});}});ev.target.value='';}
+async function teacherSend(){var i=document.getElementById('teacher-input');if(!i)return;var q=(i.value||'').trim();if(!q)return;i.value='';teacherAppend('user',escHtml(q));var area=(document.getElementById('teacher-area')||{}).value||'Geral';var lang=(document.getElementById('teacher-language')||{}).value||'pt-PT';var ctxDocs=teacherFilesData.slice(-5).map(d=>'- '+d.name+': '+(d.content||'').slice(0,500)).join('\n');var sys='És uma professora paciente e clara. Responde em '+lang+'. Área: '+area+'. Usa exemplos de Angola quando possível.'+(ctxDocs?('\nMATERIAIS:\n'+ctxDocs):'');var msgs=[{role:'system',content:sys},{role:'user',content:q}];var tp=renderTyping();try{var txt=await fetchAI(msgs,'openai');tp.remove();teacherAppend('ai',fmtText(txt));teacherSpeak(txt);}catch(e){tp.remove();teacherAppend('ai','<span style="color:#ef4444">Erro: '+escHtml(e.message)+'</span>');}}
 function teacherSpeak(text){try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(text);var l=(document.getElementById('teacher-language')||{}).value||'pt-PT';u.lang=l;var av=document.getElementById('teacher-avatar');if(av){av.style.boxShadow='0 0 0 0 rgba(168,85,247,.6)';var id=setInterval(()=>{av.style.boxShadow='0 0 0 6px rgba(168,85,247,.25)';setTimeout(()=>av.style.boxShadow='0 0 0 0 rgba(168,85,247,.0)',400);},600);u.onend=()=>{clearInterval(id);av.style.boxShadow='none';};}speechSynthesis.speak(u);}catch(e){}}
 
 // ==========================================
@@ -1883,4 +1883,3 @@ showWelcome();
 </script>
 </body>
 </html>
-
