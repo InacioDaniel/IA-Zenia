@@ -53,6 +53,25 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
 #topbar{height:50px;min-height:50px;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;padding:0 14px;gap:8px;flex-shrink:0;background:var(--topbar-bg);overflow:hidden;}
 .tbLeft{display:flex;align-items:center;gap:7px;flex-wrap:nowrap;min-width:0;overflow:hidden;}
 .tbRight{display:flex;align-items:center;gap:7px;flex-shrink:0;}
+
+/* CONTENT AREA (CHAT + CANVAS) */
+#content-area{flex:1;display:flex;overflow:hidden;position:relative;}
+#chat-column{flex:1;display:flex;flex-direction:column;min-width:0;height:100%;position:relative;z-index:1;}
+
+/* CANVAS COLUMN */
+#canvas-column{width:0;border-left:1px solid var(--border-color);background:var(--bg-secondary);display:flex;flex-direction:column;transition:width 0.3s cubic-bezier(0.4, 0, 0.2, 1);overflow:hidden;z-index:2;}
+#canvas-column.open{width:50%;}
+.canvas-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border-color);background:var(--bg-secondary);flex-shrink:0;}
+.canvas-title{font-size:12px;font-weight:700;color:var(--text-secondary);display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:0.05em;}
+.canvas-controls{display:flex;align-items:center;gap:4px;}
+.canvas-btn{background:transparent;border:1px solid transparent;color:var(--text-muted);cursor:pointer;padding:4px 8px;border-radius:6px;font-size:12px;transition:all 0.2s;}
+.canvas-btn:hover{background:var(--bg-primary);color:var(--text-primary);border-color:var(--border-accent);}
+#canvas-body{flex:1;background:var(--bg-primary);position:relative;overflow:hidden;}
+#canvas-frame{width:100%;height:100%;border:none;background:#fff;}
+@media (max-width: 768px) {
+  #canvas-column.open{position:absolute;top:0;right:0;width:100%;height:100%;border-left:none;}
+}
+
 #chat-window{flex:1;overflow-y:auto;overflow-x:hidden;padding:18px;display:flex;flex-direction:column;gap:4px;-webkit-overflow-scrolling:touch;}
 #chat-window::-webkit-scrollbar{width:4px;}
 #chat-window::-webkit-scrollbar-thumb{background:var(--border-color);border-radius:4px;}
@@ -530,47 +549,67 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
     </div>
   </div>
 
-  <div id="chat-window">
-    <div id="welcome-msg">
-      <div class="z-logo">Z</div>
-      <div style="font-size:22px;font-weight:800">Olá, <span id="welcome-name">amigo</span>!</div>
-      <div style="font-size:13px;color:var(--text-muted);max-width:420px;line-height:1.8">Sou a <strong>Zenia v4</strong>, a tua assistente IA de Angola.<br>Posso gerar imagens, áudio, ficheiros, analisar fotos, escrever código e muito mais.</div>
-      <div style="font-size:11px;color:var(--accent-primary);margin-top:4px;opacity:.7">IA-Zenia v4 · Zenia-Projects · Lubango, Angola</div>
-    </div>
-  </div>
-
-  <div id="pending-image-area" style="display:none;max-width:800px;margin:0 auto;padding:6px 12px">
-    <div id="pending-image-wrap" class="img-preview-wrap"></div>
-  </div>
-
-  <div id="input-area">
-    <div id="input-wrap">
-      <textarea id="user-input" rows="1" placeholder="Fala com a Zenia v4..."></textarea>
-      <div id="input-bottom">
-        <div id="input-bottom-left">
-          <div style="position:relative;display:inline-flex;flex-shrink:0">
-            <button class="ia-btn" id="upload-btn" onclick="togglePlusMenu()"><i class="fas fa-plus" style="color:var(--accent-secondary)"></i></button>
-            <div id="plus-menu">
-              <button class="pmenu-item" onclick="document.getElementById('file-input').click();togglePlusMenu()"><i class="fas fa-image" style="width:16px;color:var(--accent-secondary)"></i> Carregar Imagem</button>
-              <button class="pmenu-item" onclick="document.getElementById('file-any-input').click();togglePlusMenu()"><i class="fas fa-file-upload" style="width:16px;color:#10b981"></i> Importar Ficheiro</button>
-              <button class="pmenu-item" onclick="openThemeModal();togglePlusMenu()"><i class="fas fa-palette" style="width:16px;color:#f59e0b"></i> Trocar Tema</button>
-              <button class="pmenu-item" onclick="clearChat()"><i class="fas fa-trash-alt" style="width:16px;color:#ef4444"></i> Limpar Chat</button>
-            </div>
-          </div>
-          <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(event)">
-          <input type="file" id="file-any-input" accept="image/*,text/*,.pdf,.doc,.docx,.csv" style="display:none" onchange="handleFileAnyUpload(event)">
-          <button class="ia-btn" id="mic-btn" title="Microfone"><i class="fas fa-microphone"></i></button>
-          <button class="ia-btn web-btn" id="web-mode-btn" onclick="toggleWebMode()" title="Busca Web"><i class="fas fa-globe"></i><span class="btn-label">Web</span></button>
-          <button class="ia-btn visao-btn" id="visao-input-btn" onclick="openVisionModal()" title="Visão"><i class="fas fa-eye"></i><span class="btn-label">Visão</span></button>
-          <button class="ia-btn voice-cfg-btn" id="voice-cfg-btn" onclick="openPersonality()" title="Voz"><i class="fas fa-microphone-alt"></i><span class="btn-label">Voz</span></button>
-          <button class="ia-btn pensar-btn" id="pensar-btn" onclick="togglePensarMode()" title="Pensar"><i class="fas fa-brain"></i><span class="btn-label">Pensar</span></button>
-          <button class="ia-btn camera-btn" id="camera-btn" onclick="toggleCamera()" title="Câmera"><i class="fas fa-camera"></i><span class="btn-label">Câmera</span></button>
-          <button class="ia-btn" onclick="openVPNModal()" title="CAÇA VPN Angola" style="color:#f59e0b"><i class="fas fa-shield-alt"></i><span class="btn-label" style="font-size:8px">VPN</span></button>
+  <div id="content-area">
+    <div id="chat-column">
+      <div id="chat-window">
+        <div id="welcome-msg">
+          <div class="z-logo">Z</div>
+          <div style="font-size:22px;font-weight:800">Olá, <span id="welcome-name">amigo</span>!</div>
+          <div style="font-size:13px;color:var(--text-muted);max-width:420px;line-height:1.8">Sou a <strong>Zenia v4</strong>, a tua assistente IA de Angola.<br>Posso gerar imagens, áudio, ficheiros, analisar fotos, escrever código e muito mais.</div>
+          <div style="font-size:11px;color:var(--accent-primary);margin-top:4px;opacity:.7">IA-Zenia v4 · Zenia-Projects · Lubango, Angola</div>
         </div>
-        <button id="send-btn" onclick="handleSend()"><i class="fas fa-paper-plane" id="send-ic"></i></button>
+      </div>
+
+      <div id="pending-image-area" style="display:none;max-width:800px;margin:0 auto;padding:6px 12px">
+        <div id="pending-image-wrap" class="img-preview-wrap"></div>
+      </div>
+
+      <div id="input-area">
+        <div id="input-wrap">
+          <textarea id="user-input" rows="1" placeholder="Fala com a Zenia v4..."></textarea>
+          <div id="input-bottom">
+            <div id="input-bottom-left">
+              <div style="position:relative;display:inline-flex;flex-shrink:0">
+                <button class="ia-btn" id="upload-btn" onclick="togglePlusMenu()"><i class="fas fa-plus" style="color:var(--accent-secondary)"></i></button>
+                <div id="plus-menu">
+                  <button class="pmenu-item" onclick="document.getElementById('file-input').click();togglePlusMenu()"><i class="fas fa-image" style="width:16px;color:var(--accent-secondary)"></i> Carregar Imagem</button>
+                  <button class="pmenu-item" onclick="document.getElementById('file-any-input').click();togglePlusMenu()"><i class="fas fa-file-upload" style="width:16px;color:#10b981"></i> Importar Ficheiro</button>
+                  <button class="pmenu-item" onclick="openThemeModal();togglePlusMenu()"><i class="fas fa-palette" style="width:16px;color:#f59e0b"></i> Trocar Tema</button>
+                  <button class="pmenu-item" onclick="clearChat()"><i class="fas fa-trash-alt" style="width:16px;color:#ef4444"></i> Limpar Chat</button>
+                </div>
+              </div>
+              <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(event)">
+              <input type="file" id="file-any-input" accept="image/*,text/*,.pdf,.doc,.docx,.csv" style="display:none" onchange="handleFileAnyUpload(event)">
+              <button class="ia-btn" id="mic-btn" title="Microfone"><i class="fas fa-microphone"></i></button>
+              <button class="ia-btn web-btn" id="web-mode-btn" onclick="toggleWebMode()" title="Busca Web"><i class="fas fa-globe"></i><span class="btn-label">Web</span></button>
+              <button class="ia-btn visao-btn" id="visao-input-btn" onclick="openVisionModal()" title="Visão"><i class="fas fa-eye"></i><span class="btn-label">Visão</span></button>
+              <button class="ia-btn voice-cfg-btn" id="voice-cfg-btn" onclick="openPersonality()" title="Voz"><i class="fas fa-microphone-alt"></i><span class="btn-label">Voz</span></button>
+              <button class="ia-btn pensar-btn" id="pensar-btn" onclick="togglePensarMode()" title="Pensar"><i class="fas fa-brain"></i><span class="btn-label">Pensar</span></button>
+              <button class="ia-btn camera-btn" id="camera-btn" onclick="toggleCamera()" title="Câmera"><i class="fas fa-camera"></i><span class="btn-label">Câmera</span></button>
+              <button class="ia-btn" onclick="openVPNModal()" title="CAÇA VPN Angola" style="color:#f59e0b"><i class="fas fa-shield-alt"></i><span class="btn-label" style="font-size:8px">VPN</span></button>
+            </div>
+            <button id="send-btn" onclick="handleSend()"><i class="fas fa-paper-plane" id="send-ic"></i></button>
+          </div>
+        </div>
+        <div style="max-width:800px;margin:3px auto 0;text-align:center;font-size:10px;color:var(--text-muted);opacity:.4">Zenia v4 pode cometer erros. Verifica informações importantes.</div>
       </div>
     </div>
-    <div style="max-width:800px;margin:3px auto 0;text-align:center;font-size:10px;color:var(--text-muted);opacity:.4">Zenia v4 pode cometer erros. Verifica informações importantes.</div>
+    
+    <div id="canvas-column">
+      <div class="canvas-header">
+        <div class="canvas-title">
+          <i class="fas fa-code"></i> Zénia Canvas
+        </div>
+        <div class="canvas-controls">
+          <button id="canvas-run-btn" class="canvas-btn" title="Executar" onclick="runCanvasCode()"><i class="fas fa-play"></i></button>
+          <button id="canvas-download-btn" class="canvas-btn" title="Baixar" onclick="downloadCanvasCode()"><i class="fas fa-download"></i></button>
+          <button id="canvas-close-btn" class="canvas-btn" title="Fechar" onclick="closeCanvas()"><i class="fas fa-times"></i></button>
+        </div>
+      </div>
+      <div id="canvas-body">
+        <iframe id="canvas-frame" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+      </div>
+    </div>
   </div>
 </div>
 </div>
@@ -858,7 +897,7 @@ function fmtText(raw){
   var h=raw.replace(/```([^\n`]*)\n?([\s\S]*?)```/g,function(_,lang,code){
     var uid='\x00CODE'+(Math.random().toString(36).slice(2,10))+'\x00';var id='c'+Math.random().toString(36).slice(2,8);
     var hl=hlCode(code.trim(),lang);var exts={python:'.py',javascript:'.js',html:'.html',css:'.css',java:'.java',typescript:'.ts',sql:'.sql',bash:'.sh',json:'.json',c:'.c',cpp:'.cpp',php:'.php'};var ext=exts[(lang||'').toLowerCase()]||'.txt';
-    codeStore[uid]='<div class="code-block"><div class="code-hdr"><span class="code-lang">'+escHtml(lang||'código')+'</span><div style="display:flex;gap:5px"><button class="copy-btn" onclick="cpCode(\''+id+'\')"><i class="fas fa-copy"></i> Copiar</button><button class="copy-btn" onclick="downloadCode(\''+id+'\',\'code'+ext+'\')"><i class="fas fa-download"></i></button></div></div><pre><code id="'+id+'" class="hljs">'+hl+'</code></pre></div>';
+    codeStore[uid]='<div class="code-block"><div class="code-hdr"><span class="code-lang">'+escHtml(lang||'código')+'</span><div style="display:flex;gap:5px"><button class="copy-btn" onclick="openCanvas(\''+id+'\',\''+(lang||'txt')+'\')"><i class="fas fa-external-link-alt"></i> Canvas</button><button class="copy-btn" onclick="cpCode(\''+id+'\')"><i class="fas fa-copy"></i> Copiar</button><button class="copy-btn" onclick="downloadCode(\''+id+'\',\'code'+ext+'\')"><i class="fas fa-download"></i></button></div></div><pre><code id="'+id+'" class="hljs">'+hl+'</code></pre></div>';
     return uid;
   });
   var inlineStore={};
@@ -1623,6 +1662,83 @@ async function analyzeVisionAndChat(){
   window._visionAnalysis={image:visionImageData,analysis,question:q};
 }
 function sendVisionToChat(){closeVisionModal();hideWelcome();if(window._visionAnalysis){showPendingImage(window._visionAnalysis.image);inputEl.value=window._visionAnalysis.question||'Analisa esta imagem.';autoResize(inputEl);setTimeout(handleSend,200);}}
+
+// ==========================================
+// CANVAS
+// ==========================================
+var currentCanvasCode = '';
+var currentCanvasLang = '';
+
+function openCanvas(id, lang) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  
+  var code = el.innerText;
+  currentCanvasCode = code;
+  currentCanvasLang = (lang || '').toLowerCase();
+  
+  var col = document.getElementById('canvas-column');
+  if (col) col.classList.add('open');
+  
+  runCanvasCode();
+}
+
+function closeCanvas() {
+  var col = document.getElementById('canvas-column');
+  if (col) col.classList.remove('open');
+  var frame = document.getElementById('canvas-frame');
+  if (frame) frame.src = 'about:blank';
+}
+
+function runCanvasCode() {
+  var frame = document.getElementById('canvas-frame');
+  if (!frame) return;
+  
+  var code = currentCanvasCode;
+  var lang = currentCanvasLang;
+  var content = '';
+
+  if (lang === 'html' || lang === 'htm') {
+    content = code;
+  } else if (lang === 'javascript' || lang === 'js') {
+    // Wrap JS in a basic HTML structure with console output redirection
+    content = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{margin:0;padding:20px;background:#fff;color:#000;font-family:sans-serif;}</style></head><body><div id="app"></div><script>
+    // Capture console.log
+    (function(){
+      var oldLog = console.log;
+      var logDiv = document.createElement('div');
+      logDiv.style.cssText = 'font-family:monospace;background:#f5f5f5;padding:10px;border-radius:4px;margin-top:20px;white-space:pre-wrap;border:1px solid #ddd;';
+      document.body.appendChild(logDiv);
+      console.log = function(...args){
+        oldLog.apply(console, args);
+        logDiv.innerHTML += args.map(a=>typeof a==='object'?JSON.stringify(a,null,2):String(a)).join(' ') + '\\n';
+      };
+    })();
+    ${code}
+    <\/script></body></html>`;
+  } else if (lang === 'css') {
+    content = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>${code}</style></head><body><h1>Preview CSS</h1><div class="test-box">
+      <h2>Exemplo de Título</h2>
+      <p>Este é um parágrafo de exemplo para testar o CSS.</p>
+      <button>Botão de Teste</button>
+      <input type="text" placeholder="Input de teste">
+    </div></body></html>`;
+  } else {
+    content = `<!DOCTYPE html><html><body style="background:#f5f5f5;color:#333;font-family:monospace;padding:20px;white-space:pre-wrap">${code.replace(/</g,'&lt;')}</body></html>`;
+  }
+
+  frame.srcdoc = content;
+}
+
+function downloadCanvasCode() {
+  if (!currentCanvasCode) return;
+  var blob = new Blob([currentCanvasCode], {type: 'text/plain'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'canvas-code.' + (currentCanvasLang === 'javascript' ? 'js' : currentCanvasLang || 'txt');
+  a.click();
+}
+
 
 // ==========================================
 // RENDER MESSAGES
