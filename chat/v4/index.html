@@ -298,6 +298,85 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
   </div>
 </div>
 
+<!-- TEACHER MODAL -->
+<div id="teacher-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:980px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;padding:0">
+    <div style="padding:12px 14px;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <i class="fas fa-chalkboard-teacher" style="color:#22c55e"></i>
+        <strong>Modo Professor</strong>
+        <select id="teacher-language" class="adv-in" style="margin-bottom:0;width:120px">
+          <option value="pt-PT">Português</option>
+          <option value="en-US">Inglês</option>
+          <option value="fr-FR">Francês</option>
+          <option value="es-ES">Espanhol</option>
+        </select>
+        <select id="teacher-area" class="adv-in" style="margin-bottom:0;width:160px">
+          <option>Ciência</option>
+          <option>Tecnologia</option>
+          <option>Matemática</option>
+          <option>História</option>
+          <option>Línguas</option>
+        </select>
+      </div>
+      <button class="modal-close" style="position:static" onclick="closeTeacherModal()">&times;</button>
+    </div>
+    <div style="display:flex;flex:1;overflow:hidden">
+      <div style="width:320px;border-right:1px solid var(--border-color);padding:14px;display:flex;flex-direction:column;gap:10px">
+        <div id="teacher-avatar" style="background:var(--bg-primary);border:1px solid var(--border-color);border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;height:240px">
+          <img id="teacher-avatar-img" style="max-width:100%;max-height:100%;object-fit:cover;display:none">
+          <div id="teacher-avatar-ph" style="font-size:12px;color:var(--text-muted)">Avatar a carregar...</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button id="teacher-voice-btn" class="adv-btn" style="flex:1" onclick="teacherToggleVoice()"><i class="fas fa-microphone"></i> Falar</button>
+          <button class="adv-btn" style="flex:1" onclick="teacherStopVoice()"><i class="fas fa-stop"></i> Parar</button>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Entrada de Texto</div>
+          <div style="display:flex;gap:6px">
+            <input class="adv-in" id="teacher-input" placeholder="Pergunta..." style="margin-bottom:0;flex:1" onkeydown="if(event.key==='Enter')teacherSend()">
+            <button class="adv-btn" onclick="teacherSend()"><i class="fas fa-paper-plane"></i></button>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:12px;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:12px;color:var(--text-secondary);font-weight:700">Materiais do Aluno</div>
+          <div>
+            <input type="file" id="teacher-files" multiple style="display:none" onchange="teacherHandleFiles(event)">
+            <button class="adv-btn" onclick="document.getElementById('teacher-files').click()"><i class="fas fa-upload"></i> Carregar</button>
+          </div>
+        </div>
+        <div id="teacher-files-list" style="flex:0 0 auto;max-height:140px;overflow-y:auto;padding:10px"></div>
+        <div id="teacher-chat" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-close" onclick="closeTeacherModal()" style="position:fixed;top:6px;right:10px"></div>
+  </div>
+
+<!-- DESIGNER MODAL -->
+<div id="designer-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:1080px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;padding:0">
+    <div style="padding:12px 14px;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;gap:8px;align-items:center">
+        <i class="fas fa-layer-group" style="color:#f472b6"></i><strong>Canva Designer</strong>
+        <button class="adv-btn" onclick="designerAddText()">Texto</button>
+        <button class="adv-btn" onclick="designerAddRect()">Retângulo</button>
+        <button class="adv-btn" onclick="designerAddCircle()">Círculo</button>
+        <button class="adv-btn" onclick="designerAddImage()">Imagem URL</button>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="adv-btn" onclick="designerExportPNG()"><i class="fas fa-download"></i> Baixar PNG</button>
+        <button class="adv-btn" onclick="closeDesigner()">&times;</button>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;background:var(--bg-primary)">
+      <div id="designer-stage" style="position:relative;width:900px;height:506px;background:#fff;border:1px solid var(--border-color);border-radius:8px;overflow:hidden"></div>
+    </div>
+  </div>
+</div>
+
 <!-- THEME MODAL -->
 <div id="theme-modal" class="modal-overlay">
   <div class="modal-box" style="max-width:500px">
@@ -443,6 +522,8 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
           <button onclick="document.getElementById('websearch-modal').classList.add('open')" class="sb-item"><i class="fas fa-search" style="color:#60a5fa;width:15px"></i> Pesquisa Web</button>
           <button onclick="openThemeModal()" class="sb-item"><i class="fas fa-palette" style="color:#f59e0b;width:15px"></i> Trocar Tema</button>
           <button onclick="openPersonality()" class="sb-item"><i class="fas fa-microphone" style="color:#a855f7;width:15px"></i> Voz &amp; Personalidade</button>
+          <button onclick="openTeacherModal()" class="sb-item"><i class="fas fa-chalkboard-teacher" style="color:#22c55e;width:15px"></i> Modo Professor</button>
+          <button onclick="openDesigner()" class="sb-item"><i class="fas fa-layer-group" style="color:#f472b6;width:15px"></i> Canva Designer</button>
           <button onclick="openVisionModal()" class="sb-item"><i class="fas fa-eye" style="color:#10b981;width:15px"></i> Análise de Imagem</button>
           <button onclick="openVPNModal()" class="sb-item"><i class="fas fa-shield-alt" style="color:#f59e0b;width:15px"></i> CAÇA VPN Angola</button>
         </div>
@@ -453,22 +534,22 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
         <div class="sb-section-body" id="body-apps">
           <div style="padding:4px 8px 2px">
             <div class="apps-grid">
-              <a href="https://api-zenia.netlify.app/" target="_blank" class="app-card">
+              <a href="https://api-zenia.onrender.com" target="_blank" class="app-card">
                 <div class="app-card-icon">🔌</div>
                 <div class="app-card-name">Zénia API</div>
                 <div class="app-card-desc">API oficial da Zenia</div>
               </a>
-              <a href="https://zenia-3.netlify.app/zedex" target="_blank" class="app-card">
+              <a href="https://ia-zenia.onrender.com/zedex" target="_blank" class="app-card">
                 <div class="app-card-icon">💻</div>
                 <div class="app-card-name">Zedex Code</div>
                 <div class="app-card-desc">IDE com IA integrada</div>
               </a>
-              <a href="https://z-projects.netlify.app" target="_blank" class="app-card">
+              <a href="https://zenia-projects.onrender.com" target="_blank" class="app-card">
                 <div class="app-card-icon">🚀</div>
                 <div class="app-card-name">Zenia Projects</div>
                 <div class="app-card-desc">Portfólio &amp; projetos</div>
               </a>
-              <a href="https://ide-zedex.netlify.app/" target="_blank" class="app-card">
+              <a href="https://zedex-ide.onrender.com/" target="_blank" class="app-card">
                 <div class="app-card-icon">⚙️</div>
                 <div class="app-card-name">IDE Zedex</div>
                 <div class="app-card-desc">Editor online completo</div>
@@ -479,7 +560,7 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
                 <div class="app-card-desc">Previsões com base em dados</div>
               </div>
             </div>
-            <a href="https://ia-zenia.netlify.app/download" target="_blank" class="app-download-btn">
+            <a href="https://ia-zenia.onrender.com/download" target="_blank" class="app-download-btn">
               <i class="fas fa-download"></i> Baixar IA-Zenia App
             </a>
           </div>
@@ -509,7 +590,7 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
   <div id="topbar">
     <div class="tbLeft">
       <select id="model-sel" style="background:var(--bg-input);border:1px solid var(--border-color);color:var(--text-primary);border-radius:6px;padding:4px 8px;font-size:11px;outline:none">
-        <option value="openai">OpenAI (GPT-4o)</option>
+        <option value="openai">Zénia M4</option>
         <option value="qwen-coder">Qwen 2.5 Coder</option>
         <option value="mistral">Mistral Nemo</option>
         <option value="llama">Llama 3.3</option>
@@ -1477,22 +1558,27 @@ async function genVid(prompt){
   }
 
   try {
-    // 1. Obter código de animação da IA
+    var duration = 5000;
+    var m = /(?:\\b|\\D)(\\d{1,3})\\s*(?:s|seg|seconds?)/i.exec(prompt||'');
+    if(m){duration = Math.min(20000, Math.max(2000, parseInt(m[1],10)*1000));}
+    var fps = 30;
+    var totalFrames = Math.floor((duration / 1000) * fps);
+    if(totalFrames<30) totalFrames = 150;
+    setVP(6, 'A preparar...');
+    var sysPromptA = "You output only JavaScript statements to draw a frame for function draw(ctx,width,height,time). No imports. No top-level await. No DOM. Use only Canvas 2D API. Use deterministic math. Avoid creating Image(). time is seconds float. Never declare function draw; return only statements inside the body.";
+    var sysPrompt = sysPromptA+" Create an animation for: '"+prompt+"'.";
     setVP(10, 'Gerando roteiro visual...');
-    var sysPrompt = "You are a creative coder. Generate a JavaScript function body for `function draw(ctx, width, height, time)` to animate a canvas based on: '" + prompt + "'. `time` is seconds (float). Use `ctx` (CanvasRenderingContext2D). Do NOT use external libs. Return ONLY the code inside the function. No markdown.";
-    
-    // Usamos fetchAI para obter o código
     var codeMsgs = [{role:'system',content:sysPrompt},{role:'user',content:'Generate code now.'}];
-    
-    // Usar modelo rápido se possível
-    var code = await fetchAI(codeMsgs, 'qwen-coder');
-    
-    // Limpar markdown
+    var code = '';
+    try{
+      code = await fetchAI(codeMsgs, 'qwen-coder');
+    }catch(e){
+      code = await fetchAI(codeMsgs, 'openai');
+    }
     code = code.replace(/```javascript/g, '').replace(/```/g, '').trim();
 
     setVP(30, 'Compilando cena...');
 
-    // 2. Setup Canvas e Recorder
     var width = 640;
     var height = 360;
     var canvas = document.createElement('canvas');
@@ -1500,7 +1586,6 @@ async function genVid(prompt){
     canvas.height = height;
     var ctx = canvas.getContext('2d');
     
-    // Fallback para navegadores que suportam captureStream
     if(!canvas.captureStream) throw new Error('Seu navegador não suporta gravação de Canvas.');
     
     var stream = canvas.captureStream(30);
@@ -1516,40 +1601,46 @@ async function genVid(prompt){
       };
     });
 
-    // 3. Compilar função de desenho
     var drawFunc;
-    try {
-        drawFunc = new Function('ctx', 'width', 'height', 'time', code);
-    } catch(e) {
-        console.error("Erro compilação:", e);
-        // Fallback simples
-        drawFunc = function(c,w,h,t) {
-            c.fillStyle = '#000'; c.fillRect(0,0,w,h);
-            c.fillStyle = '#fff'; c.fillText('Erro script: '+e.message, 20, h/2);
+    function makeDrawFunc(src){
+      var s = (src||'').trim();
+      s = s.replace(/^export\\s+default\\s+/,'').trim();
+      var m1 = s.match(/function\\s+draw\\s*\\([^)]*\\)\\s*\\{([\\s\\S]*)\\}\\s*$/);
+      if(m1){ s = m1[1]; }
+      try{
+        var f1 = new Function('return (function(ctx,width,height,time){\\n'+s+'\\n});');
+        return f1();
+      }catch(e){}
+      try{
+        if(/=>/.test(s)){
+          var f2 = eval('('+s+')');
+          if(typeof f2==='function') return f2;
+        }
+      }catch(e){}
+      try{
+        return new Function('ctx','width','height','time', s);
+      }catch(e){
+        console.error('Erro compilação:', e);
+        return function(c,w,h,t){
+          c.fillStyle='#000';c.fillRect(0,0,w,h);
+          c.fillStyle='#fff';c.font='14px sans-serif';
+          c.fillText('Erro script: '+e.message,20,h/2);
         };
+      }
     }
+    drawFunc = makeDrawFunc(code);
 
-    // 4. Renderizar Loop
     recorder.start();
-    var duration = 5000; // 5s
-    var fps = 30;
-    var totalFrames = (duration / 1000) * fps;
-    
+    ctx.font='14px sans-serif';
     for (var f = 0; f < totalFrames; f++) {
         var time = f / fps;
-        
-        // Limpar
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, width, height);
-        
-        // Desenhar frame
         try {
             drawFunc(ctx, width, height, time);
         } catch(e) {
-            // Ignora erro de frame
         }
 
-        // Progresso
         if (f % 5 === 0) {
             var prog = 30 + Math.floor((f / totalFrames) * 60);
             setVP(prog, 'Renderizando: ' + Math.floor(time) + 's');
@@ -1704,6 +1795,33 @@ function filterHist(v){renderHist(v);}
 function renderHist(filter){var el=document.getElementById('hist-list');filter=(filter||'').toLowerCase();var list=filter?convs.filter(c=>c.title.toLowerCase().includes(filter)):convs;el.innerHTML='';if(!list.length){el.innerHTML='<p style="font-size:11px;color:var(--text-muted);padding:3px 5px;font-style:italic">'+(filter?'Sem resultados.':'Sem histórico.')+'</p>';return;}list.forEach(c=>{var active=c.id===curConvId;var div=document.createElement('div');div.style.cssText='display:flex;align-items:center;gap:4px;padding:5px 7px;border-radius:7px;cursor:pointer;'+(active?'background:var(--accent-glow)':'');var span=document.createElement('span');span.style.cssText='flex:1;font-size:12px;color:'+(active?'var(--accent-primary)':'var(--text-secondary)')+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--font-msg)';span.textContent=c.title;span.onclick=()=>loadConv(c.id);var del=document.createElement('button');del.innerHTML='<i class="fas fa-trash" style="font-size:9px"></i>';del.style.cssText='background:none;border:none;cursor:pointer;color:var(--text-muted);padding:2px 4px';del.onclick=e=>delConv(c.id,e);div.appendChild(span);div.appendChild(del);el.appendChild(div);});}
 
 // ==========================================
+// TEACHER MODE
+// ==========================================
+var teacherListening=false,teacherRec=null,teacherFilesData=[];
+function openTeacherModal(){var m=document.getElementById('teacher-modal');if(m)m.classList.add('open');teacherLoadAvatar();}
+function closeTeacherModal(){var m=document.getElementById('teacher-modal');if(m)m.classList.remove('open');teacherStopVoice();}
+async function teacherLoadAvatar(){try{var p='Friendly AI teacher avatar, minimal flat style, white background';var r=await fetch(POLLINATIONS_IMAGE_BASE+encodeURIComponent(p)+'?model=flux',{headers:{'Authorization':'Bearer '+POLLO_KEY}});var b=await r.blob();var url=URL.createObjectURL(b);var img=document.getElementById('teacher-avatar-img');var ph=document.getElementById('teacher-avatar-ph');img.src=url;img.style.display='block';if(ph)ph.style.display='none';}catch(e){var ph=document.getElementById('teacher-avatar-ph');if(ph)ph.textContent='Falhou o avatar';}}
+function teacherToggleVoice(){if(teacherListening){teacherStopVoice();return;}teacherStartVoice();}
+function teacherStartVoice(){if('SpeechRecognition'in window||'webkitSpeechRecognition'in window){var SRC=window.SpeechRecognition||window.webkitSpeechRecognition;teacherRec=new SRC();var l=document.getElementById('teacher-language');teacherRec.lang=l?l.value:'pt-PT';teacherRec.onresult=e=>{var t=e.results[0][0].transcript;var i=document.getElementById('teacher-input');if(i)i.value=t;teacherListening=false;var b=document.getElementById('teacher-voice-btn');if(b)b.classList.remove('active');teacherSend();};teacherRec.onerror=()=>{teacherListening=false;var b=document.getElementById('teacher-voice-btn');if(b)b.classList.remove('active');};teacherRec.onend=()=>{teacherListening=false;var b=document.getElementById('teacher-voice-btn');if(b)b.classList.remove('active');};try{teacherRec.start();teacherListening=true;var b=document.getElementById('teacher-voice-btn');if(b)b.classList.add('active');}catch(e){}}}
+function teacherStopVoice(){try{if(teacherRec)teacherRec.stop();}catch(e){}teacherListening=false;var b=document.getElementById('teacher-voice-btn');if(b)b.classList.remove('active');}
+function teacherAppend(role,html){var c=document.getElementById('teacher-chat');if(!c)return;var div=document.createElement('div');div.style.cssText='display:flex;gap:8px;align-items:flex-start';var av=document.createElement('div');av.style.cssText='width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;background:'+(role==='user'?'#64748b':'linear-gradient(135deg,#a855f7,#7c3aed)');av.textContent=role==='user'?(userName||'U').charAt(0).toUpperCase():'Z';var b=document.createElement('div');b.style.cssText='flex:1;font-size:12px;line-height:1.7;background:var(--bg-primary);border:1px solid var(--border-color);padding:10px;border-radius:8px;color:var(--text-primary)';b.innerHTML=html;div.appendChild(av);div.appendChild(b);c.appendChild(div);c.scrollTop=c.scrollHeight;}
+function teacherHandleFiles(ev){var list=document.getElementById('teacher-files-list');var files=[...ev.target.files];files.forEach(f=>{var item=document.createElement('div');item.style.cssText='font-size:12px;color:var(--text-secondary);padding:6px;border:1px solid var(--border-color);border-radius:7px;margin-bottom:6px;display:flex;justify-content:space-between;gap:8px';var name=document.createElement('span');name.textContent=f.name;item.appendChild(name);list.appendChild(item);if(/^text\\//.test(f.type)||/csv|json|txt/i.test(f.name)){var r=new FileReader();r.onload=e=>{teacherFilesData.push({name:f.name,content:(e.target.result||'').slice(0,6000)});};r.readAsText(f);}else{teacherFilesData.push({name:f.name,content:'[conteúdo binário]'});}});ev.target.value='';}
+async function teacherSend(){var i=document.getElementById('teacher-input');if(!i)return;var q=(i.value||'').trim();if(!q)return;i.value='';teacherAppend('user',escHtml(q));var area=(document.getElementById('teacher-area')||{}).value||'Geral';var lang=(document.getElementById('teacher-language')||{}).value||'pt-PT';var ctxDocs=teacherFilesData.slice(-5).map(d=>'- '+d.name+': '+(d.content||'').slice(0,500)).join('\\n');var sys='És uma professora paciente e clara. Responde em '+lang+'. Área: '+area+'. Usa exemplos de Angola quando possível.'+(ctxDocs?('\\nMATERIAIS:\\n'+ctxDocs):'');var msgs=[{role:'system',content:sys},{role:'user',content:q}];var tp=renderTyping();try{var txt=await fetchAI(msgs,'openai');tp.remove();teacherAppend('ai',fmtText(txt));teacherSpeak(txt);}catch(e){tp.remove();teacherAppend('ai','<span style=\"color:#ef4444\">Erro: '+escHtml(e.message)+'</span>');}}
+function teacherSpeak(text){try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(text);var l=(document.getElementById('teacher-language')||{}).value||'pt-PT';u.lang=l;var av=document.getElementById('teacher-avatar');if(av){av.style.boxShadow='0 0 0 0 rgba(168,85,247,.6)';var id=setInterval(()=>{av.style.boxShadow='0 0 0 6px rgba(168,85,247,.25)';setTimeout(()=>av.style.boxShadow='0 0 0 0 rgba(168,85,247,.0)',400);},600);u.onend=()=>{clearInterval(id);av.style.boxShadow='none';};}speechSynthesis.speak(u);}catch(e){}}
+
+// ==========================================
+// DESIGNER
+// ==========================================
+function openDesigner(){var m=document.getElementById('designer-modal');if(m)m.classList.add('open');}
+function closeDesigner(){var m=document.getElementById('designer-modal');if(m)m.classList.remove('open');}
+function makeNode(style){var el=document.createElement('div');el.style.cssText='position:absolute;cursor:move;'+(style||'');el.onmousedown=function(e){designerDragStart(e,el)};document.getElementById('designer-stage').appendChild(el);return el;}
+function designerAddText(){var el=makeNode('left:40px;top:40px;padding:6px 10px;background:rgba(0,0,0,.05);border:1px solid #ddd;border-radius:6px;font:700 24px/1.2 Arial;color:#111');el.contentEditable='true';el.textContent='Texto';}
+function designerAddRect(){makeNode('left:80px;top:80px;width:160px;height:100px;background:#e5e7eb;border:1px solid #cbd5e1;border-radius:8px');}
+function designerAddCircle(){makeNode('left:140px;top:120px;width:120px;height:120px;background:#fde68a;border:1px solid #f59e0b;border-radius:9999px');}
+function designerAddImage(){var url=prompt('URL da imagem:');if(!url)return;var el=makeNode('left:120px;top:120px;width:200px;height:140px;border:1px solid #ddd;background:#fff;overflow:hidden;border-radius:8px');var img=new Image();img.crossOrigin='anonymous';img.style.width='100%';img.style.height='100%';img.style.objectFit='cover';img.src=url;el.appendChild(img);}
+function designerDragStart(e,el){e.preventDefault();var sx=e.clientX,sy=e.clientY;var cs=getComputedStyle(el);var lx=parseInt(cs.left)||0,ty=parseInt(cs.top)||0;function mm(ev){var dx=ev.clientX-sx,dy=ev.clientY-sy;el.style.left=(lx+dx)+'px';el.style.top=(ty+dy)+'px';}function up(){document.removeEventListener('mousemove',mm);document.removeEventListener('mouseup',up);}document.addEventListener('mousemove',mm);document.addEventListener('mouseup',up);}
+async function designerExportPNG(){var stage=document.getElementById('designer-stage');var w=stage.clientWidth,h=stage.clientHeight;var c=document.createElement('canvas');c.width=w;c.height=h;var ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);var nodes=[...stage.children];for(var i=0;i<nodes.length;i++){var n=nodes[i];var s=getComputedStyle(n);var x=parseInt(s.left)||0,y=parseInt(s.top)||0;var bw=parseInt(s.width)||n.clientWidth,bh=parseInt(s.height)||n.clientHeight;if(n.children.length&&n.children[0].tagName==='IMG'){try{var img=n.children[0];if(!img.complete){await new Promise(r=>img.onload=r);}ctx.drawImage(img,x,y,bw,bh);}catch(e){}}else if(n.contentEditable==='true'){ctx.fillStyle='#111';ctx.font='700 24px Arial';ctx.fillText(n.textContent||'',x+10,y+34);}else{ctx.fillStyle=s.backgroundColor;ctx.strokeStyle=s.borderColor||'#000';ctx.lineWidth=1;var br=parseInt(s.borderRadius)||0;if(br>0){ctx.save();var r=br;var p=new Path2D();p.moveTo(x+r,y);p.arcTo(x+bw,y,x+bw,y+bh,r);p.arcTo(x+bw,y+bh,x,y+bh,r);p.arcTo(x,y+bh,x,y,r);p.arcTo(x,y,x+bw,y,r);ctx.clip(p);ctx.fillRect(x,y,bw,bh);ctx.restore();ctx.strokeRect(x+0.5,y+0.5,bw-1,bh-1);}else{ctx.fillRect(x,y,bw,bh);ctx.strokeRect(x+0.5,y+0.5,bw-1,bh-1);}}}var a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='design-zenia.png';a.click();}
+
 // SIDEBAR
 // ==========================================
 function toggleSidebar(){sbColl=!sbColl;var sb=document.getElementById('sidebar'),ic=document.getElementById('stg-ic');sb.classList.toggle('collapsed',sbColl);ic.className='fas fa-chevron-'+(sbColl?'right':'left');ic.style.fontSize='9px';}
