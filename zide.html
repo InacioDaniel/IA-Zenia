@@ -410,6 +410,74 @@
             font-size: 13px;
         }
 
+        /* Home Page Styles */
+        #home-page {
+            position: absolute;
+            inset: 0;
+            background: var(--bg-editor);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            overflow-y: auto;
+        }
+        .home-hero { text-align: center; margin-bottom: 40px; }
+        .home-logo {
+            font-size: 64px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+        .home-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 800px;
+            width: 100%;
+        }
+        .home-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .home-card:hover { background: rgba(255,255,255,0.05); border-color: var(--accent-primary); transform: translateY(-2px); }
+        .home-card i { font-size: 24px; color: var(--accent-primary); margin-bottom: 15px; }
+        .home-card h3 { font-size: 16px; margin-bottom: 8px; color: var(--text-bright); }
+        .home-card p { font-size: 13px; opacity: 0.6; }
+
+        /* Terminal Enhancements */
+        #terminal {
+            flex: 1;
+            background: #0f111a;
+            padding: 10px 15px;
+            font-family: var(--font-code);
+            font-size: 13px;
+            color: #c0caf5;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+        .term-input-line { display: flex; gap: 8px; align-items: center; margin-top: 5px; }
+        #term-input {
+            background: transparent;
+            border: none;
+            color: #9ece6a;
+            font-family: var(--font-code);
+            font-size: 13px;
+            outline: none;
+            flex: 1;
+        }
+        .term-cmd { color: #7aa2f7; font-weight: bold; }
+        .term-out { color: #a9b1d6; margin-bottom: 4px; }
+        .term-err { color: #f7768e; }
+        .term-success { color: #9ece6a; }
+
         /* Utils */
         .spin { animation: fa-spin 2s infinite linear; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -470,36 +538,70 @@
         </div>
     </div>
 
-    <!-- Main Workspace -->
-    <div id="workspace">
-        <div id="tab-bar">
-            <!-- Abas dinâmicas -->
-        </div>
-        <div id="editor-container">
-            <div id="magic-overlay">
-                <button class="magic-btn" onclick="iaAgent.magicFix()">
-                    <i class="fas fa-wand-magic-sparkles"></i> Magic Fix
-                </button>
+        <div id="editor-area">
+            <div id="tab-bar">
+                <!-- Abas dinâmicas -->
             </div>
-            <!-- Monaco Editor Container -->
-            <div id="monaco-mount" style="width:100%; height:100%;"></div>
-        </div>
+            
+            <!-- Home Page -->
+            <div id="home-page">
+                <div class="home-hero">
+                    <div class="home-logo">Zedex Pro</div>
+                    <p style="font-size: 18px; opacity: 0.8;">O futuro da programação com IA-Zénia</p>
+                </div>
+                <div class="home-grid">
+                    <div class="home-card" onclick="vfs.createNewFile()">
+                        <i class="fas fa-file-circle-plus"></i>
+                        <h3>Novo Ficheiro</h3>
+                        <p>Crie um novo ficheiro no workspace virtual.</p>
+                    </div>
+                    <div class="home-card" onclick="ui.switchSidebar('explorer')">
+                        <i class="fas fa-folder-open"></i>
+                        <h3>Explorar Workspace</h3>
+                        <p>Navegue pelos seus arquivos e pastas locais.</p>
+                    </div>
+                    <div class="home-card" onclick="ui.switchSidebar('scm')">
+                        <i class="fab fa-github"></i>
+                        <h3>GitHub Connect</h3>
+                        <p>Sincronize o seu código com repositórios remotos.</p>
+                    </div>
+                    <div class="home-card" onclick="iaAgent.magicFix()">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                        <h3>IA Magic Fix</h3>
+                        <p>Analise e corrija erros de sintaxe automaticamente.</p>
+                    </div>
+                </div>
+            </div>
 
-        <!-- Bottom Panel -->
-        <div id="bottom-panel">
-            <div class="panel-tabs">
-                <span class="panel-tab active">Terminal</span>
-                <span class="panel-tab">Output</span>
-                <span class="panel-tab">Problems</span>
-                <span class="panel-tab">Debug Console</span>
+            <div id="editor-container" style="display: none;">
+                <div id="magic-overlay">
+                    <button class="magic-btn" onclick="iaAgent.magicFix()">
+                        <i class="fas fa-wand-magic-sparkles"></i> Magic Fix
+                    </button>
+                </div>
+                <!-- Monaco Editor Container -->
+                <div id="monaco-mount" style="width:100%; height:100%;"></div>
             </div>
-            <div id="terminal">
-                <div><span class="term-prompt">zedex-pro@ia-zenia:</span> ~/workspace$ welcome --version v4.0.0</div>
-                <div><span style="color: #7aa2f7;">IA-Zénia System initialized. Welcome to the future of coding.</span></div>
-                <div id="term-content"></div>
+
+            <!-- Bottom Panel -->
+            <div id="bottom-panel">
+                <div class="panel-tabs">
+                    <span class="panel-tab active" onclick="ui.switchPanel('terminal')">Terminal</span>
+                    <span class="panel-tab" onclick="ui.switchPanel('output')">Output</span>
+                    <span class="panel-tab" onclick="ui.switchPanel('problems')">Problems</span>
+                </div>
+                <div id="terminal">
+                    <div id="term-history">
+                        <div><span class="term-prompt">zedex-pro@ia-zenia:</span> ~/workspace$ welcome --version v4.0.0</div>
+                        <div><span style="color: #7aa2f7;">IA-Zénia System initialized. Welcome to the future of coding.</span></div>
+                    </div>
+                    <div class="term-input-line">
+                        <span class="term-prompt">zedex-pro@ia-zenia:</span><span style="color:#bb9af7">~/workspace$</span>
+                        <input type="text" id="term-input" spellcheck="false" autocomplete="off">
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
     <!-- AI Side Panel -->
     <div id="ai-sidebar">
@@ -569,6 +671,25 @@
             if (targetView) targetView.classList.add('active');
 
             if (view === 'scm') scm.refresh();
+        },
+
+        switchPanel(tab) {
+            document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+            const target = Array.from(document.querySelectorAll('.panel-tab')).find(t => t.textContent.toLowerCase() === tab);
+            if (target) target.classList.add('active');
+            vfs.terminalWrite(`Switched to ${tab} panel.`);
+        },
+
+        showHome() {
+            document.getElementById('home-page').style.display = 'flex';
+            document.getElementById('editor-container').style.display = 'none';
+            currentFile = null;
+            this.updateTabs('Welcome');
+        },
+
+        hideHome() {
+            document.getElementById('home-page').style.display = 'none';
+            document.getElementById('editor-container').style.display = 'block';
         },
 
         toggleSettings() {
@@ -668,6 +789,7 @@
                 this.updateFileContent(currentFile, editor.getValue());
             }
 
+            ui.hideHome();
             currentFile = name;
             this.render();
             
@@ -699,11 +821,12 @@
 
         updateTabs(name) {
             const tabBar = document.getElementById('tab-bar');
+            const isHome = name === 'Welcome';
             tabBar.innerHTML = `
-                <div class="tab active">
-                    <i class="fas fa-file-code"></i>
+                <div class="tab ${isHome ? 'active' : ''}" onclick="${isHome ? 'ui.showHome()' : ''}">
+                    <i class="fas ${isHome ? 'fa-house' : 'fa-file-code'}"></i>
                     <span>${name}</span>
-                    <i class="fas fa-times tab-close"></i>
+                    ${!isHome ? '<i class="fas fa-times tab-close"></i>' : ''}
                 </div>
             `;
         },
@@ -874,6 +997,86 @@
         }
     };
 
+    // Terminal Interativo
+    const term = {
+        commands: {
+            'help': () => 'Comandos disponíveis: help, clear, ls, cd, cat, mkdir, touch, rm, git, zenia, whoami, date, echo, version, sysinfo, theme, status, network, cpu, ram, storage, auth, github, explorer, magicfix, breadcrumbs, logs, weather, time, jokes, motivation.',
+            'ls': () => Object.keys(vfs.files.root).join('  '),
+            'clear': () => { document.getElementById('term-history').innerHTML = ''; return ''; },
+            'whoami': () => 'zedex-pro-user@ia-zenia-workspace',
+            'date': () => new Date().toString(),
+            'version': () => 'Zedex Pro v4.0.0-stable',
+            'zenia': (args) => args ? `IA-Zénia analisando: ${args}...` : 'Olá! Use "zenia [pergunta]" para falar comigo.',
+            'echo': (args) => args || '',
+            'sysinfo': () => 'OS: Zedex WebOS\nKernel: V8 Engine\nShell: ZeniaShell v1.0',
+            'theme': () => 'Tema atual: Tokyo Night (Glassmorphism)',
+            'status': () => 'Todos os sistemas operacionais. IA-Zénia Online.',
+            'git': (args) => args === 'status' ? scm.getChanges().map(c=>`${c.status}: ${c.name}`).join('\n') || 'Clean' : 'Uso: git status, git commit, git push',
+            'mkdir': (name) => { vfs.createNewFolder(name); return `Pasta ${name} criada.`; },
+            'touch': (name) => { vfs.createNewFile(name); return `Ficheiro ${name} criado.`; },
+            'rm': (name) => `Use a interface gráfica para apagar ficheiros por segurança.`,
+            'cd': (dir) => `Navegado para ${dir || '~'}`,
+            'cat': (name) => {
+                const f = vfs.files.root[name];
+                return f ? f.content : `Erro: Ficheiro ${name} não encontrado.`;
+            },
+            'network': () => 'Conectado via WebSocket (Simulado)',
+            'cpu': () => 'Usage: 12% | Load: 0.45',
+            'ram': () => 'Used: 1.2GB | Free: 6.8GB',
+            'storage': () => 'LocalStorage: 45KB / 5MB',
+            'auth': () => 'Status: Autenticado como Desenvolvedor',
+            'github': () => `Repo: ${localStorage.getItem('gh_repo') || 'Não configurado'}`,
+            'explorer': () => { ui.switchSidebar('explorer'); return 'Abrindo Explorador...'; },
+            'magicfix': () => { iaAgent.magicFix(); return 'Iniciando Magic Fix...'; },
+            'breadcrumbs': () => 'workspace > root',
+            'logs': () => 'Nenhum erro crítico detectado nas últimas 24h.',
+            'weather': () => 'Luanda: 28°C | Céu Limpo',
+            'time': () => new Date().toLocaleTimeString(),
+            'jokes': () => 'Por que o programador faliu? Porque ele não tinha herança.',
+            'motivation': () => 'O código que você escreve hoje é a base do futuro de amanhã.'
+        },
+
+        init() {
+            const input = document.getElementById('term-input');
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const fullCmd = input.value.trim();
+                    input.value = '';
+                    if (!fullCmd) return;
+
+                    const parts = fullCmd.split(' ');
+                    const cmd = parts[0].toLowerCase();
+                    const args = parts.slice(1).join(' ');
+
+                    this.execute(cmd, args);
+                }
+            });
+        },
+
+        execute(cmd, args) {
+            const history = document.getElementById('term-history');
+            const line = document.createElement('div');
+            line.innerHTML = `<span class="term-prompt">zedex-pro@ia-zenia:</span><span style="color:#bb9af7">~/workspace$</span> <span class="term-cmd">${cmd} ${args}</span>`;
+            history.appendChild(line);
+
+            let output = '';
+            if (this.commands[cmd]) {
+                output = this.commands[cmd](args);
+            } else {
+                output = `<span class="term-err">Erro: Comando "${cmd}" não reconhecido. Digite "help" para ver a lista.</span>`;
+            }
+
+            if (output) {
+                const outLine = document.createElement('div');
+                outLine.className = 'term-out';
+                outLine.innerHTML = output.replace(/\n/g, '<br>');
+                history.appendChild(outLine);
+            }
+
+            document.getElementById('terminal').scrollTop = 99999;
+        }
+    };
+
     // IA Agent Agent Logic
     const iaAgent = {
         async sendMessage() {
@@ -982,6 +1185,8 @@
 
         vfs.initOriginals();
         vfs.render();
+        term.init();
+        ui.showHome();
         vfs.terminalWrite('Editor Monaco v0.44.0 loaded successfully.');
     });
 
