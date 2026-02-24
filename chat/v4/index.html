@@ -1485,7 +1485,7 @@ async function genVid(prompt){
     var codeMsgs = [{role:'system',content:sysPrompt},{role:'user',content:'Generate code now.'}];
     
     // Usar modelo rápido se possível
-    var code = await fetchAI(codeMsgs, 'gemini-large');
+    var code = await fetchAI(codeMsgs, 'qwen-coder');
     
     // Limpar markdown
     code = code.replace(/```javascript/g, '').replace(/```/g, '').trim();
@@ -1765,3 +1765,4 @@ showWelcome();
 </script>
 </body>
 </html>
+
