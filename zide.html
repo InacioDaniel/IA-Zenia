@@ -41,8 +41,56 @@
         #app-container {
             display: flex;
             height: 100vh;
+            flex-direction: column;
             backdrop-filter: blur(10px);
             border: 1px solid var(--border-glass);
+        }
+
+        /* Top Menu Bar */
+        #top-menu-bar {
+            height: 30px;
+            background: #16161e;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-size: 12px;
+            border-bottom: 1px solid var(--border-glass);
+            z-index: 1000;
+        }
+        .menu-item {
+            padding: 0 10px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+        }
+        .menu-item:hover { background: rgba(255,255,255,0.05); }
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border-glass);
+            min-width: 180px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+            padding: 5px 0;
+            z-index: 1100;
+        }
+        .menu-item:hover .dropdown { display: block; }
+        .drop-item {
+            padding: 6px 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .drop-item:hover { background: var(--accent-primary); color: white; }
+        .drop-shortcut { opacity: 0.5; font-size: 10px; }
+
+        #main-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
         }
 
         /* Activity Bar */
@@ -478,6 +526,50 @@
         .term-err { color: #f7768e; }
         .term-success { color: #9ece6a; }
 
+        /* Debate Page Styles */
+        #debate-page {
+            position: absolute;
+            inset: 0;
+            background: #0f111a;
+            z-index: 60;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .debate-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-bottom: 1px solid var(--border-glass);
+        }
+        .debate-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .ai-debater {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .ai-debater.active { border-color: var(--accent-primary); box-shadow: 0 0 15px rgba(122,162,247,0.2); }
+        .debater-info { display: flex; align-items: center; gap: 10px; font-weight: bold; }
+        .debater-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; }
+        
+        .debate-controls {
+            padding: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            border-top: 1px solid var(--border-glass);
+        }
+
         /* Utils */
         .spin { animation: fa-spin 2s infinite linear; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -489,16 +581,53 @@
 <body>
 
 <div id="app-container">
-    <!-- Activity Bar -->
-    <div id="activity-bar">
-        <div class="activity-btn active" onclick="ui.switchSidebar('explorer')" title="Explorer"><i class="fas fa-copy"></i></div>
-        <div class="activity-btn" onclick="ui.switchSidebar('search')" title="Search"><i class="fas fa-search"></i></div>
-        <div class="activity-btn" onclick="ui.switchSidebar('scm')" title="Source Control"><i class="fas fa-code-branch"></i></div>
-        <div class="activity-btn" title="Extensions"><i class="fas fa-puzzle-piece"></i></div>
-        <div style="margin-top: auto; padding-bottom: 20px;">
-            <div class="activity-btn" onclick="ui.toggleSettings()" title="Settings"><i class="fas fa-cog"></i></div>
+    <!-- Top Menu Bar -->
+    <div id="top-menu-bar">
+        <div class="menu-item">File
+            <div class="dropdown">
+                <div class="drop-item" onclick="vfs.createNewFile()">New File <span class="drop-shortcut">Ctrl+N</span></div>
+                <div class="drop-item">Open File... <span class="drop-shortcut">Ctrl+O</span></div>
+                <div class="drop-item" onclick="vfs.save()">Save <span class="drop-shortcut">Ctrl+S</span></div>
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
+                <div class="drop-item" onclick="ui.toggleSettings()">Settings</div>
+            </div>
         </div>
+        <div class="menu-item">Edit
+            <div class="dropdown">
+                <div class="drop-item">Undo <span class="drop-shortcut">Ctrl+Z</span></div>
+                <div class="drop-item">Redo <span class="drop-shortcut">Ctrl+Y</span></div>
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
+                <div class="drop-item">Cut <span class="drop-shortcut">Ctrl+X</span></div>
+                <div class="drop-item">Copy <span class="drop-shortcut">Ctrl+C</span></div>
+                <div class="drop-item">Paste <span class="drop-shortcut">Ctrl+V</span></div>
+            </div>
+        </div>
+        <div class="menu-item">Selection</div>
+        <div class="menu-item">View
+            <div class="dropdown">
+                <div class="drop-item" onclick="ui.showHome()">Home</div>
+                <div class="drop-item" onclick="ui.showDebate()">Angola Tech Debate</div>
+                <div class="drop-item" onclick="ui.switchSidebar('explorer')">Explorer</div>
+            </div>
+        </div>
+        <div class="menu-item">Go</div>
+        <div class="menu-item">Run</div>
+        <div class="menu-item">Terminal</div>
+        <div class="menu-item">Help</div>
+        <div style="flex:1; display:flex; justify-content:center; opacity:0.5; font-size:11px;">Zedex Pro - Angola Intelligence Edition</div>
     </div>
+
+    <div id="main-body">
+        <!-- Activity Bar -->
+        <div id="activity-bar">
+            <div class="activity-btn active" onclick="ui.switchSidebar('explorer')" title="Explorer"><i class="fas fa-copy"></i></div>
+            <div class="activity-btn" onclick="ui.switchSidebar('search')" title="Search"><i class="fas fa-search"></i></div>
+            <div class="activity-btn" onclick="ui.switchSidebar('scm')" title="Source Control"><i class="fas fa-code-branch"></i></div>
+            <div class="activity-btn" onclick="ui.showDebate()" title="Angola Debate"><i class="fas fa-comments"></i></div>
+            <div style="margin-top: auto; padding-bottom: 20px;">
+                <div class="activity-btn" onclick="ui.toggleSettings()" title="Settings"><i class="fas fa-cog"></i></div>
+            </div>
+        </div>
 
     <!-- Sidebar -->
     <div id="sidebar">
@@ -543,6 +672,21 @@
                 <!-- Abas dinâmicas -->
             </div>
             
+            <!-- Debate Page -->
+            <div id="debate-page">
+                <div class="debate-header">
+                    <h2 style="color:var(--accent-primary)">Angola Tech Debate Forum</h2>
+                    <p style="opacity:0.7">Discussão estratégica entre IAs sobre o futuro tecnológico de Angola</p>
+                </div>
+                <div class="debate-grid" id="debate-grid">
+                    <!-- Debate cards via JS -->
+                </div>
+                <div class="debate-controls">
+                    <button class="scm-btn" style="width:auto; padding:10px 30px" onclick="debateSystem.start()">Iniciar Novo Debate</button>
+                    <button class="scm-btn" style="width:auto; padding:10px 30px; background:#f7768e" onclick="ui.showHome()">Sair</button>
+                </div>
+            </div>
+
             <!-- Home Page -->
             <div id="home-page">
                 <div class="home-hero">
@@ -683,12 +827,22 @@
         showHome() {
             document.getElementById('home-page').style.display = 'flex';
             document.getElementById('editor-container').style.display = 'none';
+            document.getElementById('debate-page').style.display = 'none';
             currentFile = null;
             this.updateTabs('Welcome');
         },
 
+        showDebate() {
+            document.getElementById('home-page').style.display = 'none';
+            document.getElementById('editor-container').style.display = 'none';
+            document.getElementById('debate-page').style.display = 'flex';
+            this.updateTabs('Angola Debate');
+            debateSystem.init();
+        },
+
         hideHome() {
             document.getElementById('home-page').style.display = 'none';
+            document.getElementById('debate-page').style.display = 'none';
             document.getElementById('editor-container').style.display = 'block';
         },
 
@@ -1079,36 +1233,38 @@
 
     // IA Agent Agent Logic
     const iaAgent = {
+        agents: {
+            'zenia': { name: 'Zénia', color: '#7aa2f7', icon: 'fa-robot', bio: 'Especialista em Software Architecture.' },
+            'kwanza': { name: 'Kwanza AI', color: '#9ece6a', icon: 'fa-coins', bio: 'Focada em Fintech e Economia Digital.' },
+            'kianda': { name: 'Kianda', color: '#bb9af7', icon: 'fa-water', bio: 'Especialista em Infraestrutura e Conectividade.' },
+            'mumuila': { name: 'Mumuila AI', color: '#e0af68', icon: 'fa-wheat-awn', bio: 'Focada em Agrotech e Sustentabilidade.' }
+        },
+        activeAgent: 'zenia',
+
         async sendMessage() {
             const input = document.getElementById('ai-textarea');
             const text = input.value.trim();
             if (!text) return;
 
-            this.addMsg('user', text);
+            this.addMsg('user', text, 'user');
             input.value = '';
 
-            // Simulação de processamento
-            this.addMsg('ai', '<i class="fas fa-spinner fa-spin"></i> Analisando o seu código e o contexto do projeto...');
+            const agent = this.agents[this.activeAgent];
+            this.addMsg(this.activeAgent, `<i class="fas fa-spinner fa-spin"></i> ${agent.name} está analisando...`, agent.name);
             
             setTimeout(() => {
-                const lastMsg = document.querySelector('#ai-messages .msg.ai:last-child');
-                if (text.toLowerCase().includes('auth') || text.toLowerCase().includes('autenticação')) {
-                    lastMsg.innerHTML = `Com base no seu pedido, gerei um boilerplate de autenticação JWT para o ficheiro \`auth.js\`. Deseja aplicar este código agora?
-                    <div class="ai-actions">
-                        <button class="ai-btn-action" onclick="iaAgent.executeAICodeAction('create_auth')">Aplicar Código</button>
-                        <button class="ai-btn-action">Explicar Lógica</button>
-                    </div>`;
-                } else {
-                    lastMsg.innerHTML = "Entendi o seu pedido. Posso ajudar a refatorar funções, encontrar bugs ou gerar testes unitários. O que prefere fazer?";
-                }
+                const lastMsg = document.querySelector('#ai-messages .msg:last-child');
+                lastMsg.innerHTML = `<strong>${agent.name}:</strong><br>Sou a **${agent.name}**. Analisei seu código e sugiro uma abordagem focada em ${agent.bio.toLowerCase()}. Como posso ajudar mais?`;
             }, 1500);
         },
 
-        addMsg(role, text) {
+        addMsg(agentKey, text, name) {
             const container = document.getElementById('ai-messages');
             const div = document.createElement('div');
-            div.className = `msg ${role}`;
-            div.innerHTML = text;
+            const agent = this.agents[agentKey] || { color: '#fff' };
+            div.className = `msg ${agentKey === 'user' ? 'user' : 'ai'}`;
+            if(agentKey !== 'user') div.style.borderLeft = `3px solid ${agent.color}`;
+            div.innerHTML = `<strong>${name || agent.name}:</strong><br>${text}`;
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
         },
@@ -1117,8 +1273,8 @@
             if (action === 'create_auth') {
                 const authCode = `// JWT Auth Service by IA-Zenia\nconst jwt = require('jsonwebtoken');\n\nconst login = (user) => {\n    return jwt.sign({ id: user.id }, process.env.SECRET);\n};`;
                 editor.setValue(authCode);
-                this.addMsg('ai', '✅ Código de autenticação aplicado com sucesso ao editor!');
-                vfs.terminalWrite('File auth.js updated by Zenia AI.');
+                this.addMsg('zenia', '✅ Código de autenticação aplicado com sucesso!', 'Zénia');
+                vfs.terminalWrite('File updated by AI Agent.');
             }
         },
 
@@ -1134,6 +1290,65 @@
                     vfs.terminalWrite('No common errors found. Code looks clean!');
                 }
             }, 1000);
+        }
+    };
+
+    // Debate System for Angola
+    const debateSystem = {
+        topics: [
+            "Digitalização dos Pagamentos no Mercado Informal (Kikas/Zungueiras)",
+            "Expansão da Fibra Óptica para as Províncias do Interior",
+            "Uso de Drones e IA na Agricultura no Planalto Central",
+            "Formação de 100 mil Programadores Angolanos até 2030"
+        ],
+        
+        init() {
+            const grid = document.getElementById('debate-grid');
+            grid.innerHTML = '';
+            Object.keys(iaAgent.agents).forEach(key => {
+                const agent = iaAgent.agents[key];
+                const div = document.createElement('div');
+                div.className = 'ai-debater';
+                div.id = `debater-${key}`;
+                div.innerHTML = `
+                    <div class="debater-info">
+                        <div class="debater-avatar" style="background:${agent.color}"><i class="fas ${agent.icon}"></i></div>
+                        <span>${agent.name}</span>
+                    </div>
+                    <div style="font-size:11px; opacity:0.6">${agent.bio}</div>
+                    <div class="debate-bubble" id="bubble-${key}" style="font-size:13px; font-style:italic; min-height:60px; padding:10px; background:rgba(255,255,255,0.02); border-radius:8px;">Aguardando início...</div>
+                `;
+                grid.appendChild(div);
+            });
+        },
+
+        async start() {
+            const topic = this.topics[Math.floor(Math.random() * this.topics.length)];
+            vfs.terminalWrite(`Iniciando debate sobre: ${topic}`);
+            
+            const keys = Object.keys(iaAgent.agents);
+            for (let i = 0; i < 8; i++) {
+                const key = keys[i % keys.length];
+                const agent = iaAgent.agents[key];
+                
+                document.querySelectorAll('.ai-debater').forEach(d => d.classList.remove('active'));
+                const el = document.getElementById(`debater-${key}`);
+                if(el) el.classList.add('active');
+                
+                const bubble = document.getElementById(`bubble-${key}`);
+                if(bubble) {
+                    bubble.innerHTML = `<i class="fas fa-ellipsis fa-fade"></i> ${agent.name} está elaborando...`;
+                    await new Promise(r => setTimeout(r, 2000));
+                    
+                    const arguments = [
+                        `Para o tema "${topic}", acredito que a chave é a descentralização tecnológica.`,
+                        `Discordo parcialmente, ${agent.name}. Precisamos primeiro de infraestrutura base sólida.`,
+                        `A solução real para Angola passa pela inclusão financeira via mobile-money.`,
+                        `Não podemos esquecer o impacto social. A tecnologia deve servir o povo nas 18 províncias.`
+                    ];
+                    bubble.innerHTML = arguments[Math.floor(Math.random() * arguments.length)];
+                }
+            }
         }
     };
 
