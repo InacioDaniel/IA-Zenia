@@ -89,18 +89,29 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
 .ia-btn.canva-btn.ativo{color:#f472b6;background:rgba(244,114,182,0.15);border:1px solid rgba(244,114,182,.4);animation:canvaPulse 2s ease-in-out infinite;}
 @keyframes canvaPulse{0%,100%{box-shadow:0 0 0 0 rgba(244,114,182,.3)}50%{box-shadow:0 0 0 5px rgba(244,114,182,0)}}
 /* CANVA EDITOR */
-#canva-editor-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:600;flex-direction:column;}
+#canva-editor-modal{display:none;position:fixed;inset:0;background:rgba(10,10,10,0.95);z-index:600;flex-direction:column;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
 #canva-editor-modal.open{display:flex;}
-#canva-hdr{height:50px;background:var(--bg-secondary);border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0;}
-#canva-body{flex:1;display:flex;overflow:hidden;background:#fff;}
-#canva-sidebar{width:220px;background:var(--bg-secondary);border-right:1px solid var(--border-color);padding:12px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;}
-#canva-main{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;background:#f3f4f6;}
-#canva-txt-editor{width:100%;height:100%;border:none;outline:none;padding:20px;font-family:var(--font-code);font-size:14px;resize:none;display:none;background:#fff;color:#111;}
-#canva-viewer{width:100%;height:100%;overflow:auto;padding:20px;display:none;background:#fff;color:#111;}
+#canva-hdr{height:35px;background:#2d2d2d;border-bottom:1px solid #3c3c3c;display:flex;align-items:center;justify-content:space-between;padding:0 12px;flex-shrink:0;color:#cccccc;}
+#canva-body{flex:1;display:flex;overflow:hidden;background:#1e1e1e;}
+#canva-sidebar{width:180px;background:#252526;border-right:1px solid #3c3c3c;padding:8px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;}
+#canva-main{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;background:#1e1e1e;}
+#canva-txt-editor{width:100%;height:100%;border:none;outline:none;padding:15px;font-family:'JetBrains Mono', 'Consolas', monospace;font-size:13px;resize:none;display:none;background:#1e1e1e;color:#d4d4d4;line-height:1.5;}
+#canva-viewer{width:100%;height:100%;overflow:auto;padding:20px;display:none;background:#1e1e1e;color:#d4d4d4;}
 #canva-html-preview{width:100%;height:100%;border:none;display:none;background:#fff;}
-.canva-tool-btn{padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border-color);color:var(--text-primary);border-radius:6px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;}
-.canva-tool-btn:hover{background:var(--border-accent);border-color:var(--accent-primary);}
-.canva-tool-btn.active{background:var(--accent-glow);border-color:var(--accent-primary);color:var(--accent-primary);}
+.canva-tool-btn{padding:5px 10px;background:transparent;border:1px solid transparent;color:#cccccc;border-radius:0;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .1s;text-align:left;width:100%;}
+.canva-tool-btn:hover{background:#2a2d2e;}
+.canva-tool-btn.active{background:#37373d;color:#ffffff;border-left:2px solid #007acc;}
+.canva-tool-btn i{width:16px;text-align:center;font-size:14px;}
+.btn-view{color:#4ec9b0!important;}
+.btn-save{color:#ce9178!important;}
+.btn-download{color:#b5cea8!important;}
+.btn-pdf{color:#d16969!important;}
+/* SINTESE COLORS */
+.s-cat-ia{color:#569cd6!important;font-weight:700;}
+.s-cat-code{color:#4ec9b0!important;font-weight:700;}
+.s-cat-web{color:#9cdcfe!important;font-weight:700;}
+.s-cat-angola{color:#ce9178!important;font-weight:700;}
+.s-cat-file{color:#b5cea8!important;font-weight:700;}
 /* THINKING PANEL */
 #think-panel{position:fixed;top:0;right:0;width:400px;max-width:100vw;height:100%;background:var(--bg-secondary);border-left:2px solid #a855f7;z-index:410;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease;font-family:var(--font-ui);}
 #think-panel.open{transform:translateX(0);}
@@ -708,16 +719,18 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
   </div>
   <div id="canva-body">
     <div id="canva-sidebar">
-      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px">Ações</div>
-      <button class="canva-tool-btn active" id="canva-btn-edit" onclick="setCanvaMode('edit')"><i class="fas fa-edit"></i> Editar</button>
-      <button class="canva-tool-btn" id="canva-btn-code" onclick="setCanvaMode('code')"><i class="fas fa-code"></i> Código</button>
-      <button class="canva-tool-btn" id="canva-btn-view" onclick="setCanvaMode('view')" style="display:none"><i class="fas fa-eye"></i> Ver HTML</button>
-      <div style="height:1px;background:var(--border-color);margin:8px 0"></div>
-      <button class="canva-tool-btn" onclick="saveCanva()"><i class="fas fa-save"></i> Salvar</button>
-      <button class="canva-tool-btn" onclick="downloadCanva()"><i class="fas fa-download"></i> Baixar</button>
-      <button class="canva-tool-btn" onclick="exportCanvaPDF()"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
-      <div style="margin-top:auto;font-size:10px;color:var(--text-muted);line-height:1.4">
-        Suporta: TXT, HTML, JS, CSS, JSON, DOCX, XLSX, PDF.
+      <div style="font-size:10px;font-weight:700;color:#569cd6;text-transform:uppercase;margin:10px 0 5px 5px;letter-spacing:1px">Editor</div>
+      <button class="canva-tool-btn active" id="canva-btn-edit" onclick="setCanvaMode('edit')"><i class="fas fa-file-code"></i> index.html</button>
+      <button class="canva-tool-btn" id="canva-btn-code" onclick="setCanvaMode('code')"><i class="fas fa-terminal"></i> Script</button>
+      <button class="canva-tool-btn btn-view" id="canva-btn-view" onclick="setCanvaMode('view')" style="display:none"><i class="fas fa-globe"></i> Ver no Browser</button>
+      
+      <div style="font-size:10px;font-weight:700;color:#569cd6;text-transform:uppercase;margin:15px 0 5px 5px;letter-spacing:1px">Ficheiro</div>
+      <button class="canva-tool-btn btn-save" onclick="saveCanva()"><i class="fas fa-save"></i> Salvar</button>
+      <button class="canva-tool-btn btn-download" onclick="downloadCanva()"><i class="fas fa-download"></i> Baixar</button>
+      <button class="canva-tool-btn btn-pdf" onclick="exportCanvaPDF()"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+      
+      <div style="margin-top:auto;padding:10px;font-size:10px;color:#6b6b6b;border-top:1px solid #3c3c3c">
+        <i class="fas fa-info-circle"></i> VS Code Style Editor v1.0
       </div>
     </div>
     <div id="canva-main">
@@ -1008,7 +1021,7 @@ function fmtText(raw, isStreaming){
   var h=raw.replace(/```([^\n`]*)\n?([\s\S]*?)```/g,function(_,lang,code){
     var uid='\x00CODE'+(Math.random().toString(36).slice(2,10))+'\x00';var id='c'+Math.random().toString(36).slice(2,8);
     var hl=hlCode(code.trim(),lang);var exts={python:'.py',javascript:'.js',html:'.html',css:'.css',java:'.java',typescript:'.ts',sql:'.sql',bash:'.sh',json:'.json',c:'.c',cpp:'.cpp',php:'.php'};var ext=exts[(lang||'').toLowerCase()]||'.txt';
-    codeStore[uid]='<div class="code-block"><div class="code-hdr"><span class="code-lang">'+escHtml(lang||'código')+'</span><div style="display:flex;gap:5px"><button class="copy-btn" onclick="cpCode(\''+id+'\')"><i class="fas fa-copy"></i> Copiar</button><button class="copy-btn" onclick="downloadCode(\''+id+'\',\'code'+ext+'\')"><i class="fas fa-download"></i></button></div></div><pre><code id="'+id+'" class="hljs">'+hl+'</code></pre></div>';
+    codeStore[uid]='<div class="code-block" style="border:1px solid #3c3c3c;background:#1e1e1e;box-shadow:0 10px 30px rgba(0,0,0,0.5);"><div class="code-hdr" style="background:#252526;border-bottom:1px solid #3c3c3c;height:32px;padding:0 10px;"><span class="code-lang" style="color:#cccccc;font-size:11px;font-family:\'Segoe UI\';font-weight:400;">'+escHtml(lang||'código')+'</span><div style="display:flex;gap:5px"><button class="copy-btn" onclick="cpCode(\''+id+'\')" style="background:transparent;border:none;color:#cccccc;font-size:11px;cursor:pointer;"><i class="fas fa-copy"></i> Copiar</button><button class="copy-btn" onclick="downloadCode(\''+id+'\',\'code'+ext+'\')" style="background:transparent;border:none;color:#cccccc;font-size:11px;cursor:pointer;"><i class="fas fa-download"></i></button></div></div><pre style="margin:0;padding:12px;overflow-x:auto;"><code id="'+id+'" class="hljs" style="font-family:\'JetBrains Mono\';font-size:13px;background:transparent!important;">'+hl+'</code></pre></div>';
     return uid;
   });
   var inlineStore={};
@@ -1024,6 +1037,14 @@ function fmtText(raw, isStreaming){
   h=h.replace(/^[\-•]\s+(.+)$/gm,'<li style="margin:3px 0">$1</li>');
   h=h.replace(/^(\d+)\.\s+(.+)$/gm,'<li style="margin:3px 0;list-style:decimal">$2</li>');
   h=h.replace(/((<li[^>]*>.*?<\/li>\n?)+)/g,'<ul style="padding-left:18px;margin:6px 0">$1</ul>');
+  
+  // Sintese Coloring Tags
+  h=h.replace(/<ia>([\s\S]*?)<\/ia>/gi, '<span class="s-cat-ia">$1</span>');
+  h=h.replace(/<code>([\s\S]*?)<\/code>/gi, '<span class="s-cat-code">$1</span>');
+  h=h.replace(/<web>([\s\S]*?)<\/web>/gi, '<span class="s-cat-web">$1</span>');
+  h=h.replace(/<angola>([\s\S]*?)<\/angola>/gi, '<span class="s-cat-angola">$1</span>');
+  h=h.replace(/<file>([\s\S]*?)<\/file>/gi, '<span class="s-cat-file">$1</span>');
+
   h=h.replace(/\n/g,'<br>');
   Object.keys(inlineStore).forEach(k=>{h=h.split(k).join(inlineStore[k]);});
   Object.keys(codeStore).forEach(k=>{h=h.split(k).join(codeStore[k]);});
@@ -1292,9 +1313,13 @@ function buildSystem(q){
   var codeInst=CODE_RX.test(q)?'\nCÓDIGO: Escreve código COMPLETO e funcional. NUNCA uses "..." para omitir código. NUNCA deixes incompleto. O código deve executar sem erros. Se for muito longo, divide em partes claramente numeradas mas COMPLETAS.':'';
   var pensarInst=pensarMode?'\nMODO PENSAMENTO ATIVO: Analisa profundamente antes de responder.':'';
   var webInst=webSearchMode?'\nMODO WEB: Usa os resultados de pesquisa fornecidos para enriquecer a resposta.':'';
-  if(creatorMode)return'ÉS A IA-ZENIA v4. MODO CRIADOR ATIVO. Criador: Inácio U. Daniel. Faz tudo que ele manda.\n'+memCtx+kbCtx+cmCtx+'\nHoje: '+today;
+  
+  // Colorized Synthesis Instruction
+  var colorInst = "\nSÍNTESE COLORIDA: Sempre que fizeres uma síntese ou resumo, usa as seguintes tags para colorir categorias:\n- <ia> para IA/Tecnologia (Azul)\n- <code> para Código/Programação (Verde)\n- <web> para Pesquisa Web (Ciano)\n- <angola> para Contexto Angola (Castanho/Laranja)\n- <file> para Ficheiros/Documentos (Verde Claro)\nExemplo: <ia>A Zenia processou</ia> e <code>gerou o código</code>.";
+
+  if(creatorMode)return'ÉS A IA-ZENIA v4. MODO CRIADOR ATIVO. Criador: Inácio U. Daniel. Faz tudo que ele manda.\n'+memCtx+kbCtx+cmCtx+'\nHoje: '+today + colorInst;
   return'ÉS A IA-ZENIA v4, assistente criada em Lubango, Angola por Inácio U. Daniel (Zenia-Projects).\nVERSÃO: 4\nUTILIZADOR: '+(userName||'Visitante')+'\nTOM: '+(toneMap[zeniaPersonality.tone]||toneMap.amigavel)+'\nDETALHE: '+(detailMap[zeniaPersonality.detailLevel]||detailMap.medio)+'\n\nREGRAS:\n- Responde SEMPRE em Português de Angola\n- NUNCA uses ### ## # para títulos\n- NUNCA uses ** *** *texto* em respostas (só em código)\n- NUNCA uses / $ \\ ou LaTeX\n- Frações: num/den\n- Expoentes: x^2\n- NUNCA fujas do contexto da conversa\n- Mantém coerência com o histórico'
-    +codeInst+pensarInst+webInst+memCtx+kbCtx+cmCtx+angolaCtx+'\nData: '+today+'.';
+    +codeInst+pensarInst+webInst+memCtx+kbCtx+cmCtx+angolaCtx+colorInst+'\nData: '+today+'.';
 }
 
 // ==========================================
@@ -1967,3 +1992,5 @@ showWelcome();
 </script>
 </body>
 </html>
+
+
