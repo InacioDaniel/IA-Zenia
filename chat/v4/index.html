@@ -19,6 +19,7 @@
 <!-- Diagram & Chart Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>mermaid.initialize({startOnLoad:false,theme:'dark',securityLevel:'loose'});</script>
 <style>
 :root{--bg-primary:#0b0d11;--bg-secondary:#111318;--bg-tertiary:#151b2d;--bg-input:#151c2e;--border-color:#1e2330;--border-accent:#252c3b;--text-primary:#e5e7eb;--text-secondary:#9ca3af;--text-muted:#6b7280;--accent-primary:#3b5bdb;--accent-secondary:#7c3aed;--accent-glow:rgba(59,91,219,0.25);--msg-ai-bg:transparent;--msg-user-bg:#1d3461;--msg-user-text:#e8f0fe;--sidebar-bg:#0f1117;--topbar-bg:#0b0d11;--send-btn:#3b5bdb;--send-btn-hover:#4c6ef5;--user-av:#1e3a5f;--font-ui:'Plus Jakarta Sans','Outfit',system-ui,sans-serif;--font-msg:'DM Sans','Plus Jakarta Sans',sans-serif;--font-code:'JetBrains Mono',monospace;--radius-main:14px;--shadow-main:0 4px 24px rgba(0,0,0,0.4);}
@@ -1101,9 +1102,87 @@ function toggleWebMode(){webSearchMode=!webSearchMode;var btn=document.getElemen
 async function performWebSearch(query){
   document.getElementById('web-st').style.display='inline-flex';
   var results=[];
-  try{var r=await fetch('https://api.duckduckgo.com/?q='+encodeURIComponent(query)+'&format=json&no_html=1&skip_disambig=1',{signal:AbortSignal.timeout(8000)});if(r.ok){var d=await r.json();if(d.Answer)results.push({title:'Resposta Direta',text:d.Answer,url:''});if(d.AbstractText)results.push({title:d.Heading||query,text:d.AbstractText,url:d.AbstractURL||''});if(d.RelatedTopics)d.RelatedTopics.slice(0,4).forEach(t=>{if(t.Text)results.push({title:t.Text.substring(0,60),text:t.Text,url:t.FirstURL||''});});}}catch(e){}
-  if(results.length<2){try{var wq=encodeURIComponent(query.split(' ').slice(0,4).join(' '));var wr=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+wq,{signal:AbortSignal.timeout(6000)});if(wr.ok){var wd=await wr.json();if(wd.extract)results.push({title:wd.title,text:wd.extract,url:wd.content_urls?.desktop?.page||''});}}catch(e){}}
-  document.getElementById('web-st').style.display='none';
+  var seenUrls = new Set();
+
+  async function fetchWithTimeout(url, timeout = 7000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(id);
+      return response;
+    } catch (e) {
+      clearTimeout(id);
+      return null;
+    }
+  }
+
+  // 1. DuckDuckGo (Resposta Direta e Tópicos Relacionados)
+  try {
+    var r = await fetchWithTimeout('https://api.duckduckgo.com/?q=' + encodeURIComponent(query) + '&format=json&no_html=1&skip_disambig=1');
+    if (r && r.ok) {
+      var d = await r.json();
+      if (d.Answer) results.push({ title: 'Resposta Direta', text: d.Answer, url: 'DDG' });
+      if (d.AbstractText) {
+        results.push({ title: d.Heading || query, text: d.AbstractText, url: d.AbstractURL || '' });
+        if (d.AbstractURL) seenUrls.add(d.AbstractURL);
+      }
+      if (d.RelatedTopics) {
+        d.RelatedTopics.slice(0, 3).forEach(t => {
+          if (t.Text && t.FirstURL && !seenUrls.has(t.FirstURL)) {
+            results.push({ title: t.Text.substring(0, 60), text: t.Text, url: t.FirstURL });
+            seenUrls.add(t.FirstURL);
+          }
+        });
+      }
+    }
+  } catch (e) {}
+
+  // 2. Wikipedia (Fallback ou Complemento)
+  if (results.length < 5) {
+    try {
+      var wq = encodeURIComponent(query.split(' ').slice(0, 5).join(' '));
+      // Tentar Wikipedia em Português primeiro
+      var wr = await fetchWithTimeout('https://pt.wikipedia.org/api/rest_v1/page/summary/' + wq, 5000);
+      if (!wr || !wr.ok) wr = await fetchWithTimeout('https://en.wikipedia.org/api/rest_v1/page/summary/' + wq, 5000);
+      
+      if (wr && wr.ok) {
+        var wd = await wr.json();
+        if (wd.extract && !seenUrls.has(wd.content_urls?.desktop?.page)) {
+          results.push({ title: wd.title + ' (Wikipedia)', text: wd.extract, url: wd.content_urls?.desktop?.page || '' });
+          seenUrls.add(wd.content_urls?.desktop?.page);
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 3. Google Custom Search (Se disponível via proxy ou similar - Fallback para Brave Search API livre se possível)
+  // Como não temos API Keys aqui, vamos usar um motor de busca de notícias ou similar
+  if (results.length < 3) {
+    try {
+      // Exemplo de busca em APIs de notícias abertas (NewsAPI ou similar requer key, então usamos RSS2JSON para sites de notícias angolanos)
+      var newsQueries = ['Jornal de Angola', 'Angop', 'Club-K', 'Novo Jornal'];
+      var isAngolaQuery = /angola|luanda|bengo|lobito|huambo|lubango|cabinda/i.test(query);
+      
+      if (isAngolaQuery) {
+        // Busca simulada ou via DuckDuckGo específico para domínios .ao
+        var r2 = await fetchWithTimeout('https://api.duckduckgo.com/?q=' + encodeURIComponent(query + ' site:ao') + '&format=json&no_html=1');
+        if (r2 && r2.ok) {
+          var d2 = await r2.json();
+          if (d2.RelatedTopics) {
+            d2.RelatedTopics.slice(0, 2).forEach(t => {
+              if (t.Text && t.FirstURL && !seenUrls.has(t.FirstURL)) {
+                results.push({ title: '[NOTÍCIA/ANGOLA] ' + t.Text.substring(0, 50), text: t.Text, url: t.FirstURL });
+                seenUrls.add(t.FirstURL);
+              }
+            });
+          }
+        }
+      }
+    } catch (e) {}
+  }
+
+  document.getElementById('web-st').style.display = 'none';
   return results;
 }
 function webResultsToContext(results,query){if(!results.length)return'';return '[PESQUISA WEB: "'+query+'"]\n'+results.map((r,i)=>'['+(i+1)+'] '+r.title+':\n'+r.text.substring(0,400)).join('\n\n')+'\n[FIM PESQUISA WEB]\n\n';}
@@ -2047,17 +2126,36 @@ async function genVisual(prompt){
   row.appendChild(av);row.appendChild(card);chatEl.appendChild(row);chatEl.scrollTop=chatEl.scrollHeight;
 
   try {
-    var sysPrompt = "You are a visual engine. Output only JavaScript code for a function draw(ctx, width, height) to create a high-quality visual representation of: '"+prompt+"'. Use Canvas 2D API. If it's a floor plan (planta), draw walls (black), windows (blue), and labels. If it's an infographic, use icons and clear text. Output ONLY the code inside the function.";
-    var code = await fetchAI([{role:'system',content:sysPrompt},{role:'user',content:'Generate canvas code for: '+prompt}], 'qwen-coder');
-    code = code.replace(/```javascript/g, '').replace(/```/g, '').trim();
+    var is3D = prompt.toLowerCase().includes('3d') || prompt.toLowerCase().includes('realista') || prompt.toLowerCase().includes('cidade') || prompt.toLowerCase().includes('planta');
+    
+    var sysPrompt = is3D 
+      ? "You are a 3D Architect. Output only JavaScript code for a function draw(scene, camera, renderer, width, height) to create a high-quality 3D representation of: '"+prompt+"'. Use Three.js, realistic materials (MeshStandardMaterial), and good lighting. Output ONLY the code inside the function."
+      : "You are a visual engine. Output only JavaScript code for a function draw(ctx, width, height) to create a high-quality visual representation of: '"+prompt+"'. Use Canvas 2D API. If it's a floor plan (planta), draw walls (black), windows (blue), and labels. Output ONLY the code inside the function.";
+    
+    var code = await fetchAI([{role:'system',content:sysPrompt},{role:'user',content:'Generate visual code for: '+prompt}], 'qwen-coder');
+    code = code.replace(/```(?:javascript|js)?/gi, '').replace(/```/g, '').trim();
 
     var canvas = document.createElement('canvas');
-    canvas.width = 1024; canvas.height = 768;
-    var ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,1024,768);
+    canvas.width = 1280; canvas.height = 720;
     
-    var drawFunc = new Function('ctx', 'width', 'height', code);
-    drawFunc(ctx, 1024, 768);
+    if(is3D) {
+      var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+      renderer.setSize(1280, 720);
+      renderer.setClearColor(0xf0f0f0);
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(45, 1280/720, 0.1, 1000);
+      camera.position.set(10, 10, 10);
+      camera.lookAt(0, 0, 0);
+      
+      var drawFunc = new Function('scene', 'camera', 'renderer', 'width', 'height', code);
+      drawFunc(scene, camera, renderer, 1280, 720);
+      renderer.render(scene, camera);
+    } else {
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,1280,720);
+      var drawFunc = new Function('ctx', 'width', 'height', code);
+      drawFunc(ctx, 1280, 720);
+    }
     
     var dataUrl = canvas.toDataURL('image/png');
     card.innerHTML = `
@@ -2150,96 +2248,91 @@ async function genVid(prompt){
 
   try {
     var duration = 5000;
-    var m = /(?:\b|\D)(\d{1,3})\s*(?:s|seg|seconds?)/i.exec(prompt||'');
-    if(m){duration = Math.min(20000, Math.max(2000, parseInt(m[1],10)*1000));}
-    var fps = 30;
+    var m = /(?:\b|\D)(\d{1,3})\s*(?:s|seg|seconds?|m|min|minutos?)/i.exec(prompt||'');
+    if(m){
+      var val = parseInt(m[1],10);
+      if(/m|min/i.test(m[0])) duration = Math.min(240000, val * 60000);
+      else duration = Math.min(240000, Math.max(2000, val * 1000));
+    }
+    var fps = 24; // Reduzido para 24fps para vídeos longos e realistas
     var totalFrames = Math.floor((duration / 1000) * fps);
-    if(totalFrames<30) totalFrames = 150;
-    setVP(6, 'A preparar...');
-    var sysPrompt = "You are Qwen-Coder. Output only JavaScript statements to draw an animation frame for a function draw(ctx,width,height,time). No imports. Use only Canvas 2D API. Create an animation for: '"+prompt+"'. return ONLY the code inside the function, no markdown backticks.";
-    setVP(15, 'Gerando animação com Qwen-Coder...');
-    var code = await fetchAI([{role:'system',content:sysPrompt},{role:'user',content:'Generate JS canvas code for: '+prompt}], 'qwen-coder');
+    setVP(6, 'A preparar motor 3D Ultra-Realista...');
     
-    // Limpeza de código mais robusta
+    var sysPrompt = "You are a 3D Visual Engine using Three.js. Output ONLY a JavaScript object with a function init(scene, camera, renderer, width, height) and update(time). Use high-quality materials (MeshStandardMaterial), lighting (PointLight, AmbientLight), and realistic geometries for: '"+prompt+"'. If it's a house/city, use boxes/planes with textures and realistic scale. Return ONLY the JS object, no markdown.";
+    
+    setVP(15, 'Gerando cena 3D com Qwen-Coder...');
+    var code = await fetchAI([{role:'system',content:sysPrompt},{role:'user',content:'Generate Three.js code for: '+prompt}], 'qwen-coder');
     code = code.replace(/```(?:javascript|js)?/gi, '').replace(/```/g, '').trim();
 
-    setVP(40, 'Compilando cena...');
+    setVP(30, 'Compilando ambiente WebGL...');
 
-    var width = 640;
-    var height = 360;
+    var width = 1280; // HD
+    var height = 720;
     var canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    var ctx = canvas.getContext('2d');
+    canvas.width = width; canvas.height = height;
+    
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
+    renderer.setSize(width, height);
+    renderer.setClearColor(0x000000);
+    renderer.shadowMap.enabled = true;
+    
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(75, width/height, 0.1, 1000);
+    camera.position.z = 5;
+
+    var sceneObj;
+    try {
+      sceneObj = eval('(' + code + ')');
+      if(sceneObj.init) sceneObj.init(scene, camera, renderer, width, height);
+    } catch(e) {
+      console.error('Three.js Init Error:', e);
+      // Fallback simples
+      var geometry = new THREE.BoxGeometry();
+      var material = new THREE.MeshStandardMaterial({ color: 0x10b981 });
+      var cube = new THREE.Mesh(geometry, material);
+      scene.add(cube);
+      var light = new THREE.PointLight(0xffffff, 1, 100);
+      light.position.set(10, 10, 10);
+      scene.add(light);
+      scene.add(new THREE.AmbientLight(0x404040));
+    }
     
     if(!canvas.captureStream) throw new Error('Seu navegador não suporta gravação de Canvas.');
     
-    // Tenta codecs comuns para compatibilidade
-    var mimeType = 'video/webm';
-    if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) mimeType = 'video/webm;codecs=vp9';
-    else if (MediaRecorder.isTypeSupported('video/mp4')) mimeType = 'video/mp4';
+    var mimeType = 'video/webm;codecs=vp9';
+    if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
 
     var stream = canvas.captureStream(fps);
-    var recorder = new MediaRecorder(stream, { mimeType: mimeType });
+    var recorder = new MediaRecorder(stream, { mimeType: mimeType, videoBitsPerSecond: 5000000 });
     var chunks = [];
     recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
     
     var recordingPromise = new Promise((resolve, reject) => {
       recorder.onstop = () => {
         var blob = new Blob(chunks, { type: mimeType });
-        var url = URL.createObjectURL(blob);
-        resolve(url);
+        resolve(URL.createObjectURL(blob));
       };
-      recorder.onerror = e => reject(e);
     });
-
-    var drawFunc;
-    function makeDrawFunc(src){
-      var s = (src||'').trim();
-      // Remove export default ou definições de função se a IA as incluiu
-      s = s.replace(/^export\s+default\s+/,'').trim();
-      var m1 = s.match(/function\s+draw\s*\([^)]*\)\s*\{([\s\S]*)\}\s*$/);
-      if(m1){ s = m1[1]; }
-      
-      try{
-        return new Function('ctx','width','height','time', s);
-      }catch(e){
-        console.error('Erro compilação:', e);
-        return function(c,w,h,t){
-          c.fillStyle='#000';c.fillRect(0,0,w,h);
-          c.fillStyle='#fff';c.font='14px sans-serif';
-          c.fillText('Erro no script gerado',20,h/2);
-        };
-      }
-    }
-    drawFunc = makeDrawFunc(code);
 
     recorder.start();
     
-    // Renderização frame a frame
     for (var f = 0; f < totalFrames; f++) {
         var time = f / fps;
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, 0, width, height);
-        try {
-            drawFunc(ctx, width, height, time);
-        } catch(e) {
-            console.warn('Erro no frame:', e);
-        }
+        if(sceneObj && sceneObj.update) sceneObj.update(time);
+        renderer.render(scene, camera);
 
-        if (f % 10 === 0) {
-            var prog = 40 + Math.floor((f / totalFrames) * 55);
-            setVP(prog, 'Renderizando: ' + time.toFixed(1) + 's');
+        if (f % 20 === 0) {
+            var prog = 30 + Math.floor((f / totalFrames) * 65);
+            setVP(prog, 'Renderizando 3D: ' + (f/fps).toFixed(1) + 's / ' + (duration/1000) + 's');
             await new Promise(r => setTimeout(r, 0));
         }
     }
 
-    // Pequeno delay para garantir o último frame
-    await sleep(100);
+    await sleep(200);
     recorder.stop();
-    setVP(98, 'Finalizando vídeo...');
+    setVP(98, 'Finalizando vídeo HD...');
     var videoUrl = await recordingPromise;
-    setVP(100, 'Vídeo pronto!');
+    setVP(100, 'Vídeo 3D Realista pronto!');
 
     card.innerHTML=`
       <div style="position:relative;background:#000;border-radius:8px 8px 0 0;overflow:hidden">
