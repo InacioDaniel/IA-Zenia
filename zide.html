@@ -586,35 +586,108 @@
         <div class="menu-item">File
             <div class="dropdown">
                 <div class="drop-item" onclick="vfs.createNewFile()">New File <span class="drop-shortcut">Ctrl+N</span></div>
-                <div class="drop-item">Open File... <span class="drop-shortcut">Ctrl+O</span></div>
-                <div class="drop-item" onclick="vfs.save()">Save <span class="drop-shortcut">Ctrl+S</span></div>
+                <div class="drop-item" onclick="vfs.createNewFolder()">New Folder <span class="drop-shortcut">Ctrl+Shift+N</span></div>
+                <div class="drop-item" onclick="ui.showHome()">New Window <span class="drop-shortcut">Ctrl+Shift+W</span></div>
                 <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
-                <div class="drop-item" onclick="ui.toggleSettings()">Settings</div>
+                <div class="drop-item" onclick="ui.switchSidebar('explorer')">Open File... <span class="drop-shortcut">Ctrl+O</span></div>
+                <div class="drop-item" onclick="ui.switchSidebar('explorer')">Open Folder... <span class="drop-shortcut">Ctrl+K Ctrl+O</span></div>
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
+                <div class="drop-item" onclick="vfs.save()">Save <span class="drop-shortcut">Ctrl+S</span></div>
+                <div class="drop-item" onclick="vfs.save()">Save As... <span class="drop-shortcut">Ctrl+Shift+S</span></div>
+                <div class="drop-item" onclick="vfs.save()">Save All <span class="drop-shortcut">Ctrl+K S</span></div>
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
+                <div class="drop-item" onclick="ui.toggleSettings()">Preferences <i class="fas fa-chevron-right" style="font-size:8px; margin-left:10px;"></i></div>
+                <div class="drop-item" onclick="window.location.reload()">Revert File</div>
+                <div class="drop-item" onclick="window.close()">Exit</div>
             </div>
         </div>
         <div class="menu-item">Edit
             <div class="dropdown">
-                <div class="drop-item">Undo <span class="drop-shortcut">Ctrl+Z</span></div>
-                <div class="drop-item">Redo <span class="drop-shortcut">Ctrl+Y</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Undo performed')">Undo <span class="drop-shortcut">Ctrl+Z</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Redo performed')">Redo <span class="drop-shortcut">Ctrl+Y</span></div>
                 <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
-                <div class="drop-item">Cut <span class="drop-shortcut">Ctrl+X</span></div>
-                <div class="drop-item">Copy <span class="drop-shortcut">Ctrl+C</span></div>
-                <div class="drop-item">Paste <span class="drop-shortcut">Ctrl+V</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Cut')">Cut <span class="drop-shortcut">Ctrl+X</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Copy')">Copy <span class="drop-shortcut">Ctrl+C</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Paste')">Paste <span class="drop-shortcut">Ctrl+V</span></div>
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
+                <div class="drop-item" onclick="ui.switchSidebar('search')">Find <span class="drop-shortcut">Ctrl+F</span></div>
+                <div class="drop-item" onclick="ui.switchSidebar('search')">Replace <span class="drop-shortcut">Ctrl+H</span></div>
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
+                <div class="drop-item" onclick="vfs.terminalWrite('Comment toggled')">Toggle Line Comment <span class="drop-shortcut">Ctrl+/</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Block comment toggled')">Toggle Block Comment <span class="drop-shortcut">Alt+Shift+A</span></div>
             </div>
         </div>
-        <div class="menu-item">Selection</div>
+        <div class="menu-item">Selection
+            <div class="dropdown">
+                <div class="drop-item" onclick="vfs.terminalWrite('Select All')">Select All <span class="drop-shortcut">Ctrl+A</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Expand Selection')">Expand Selection <span class="drop-shortcut">Shift+Alt+Right</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Shrink Selection')">Shrink Selection <span class="drop-shortcut">Shift+Alt+Left</span></div>
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
+                <div class="drop-item" onclick="vfs.terminalWrite('Copy Line Up')">Copy Line Up <span class="drop-shortcut">Alt+Shift+Up</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Copy Line Down')">Copy Line Down <span class="drop-shortcut">Alt+Shift+Down</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Move Line Up')">Move Line Up <span class="drop-shortcut">Alt+Up</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Move Line Down')">Move Line Down <span class="drop-shortcut">Alt+Down</span></div>
+            </div>
+        </div>
         <div class="menu-item">View
             <div class="dropdown">
-                <div class="drop-item" onclick="ui.showHome()">Home</div>
-                <div class="drop-item" onclick="ui.showDebate()">Angola Tech Debate</div>
-                <div class="drop-item" onclick="ui.switchSidebar('explorer')">Explorer</div>
+                <div class="drop-item" onclick="ui.showHome()">Home / Welcome</div>
+                <div class="drop-item" onclick="ui.showDebate()">Angola Tech Debate <span class="drop-shortcut">Ctrl+Shift+D</span></div>
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
+                <div class="drop-item" onclick="ui.switchSidebar('explorer')">Explorer <span class="drop-shortcut">Ctrl+Shift+E</span></div>
+                <div class="drop-item" onclick="ui.switchSidebar('search')">Search <span class="drop-shortcut">Ctrl+Shift+F</span></div>
+                <div class="drop-item" onclick="ui.switchSidebar('scm')">Source Control <span class="drop-shortcut">Ctrl+Shift+G</span></div>
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
+                <div class="drop-item" onclick="ui.switchPanel('terminal')">Terminal <span class="drop-shortcut">Ctrl+`</span></div>
+                <div class="drop-item" onclick="ui.switchPanel('output')">Output</div>
+                <div class="drop-item" onclick="ui.switchPanel('problems')">Problems <span class="drop-shortcut">Ctrl+Shift+M</span></div>
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
+                <div class="drop-item" onclick="vfs.terminalWrite('Full Screen toggled')">Appearance <i class="fas fa-chevron-right" style="font-size:8px; margin-left:10px;"></i></div>
             </div>
         </div>
-        <div class="menu-item">Go</div>
-        <div class="menu-item">Run</div>
-        <div class="menu-item">Terminal</div>
-        <div class="menu-item">Help</div>
-        <div style="flex:1; display:flex; justify-content:center; opacity:0.5; font-size:11px;">Zedex Pro - Angola Intelligence Edition</div>
+        <div class="menu-item">Go
+            <div class="dropdown">
+                <div class="drop-item" onclick="vfs.terminalWrite('Go to File')">Go to File... <span class="drop-shortcut">Ctrl+P</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Go to Symbol')">Go to Symbol... <span class="drop-shortcut">Ctrl+Shift+O</span></div>
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
+                <div class="drop-item" onclick="vfs.terminalWrite('Go to Line')">Go to Line/Column... <span class="drop-shortcut">Ctrl+G</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Go to Definition')">Go to Definition <span class="drop-shortcut">F12</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Go to References')">Go to References <span class="drop-shortcut">Shift+F12</span></div>
+            </div>
+        </div>
+        <div class="menu-item">Run
+            <div class="dropdown">
+                <div class="drop-item" onclick="vfs.terminalWrite('Debugging started')">Start Debugging <span class="drop-shortcut">F5</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Run without debugging')">Run Without Debugging <span class="drop-shortcut">Ctrl+F5</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Debugging stopped')">Stop Debugging <span class="drop-shortcut">Shift+F5</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Debugging restarted')">Restart Debugging <span class="drop-shortcut">Ctrl+Shift+F5</span></div>
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
+                <div class="drop-item" onclick="vfs.terminalWrite('Breakpoint toggled')">Toggle Breakpoint <span class="drop-shortcut">F9</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('All breakpoints removed')">New Breakpoint <i class="fas fa-chevron-right" style="font-size:8px; margin-left:10px;"></i></div>
+            </div>
+        </div>
+        <div class="menu-item">Terminal
+            <div class="dropdown">
+                <div class="drop-item" onclick="ui.switchPanel('terminal'); vfs.terminalWrite('New terminal opened')">New Terminal <span class="drop-shortcut">Ctrl+Shift+`</span></div>
+                <div class="drop-item" onclick="ui.switchPanel('terminal'); vfs.terminalWrite('Terminal split')">Split Terminal <span class="drop-shortcut">Ctrl+\</span></div>
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
+                <div class="drop-item" onclick="vfs.terminalWrite('Build task running...')">Run Build Task... <span class="drop-shortcut">Ctrl+Shift+B</span></div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Active task stopped')">Terminate Task...</div>
+            </div>
+        </div>
+        <div class="menu-item">Help
+            <div class="dropdown">
+                <div class="drop-item" onclick="vfs.terminalWrite('Welcome page shown')">Welcome</div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Documentation opened')">Documentation</div>
+                <div class="drop-item" onclick="vfs.terminalWrite('Editor shortcuts shown')">Keyboard Shortcuts Reference</div>
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
+                <div class="drop-item" onclick="vfs.terminalWrite('Angola Tech Forum opened')">Join Angola Tech Community</div>
+                <div class="drop-item" onclick="iaAgent.addMsg('zenia', 'Olá! Sou a Zénia. Como posso ajudar com o Zedex Pro?', 'Zénia')">Contact Support</div>
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
+                <div class="drop-item" onclick="alert('Zedex Pro v4.0.0\nAngola Intelligence Edition\nPowered by IA-Zénia')">About Zedex Pro</div>
+            </div>
+        </div>
+        <div style="flex:1; display:flex; justify-content:center; opacity:0.5; font-size:11px; pointer-events:none;">Zedex Pro - Angola Intelligence Edition</div>
     </div>
 
     <div id="main-body">
@@ -838,6 +911,7 @@
             document.getElementById('debate-page').style.display = 'flex';
             this.updateTabs('Angola Debate');
             debateSystem.init();
+            debateSystem.start(); // Inicia automaticamente
         },
 
         hideHome() {
