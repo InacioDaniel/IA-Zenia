@@ -21,13 +21,19 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<!-- Three.js Post-processing -->
+<!-- Three.js Post-processing & Advanced Effects -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/SAOPass.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/SAOShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/DepthLimitedBlurShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/UnpackDepthRGBAShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Sky.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Water.js"></script>
 <script>mermaid.initialize({startOnLoad:false,theme:'dark',securityLevel:'loose'});</script>
 <style>
 :root{--bg-primary:#0b0d11;--bg-secondary:#111318;--bg-tertiary:#151b2d;--bg-input:#151c2e;--border-color:#1e2330;--border-accent:#252c3b;--text-primary:#e5e7eb;--text-secondary:#9ca3af;--text-muted:#6b7280;--accent-primary:#3b5bdb;--accent-secondary:#7c3aed;--accent-glow:rgba(59,91,219,0.25);--msg-ai-bg:transparent;--msg-user-bg:#1d3461;--msg-user-text:#e8f0fe;--sidebar-bg:#0f1117;--topbar-bg:#0b0d11;--send-btn:#3b5bdb;--send-btn-hover:#4c6ef5;--user-av:#1e3a5f;--font-ui:'Plus Jakarta Sans','Outfit',system-ui,sans-serif;--font-msg:'DM Sans','Plus Jakarta Sans',sans-serif;--font-code:'JetBrains Mono',monospace;--radius-main:14px;--shadow-main:0 4px 24px rgba(0,0,0,0.4);}
@@ -2285,28 +2291,32 @@ async function genVid(prompt){
     var fps = 30; // 30fps para movimentos fluidos
     var totalFrames = Math.floor((duration / 1000) * fps);
 
-    var sysPrompt = `You are an Ultra-Realistic Cinematic 3D Architect (Veo-3 Style). Output ONLY a JavaScript object with an init(scene, camera, renderer, THREE, gsap, composer) function.
+    var sysPrompt = `You are the "Zenia Cinematic Forge" - an elite 3D technical artist and cinematographer.
+    Your goal is to output high-end JavaScript code using Three.js and GSAP that matches the quality of Sora or Gemini Veo3.
     
-    ULTRA-REALISM PROTOCOLS:
-    1. HUMAN ANATOMY: If characters are requested, build them using multiple meshes (Sphere for head, cylinders for limbs) but use skin-tone PBR materials with 0.1 roughness and 0.5 metalness for sub-surface scattering look.
-    2. SCENERY: Use high-res procedural textures. Add 'Ground' with displacement maps (bumps).
-    3. CINEMATIC LIGHTING: Use a 'Three-Point Lighting' setup (Key, Fill, Back). Add a 'Sun' (DirectionalLight) and 'Atmosphere' (Fog).
-    4. CAMERA PATHS: Use GSAP to create 'Drone Shots', 'Dolly Zooms' or 'Handheld Shake' effects.
-    5. POST-PROCESSING: Use the 'composer' (EffectComposer) with UnrealBloomPass for glow and cinematic bloom.
-    6. TEXTURES: Use public URLs for textures (e.g. from Unsplash) if needed for faces or ground.
+    AVAILABLE ADVANCED TOOLS:
+    - scene, camera, renderer, THREE, gsap, composer, width, height, duration
+    - THREE.Sky: Use for realistic atmosphere (sky.material.uniforms.sunPosition).
+    - THREE.Water: Use for realistic oceans (water.material.uniforms.time).
+    - THREE.SAOPass: Scalable Ambient Occlusion for realistic shadows in crevices.
+    - THREE.UnrealBloomPass: For high-end cinematic glow.
+    - THREE.MeshStandardMaterial: Use metalnessMap, roughnessMap (simulated with noise if needed).
     
-    VIDEO SPECS:
-    - Duration: ${duration/1000}s.
-    - Resolution: 1280x720 (HD).
-    - Style: Ultra-realistic, 8k, cinematic lighting, movie-like.
+    CINEMATIC MASTERCLASS RULES:
+    1. ATMOSPHERE: Always add Sky and Fog. Use a sun position that creates long, cinematic shadows.
+    2. TEXTURE & DETAIL: Use procedural noise (THREE.DataTexture) to create displacement on grounds (Marte, Floresta, etc).
+    3. COMPOSITION: Use GSAP for multi-point camera movements (splines). Start wide, move close (Dolly).
+    4. LIGHTING: Use PBR lighting. Add a strong rim light (Backlight) to make objects pop.
+    5. REALISM: If 'Astronauta', use shiny visor (Metalness 1) and matte suit (Roughness 0.8). If 'Natureza', add swaying movements to trees.
     
-    Return ONLY the JS object.`;
+    Return ONLY raw JavaScript. NO comments, NO markdown, NO function wrappers. Direct execution code.`;
     
-    setVP(15, 'Zenia Ultra-Realism Engine a processar polígonos...');
-    var code = await fetchAI([{role:'system',content:sysPrompt},{role:'user',content:'Generate ultra-realistic 8k cinematic video code for: '+prompt}], 'qwen-coder');
-    code = code.replace(/```(?:javascript|js)?/gi, '').replace(/```/g, '').trim();
+    setVP(15, 'Forjando ambiente cinemático de elite...');
+    var code = await fetchAI([{role:'system',content:sysPrompt},{role:'user',content:'Create an ultra-realistic, cinematic masterpiece for: '+prompt}], 'qwen-coder');
+    
+    var cleanCode = code.replace(/```(?:javascript|js)?/gi, '').replace(/```/g, '').trim();
 
-    setVP(30, 'Renderizando texturas PBR e Iluminação Global...');
+    setVP(30, 'Renderizando Fotorrealismo PBR & Sombras Dinâmicas...');
 
     var width = 1280;
     var height = 720;
@@ -2315,71 +2325,65 @@ async function genVid(prompt){
     
     var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false, preserveDrawingBuffer: true });
     renderer.setSize(width, height);
-    renderer.toneMapping = THREE.ReinhardToneMapping;
-    renderer.toneMappingExposure = 1.5;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping; // Qualidade de cinema
+    renderer.toneMappingExposure = 1.2;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputEncoding = THREE.sRGBEncoding;
     
     var scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x000000, 0.02);
+    scene.fog = new THREE.FogExp2(0x0a0a0a, 0.002);
     
-    var camera = new THREE.PerspectiveCamera(45, width/height, 0.1, 5000);
-    camera.position.set(0, 10, 30);
+    var camera = new THREE.PerspectiveCamera(40, width/height, 0.1, 10000);
+    camera.position.set(0, 15, 50);
 
-    // Post-processing setup
     var composer = new THREE.EffectComposer(renderer);
-    var renderPass = new THREE.RenderPass(scene, camera);
-    composer.addPass(renderPass);
+    composer.addPass(new THREE.RenderPass(scene, camera));
     
-    var bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(width, height), 1.5, 0.4, 0.85);
+    // Ambient Occlusion para Realismo
+    var saoPass = new THREE.SAOPass(scene, camera, false, true);
+    saoPass.params.saoIntensity = 0.01;
+    composer.addPass(saoPass);
+
+    var bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(width, height), 0.8, 0.3, 0.9);
     composer.addPass(bloomPass);
 
-    var sceneObj;
     try {
-      var cleanCode = code.replace(/^export\s+default\s+/,'').trim();
-      sceneObj = eval('(' + cleanCode + ')');
-      if(sceneObj.init) sceneObj.init(scene, camera, renderer, THREE, gsap, composer);
+      var setupFunc = new Function('scene', 'camera', 'renderer', 'THREE', 'gsap', 'composer', 'width', 'height', 'duration', cleanCode);
+      setupFunc(scene, camera, renderer, THREE, gsap, composer, width, height, duration/1000);
     } catch(e) {
-      console.error('Ultra-Realism Error:', e);
-      // Fallback Ultra-Cinematic
+      console.warn('Cinematic Forge Error, usando fallback de elite:', e);
       scene.background = new THREE.Color(0x020205);
-      var mainLight = new THREE.DirectionalLight(0xffffff, 2);
-      mainLight.position.set(50, 50, 50);
-      mainLight.castShadow = true;
-      scene.add(mainLight);
-      scene.add(new THREE.AmbientLight(0x101020, 0.3));
-      
-      var groundGeo = new THREE.PlaneGeometry(100, 100);
-      var groundMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8 });
-      var ground = new THREE.Mesh(groundGeo, groundMat);
-      ground.rotation.x = -Math.PI/2;
-      ground.receiveShadow = true;
-      scene.add(ground);
-
-      var heroGeo = new THREE.SphereGeometry(3, 64, 64);
-      var heroMat = new THREE.MeshStandardMaterial({ color: 0x3b5bdb, metalness: 0.9, roughness: 0.1 });
-      var hero = new THREE.Mesh(heroGeo, heroMat);
-      hero.position.y = 5;
-      hero.castShadow = true;
-      scene.add(hero);
-      
-      gsap.to(camera.position, { duration: duration/1000, x: 20, z: 40, y: 15, ease: "sine.inOut" });
-      camera.lookAt(0, 5, 0);
+      // Fallback de alta qualidade: Torus de cristal com luzes HDR
+      var g = new THREE.TorusKnotGeometry(10, 3, 300, 32);
+      var m = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0.1, envMapIntensity: 2 });
+      var mesh = new THREE.Mesh(g, m);
+      mesh.castShadow = true; scene.add(mesh);
+      var sun = new THREE.DirectionalLight(0xffffff, 2); sun.position.set(50,50,50); sun.castShadow=true; scene.add(sun);
+      scene.add(new THREE.AmbientLight(0x4040ff, 0.3));
+      gsap.to(mesh.rotation, { duration: duration/1000, x: Math.PI*4, y: Math.PI*2, ease: "none" });
+      gsap.to(camera.position, { duration: duration/1000, z: 100, x: 50, ease: "power2.inOut" });
     }
     
-    if(!canvas.captureStream) throw new Error('Browser incompatível.');
-    
+    // Garantia de Atmosfera e Luz
+    var hasLight = false; scene.traverse(obj => { if(obj instanceof THREE.Light) hasLight = true; });
+    if(!hasLight) {
+        scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+        var p = new THREE.PointLight(0xffffff, 1.5); p.position.set(20,30,20); p.castShadow=true; scene.add(p);
+    }
+
+    if(!canvas.captureStream) throw new Error('Navegador não suportado.');
     var mimeType = 'video/webm;codecs=vp9';
     if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
 
     var stream = canvas.captureStream(fps);
-    var recorder = new MediaRecorder(stream, { mimeType: mimeType, videoBitsPerSecond: 12000000 }); // Bitrate ultra alto
+    var recorder = new MediaRecorder(stream, { mimeType: mimeType, videoBitsPerSecond: 20000000 }); // Bitrate de Cinema
     var chunks = [];
     recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
     
     var recordingPromise = new Promise((resolve, reject) => {
       recorder.onstop = () => {
-        if(chunks.length === 0) reject(new Error('Falha na captura.'));
+        if(chunks.length === 0) reject(new Error('Falha na renderização.'));
         else resolve(URL.createObjectURL(new Blob(chunks, { type: mimeType })));
       };
       recorder.onerror = reject;
@@ -2395,20 +2399,20 @@ async function genVid(prompt){
           anim.seek(time);
         });
 
-        composer.render(); // Renderiza com pós-processamento
+        composer.render();
 
-        if (f % 10 === 0) {
+        if (f % 15 === 0) {
             var prog = 30 + Math.floor((f / totalFrames) * 65);
-            setVP(prog, 'Renderizando Ultra-Realista (8k Style): ' + time.toFixed(1) + 's / ' + (duration/1000) + 's');
+            setVP(prog, 'Zenia Cinematic Forge - Frame ' + f + ' / ' + totalFrames);
             await new Promise(r => setTimeout(r, 15));
         }
     }
 
     await sleep(600);
     recorder.stop();
-    setVP(98, 'Finalizando Vídeo Fotorrealista...');
+    setVP(98, 'Finalizando Obra Prima...');
     var videoUrl = await recordingPromise;
-    setVP(100, 'Vídeo Ultra-Realista Pronto!');
+    setVP(100, 'Vídeo Cinemático Pronto!');
 
     card.innerHTML=`
       <div style="position:relative;background:#000;border-radius:8px 8px 0 0;overflow:hidden">
