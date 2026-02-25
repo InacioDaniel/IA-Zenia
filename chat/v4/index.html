@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>IA-Zenia 4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2139,16 +2139,35 @@ async function genVisual(prompt){
     canvas.width = 1280; canvas.height = 720;
     
     if(is3D) {
-      var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+      var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
       renderer.setSize(1280, 720);
       renderer.setClearColor(0xf0f0f0);
       var scene = new THREE.Scene();
       var camera = new THREE.PerspectiveCamera(45, 1280/720, 0.1, 1000);
-      camera.position.set(10, 10, 10);
+      camera.position.set(12, 12, 12);
       camera.lookAt(0, 0, 0);
       
-      var drawFunc = new Function('scene', 'camera', 'renderer', 'width', 'height', code);
-      drawFunc(scene, camera, renderer, 1280, 720);
+      try {
+        var drawFunc = new Function('scene', 'camera', 'renderer', 'width', 'height', 'THREE', code);
+        drawFunc(scene, camera, renderer, 1280, 720, THREE);
+      } catch(e) {
+        console.error('genVisual 3D Error:', e);
+        // Fallback: Desenha algo para não ficar vazio
+        var geometry = new THREE.BoxGeometry(5, 1, 5);
+        var material = new THREE.MeshStandardMaterial({ color: 0x3b5bdb });
+        scene.add(new THREE.Mesh(geometry, material));
+      }
+
+      // Garantir luzes
+      var hasLight = false;
+      scene.traverse(obj => { if(obj instanceof THREE.Light) hasLight = true; });
+      if(!hasLight) {
+          scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+          var dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+          dirLight.position.set(10, 20, 10);
+          scene.add(dirLight);
+      }
+      
       renderer.render(scene, camera);
     } else {
       var ctx = canvas.getContext('2d');
@@ -2282,21 +2301,44 @@ async function genVid(prompt){
 
     var sceneObj;
     try {
-      sceneObj = eval('(' + code + ')');
-      if(sceneObj.init) sceneObj.init(scene, camera, renderer, width, height);
+      // Tenta limpar o código de possíveis invólucros de função
+      var cleanCode = code.replace(/^export\s+default\s+/,'').trim();
+      if(cleanCode.startsWith('function') || cleanCode.includes('=>')) {
+          // Se for uma função pura, tenta envolver num objeto
+          sceneObj = { init: eval('(' + cleanCode + ')'), update: () => {} };
+      } else {
+          // Tenta avaliar como objeto literal ou bloco de comandos
+          sceneObj = eval('(' + cleanCode + ')');
+      }
+      if(sceneObj && sceneObj.init) sceneObj.init(scene, camera, renderer, width, height);
     } catch(e) {
-      console.error('Three.js Init Error:', e);
-      // Fallback simples
-      var geometry = new THREE.BoxGeometry();
-      var material = new THREE.MeshStandardMaterial({ color: 0x10b981 });
-      var cube = new THREE.Mesh(geometry, material);
-      scene.add(cube);
-      var light = new THREE.PointLight(0xffffff, 1, 100);
-      light.position.set(10, 10, 10);
-      scene.add(light);
-      scene.add(new THREE.AmbientLight(0x404040));
+      console.warn('Three.js Eval Error, tentando execução direta:', e);
+      try {
+          // Fallback: Tenta executar o código como um script normal
+          var scriptFunc = new Function('scene', 'camera', 'renderer', 'THREE', code);
+          scriptFunc(scene, camera, renderer, THREE);
+          sceneObj = { update: (t) => { scene.rotation.y = t * 0.5; } };
+      } catch(e2) {
+          console.error('Three.js Fallback Error:', e2);
+          var geometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
+          var material = new THREE.MeshStandardMaterial({ color: 0x7c3aed, roughness: 0.1, metalness: 0.8 });
+          var mesh = new THREE.Mesh(geometry, material);
+          scene.add(mesh);
+          sceneObj = { update: (t) => { mesh.rotation.y = t; mesh.rotation.x = t * 0.5; } };
+      }
     }
     
+    // Adicionar luzes se a cena estiver vazia (sem luzes)
+    var hasLight = false;
+    scene.traverse(obj => { if(obj instanceof THREE.Light) hasLight = true; });
+    if(!hasLight) {
+        var ambient = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambient);
+        var point = new THREE.PointLight(0xffffff, 1);
+        point.position.set(5, 5, 5);
+        scene.add(point);
+    }
+
     if(!canvas.captureStream) throw new Error('Seu navegador não suporta gravação de Canvas.');
     
     var mimeType = 'video/webm;codecs=vp9';
@@ -2309,26 +2351,38 @@ async function genVid(prompt){
     
     var recordingPromise = new Promise((resolve, reject) => {
       recorder.onstop = () => {
+        if(chunks.length === 0) {
+            reject(new Error('Nenhum dado de vídeo foi capturado.'));
+            return;
+        }
         var blob = new Blob(chunks, { type: mimeType });
         resolve(URL.createObjectURL(blob));
       };
+      recorder.onerror = (e) => reject(e);
     });
 
     recorder.start();
     
+    // Renderização frame a frame com pequeno delay para garantir captura
     for (var f = 0; f < totalFrames; f++) {
         var time = f / fps;
-        if(sceneObj && sceneObj.update) sceneObj.update(time);
+        if(sceneObj && sceneObj.update) {
+            try { sceneObj.update(time); } catch(e){}
+        }
         renderer.render(scene, camera);
 
-        if (f % 20 === 0) {
+        // A cada 5 frames, damos um tempo para o MediaRecorder processar
+        if (f % 5 === 0) {
+            await new Promise(r => setTimeout(r, 5));
+        }
+
+        if (f % 25 === 0) {
             var prog = 30 + Math.floor((f / totalFrames) * 65);
             setVP(prog, 'Renderizando 3D: ' + (f/fps).toFixed(1) + 's / ' + (duration/1000) + 's');
-            await new Promise(r => setTimeout(r, 0));
         }
     }
 
-    await sleep(200);
+    await sleep(300); // Mais tempo para finalizar o buffer do MediaRecorder
     recorder.stop();
     setVP(98, 'Finalizando vídeo HD...');
     var videoUrl = await recordingPromise;
