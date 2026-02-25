@@ -20,6 +20,7 @@
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>mermaid.initialize({startOnLoad:false,theme:'dark',securityLevel:'loose'});</script>
 <style>
 :root{--bg-primary:#0b0d11;--bg-secondary:#111318;--bg-tertiary:#151b2d;--bg-input:#151c2e;--border-color:#1e2330;--border-accent:#252c3b;--text-primary:#e5e7eb;--text-secondary:#9ca3af;--text-muted:#6b7280;--accent-primary:#3b5bdb;--accent-secondary:#7c3aed;--accent-glow:rgba(59,91,219,0.25);--msg-ai-bg:transparent;--msg-user-bg:#1d3461;--msg-user-text:#e8f0fe;--sidebar-bg:#0f1117;--topbar-bg:#0b0d11;--send-btn:#3b5bdb;--send-btn-hover:#4c6ef5;--user-av:#1e3a5f;--font-ui:'Plus Jakarta Sans','Outfit',system-ui,sans-serif;--font-msg:'DM Sans','Plus Jakarta Sans',sans-serif;--font-code:'JetBrains Mono',monospace;--radius-main:14px;--shadow-main:0 4px 24px rgba(0,0,0,0.4);}
@@ -2273,120 +2274,109 @@ async function genVid(prompt){
       if(/m|min/i.test(m[0])) duration = Math.min(240000, val * 60000);
       else duration = Math.min(240000, Math.max(2000, val * 1000));
     }
-    var fps = 24; // Reduzido para 24fps para vídeos longos e realistas
+    var fps = 30; // 30fps para movimentos fluidos
     var totalFrames = Math.floor((duration / 1000) * fps);
-    setVP(6, 'A preparar motor 3D Ultra-Realista...');
+    setVP(6, 'A preparar motor 3D Cinemático (Three.js + GSAP)...');
     
-    var sysPrompt = "You are a 3D Visual Engine using Three.js. Output ONLY a JavaScript object with a function init(scene, camera, renderer, width, height) and update(time). Use high-quality materials (MeshStandardMaterial), lighting (PointLight, AmbientLight), and realistic geometries for: '"+prompt+"'. If it's a house/city, use boxes/planes with textures and realistic scale. Return ONLY the JS object, no markdown.";
+    var sysPrompt = `You are a Cinematic 3D Engine. Output ONLY a JavaScript object with an init(scene, camera, renderer, THREE, gsap) function. 
+    REGRAS DE OURO:
+    1. FOTORREALISMO: Usa MeshStandardMaterial com metalness/roughness. Adiciona sempre Skybox ou cor de fundo realista.
+    2. ANIMAÇÃO CINEMÁTICA: Usa GSAP (gsap.to, gsap.timeline) para movimentos suaves de câmera e objetos. NUNCA apenas rotações simples.
+    3. CENA REALISTA: Se o prompt for 'natureza', cria árvores (cilindros+esferas) e relva. Se for 'objeto', foca em detalhes, reflexos e luzes de estúdio.
+    4. ILUMINAÇÃO PBR: Usa luzes HDR (AmbientLight + DirectionalLight com sombras + PointLights coloridas).
+    5. DURAÇÃO: O vídeo terá ${duration/1000} segundos. Planeia a animação GSAP para durar esse tempo exatamente.
+    Retorna APENAS o objeto JS, sem markdown.`;
     
-    setVP(15, 'Gerando cena 3D com Qwen-Coder...');
-    var code = await fetchAI([{role:'system',content:sysPrompt},{role:'user',content:'Generate Three.js code for: '+prompt}], 'qwen-coder');
+    setVP(15, 'Zenia Video Intelligence a projetar cena...');
+    var code = await fetchAI([{role:'system',content:sysPrompt},{role:'user',content:'Generate cinematic 3D animation code for: '+prompt}], 'qwen-coder');
     code = code.replace(/```(?:javascript|js)?/gi, '').replace(/```/g, '').trim();
 
-    setVP(30, 'Compilando ambiente WebGL...');
+    setVP(30, 'Compilando ambiente WebGL de Alta Fidelidade...');
 
-    var width = 1280; // HD
+    var width = 1280;
     var height = 720;
     var canvas = document.createElement('canvas');
     canvas.width = width; canvas.height = height;
     
-    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false, preserveDrawingBuffer: true });
     renderer.setSize(width, height);
-    renderer.setClearColor(0x000000);
+    renderer.setPixelRatio(1);
     renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputEncoding = THREE.sRGBEncoding;
     
     var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(75, width/height, 0.1, 1000);
-    camera.position.z = 5;
+    var camera = new THREE.PerspectiveCamera(50, width/height, 0.1, 2000);
+    camera.position.set(0, 5, 15);
 
     var sceneObj;
     try {
-      // Tenta limpar o código de possíveis invólucros de função
       var cleanCode = code.replace(/^export\s+default\s+/,'').trim();
-      if(cleanCode.startsWith('function') || cleanCode.includes('=>')) {
-          // Se for uma função pura, tenta envolver num objeto
-          sceneObj = { init: eval('(' + cleanCode + ')'), update: () => {} };
-      } else {
-          // Tenta avaliar como objeto literal ou bloco de comandos
-          sceneObj = eval('(' + cleanCode + ')');
-      }
-      if(sceneObj && sceneObj.init) sceneObj.init(scene, camera, renderer, width, height);
+      sceneObj = eval('(' + cleanCode + ')');
+      if(sceneObj.init) sceneObj.init(scene, camera, renderer, THREE, gsap);
     } catch(e) {
-      console.warn('Three.js Eval Error, tentando execução direta:', e);
-      try {
-          // Fallback: Tenta executar o código como um script normal
-          var scriptFunc = new Function('scene', 'camera', 'renderer', 'THREE', code);
-          scriptFunc(scene, camera, renderer, THREE);
-          sceneObj = { update: (t) => { scene.rotation.y = t * 0.5; } };
-      } catch(e2) {
-          console.error('Three.js Fallback Error:', e2);
-          var geometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
-          var material = new THREE.MeshStandardMaterial({ color: 0x7c3aed, roughness: 0.1, metalness: 0.8 });
-          var mesh = new THREE.Mesh(geometry, material);
-          scene.add(mesh);
-          sceneObj = { update: (t) => { mesh.rotation.y = t; mesh.rotation.x = t * 0.5; } };
-      }
+      console.error('Three.js Cinematic Error:', e);
+      // Fallback Cinemático
+      scene.background = new THREE.Color(0x050505);
+      var light = new THREE.SpotLight(0xffffff, 1.5);
+      light.position.set(10, 20, 10);
+      light.castShadow = true;
+      scene.add(light);
+      scene.add(new THREE.AmbientLight(0x404040, 0.5));
+      
+      var geo = new THREE.TorusKnotGeometry(2, 0.6, 128, 32);
+      var mat = new THREE.MeshStandardMaterial({ color: 0x3b5bdb, metalness: 0.7, roughness: 0.1 });
+      var mesh = new THREE.Mesh(geo, mat);
+      mesh.castShadow = true;
+      scene.add(mesh);
+      gsap.to(mesh.rotation, { duration: duration/1000, x: Math.PI*4, y: Math.PI*2, ease: "none" });
+      gsap.to(camera.position, { duration: duration/1000, z: 25, ease: "power1.inOut" });
     }
     
-    // Adicionar luzes se a cena estiver vazia (sem luzes)
-    var hasLight = false;
-    scene.traverse(obj => { if(obj instanceof THREE.Light) hasLight = true; });
-    if(!hasLight) {
-        var ambient = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(ambient);
-        var point = new THREE.PointLight(0xffffff, 1);
-        point.position.set(5, 5, 5);
-        scene.add(point);
-    }
-
-    if(!canvas.captureStream) throw new Error('Seu navegador não suporta gravação de Canvas.');
+    if(!canvas.captureStream) throw new Error('Browser incompatível.');
     
     var mimeType = 'video/webm;codecs=vp9';
     if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
 
     var stream = canvas.captureStream(fps);
-    var recorder = new MediaRecorder(stream, { mimeType: mimeType, videoBitsPerSecond: 5000000 });
+    var recorder = new MediaRecorder(stream, { mimeType: mimeType, videoBitsPerSecond: 8000000 });
     var chunks = [];
     recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
     
     var recordingPromise = new Promise((resolve, reject) => {
       recorder.onstop = () => {
-        if(chunks.length === 0) {
-            reject(new Error('Nenhum dado de vídeo foi capturado.'));
-            return;
-        }
-        var blob = new Blob(chunks, { type: mimeType });
-        resolve(URL.createObjectURL(blob));
+        if(chunks.length === 0) reject(new Error('Falha na captura.'));
+        else resolve(URL.createObjectURL(new Blob(chunks, { type: mimeType })));
       };
-      recorder.onerror = (e) => reject(e);
+      recorder.onerror = reject;
     });
 
     recorder.start();
     
-    // Renderização frame a frame com pequeno delay para garantir captura
+    // Motor de Renderização Síncrona para garantir duração exata
     for (var f = 0; f < totalFrames; f++) {
         var time = f / fps;
-        if(sceneObj && sceneObj.update) {
-            try { sceneObj.update(time); } catch(e){}
-        }
+        
+        // Sincroniza o GSAP com o frame manual do vídeo
+        gsap.exportRoot().getChildren(true, true, true).forEach(anim => {
+          anim.pause();
+          anim.seek(time);
+        });
+
         renderer.render(scene, camera);
 
-        // A cada 5 frames, damos um tempo para o MediaRecorder processar
-        if (f % 5 === 0) {
-            await new Promise(r => setTimeout(r, 5));
-        }
-
-        if (f % 25 === 0) {
+        if (f % 10 === 0) {
             var prog = 30 + Math.floor((f / totalFrames) * 65);
-            setVP(prog, 'Renderizando 3D: ' + (f/fps).toFixed(1) + 's / ' + (duration/1000) + 's');
+            setVP(prog, 'Renderizando Cinematic 3D: ' + time.toFixed(1) + 's / ' + (duration/1000) + 's');
+            await new Promise(r => setTimeout(r, 10)); // Pequeno fôlego para o recorder
         }
     }
 
-    await sleep(300); // Mais tempo para finalizar o buffer do MediaRecorder
+    await sleep(500);
     recorder.stop();
-    setVP(98, 'Finalizando vídeo HD...');
+    setVP(98, 'Finalizando Vídeo Ultra-Realista...');
     var videoUrl = await recordingPromise;
-    setVP(100, 'Vídeo 3D Realista pronto!');
+    setVP(100, 'Vídeo Cinemático Pronto!');
 
     card.innerHTML=`
       <div style="position:relative;background:#000;border-radius:8px 8px 0 0;overflow:hidden">
