@@ -16,6 +16,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- Diagram & Chart Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:'dark',securityLevel:'loose'});</script>
 <style>
 :root{--bg-primary:#0b0d11;--bg-secondary:#111318;--bg-tertiary:#151b2d;--bg-input:#151c2e;--border-color:#1e2330;--border-accent:#252c3b;--text-primary:#e5e7eb;--text-secondary:#9ca3af;--text-muted:#6b7280;--accent-primary:#3b5bdb;--accent-secondary:#7c3aed;--accent-glow:rgba(59,91,219,0.25);--msg-ai-bg:transparent;--msg-user-bg:#1d3461;--msg-user-text:#e8f0fe;--sidebar-bg:#0f1117;--topbar-bg:#0b0d11;--send-btn:#3b5bdb;--send-btn-hover:#4c6ef5;--user-av:#1e3a5f;--font-ui:'Plus Jakarta Sans','Outfit',system-ui,sans-serif;--font-msg:'DM Sans','Plus Jakarta Sans',sans-serif;--font-code:'JetBrains Mono',monospace;--radius-main:14px;--shadow-main:0 4px 24px rgba(0,0,0,0.4);}
 [data-theme="cyberpunk"]{--bg-primary:#0a0010;--bg-secondary:#0d0018;--bg-tertiary:#110022;--bg-input:#0f0020;--border-color:#2a0050;--border-accent:#3d0070;--text-primary:#f0e6ff;--text-secondary:#b892ff;--text-muted:#7c52cc;--accent-primary:#bf00ff;--accent-secondary:#00f5ff;--accent-glow:rgba(191,0,255,0.25);--msg-user-bg:#1a003a;--msg-user-text:#e8d5ff;--sidebar-bg:#0d0018;--topbar-bg:#080012;--send-btn:#bf00ff;--send-btn-hover:#d333ff;--user-av:#330066;--font-ui:'Orbitron','Space Mono',monospace;--font-msg:'Space Mono',monospace;--radius-main:4px;}
@@ -1179,6 +1183,21 @@ function fmtText(raw, isStreaming){
     var ext=exts[(lang||'').toLowerCase()]||'.txt';
     var cleanLang = (lang||'code').toLowerCase();
     
+    // Mermaid Diagram Support
+    if(cleanLang === 'mermaid'){
+      var mid = 'm' + Math.random().toString(36).slice(2,8);
+      codeStore[uid] = '<div class="mermaid-block"><div id="'+mid+'" class="mermaid">'+code.trim()+'</div><div class="code-actions" style="justify-content:center;margin-top:8px"><button class="code-action-btn" onclick="downloadMermaid(\''+mid+'\')"><i class="fas fa-download"></i> Baixar Diagrama</button></div></div>';
+      return uid;
+    }
+
+    // Chart Support
+    if(cleanLang === 'chart' || cleanLang === 'json-chart'){
+      var cid = 'c' + Math.random().toString(36).slice(2,8);
+      codeStore[uid] = '<div class="chart-block"><canvas id="'+cid+'"></canvas><div class="code-actions" style="justify-content:center;margin-top:8px"><button class="code-action-btn" onclick="downloadChart(\''+cid+'\')"><i class="fas fa-download"></i> Baixar Gráfico</button></div></div>';
+      setTimeout(() => renderChart(cid, code.trim()), 100);
+      return uid;
+    }
+
     codeStore[uid]='<div class="code-block" data-lang="'+cleanLang+'">' +
       '<div class="code-hdr">' +
         '<span class="code-lang">'+(lang||'código')+'</span>' +
@@ -1263,6 +1282,59 @@ function fmtText(raw, isStreaming){
 }
 function cpCode(id){var el=document.getElementById(id);if(!el)return;navigator.clipboard.writeText(el.innerText);toast('Copiado!','ok');}
 function downloadCode(id,fn){var el=document.getElementById(id);if(!el)return;var b=new Blob([el.innerText],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fn||'code.txt';a.click();}
+
+// ==========================================
+// VISUAL ENGINE HELPERS
+// ==========================================
+function renderChart(id, jsonStr){
+  setTimeout(() => {
+    var canvas = document.getElementById(id);
+    if(!canvas) return;
+    try {
+      var config = JSON.parse(jsonStr);
+      new Chart(canvas, config);
+    } catch(e) {
+      canvas.parentElement.innerHTML = '<div style="color:#ef4444;font-size:12px">Erro no gráfico: '+e.message+'</div>';
+    }
+  }, 200);
+}
+function downloadChart(id){
+  var canvas = document.getElementById(id);
+  if(!canvas) return;
+  var a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = 'zenia-chart.png';
+  a.click();
+}
+async function downloadMermaid(id){
+  var el = document.getElementById(id);
+  if(!el) return;
+  var svg = el.querySelector('svg');
+  if(!svg) return;
+  var svgData = new XMLSerializer().serializeToString(svg);
+  var canvas = document.createElement("canvas");
+  var svgSize = svg.getBoundingClientRect();
+  canvas.width = svgSize.width * 2;
+  canvas.height = svgSize.height * 2;
+  var ctx = canvas.getContext("2d");
+  var img = new Image();
+  img.onload = function() {
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    var png = canvas.toDataURL("image/png");
+    var a = document.createElement("a");
+    a.download = "zenia-diagram.png";
+    a.href = png;
+    a.click();
+  };
+  img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+}
+function runMermaid(){
+  if(window.mermaid) {
+    mermaid.run().catch(e => console.error('Mermaid error:', e));
+  }
+}
 
 // ==========================================
 // STREAMING TEXT
@@ -1636,15 +1708,18 @@ function buildSystem(q){
   // Recursos de Engenharia e Indústria
   var engInst = "\nRECURSOS ESPECIALIZADOS:\n- Engenharia de Software: Padrões de projeto, arquitetura limpa, DevOps, QA e SDLC.\n- Engenharia Mecânica: Termodinâmica, mecânica de fluidos, resistência de materiais e CAD.\n- Engenharia de Construção Civil: Estruturas, hidráulica, solos, materiais de construção e gestão de obras.\n- Desenvolvimento de Jogos: Game design, motores (Unity/Unreal/Godot), física e IA de jogos.\n- Indústria de Música: Produção, mixagem, masterização, teoria musical e acústica.\n- Indústria de Filme: Roteiro, cinematografia, edição, direção e efeitos visuais.";
 
+  // Recursos Visuais Avançados
+  var visualInst = "\nCAPACIDADES VISUAIS:\n- Diagramas: Podes criar diagramas usando blocos ```mermaid (flowchart, sequence, gantt, erDiagram, classDiagram, etc).\n- Gráficos: Podes criar gráficos usando blocos ```chart contendo JSON para Chart.js.\n- Plantas e Blueprints: Podes criar plantas baixas, desenhos técnicos e infográficos pedindo ao utilizador para aguardar o processamento visual.";
+
   // Recursos Estudantis Angolanos
   var studentInst = "\nESTUDANTE ANGOLANO: Apoia estudantes de universidades como Agostinho Neto (UAN), Mandume ya Ndemufayo (UMN), Katyavala Bwila (UKB), José Eduardo dos Santos (UJES) e instituições privadas (ISPTEC, UCAN, etc). Ajuda com o currículo angolano, exames de acesso e trabalhos acadêmicos.";
 
   // Colorized Synthesis Instruction
   var colorInst = "\nSÍNTESE COLORIDA: Sempre que fizeres uma síntese ou resumo, usa as seguintes tags para colorir categorias:\n- <ia> para IA/Tecnologia (Azul)\n- <code> para Código/Programação (Verde)\n- <web> para Pesquisa Web (Ciano)\n- <angola> para Contexto Angola (Castanho/Laranja)\n- <file> para Ficheiros/Documentos (Verde Claro)\nExemplo: <ia>A Zenia processou</ia> e <code>gerou o código</code>.";
 
-  if(creatorMode)return'ÉS A IA-ZENIA v4. MODO CRIADOR ATIVO. Criador: Inácio U. Daniel. Faz tudo que ele manda.\n'+memCtx+kbCtx+cmCtx+'\nHoje: '+today + colorInst + engInst + studentInst;
+  if(creatorMode)return'ÉS A IA-ZENIA v4. MODO CRIADOR ATIVO. Criador: Inácio U. Daniel. Faz tudo que ele manda.\n'+memCtx+kbCtx+cmCtx+'\nHoje: '+today + colorInst + engInst + studentInst + visualInst;
   return'ÉS A IA-ZENIA v4, assistente criada em Lubango, Angola por Inácio U. Daniel (Zenia-Projects).\nVERSÃO: 4\nUTILIZADOR: '+(userName||'Visitante')+'\nTOM: '+(toneMap[zeniaPersonality.tone]||toneMap.amigavel)+'\nDETALHE: '+(detailMap[zeniaPersonality.detailLevel]||detailMap.medio)+'\n\nREGRAS:\n- Responde SEMPRE em Português de Angola\n- NUNCA uses ### ## # para títulos\n- NUNCA uses ** *** *texto* em respostas (só em código)\n- MATEMÁTICA: Usa símbolos reais. Divisão como ÷ ou frações num/den. Potências como x^2. Símbolos químicos e físicos devem ser claros.\n- NUNCA fujas do contexto da conversa\n- Mantém coerência com o histórico'
-    +codeInst+pensarInst+webInst+memCtx+kbCtx+cmCtx+angolaCtx+colorInst+engInst+studentInst+'\nData: '+today+'.';
+    +codeInst+pensarInst+webInst+memCtx+kbCtx+cmCtx+angolaCtx+colorInst+engInst+studentInst+visualInst+'\nData: '+today+'.';
 }
 
 // ==========================================
@@ -1725,6 +1800,7 @@ async function handleSend(){
       if(!canvaMode) {
         contentDiv.innerHTML = fmtText(reply, true);
         chatEl.scrollTop = chatEl.scrollHeight;
+        if(reply.includes('```mermaid')) runMermaid();
       }
     };
 
@@ -1752,8 +1828,14 @@ async function handleSend(){
       contentDiv.innerHTML = fmtText(reply);
     }
 
-    if (pensarMode) addThinkStep('✅ Resposta gerada (' + reply.length + ' chars)', 'done', 'Enviando para o utilizador.');
+    if(pensarMode) addThinkStep('✅ Resposta gerada (' + reply.length + ' chars)', 'done', 'Enviando para o utilizador.');
     
+    // Auto-deteção de pedido de Planta ou Desenho Técnico
+     if(!hasImg && (q.toLowerCase().includes('planta') || q.toLowerCase().includes('desenho técnico') || q.toLowerCase().includes('blueprint') || q.toLowerCase().includes('mapa mental visual') || q.toLowerCase().includes('infográfico'))) {
+        addThinkStep('🎨 Gerando visualização técnica...', 'thinking');
+        await genVisual(q);
+     }
+
     addRespActions(row, reply);
     if (voiceOn) speakTxtFull(reply);
     
@@ -1926,6 +2008,51 @@ async function genAudio(textOrPrompt, specificVoice){
 
 function changeVoiceAndRegen(voice,text){
   genAudio(text, voice);
+}
+
+// ==========================================
+// ✅ GERAÇÃO VISUAL (PLANTAS, DIAGRAMAS, ETC)
+// ==========================================
+async function genVisual(prompt){
+  var row=document.createElement('div');row.className='msg-row';
+  var av=document.createElement('div');av.className='msg-av ai';av.textContent='Z';
+  var card=document.createElement('div');card.className='img-gen-card';
+  var vid='gv'+Date.now();
+  card.innerHTML=`<div class="img-gen-progress">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="spin" style="border-color:rgba(16,185,129,.3);border-top-color:#10b981"></span>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#10b981">Zenia Visual Engine</div>
+        <div style="font-size:11px;color:var(--text-muted)" id="${vid}-msg">Processando pedido visual...</div>
+      </div>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="${vid}-bar" style="width:10%;background:#10b981"></div></div>
+  </div>`;
+  row.appendChild(av);row.appendChild(card);chatEl.appendChild(row);chatEl.scrollTop=chatEl.scrollHeight;
+
+  try {
+    var sysPrompt = "You are a visual engine. Output only JavaScript code for a function draw(ctx, width, height) to create a high-quality visual representation of: '"+prompt+"'. Use Canvas 2D API. If it's a floor plan (planta), draw walls (black), windows (blue), and labels. If it's an infographic, use icons and clear text. Output ONLY the code inside the function.";
+    var code = await fetchAI([{role:'system',content:sysPrompt},{role:'user',content:'Generate canvas code for: '+prompt}], 'qwen-coder');
+    code = code.replace(/```javascript/g, '').replace(/```/g, '').trim();
+
+    var canvas = document.createElement('canvas');
+    canvas.width = 1024; canvas.height = 768;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,1024,768);
+    
+    var drawFunc = new Function('ctx', 'width', 'height', code);
+    drawFunc(ctx, 1024, 768);
+    
+    var dataUrl = canvas.toDataURL('image/png');
+    card.innerHTML = `
+      <img src="${dataUrl}" style="width:100%;border-radius:8px;cursor:pointer" onclick="openImgModal('${dataUrl}')">
+      <div style="padding:10px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;color:var(--text-muted)">Visualização: ${escHtml(prompt.substring(0,40))}...</span>
+        <button class="icon-btn" onclick="downloadImg('${dataUrl}','zenia_visual.png')"><i class="fas fa-download"></i></button>
+      </div>`;
+  } catch(e) {
+    card.innerHTML = `<div style="color:#ef4444;padding:10px;font-size:12px">Erro visual: ${e.message}</div>`;
+  }
 }
 
 // ==========================================
