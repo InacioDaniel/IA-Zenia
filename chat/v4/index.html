@@ -2155,10 +2155,12 @@ async function genVid(prompt){
     var totalFrames = Math.floor((duration / 1000) * fps);
     if(totalFrames<30) totalFrames = 150;
     setVP(6, 'A preparar...');
-    var sysPrompt = "You are Qwen-Coder. Output only JavaScript statements to draw an animation frame for a function draw(ctx,width,height,time). No imports. Use only Canvas 2D API. Create an animation for: '"+prompt+"'. return only the code inside the function.";
+    var sysPrompt = "You are Qwen-Coder. Output only JavaScript statements to draw an animation frame for a function draw(ctx,width,height,time). No imports. Use only Canvas 2D API. Create an animation for: '"+prompt+"'. return ONLY the code inside the function, no markdown backticks.";
     setVP(15, 'Gerando animação com Qwen-Coder...');
     var code = await fetchAI([{role:'system',content:sysPrompt},{role:'user',content:'Generate JS canvas code for: '+prompt}], 'qwen-coder');
-    code = code.replace(/```javascript/g, '').replace(/```/g, '').trim();
+    
+    // Limpeza de código mais robusta
+    code = code.replace(/```(?:javascript|js)?/gi, '').replace(/```/g, '').trim();
 
     setVP(40, 'Compilando cena...');
 
@@ -2171,35 +2173,33 @@ async function genVid(prompt){
     
     if(!canvas.captureStream) throw new Error('Seu navegador não suporta gravação de Canvas.');
     
-    var stream = canvas.captureStream(30);
-    var recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
+    // Tenta codecs comuns para compatibilidade
+    var mimeType = 'video/webm';
+    if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) mimeType = 'video/webm;codecs=vp9';
+    else if (MediaRecorder.isTypeSupported('video/mp4')) mimeType = 'video/mp4';
+
+    var stream = canvas.captureStream(fps);
+    var recorder = new MediaRecorder(stream, { mimeType: mimeType });
     var chunks = [];
     recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
     
-    var recordingPromise = new Promise((resolve) => {
+    var recordingPromise = new Promise((resolve, reject) => {
       recorder.onstop = () => {
-        var blob = new Blob(chunks, { type: 'video/webm' });
+        var blob = new Blob(chunks, { type: mimeType });
         var url = URL.createObjectURL(blob);
         resolve(url);
       };
+      recorder.onerror = e => reject(e);
     });
 
     var drawFunc;
     function makeDrawFunc(src){
       var s = (src||'').trim();
+      // Remove export default ou definições de função se a IA as incluiu
       s = s.replace(/^export\s+default\s+/,'').trim();
       var m1 = s.match(/function\s+draw\s*\([^)]*\)\s*\{([\s\S]*)\}\s*$/);
       if(m1){ s = m1[1]; }
-      try{
-        var f1 = new Function('return (function(ctx,width,height,time){\n'+s+'\n});');
-        return f1();
-      }catch(e){}
-      try{
-        if(/=>/.test(s)){
-          var f2 = eval('('+s+')');
-          if(typeof f2==='function') return f2;
-        }
-      }catch(e){}
+      
       try{
         return new Function('ctx','width','height','time', s);
       }catch(e){
@@ -2207,14 +2207,15 @@ async function genVid(prompt){
         return function(c,w,h,t){
           c.fillStyle='#000';c.fillRect(0,0,w,h);
           c.fillStyle='#fff';c.font='14px sans-serif';
-          c.fillText('Erro script: '+e.message,20,h/2);
+          c.fillText('Erro no script gerado',20,h/2);
         };
       }
     }
     drawFunc = makeDrawFunc(code);
 
     recorder.start();
-    ctx.font='14px sans-serif';
+    
+    // Renderização frame a frame
     for (var f = 0; f < totalFrames; f++) {
         var time = f / fps;
         ctx.fillStyle = '#000';
@@ -2222,17 +2223,20 @@ async function genVid(prompt){
         try {
             drawFunc(ctx, width, height, time);
         } catch(e) {
+            console.warn('Erro no frame:', e);
         }
 
-        if (f % 5 === 0) {
-            var prog = 30 + Math.floor((f / totalFrames) * 60);
-            setVP(prog, 'Renderizando: ' + Math.floor(time) + 's');
+        if (f % 10 === 0) {
+            var prog = 40 + Math.floor((f / totalFrames) * 55);
+            setVP(prog, 'Renderizando: ' + time.toFixed(1) + 's');
             await new Promise(r => setTimeout(r, 0));
         }
     }
 
+    // Pequeno delay para garantir o último frame
+    await sleep(100);
     recorder.stop();
-    setVP(95, 'Finalizando vídeo...');
+    setVP(98, 'Finalizando vídeo...');
     var videoUrl = await recordingPromise;
     setVP(100, 'Vídeo pronto!');
 
