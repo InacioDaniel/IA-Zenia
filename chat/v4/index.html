@@ -1028,6 +1028,7 @@ var sendIc=document.getElementById('send-ic');
 
 // REGEX
 var VID_RX=/\b(gera|gere|gerar|cria|criar|faz|fazer|mostra|quero\s+ver|faz-me)\s+um?\s*(video|filme|clip|animacao|animação|gif|cena|movie)\b/i;
+var VID_STRICT_RX=/^\s*(gera|gere|gerar|cria|criar|faz|fazer|mostra|quero\s+ver|faz-me)\s+um?\s*(video|filme|clip|animacao|animação|gif|cena|movie)\s+(de|do|da|com|sobre|a|que)?\s*[\s\S]+/i;
 var IMG_RX=/\b(gera|gere|gerar|cria|criar|crie|faz|fazer|desenha|desenhe|pinta|pinte|mostra|ilustra|produz|gere-me|cria-me|faz-me)\s+(um?a?\s+)?(imagem|foto|fotografia|image|picture|desenho|wallpaper|arte|avatar|paisagem|retrato|quadro|pintura|ilustra[cç][aã]o|thumbnail|banner|poster|logo|icon|capa)\b/i;
 var AUD_RX=/\b(gera|gere|gerar|cria|criar|faz|fazer|produz|sintetiza)\s+(um?a?\s+)?(audio|áudio|voz|narração|narracao|som|fala|speech|tts|leitura\s+em\s+voz)\b/i;
 var FILE_RX=/\b(gera|gere|gerar|cria|criar|faz|fazer|produz|exporta|escreve|elabora)\s+(um?a?\s+)?(ficheiro|arquivo|documento|relatorio|relatório|doc|docx|word|excel|xlsx|planilha|tabela|powerpoint|pptx|apresenta[cç][aã]o|pdf|zip|csv)\b/i;
@@ -1848,7 +1849,7 @@ async function handleSend(){
 
   if(!capturedImg&&!capturedFile&&AUD_RX.test(text)){var ap=text.replace(AUD_RX,'').trim()||text;await genAudio(ap);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Áudio: '+ap+']'});saveConvs();setLoading(false);typing.remove();return;}
   if(!capturedImg&&!capturedFile&&FILE_RX.test(text)){await genFile(text);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Ficheiro gerado]'});saveConvs();setLoading(false);typing.remove();return;}
-  if(!capturedImg&&!capturedFile&&VID_RX.test(text)){var vp=text.replace(VID_RX,'').trim()||text;await genVid(vp);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Video: '+vp+']'});saveConvs();setLoading(false);typing.remove();return;}
+  if(!capturedImg&&!capturedFile&&VID_STRICT_RX.test(text)){var vp=text.replace(VID_RX,'').trim()||text;await genVid(vp);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Video: '+vp+']'});saveConvs();setLoading(false);typing.remove();return;}
   if(!capturedImg&&!capturedFile&&IMG_RX.test(text)){var ip=extractImgPrompt(text);await genImg(ip);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Imagem: '+ip+']'});saveConvs();setLoading(false);typing.remove();return;}
 
   var row = document.createElement('div'); row.className = 'msg-row';
