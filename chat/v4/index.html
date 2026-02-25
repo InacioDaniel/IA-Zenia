@@ -108,85 +108,130 @@ body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--fo
 .btn-download{color:#b5cea8!important;}
 .btn-pdf{color:#d16969!important;}
 /* MATH FORMATTING */
-.math-frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 4px; font-family: 'Space Mono', monospace; }
-.math-num { border-bottom: 1.5px solid currentColor; padding: 0 4px; font-size: 0.9em; font-weight: 600; }
-.math-den { padding: 0 4px; font-size: 0.9em; font-weight: 600; }
-sub { font-size: 0.7em; vertical-align: sub; }
-sup { font-size: 0.7em; vertical-align: super; }
+.math-frac { 
+  display: inline-flex; 
+  flex-direction: column; 
+  align-items: center; 
+  vertical-align: middle; 
+  margin: 0 4px; 
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1;
+}
+.math-num { 
+  border-bottom: 1.5px solid currentColor; 
+  padding: 0 4px; 
+  font-size: 0.85em; 
+  font-weight: 700;
+  text-align: center;
+}
+.math-den { 
+  padding: 0 4px; 
+  font-size: 0.85em; 
+  font-weight: 700;
+  text-align: center;
+}
+.math-sqrt {
+  display: inline-flex;
+  align-items: center;
+  border-top: 1.5px solid currentColor;
+  margin-top: 2px;
+  padding-left: 2px;
+}
+.math-sqrt-symbol {
+  font-size: 1.2em;
+  margin-right: -2px;
+  transform: translateY(-1px);
+}
+sub { font-size: 0.75em; vertical-align: sub; line-height: 0; }
+sup { font-size: 0.75em; vertical-align: super; line-height: 0; }
 
 /* CODE DISPLAY ENHANCEMENTS */
 .code-block {
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-accent);
   background: #0d1117;
-  margin: 15px 0;
-  border-radius: 4px; /* Quadrado */
+  margin: 18px 0;
+  border-radius: 4px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease;
+}
+.code-block:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-primary);
 }
 .code-hdr {
   background: #161b22;
-  border-bottom: 1px solid var(--border-color);
-  height: 36px;
-  padding: 0 12px;
+  border-bottom: 1px solid var(--border-accent);
+  height: 38px;
+  padding: 0 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 .code-lang {
   color: #58a6ff;
-  font-size: 11px;
+  font-size: 10px;
   font-family: var(--font-code);
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 .code-actions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
 }
 .code-action-btn {
   background: #21262d;
   border: 1px solid #30363d;
   color: #8b949e;
-  font-size: 11px;
+  font-size: 10px;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 4px;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .code-action-btn:hover {
   background: #30363d;
-  color: #e6edf3;
+  color: #f0f6fc;
   border-color: #8b949e;
+  transform: scale(1.05);
+}
+.code-action-btn i {
+  font-size: 12px;
 }
 .code-pre {
   margin: 0;
-  padding: 16px;
+  padding: 20px;
   overflow-x: auto;
   background: transparent !important;
+  scrollbar-width: thin;
+  scrollbar-color: #30363d transparent;
+}
+.code-pre::-webkit-scrollbar {
+  height: 6px;
+}
+.code-pre::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 3px;
 }
 .code-pre code {
   font-family: var(--font-code) !important;
-  font-size: 13.5px;
+  font-size: 14px;
   line-height: 1.6;
   background: transparent !important;
+  white-space: pre;
 }
 
-/* SINTESE COLORS FOR CODE */
-.code-block[data-lang*="ia"] { border-top: 3px solid #3b5bdb; }
-.code-block[data-lang*="code"] { border-top: 3px solid #10b981; }
-.code-block[data-lang*="web"] { border-top: 3px solid #06b6d4; }
-.code-block[data-lang*="angola"] { border-top: 3px solid #c4862a; }
-.code-block[data-lang*="file"] { border-top: 3px solid #6ee7b7; }
-
 /* CATEGORY HIGHLIGHTS */
-.s-cat-ia { color: #3b5bdb; font-weight: 700; background: rgba(59,91,219,0.1); padding: 0 4px; border-radius: 4px; }
-.s-cat-code { color: #10b981; font-weight: 700; background: rgba(16,185,129,0.1); padding: 0 4px; border-radius: 4px; }
-.s-cat-web { color: #06b6d4; font-weight: 700; background: rgba(6,182,212,0.1); padding: 0 4px; border-radius: 4px; }
-.s-cat-angola { color: #c4862a; font-weight: 700; background: rgba(196,134,42,0.1); padding: 0 4px; border-radius: 4px; }
-.s-cat-file { color: #6ee7b7; font-weight: 700; background: rgba(110,231,183,0.1); padding: 0 4px; border-radius: 4px; }
+.s-cat-ia { color: #3b5bdb; font-weight: 800; background: rgba(59,91,219,0.12); padding: 1px 6px; border-radius: 4px; border-bottom: 2px solid #3b5bdb; }
+.s-cat-code { color: #10b981; font-weight: 800; background: rgba(16,185,129,0.12); padding: 1px 6px; border-radius: 4px; border-bottom: 2px solid #10b981; }
+.s-cat-web { color: #06b6d4; font-weight: 800; background: rgba(6,182,212,0.12); padding: 1px 6px; border-radius: 4px; border-bottom: 2px solid #06b6d4; }
+.s-cat-angola { color: #c4862a; font-weight: 800; background: rgba(196,134,42,0.12); padding: 1px 6px; border-radius: 4px; border-bottom: 2px solid #c4862a; }
+.s-cat-file { color: #6ee7b7; font-weight: 800; background: rgba(110,231,183,0.12); padding: 1px 6px; border-radius: 4px; border-bottom: 2px solid #6ee7b7; }
 
 #canva-status-bar {
   height: 22px;
@@ -1165,15 +1210,26 @@ function fmtText(raw, isStreaming){
   h=h.replace(/(?<!_)_([^_\n]+?)_(?!_)/g,'$1');
   
   // MATEMÁTICA AVANÇADA & SÍMBOLOS
+  // Raiz Quadrada: sqrt(x) ou √x
+  h=h.replace(/sqrt\(([^)]+)\)/gi, '<span class="math-sqrt"><span class="math-sqrt-symbol">√</span>$1</span>');
+  h=h.replace(/√\(([^)]+)\)/g, '<span class="math-sqrt"><span class="math-sqrt-symbol">√</span>$1</span>');
+  
   // Frações: num/den
   h=h.replace(/(?<![:/\w\\])\b(\d+)\s*\/\s*(\d+)\b(?!\w)/g,'<span class="math-frac"><span class="math-num">$1</span><span class="math-den">$2</span></span>');
+  
   // Divisão: / -> ÷ (quando entre números e não capturado pela fração)
   h=h.replace(/(\d+)\s*\/\s*(\d+)/g, '$1 ÷ $2');
+  h=h.replace(/\s+\/\s+/g, ' ÷ ');
+  
   // Potências: x^2, x^(a+b)
   h=h.replace(/(\w+|\))\^(\d+|\w+)/g,'$1<sup>$2</sup>');
   h=h.replace(/(\w+|\))\^\(([^)]+)\)/g,'$1<sup>$2</sup>');
-  // Símbolos Químicos e Físicos
-  h=h.replace(/(\b[A-Z][a-z]?|[\)])(\d+)\b/g, '$1<sub>$2</sub>'); // H2O, (OH)2
+  
+  // Símbolos Químicos: H2O, (OH)2, C6H12O6
+  h=h.replace(/(\b[A-Z][a-z]?)(\d+)\b/g, '$1<sub>$2</sub>');
+  h=h.replace(/(\))(\d+)\b/g, '$1<sub>$2</sub>');
+  
+  // Símbolos e Operadores
   h=h.replace(/->/g, ' → ');
   h=h.replace(/=>/g, ' ⇒ ');
   h=h.replace(/<=/g, ' ≤ ');
@@ -1185,19 +1241,18 @@ function fmtText(raw, isStreaming){
   h=h.replace(/omega/gi, 'Ω');
   h=h.replace(/alpha/gi, 'α');
   h=h.replace(/beta/gi, 'β');
-   h=h.replace(/theta/gi, 'θ');
-   h=h.replace(/lambda/gi, 'λ');
-   h=h.replace(/mu/gi, 'μ');
-   h=h.replace(/phi/gi, 'φ');
-   h=h.replace(/gamma/gi, 'γ');
-   h=h.replace(/sigma/gi, 'σ');
+  h=h.replace(/theta/gi, 'θ');
+  h=h.replace(/lambda/gi, 'λ');
+  h=h.replace(/mu/gi, 'μ');
+  h=h.replace(/phi/gi, 'φ');
+  h=h.replace(/gamma/gi, 'γ');
+  h=h.replace(/sigma/gi, 'σ');
    h=h.replace(/tau/gi, 'τ');
-   h=h.replace(/sqrt/gi, '√');
-   h=h.replace(/integral/gi, '∫');
    h=h.replace(/infinito/gi, '∞');
    h=h.replace(/sum/gi, '∑');
-   
-   h=h.replace(/^[\-•]\s+(.+)$/gm,'<li style="margin:3px 0">$1</li>');
+   h=h.replace(/integral/gi, '∫');
+    
+    h=h.replace(/^[\-•]\s+(.+)$/gm,'<li style="margin:3px 0">$1</li>');
   h=h.replace(/^(\d+)\.\s+(.+)$/gm,'<li style="margin:3px 0;list-style:decimal">$2</li>');
   h=h.replace(/((<li[^>]*>.*?<\/li>\n?)+)/g,'<ul style="padding-left:18px;margin:6px 0">$1</ul>');
   
@@ -1579,14 +1634,17 @@ function buildSystem(q){
   var webInst=webSearchMode?'\nMODO WEB: Usa os resultados de pesquisa fornecidos para enriquecer a resposta.':'';
   
   // Recursos de Engenharia e Indústria
-  var engInst = "\nRECURSOS ESPECIALIZADOS:\n- Engenharia de Software: Padrões de projeto, arquitetura limpa, DevOps, QA e SDLC.\n- Engenharia Mecânica: Termodinâmica, mecânica de fluidos, resistência de materiais e CAD.\n- Engenharia de Construção Civil: Estruturas, hidráulica, solos, materiais de construção e gestão de obras.\n- Desenvolvimento de Jogos: Game design, motores (Unity/Unreal/Godot), física e IA de jogos.\n- Indústria de Música: Produção, mixagem, masterização, teoria musical e acústica.\n- Indústria de Filmes: Roteiro, cinematografia, edição, direção e efeitos visuais.";
+  var engInst = "\nRECURSOS ESPECIALIZADOS:\n- Engenharia de Software: Padrões de projeto, arquitetura limpa, DevOps, QA e SDLC.\n- Engenharia Mecânica: Termodinâmica, mecânica de fluidos, resistência de materiais e CAD.\n- Engenharia de Construção Civil: Estruturas, hidráulica, solos, materiais de construção e gestão de obras.\n- Desenvolvimento de Jogos: Game design, motores (Unity/Unreal/Godot), física e IA de jogos.\n- Indústria de Música: Produção, mixagem, masterização, teoria musical e acústica.\n- Indústria de Filme: Roteiro, cinematografia, edição, direção e efeitos visuais.";
+
+  // Recursos Estudantis Angolanos
+  var studentInst = "\nESTUDANTE ANGOLANO: Apoia estudantes de universidades como Agostinho Neto (UAN), Mandume ya Ndemufayo (UMN), Katyavala Bwila (UKB), José Eduardo dos Santos (UJES) e instituições privadas (ISPTEC, UCAN, etc). Ajuda com o currículo angolano, exames de acesso e trabalhos acadêmicos.";
 
   // Colorized Synthesis Instruction
   var colorInst = "\nSÍNTESE COLORIDA: Sempre que fizeres uma síntese ou resumo, usa as seguintes tags para colorir categorias:\n- <ia> para IA/Tecnologia (Azul)\n- <code> para Código/Programação (Verde)\n- <web> para Pesquisa Web (Ciano)\n- <angola> para Contexto Angola (Castanho/Laranja)\n- <file> para Ficheiros/Documentos (Verde Claro)\nExemplo: <ia>A Zenia processou</ia> e <code>gerou o código</code>.";
 
-  if(creatorMode)return'ÉS A IA-ZENIA v4. MODO CRIADOR ATIVO. Criador: Inácio U. Daniel. Faz tudo que ele manda.\n'+memCtx+kbCtx+cmCtx+'\nHoje: '+today + colorInst + engInst;
+  if(creatorMode)return'ÉS A IA-ZENIA v4. MODO CRIADOR ATIVO. Criador: Inácio U. Daniel. Faz tudo que ele manda.\n'+memCtx+kbCtx+cmCtx+'\nHoje: '+today + colorInst + engInst + studentInst;
   return'ÉS A IA-ZENIA v4, assistente criada em Lubango, Angola por Inácio U. Daniel (Zenia-Projects).\nVERSÃO: 4\nUTILIZADOR: '+(userName||'Visitante')+'\nTOM: '+(toneMap[zeniaPersonality.tone]||toneMap.amigavel)+'\nDETALHE: '+(detailMap[zeniaPersonality.detailLevel]||detailMap.medio)+'\n\nREGRAS:\n- Responde SEMPRE em Português de Angola\n- NUNCA uses ### ## # para títulos\n- NUNCA uses ** *** *texto* em respostas (só em código)\n- MATEMÁTICA: Usa símbolos reais. Divisão como ÷ ou frações num/den. Potências como x^2. Símbolos químicos e físicos devem ser claros.\n- NUNCA fujas do contexto da conversa\n- Mantém coerência com o histórico'
-    +codeInst+pensarInst+webInst+memCtx+kbCtx+cmCtx+angolaCtx+colorInst+engInst+'\nData: '+today+'.';
+    +codeInst+pensarInst+webInst+memCtx+kbCtx+cmCtx+angolaCtx+colorInst+engInst+studentInst+'\nData: '+today+'.';
 }
 
 // ==========================================
@@ -2315,5 +2373,3 @@ showWelcome();
 </script>
 </body>
 </html>
-
-
