@@ -1741,8 +1741,15 @@ async function handleSend(){
   
   hideWelcome();
   var cameraFrame=null;if(cameraOn)cameraFrame=await captureFrame();
-  if(hasImg)renderMsgWithImg('user',text||'Analisa esta imagem.',pendingImageBase64);else renderMsg('user',text);
-  var capturedImg=pendingImageBase64;pendingImageBase64=null;clearPendingImage();
+  
+  var capturedImg=pendingImageBase64;
+  var capturedFile=pendingFileData;
+  
+  if(capturedImg) renderMsgWithImg('user',text||'Analisa esta imagem.',capturedImg);
+  else if(capturedFile) renderMsgWithFile('user',text||'Analisa este ficheiro.',capturedFile);
+  else renderMsg('user',text);
+  
+  clearPendingAssets();
   inputEl.value='';autoResize(inputEl);setLoading(true);
 
   // UI Feedback imediato para evitar "travamento"
@@ -1751,10 +1758,10 @@ async function handleSend(){
 
   if(pensarMode&&text&&!isSimple)await deepThink(text);
 
-  if(!hasImg&&AUD_RX.test(text)){var ap=text.replace(AUD_RX,'').trim()||text;await genAudio(ap);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Áudio: '+ap+']'});saveConvs();setLoading(false);typing.remove();return;}
-  if(!hasImg&&FILE_RX.test(text)){await genFile(text);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Ficheiro gerado]'});saveConvs();setLoading(false);typing.remove();return;}
-  if(!hasImg&&VID_RX.test(text)){var vp=text.replace(VID_RX,'').trim()||text;await genVid(vp);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Video: '+vp+']'});saveConvs();setLoading(false);typing.remove();return;}
-  if(!hasImg&&IMG_RX.test(text)){var ip=extractImgPrompt(text);await genImg(ip);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Imagem: '+ip+']'});saveConvs();setLoading(false);typing.remove();return;}
+  if(!capturedImg&&!capturedFile&&AUD_RX.test(text)){var ap=text.replace(AUD_RX,'').trim()||text;await genAudio(ap);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Áudio: '+ap+']'});saveConvs();setLoading(false);typing.remove();return;}
+  if(!capturedImg&&!capturedFile&&FILE_RX.test(text)){await genFile(text);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Ficheiro gerado]'});saveConvs();setLoading(false);typing.remove();return;}
+  if(!capturedImg&&!capturedFile&&VID_RX.test(text)){var vp=text.replace(VID_RX,'').trim()||text;await genVid(vp);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Video: '+vp+']'});saveConvs();setLoading(false);typing.remove();return;}
+  if(!capturedImg&&!capturedFile&&IMG_RX.test(text)){var ip=extractImgPrompt(text);await genImg(ip);conv.messages.push({role:'user',content:text},{role:'assistant',content:'[Imagem: '+ip+']'});saveConvs();setLoading(false);typing.remove();return;}
 
   var row = document.createElement('div'); row.className = 'msg-row';
   var av = document.createElement('div'); av.className = 'msg-av ai'; av.textContent = 'Z';
@@ -1777,12 +1784,20 @@ async function handleSend(){
 
     var sys = { role: 'system', content: buildSystem(text || 'analisa') };
     var userMsg;
-    if (hasImg && capturedImg) { userMsg = { role: 'user', content: [{ type: 'image_url', image_url: { url: capturedImg } }, { type: 'text', text: (text || 'Descreve esta imagem em detalhe, em Português de Angola.') }] }; }
-    else if (cameraFrame && !hasImg) { userMsg = { role: 'user', content: [{ type: 'image_url', image_url: { url: cameraFrame } }, { type: 'text', text: (webCtx ? webCtx + '\nPergunta: ' : '') + text }] }; }
+    if (capturedImg) { userMsg = { role: 'user', content: [{ type: 'image_url', image_url: { url: capturedImg } }, { type: 'text', text: (text || 'Descreve esta imagem em detalhe, em Português de Angola.') }] }; }
+    else if (capturedFile) { 
+      var fileContent = capturedFile.content;
+      if(capturedFile.type === 'text') {
+        userMsg = { role: 'user', content: 'Analisa este ficheiro "' + capturedFile.name + '":\n\n' + fileContent.substring(0, 6000) + (text ? '\n\nPergunta: ' + text : '') };
+      } else {
+        userMsg = { role: 'user', content: 'O utilizador carregou um ficheiro "' + capturedFile.name + '" do tipo ' + capturedFile.type + '. ' + (text ? '\n\nPergunta: ' + text : 'Analisa este documento.') };
+      }
+    }
+    else if (cameraFrame && !capturedImg) { userMsg = { role: 'user', content: [{ type: 'image_url', image_url: { url: cameraFrame } }, { type: 'text', text: (webCtx ? webCtx + '\nPergunta: ' : '') + text }] }; }
     else { userMsg = { role: 'user', content: webCtx ? (webCtx + 'Pergunta do utilizador: ' + text) : text }; }
     
     var selM = document.getElementById('model-sel').value;
-    var useM = (hasImg || cameraFrame) ? 'openai' : (CODE_RX.test(text) ? 'qwen-coder' : (isSimple ? 'openai' : selM));
+    var useM = (capturedImg || cameraFrame) ? 'openai' : (CODE_RX.test(text) ? 'qwen-coder' : (isSimple ? 'openai' : selM));
     var histMsgs = conv.messages.filter(m => typeof m.content === 'string' && m.content.length < 2000).slice(-20);
     var msgs = [sys].concat(histMsgs).concat([userMsg]);
     
@@ -2310,6 +2325,14 @@ function renderMsgWithImg(role,text,imgB64){
   bbl.innerHTML=(text?escHtml(text)+'<br>':'')+'<img src="'+imgB64+'" style="max-width:220px;border-radius:8px;margin-top:6px;display:block">';
   row.appendChild(av);row.appendChild(bbl);chatEl.appendChild(row);chatEl.scrollTop=chatEl.scrollHeight;
 }
+function renderMsgWithFile(role,text,fileData){
+  var row=document.createElement('div');row.className='msg-row user-row';
+  var av=document.createElement('div');av.className='msg-av user';av.textContent=(userName||'U').charAt(0).toUpperCase();
+  var bbl=document.createElement('div');bbl.className='msg-bbl user';
+  var icon = fileData.type==='pdf'?'fa-file-pdf':fileData.type==='docx'?'fa-file-word':fileData.type==='xlsx'?'fa-file-excel':'fa-file-alt';
+  bbl.innerHTML=(text?escHtml(text)+'<br>':'')+'<div style="background:rgba(255,255,255,0.1);padding:10px;border-radius:8px;display:flex;align-items:center;gap:10px;margin-top:6px;border:1px solid rgba(255,255,255,0.2)"><i class="fas '+icon+'" style="font-size:20px"></i><div style="font-size:12px;font-weight:700">'+fileData.name+'</div></div>';
+  row.appendChild(av);row.appendChild(bbl);chatEl.appendChild(row);chatEl.scrollTop=chatEl.scrollHeight;
+}
 function addRespActions(row,text){
   var bbl=row.querySelector('.msg-bbl');if(!bbl)return;var div=document.createElement('div');div.className='resp-actions';
   [[`<i class="fas fa-copy"></i>`,()=>{navigator.clipboard.writeText(text);toast('Copiado!','ok');}],[`<i class="fas fa-volume-up"></i>`,()=>speakTxtFull(text)],[`<i class="fas fa-volume-mute"></i>`,()=>{speechSynthesis.cancel();}],[`<i class="fas fa-download"></i>`,()=>{var b=new Blob([text],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='resposta_zenia.txt';a.click();}],['👍',()=>toast('Obrigado!','ok')],['👎',()=>toast('Vamos melhorar!','ok')]].forEach(([label,fn])=>{var b=document.createElement('button');b.className='ra-btn';b.innerHTML=label;b.onclick=fn;div.appendChild(b);});bbl.appendChild(div);
@@ -2334,10 +2357,35 @@ function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrol
 function toggleVoice(){voiceOn=!voiceOn;var b=document.getElementById('voice-topbar-btn');b.className='sbadge '+(voiceOn?'s-ok':'s-wait');b.innerHTML='<i class="fas fa-headset"></i>';if(!voiceOn&&window.speechSynthesis)speechSynthesis.cancel();}
 
 // ==========================================
-// PENDING IMAGE
+// PENDING ASSETS
 // ==========================================
-function clearPendingImage(){pendingImageBase64=null;var area=document.getElementById('pending-image-area'),wrap=document.getElementById('pending-image-wrap');if(area)area.style.display='none';if(wrap)wrap.innerHTML='';inputEl.placeholder='Fala com a Zenia v4...';}
-function showPendingImage(b64){pendingImageBase64=b64;var area=document.getElementById('pending-image-area'),wrap=document.getElementById('pending-image-wrap');if(area)area.style.display='block';if(wrap)wrap.innerHTML='<img src="'+b64+'" alt="imagem"><button class="remove-img" onclick="clearPendingImage()">&times;</button>';inputEl.placeholder='Pergunta sobre a imagem...';inputEl.focus();}
+function clearPendingAssets(){
+  pendingImageBase64=null;
+  pendingFileData=null;
+  var area=document.getElementById('pending-image-area'),wrap=document.getElementById('pending-image-wrap');
+  if(area)area.style.display='none';
+  if(wrap)wrap.innerHTML='';
+  inputEl.placeholder='Fala com a Zenia v4...';
+}
+function showPendingImage(b64){
+  pendingImageBase64=b64;
+  pendingFileData=null;
+  var area=document.getElementById('pending-image-area'),wrap=document.getElementById('pending-image-wrap');
+  if(area)area.style.display='block';
+  if(wrap)wrap.innerHTML='<img src="'+b64+'" alt="imagem"><button class="remove-img" onclick="clearPendingAssets()">&times;</button>';
+  inputEl.placeholder='Pergunta sobre a imagem...';
+  inputEl.focus();
+}
+function showPendingFile(name, content, type){
+  pendingFileData={name, content, type};
+  pendingImageBase64=null;
+  var area=document.getElementById('pending-image-area'),wrap=document.getElementById('pending-image-wrap');
+  if(area)area.style.display='block';
+  var icon = type==='pdf'?'fa-file-pdf':type==='docx'?'fa-file-word':type==='xlsx'?'fa-file-excel':'fa-file-alt';
+  wrap.innerHTML='<div style="background:var(--bg-tertiary);padding:10px;border-radius:8px;display:flex;align-items:center;gap:10px;border:1px solid var(--border-accent);min-width:180px"><i class="fas '+icon+'" style="font-size:20px;color:var(--accent-primary)"></i><div style="font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+name+'</div></div><button class="remove-img" onclick="clearPendingAssets()">&times;</button>';
+  inputEl.placeholder='Pergunta sobre o ficheiro "'+name+'"...';
+  inputEl.focus();
+}
 
 // ==========================================
 // FILE UPLOADS
@@ -2345,27 +2393,26 @@ function showPendingImage(b64){pendingImageBase64=b64;var area=document.getEleme
 async function handleFileUpload(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=e=>{showPendingImage(e.target.result);toast('Imagem pronta!','ok');};r.readAsDataURL(f);ev.target.value='';}
 async function handleFileAnyUpload(ev){
   var f=ev.target.files[0];if(!f)return;
-  if(f.type.startsWith('image/')){var r=new FileReader();r.onload=e=>{showPendingImage(e.target.result);toast('Imagem pronta!','ok');};r.readAsDataURL(f);}
-  else if(f.type === 'application/pdf' || f.name.endsWith('.pdf')) {
-    toast('PDF detectado. A processar...','ok');
-    // Implementação básica de PDF seria extrair texto via pdf.js se disponível,
-    // mas por agora vamos tratar como documento para o Canva
+  var name = f.name;
+  if(f.type.startsWith('image/')){
+    var r=new FileReader();r.onload=e=>{showPendingImage(e.target.result);toast('Imagem pronta!','ok');};r.readAsDataURL(f);
+  } else if(f.type === 'application/pdf' || name.endsWith('.pdf')) {
+    toast('PDF carregado!','ok');
+    var r = new FileReader();
+    r.onload = e => showPendingFile(name, e.target.result, 'pdf');
+    r.readAsArrayBuffer(f);
+  } else if(name.endsWith('.docx') || name.endsWith('.xlsx')) {
+    var r = new FileReader();
+    r.onload = e => showPendingFile(name, e.target.result, name.endsWith('.docx')?'docx':'xlsx');
+    r.readAsArrayBuffer(f);
+  } else {
     var r = new FileReader();
     r.onload = e => {
-      openCanvaEditor(e.target.result, 'pdf');
-      toast('PDF aberto no Canva!','ok');
+      showPendingFile(name, e.target.result, 'text');
+      toast('Ficheiro de texto carregado!','ok');
     };
-    r.readAsArrayBuffer(f);
+    r.readAsText(f);
   }
-  else if(f.name.endsWith('.docx') || f.name.endsWith('.xlsx')) {
-    var r = new FileReader();
-    r.onload = e => {
-      openCanvaEditor(e.target.result, f.name.endsWith('.docx')?'docx':'xlsx');
-      toast('Documento aberto no Canva!','ok');
-    };
-    r.readAsArrayBuffer(f);
-  }
-  else{var r2=new FileReader();r2.onload=e=>{var content=e.target.result;hideWelcome();var conv=getConv()||createConv('Análise: '+f.name);renderMsg('user','[Ficheiro: '+f.name+']');inputEl.value='Analisa este ficheiro "'+f.name+'":\n\n'+content.substring(0,4000);autoResize(inputEl);setTimeout(handleSend,100);};r2.readAsText(f);}
   ev.target.value='';
 }
 
