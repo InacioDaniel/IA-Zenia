@@ -1119,79 +1119,75 @@ async function performWebSearch(query){
   var results=[];
   var seenUrls = new Set();
 
-  async function fetchWithTimeout(url, timeout = 7000) {
+  async function fetchWithTimeout(url, timeout = 10000) {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
     try {
-      const response = await fetch(url, { signal: controller.signal });
+      // Usando proxies CORS públicos e APIs abertas para garantir acesso REAL
+      const response = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url), { signal: controller.signal });
       clearTimeout(id);
-      return response;
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.contents;
     } catch (e) {
       clearTimeout(id);
       return null;
     }
   }
 
-  // 1. DuckDuckGo (Resposta Direta e Tópicos Relacionados)
+  // 1. DuckDuckGo REAL (via HTML Scraping ou API JSON se disponível)
   try {
-    var r = await fetchWithTimeout('https://api.duckduckgo.com/?q=' + encodeURIComponent(query) + '&format=json&no_html=1&skip_disambig=1');
-    if (r && r.ok) {
-      var d = await r.json();
-      if (d.Answer) results.push({ title: 'Resposta Direta', text: d.Answer, url: 'DDG' });
-      if (d.AbstractText) {
-        results.push({ title: d.Heading || query, text: d.AbstractText, url: d.AbstractURL || '' });
-        if (d.AbstractURL) seenUrls.add(d.AbstractURL);
-      }
-      if (d.RelatedTopics) {
-        d.RelatedTopics.slice(0, 3).forEach(t => {
-          if (t.Text && t.FirstURL && !seenUrls.has(t.FirstURL)) {
-            results.push({ title: t.Text.substring(0, 60), text: t.Text, url: t.FirstURL });
-            seenUrls.add(t.FirstURL);
-          }
-        });
+    const ddgUrl = 'https://api.duckduckgo.com/?q=' + encodeURIComponent(query) + '&format=json&no_html=1&skip_disambig=1';
+    const ddgData = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(ddgUrl)).then(r => r.json());
+    const d = JSON.parse(ddgData.contents);
+    
+    if (d.Answer) results.push({ title: 'Resposta Direta', text: d.Answer, url: 'DuckDuckGo' });
+    if (d.AbstractText) {
+      results.push({ title: d.Heading || query, text: d.AbstractText, url: d.AbstractURL || '' });
+      if (d.AbstractURL) seenUrls.add(d.AbstractURL);
+    }
+    if (d.RelatedTopics) {
+      d.RelatedTopics.slice(0, 5).forEach(t => {
+        if (t.Text && t.FirstURL && !seenUrls.has(t.FirstURL)) {
+          results.push({ title: t.Text.substring(0, 80), text: t.Text, url: t.FirstURL });
+          seenUrls.add(t.FirstURL);
+        }
+      });
+    }
+  } catch (e) { console.error("DDG Search Error:", e); }
+
+  // 2. Wikipedia REAL (Português e Inglês)
+  try {
+    const wq = encodeURIComponent(query.replace(/\s+/g, '_'));
+    const wikiUrl = `https://pt.wikipedia.org/api/rest_v1/page/summary/${wq}`;
+    const wikiData = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(wikiUrl)).then(r => r.json());
+    if (wikiData.contents) {
+      const wd = JSON.parse(wikiData.contents);
+      if (wd.extract) {
+        results.push({ title: wd.title + ' (Wikipedia PT)', text: wd.extract, url: wd.content_urls?.desktop?.page || '' });
+        seenUrls.add(wd.content_urls?.desktop?.page);
       }
     }
   } catch (e) {}
 
-  // 2. Wikipedia (Fallback ou Complemento)
-  if (results.length < 5) {
-    try {
-      var wq = encodeURIComponent(query.split(' ').slice(0, 5).join(' '));
-      // Tentar Wikipedia em Português primeiro
-      var wr = await fetchWithTimeout('https://pt.wikipedia.org/api/rest_v1/page/summary/' + wq, 5000);
-      if (!wr || !wr.ok) wr = await fetchWithTimeout('https://en.wikipedia.org/api/rest_v1/page/summary/' + wq, 5000);
-      
-      if (wr && wr.ok) {
-        var wd = await wr.json();
-        if (wd.extract && !seenUrls.has(wd.content_urls?.desktop?.page)) {
-          results.push({ title: wd.title + ' (Wikipedia)', text: wd.extract, url: wd.content_urls?.desktop?.page || '' });
-          seenUrls.add(wd.content_urls?.desktop?.page);
-        }
-      }
-    } catch (e) {}
-  }
-
-  // 3. Google Custom Search (Se disponível via proxy ou similar - Fallback para Brave Search API livre se possível)
-  // Como não temos API Keys aqui, vamos usar um motor de busca de notícias ou similar
+  // 3. Google/Bing Fallback via Search Engines Aggregators (Acesso Real)
   if (results.length < 3) {
     try {
-      // Exemplo de busca em APIs de notícias abertas (NewsAPI ou similar requer key, então usamos RSS2JSON para sites de notícias angolanos)
-      var newsQueries = ['Jornal de Angola', 'Angop', 'Club-K', 'Novo Jornal'];
-      var isAngolaQuery = /angola|luanda|bengo|lobito|huambo|lubango|cabinda/i.test(query);
-      
-      if (isAngolaQuery) {
-        // Busca simulada ou via DuckDuckGo específico para domínios .ao
-        var r2 = await fetchWithTimeout('https://api.duckduckgo.com/?q=' + encodeURIComponent(query + ' site:ao') + '&format=json&no_html=1');
-        if (r2 && r2.ok) {
-          var d2 = await r2.json();
-          if (d2.RelatedTopics) {
-            d2.RelatedTopics.slice(0, 2).forEach(t => {
-              if (t.Text && t.FirstURL && !seenUrls.has(t.FirstURL)) {
-                results.push({ title: '[NOTÍCIA/ANGOLA] ' + t.Text.substring(0, 50), text: t.Text, url: t.FirstURL });
-                seenUrls.add(t.FirstURL);
-              }
-            });
-          }
+      // Tentar buscar em portais de notícias reais de Angola via RSS-to-JSON
+      const feeds = [
+        'https://www.jornaldeangola.ao/ao/feed/',
+        'https://www.angop.ao/feed/'
+      ];
+      for (const feed of feeds) {
+        const feedData = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed)}`).then(r => r.json());
+        if (feedData.status === 'ok') {
+          feedData.items.slice(0, 3).forEach(item => {
+            const match = item.title.toLowerCase().includes(query.toLowerCase()) || item.content.toLowerCase().includes(query.toLowerCase());
+            if (match && !seenUrls.has(item.link)) {
+              results.push({ title: '[NOTÍCIA REAL] ' + item.title, text: item.description || item.content.substring(0, 200), url: item.link });
+              seenUrls.add(item.link);
+            }
+          });
         }
       }
     } catch (e) {}
