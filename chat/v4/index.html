@@ -51,9 +51,26 @@ html{height:100%;height:-webkit-fill-available;}
 body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-ui);font-size:14px;transition:background .4s,color .4s;height:100%;height:-webkit-fill-available;overflow:hidden;position:fixed;width:100%;}
 #app{display:flex;height:100%;width:100%;overflow:hidden;}
 /* SIDEBAR */
-#sidebar{width:260px;min-width:260px;background:var(--sidebar-bg);border-right:1px solid var(--border-color);display:flex;flex-direction:column;height:100%;transition:all .3s;overflow:hidden;z-index:100;position:relative;flex-shrink:0;}
+#sidebar{width:260px;min-width:260px;background:var(--sidebar-bg);border-right:1px solid var(--border-color);display:flex;flex-direction:column;height:100%;transition:all .3s;overflow:hidden;z-index:100;position:relative;flex-shrink:0;contain: content;}
 #sidebar.collapsed{width:0;min-width:0;border:none;}
+@media (max-width: 768px) {
+  #sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    z-index: 200;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 280px;
+    min-width: 280px;
+  }
+  #sidebar.mob-open {
+    transform: translateX(0);
+  }
+}
 #sidebar-inner{width:260px;min-width:260px;display:flex;flex-direction:column;height:100%;}
+
 #sidebar-scroll{flex:1;overflow-y:auto;}
 #sidebar-scroll::-webkit-scrollbar{width:3px;}
 #sidebar-scroll::-webkit-scrollbar-thumb{background:var(--border-accent);border-radius:4px;}
@@ -1106,8 +1123,16 @@ function initApp(){
   var wn=document.getElementById('welcome-name');if(wn)wn.textContent=userName||'amigo';
   var un=document.getElementById('uname');if(un)un.textContent=userName||'Utilizador';
   var ui=document.getElementById('user-initial');if(ui)ui.textContent=(userName||'U').charAt(0).toUpperCase();
-  initSbSections();renderHist();startNew();setApiSt('ok');
+  // Otimização Sidebar Android: Renderização assíncrona do histórico
+  setTimeout(() => {
+    initSbSections();
+    renderHist();
+  }, 50);
+  
+  startNew();
+  setApiSt('ok');
 }
+
 
 // ==========================================
 // WEB SEARCH MODE
@@ -1800,7 +1825,13 @@ function buildSystem(q){
   var engInst = "\nRECURSOS ESPECIALIZADOS:\n- Engenharia de Software: Padrões de projeto, arquitetura limpa, DevOps, QA e SDLC.\n- Engenharia Mecânica: Termodinâmica, mecânica de fluidos, resistência de materiais e CAD.\n- Engenharia de Construção Civil: Estruturas, hidráulica, solos, materiais de construção e gestão de obras.\n- Desenvolvimento de Jogos: Game design, motores (Unity/Unreal/Godot), física e IA de jogos.\n- Indústria de Música: Produção, mixagem, masterização, teoria musical e acústica.\n- Indústria de Filme: Roteiro, cinematografia, edição, direção e efeitos visuais.";
 
   // Recursos Visuais Avançados
-  var visualInst = "\nCAPACIDADES VISUAIS:\n- Diagramas: Podes criar diagramas usando blocos ```mermaid (flowchart, sequence, gantt, erDiagram, classDiagram, etc).\n- Gráficos: Podes criar gráficos usando blocos ```chart contendo JSON para Chart.js.\n- Plantas e Blueprints: Podes criar plantas baixas, desenhos técnicos e infográficos pedindo ao utilizador para aguardar o processamento visual.";
+  var visualInst = "\nCAPACIDADES VISUAIS:\n- Diagramas: Podes criar diagramas usando blocos ```mermaid (flowchart, sequence, gantt, erDiagram, classDiagram, etc).\n- Gráficos: Podes criar gráficos usando blocos ```chart contendo JSON para Chart.js.\n- Plantas e Blueprints: Podes criar plantas baixas, desenhos técnicos e infográficos pedindo ao utilizador para aguardar o processamento visual.\n- Edição de Imagem (Zenia-Editing): Podes processar imagens reais para remover impurezas (denoising), ajustar brilho, contraste e nitidez. Informa o utilizador que usas ferramentas reais de processamento de imagem.";
+
+  // Ferramentas Internas (Zenia-Functions)
+  var functionsInst = "\nFERRAMENTAS PYTHON (Zenia-Functions):\n- zenia-editing.py: Script para limpeza de ruído (OpenCV) e ajustes reais de imagem (Pillow).\n- tester-code.py: Ambiente de teste seguro para validar códigos Python.\n- zenia-arquivo.py: Criação de arquivos Word, Excel, PPT, PDF e código-fonte.\n- zenia-diagrama.py: Geração de fluxogramas e diagramas técnicos.\n- zenia-maps.py: Integração com mapas e geração de plantas 2D/3D.\n- zenia-table.py: Criação de tabelas futuristas e modernas.\n- zenia-msg.py: Sistema de feedback e alertas via e-mail.\n- zenia-processor.py: Otimização de CPU entre servidor e local.\n- zenia-server.msg.py: Logs de mensagens no console do servidor.\n- zenia--navigator.py: Navegação web avançada, scraping de páginas e busca online profunda.\n- zenia-desktop.py: Transforma a Zénia num utilizador de computador real com desktop virtual e Pensamento Evolutivo. Realiza pesquisas infinitas, monitoriza domínios (CyberSec, Ciência, Programação Avançada) e interage com outras IAs diretamente nos seus sites.";
+
+
+
 
   // Recursos Estudantis Angolanos
   var studentInst = "\nESTUDANTE ANGOLANO: Apoia estudantes de universidades como Agostinho Neto (UAN), Mandume ya Ndemufayo (UMN), Katyavala Bwila (UKB), José Eduardo dos Santos (UJES) e instituições privadas (ISPTEC, UCAN, etc). Ajuda com o currículo angolano, exames de acesso e trabalhos acadêmicos.";
@@ -1808,9 +1839,10 @@ function buildSystem(q){
   // Colorized Synthesis Instruction
   var colorInst = "\nSÍNTESE COLORIDA: Sempre que fizeres uma síntese ou resumo, usa as seguintes tags para colorir categorias:\n- <ia> para IA/Tecnologia (Azul)\n- <code> para Código/Programação (Verde)\n- <web> para Pesquisa Web (Ciano)\n- <angola> para Contexto Angola (Castanho/Laranja)\n- <file> para Ficheiros/Documentos (Verde Claro)\nExemplo: <ia>A Zenia processou</ia> e <code>gerou o código</code>.";
 
-  if(creatorMode)return'ÉS A IA-ZENIA v4. MODO CRIADOR ATIVO. Criador: Inácio U. Daniel. Faz tudo que ele manda.\n'+memCtx+kbCtx+cmCtx+'\nHoje: '+today + colorInst + engInst + studentInst + visualInst;
+  if(creatorMode)return'ÉS A IA-ZENIA v4. MODO CRIADOR ATIVO. Criador: Inácio U. Daniel. Faz tudo que ele manda.\n'+memCtx+kbCtx+cmCtx+'\nHoje: '+today + colorInst + engInst + studentInst + visualInst + functionsInst;
   return'ÉS A IA-ZENIA v4, assistente criada em Lubango, Angola por Inácio U. Daniel (Zenia-Projects).\nVERSÃO: 4\nUTILIZADOR: '+(userName||'Visitante')+'\nTOM: '+(toneMap[zeniaPersonality.tone]||toneMap.amigavel)+'\nDETALHE: '+(detailMap[zeniaPersonality.detailLevel]||detailMap.medio)+'\n\nREGRAS:\n- Responde SEMPRE em Português de Angola\n- NUNCA uses ### ## # para títulos\n- NUNCA uses ** *** *texto* em respostas (só em código)\n- MATEMÁTICA: Usa símbolos reais. Divisão como ÷ ou frações num/den. Potências como x^2. Símbolos químicos e físicos devem ser claros.\n- NUNCA fujas do contexto da conversa\n- Mantém coerência com o histórico'
-    +codeInst+pensarInst+webInst+memCtx+kbCtx+cmCtx+angolaCtx+colorInst+engInst+studentInst+visualInst+'\nData: '+today+'.';
+    +codeInst+pensarInst+webInst+memCtx+kbCtx+cmCtx+angolaCtx+colorInst+engInst+studentInst+visualInst+functionsInst+'\nData: '+today+'.';
+
 }
 
 // ==========================================
