@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="pt-ao">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IA-Zénia v5 - Em Construção</title>
+  <style>
+    :root {
+      --bg-dark: #0a0a14;
+      --bg-panel: #121220;
+      --accent-primary: #00f7ff;
+      --accent-secondary: #ff00c8;
+      --text-primary: #ffffff;
+      --text-secondary: #b0b0d0;
+      --border-radius: 12px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid rgba(0, 247, 255, 0.2);
+      margin-bottom: 30px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .logo-text {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 1px;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 25px;
+    }
+
+    nav a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 8px 15px;
+      border-radius:(--border-radius);
+      transition: var(--transition);
+      position: relative;
+    }
+
+    nav a:hover {
+      color: var(--accent-primary);
+    }
+
+    nav a.active {
+      color: var(--accent-primary);
+    }
+
+    nav a.active::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--accent-primary);
+      border-radius: 3px;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 30px;
+    }
+
+    .content-area {
+      background: var(--bg-panel);
+      border-radius: var(--border-radius);
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(0, 247, 255, 0.1);
+    }
+
+    .section-title {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: var(--accent-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title i {
+      font-size: 28px;
+    }
+
+    .status-banner {
+      background: linear-gradient(90deg, rgba(0, 247, 255, 0.1), rgba(255, 0, 200, 0.1));
+      border: 1px solid rgba(0, 247, 255, 0.3);
+      border-radius: var(--border-radius);
+      padding: 25px;
+      margin-bottom: 30px;
+      text-align: center;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(0, 247, 255, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(0, 247, 255, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 247, 255, 0); }
+    }
+
+    .status-banner h2 {
+      font-size: 28px;
+      margin-bottom: 15px;
+      color: var(--accent-primary);
+    }
+
+    .status-banner p {
+      font-size: 18px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20;
+      margin-top: 30px;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--border-radius);
+      padding:20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: var(--transition);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--accent-primary);
+      box-shadow: 0 5px 15px rgba(0, 247, 255, 0.2);
+    }
+
+    .feature-card h3 {
+      color: var(--accent-primary);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .sidebar {
+      background: var(--bg-panel);
+      border-radius: var(--border-radius);
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(0, 247, 255, 0.1);
+    }
+
+    .sidebar h3 {
+      color: var(--accent-primary);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(0, 247, 255, 0.2);
+    }
+
+    .progress-container {
+      margin: 25px 0;
+    }
+
+    .progress-bar {
+      height: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 5px;
+      width: 65%;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .team-info {
+      background: rgba(0, 247, 255, 0.05);
+      border-radius: var(--border-radius);
+      padding: 20px;
+      margin-top: 25px;
+    }
+
+    .team-member {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .member-info h4 {
+      color: var(--accent-primary);
+    }
+
+    .member-info p {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px 0;
+      margin-top: 40px;
+      border-top: 1px solid rgba(0, 247, 255, 0.2);
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .build-status {
+      display: inline-block;
+      background: rgba(255, 0, 200, 0.2);
+      color: var(--accent-secondary);
+     : 5px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        grid-template-columns: 1fr;
+      }
+
+      nav ul {
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      header {
+        flex-direction: column;
+        gap: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">Z</div>
+        <div class="logo-text">IA-Zénia v5</div>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="#" class="active">Início</a></li>
+          <li><a href="#">Recursos</a></li>
+          <li><a href="#">Equipa</a></li>
+          <li><a href="#">Contato</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="main-content">
+      <div class="content-area">
+        <div class="status-banner">
+          <h2>⚠️ Em Construção ⚠️</h2>
+          <p>O futuro site da IA-Zénia v5 está atualmente em desenvolvimento ativo. Nossa equipe da Zenia Projects está trabalhando incansavelmente para trazer a melhor experiência futurista possível. Esta página será atualizada conforme o progresso do desenvolvimento.</p>
+          <div class="build-status">Versão: v0.1 - Em Desenvolvimento</div>
+        </div>
+
+        <h2 class="section-title">🚀 Recursos Planejados</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <h3>🌐 Interface Multiaba</h3>
+            <p>Navegação intuitiva com abas modernas para diferentes funcionalidades da IA.</p>
+          </div>
+          <div class="feature-card">
+            <h3>🎨 Design Futurista</h3>
+            <p>Estilo escuro com elementos neon e transições suaves para experiência imersiva.</p>
+          </div>
+          <div class="feature-card">
+            <h3>🤖 IA Avançada</h3>
+            <p>Funcionalidades de inteligência artificial de última geração integradas.</p>
+          </div>
+          <div class="feature-card">
+            <h3>🔒 Segurança</h3>
+            <p>Protocolos de segurança avançados para proteção de dados e privacidade.</p>
+          </div>
+        </div>
+
+        <h2 class="section-title">📊 Progresso do Desenvolvimento</h2>
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+          <div class="progress-label">
+            <span>Frontend</span>
+            <span>65%</span>
+          </div>
+        </div>
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 40%;"></div>
+          </div>
+          <div class="progress-label">
+            <span>Backend</span>
+            <span>40%</span>
+          </div>
+        </div>
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 20%;"></div>
+          </div>
+          <div class="progress-label">
+            <span>Integração IA</span>
+            <span>20%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <h3>Equipe Zenia Projects</h3>
+        <div class="team-info">
+          <div class="team-member">
+            <div class="avatar">I</div>
+            <div class="member-info">
+              <h4>Inácio U. Daniel</h4>
+              <p>Líder de Projeto</p>
+            </div>
+          </div>
+          <div class="team-member">
+            <div class="avatar">C</div>
+            <div class="member-info">
+              <h4>Clerio Cuita</h4>
+              <p>Designer UX/UI</p>
+            </div>
+          </div>
+          <div class="team-member">
+            <div class="avatar">M</div>
+            <div class="member-info">
+              <h4>Maravilho Mateus</h4>
+              <p>Desenvolvedor Backend</p>
+            </div>
+          </div>
+        </div>
+
+        <h3>📅 Próximos Passos</h3>
+        <ul style="list-style: none; color: var(--text-secondary); padding-left: 0;">
+          <li style="margin-bottom: 10px;">✅ Implementação do sistema de abas</li>
+          <li style="margin-bottom: 10px;">✅ Estilização do tema escuro</li>
+          <li style="margin-bottom: 10px;">✅ Integração com API da IA</li>
+          <li style="margin-bottom: 10px;">✅ Testes de performance</li>
+          <li>✅ Lançamento beta</li>
+        </ul>
+      </div>
+    </div>
+
+    <footer>
+      <p>© 2026 Zenia Projects - Todos os direitos reservados</p>
+      <p>Hospedado em: <strong>https://ia-zenia.onrender.com/chat/v5</strong></p>
+      <p>Esta página é parte do projeto IA-Zénia v5 em desenvolvimento</p>
+    </footer>
+  </div>
+
+  <script>
+    // Atualizar navegação ativa
+    document.querySelectorAll('nav a').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Animação de carregamento
+    document.addEventListener('DOMContentLoaded', function() {
+      const statusBanner = document.querySelector('.status-banner');
+      statusBanner.style.opacity = '0';
+      setTimeout(() => {
+        statusBanner.style.transition = 'opacity 0.8s ease';
+        statusBanner.style.opacity = '1';
+      }, 100);
+    });
+  </script>
+</body>
+</html>
