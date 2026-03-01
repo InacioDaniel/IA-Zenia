@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZeniaOS — by Zénia Projects</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #111118;
+  --surface2: #1a1a25;
+  --surface3: #22223a;
+  --accent1: #ff6b35;
+  --accent2: #f7c59f;
+  --accent3: #00d4aa;
+  --accent4: #ffb347;
+  --accent5: #e85d04;
+  --neon1: #ff6b35;
+  --neon2: #00ffc8;
+  --neon3: #ffb347;
+  --text: #f0ede8;
+  --text2: #a09880;
+  --border: rgba(255,107,53,0.2);
+  --glow: 0 0 20px rgba(255,107,53,0.4);
+  --glow2: 0 0 20px rgba(0,255,200,0.3);
+  --taskbar-h: 52px;
+  --font-head: 'Orbitron', monospace;
+  --font-body: 'Rajdhani', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+  --wallpaper: linear-gradient(135deg, #0a0a0f 0%, #0f0a1a 25%, #1a0a0a 50%, #0a100f 75%, #0a0a0f 100%);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--text);
+  overflow:hidden;
+  width:100vw;height:100vh;
+  user-select:none;
+}
+
+/* ═══════════════════════════════════════
+   BOOT SCREEN
+═══════════════════════════════════════ */
+#boot{
+  position:fixed;inset:0;
+  background:#000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9999;
+  transition:opacity 0.8s ease;
+}
+.boot-logo{
+  font-family:var(--font-head);
+  font-size:3.5rem;font-weight:900;
+  background:linear-gradient(135deg,var(--accent1),var(--accent4),var(--accent3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:8px;
+  animation:pulse 2s ease-in-out infinite;
+}
+.boot-sub{font-size:0.9rem;color:var(--text2);letter-spacing:4px;margin-top:8px;font-family:var(--font-mono);}
+.boot-bar-wrap{width:320px;height:3px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:40px;overflow:hidden;}
+.boot-bar{height:100%;width:0;border-radius:2px;background:linear-gradient(90deg,var(--accent1),var(--accent4),var(--accent3));transition:width 0.1s;}
+.boot-status{font-family:var(--font-mono);font-size:0.7rem;color:var(--accent3);margin-top:12px;min-height:16px;}
+@keyframes pulse{0%,100%{filter:brightness(1);}50%{filter:brightness(1.3);}}
+
+/* ═══════════════════════════════════════
+   LOGIN SCREEN
+═══════════════════════════════════════ */
+#login{
+  position:fixed;inset:0;
+  background:var(--wallpaper);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9998;
+}
+#login::before{
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ff6b35' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.login-card{
+  background:rgba(17,17,24,0.9);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:48px 52px;
+  min-width:380px;
+  text-align:center;
+  backdrop-filter:blur(20px);
+  box-shadow:0 0 60px rgba(255,107,53,0.15),0 20px 80px rgba(0,0,0,0.6);
+  position:relative;z-index:1;
+}
+.login-os-name{font-family:var(--font-head);font-size:1.8rem;font-weight:900;background:linear-gradient(135deg,var(--accent1),var(--accent4));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:4px;margin-bottom:4px;}
+.login-os-sub{font-size:0.75rem;color:var(--text2);letter-spacing:3px;margin-bottom:32px;}
+.login-avatar-wrap{margin-bottom:20px;}
+.login-avatar{
+  width:80px;height:80px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent1),var(--accent5));
+  display:flex;align-items:center;justify-content:center;
+  font-size:2rem;margin:0 auto 12px;
+  box-shadow:0 0 30px rgba(255,107,53,0.4);
+}
+.login-username-disp{font-size:1.1rem;color:var(--text);font-weight:600;margin-bottom:24px;}
+.login-user-select{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:24px;}
+.user-btn{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;padding:12px 16px;cursor:pointer;
+  transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:6px;
+  min-width:80px;
+}
+.user-btn:hover,.user-btn.active{border-color:var(--accent1);background:rgba(255,107,53,0.1);box-shadow:var(--glow);}
+.user-btn .uavatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;}
+.user-btn .uname{font-size:0.75rem;color:var(--text2);}
+.login-input{
+  width:100%;background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:12px 16px;color:var(--text);font-family:var(--font-body);
+  font-size:1rem;outline:none;transition:all 0.2s;margin-bottom:16px;
+}
+.login-input:focus{border-color:var(--accent1);box-shadow:0 0 0 3px rgba(255,107,53,0.1);}
+.login-btn{
+  width:100%;padding:13px;border-radius:10px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--accent1),var(--accent5));
+  color:#fff;font-family:var(--font-head);font-size:0.85rem;letter-spacing:2px;
+  font-weight:700;transition:all 0.2s;
+}
+.login-btn:hover{filter:brightness(1.2);transform:translateY(-1px);box-shadow:var(--glow);}
+.login-add-user{margin-top:12px;font-size:0.8rem;color:var(--accent3);cursor:pointer;text-decoration:underline;}
+.login-error{color:#ff4444;font-size:0.8rem;margin-top:8px;min-height:18px;}
+
+/* ═══════════════════════════════════════
+   DESKTOP
+═══════════════════════════════════════ */
+#desktop{
+  position:fixed;inset:0;
+  background:var(--wallpaper);
+  display:none;
+  overflow:hidden;
+}
+#desktop.visible{display:block;}
+#desktop::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 30%, rgba(255,107,53,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 80% 70%, rgba(0,212,170,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(255,179,71,0.04) 0%, transparent 60%);
+  pointer-events:none;
+}
+#desktop-grid{
+  position:absolute;inset:0;
+  top:0;bottom:var(--taskbar-h);
+  display:grid;
+  grid-template-columns:repeat(auto-fill,88px);
+  grid-template-rows:repeat(auto-fill,100px);
+  align-content:start;
+  padding:24px;gap:8px;
+  pointer-events:none;
+}
+.desk-icon{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:pointer;border-radius:12px;padding:8px;
+  transition:all 0.15s;pointer-events:all;
+  width:88px;
+}
+.desk-icon:hover{background:rgba(255,107,53,0.12);}
+.desk-icon:active{transform:scale(0.95);}
+.desk-icon .icon-img{
+  width:52px;height:52px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;
+  box-shadow:0 4px 16px rgba(0,0,0,0.4);
+  transition:all 0.2s;
+}
+.desk-icon:hover .icon-img{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.5);}
+.desk-icon .icon-label{
+  font-size:0.7rem;color:#fff;text-align:center;
+  text-shadow:0 1px 4px rgba(0,0,0,0.8);
+  line-height:1.2;word-break:break-word;
+}
+
+/* ═══════════════════════════════════════
+   TASKBAR
+═══════════════════════════════════════ */
+#taskbar{
+  position:fixed;bottom:0;left:0;right:0;
+  height:var(--taskbar-h);
+  background:rgba(10,10,15,0.85);
+  backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 16px;gap:8px;
+  z-index:100;
+}
+#tb-start{
+  width:40px;height:40px;border-radius:10px;
+  background:linear-gradient(135deg,var(--accent1),var(--accent5));
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:1.1rem;font-family:var(--font-head);font-weight:900;color:#fff;
+  flex-shrink:0;transition:all 0.2s;
+  box-shadow:0 0 15px rgba(255,107,53,0.3);
+}
+#tb-start:hover{filter:brightness(1.2);box-shadow:var(--glow);}
+#tb-apps{display:flex;gap:4px;flex:1;overflow:hidden;}
+.tb-app-btn{
+  height:38px;min-width:120px;max-width:160px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;display:flex;align-items:center;gap:8px;
+  padding:0 10px;cursor:pointer;font-size:0.75rem;color:var(--text2);
+  transition:all 0.15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-family:var(--font-body);
+}
+.tb-app-btn:hover,.tb-app-btn.active{background:rgba(255,107,53,0.15);border-color:var(--accent1);color:var(--text);}
+.tb-app-btn .tb-icon{font-size:0.9rem;flex-shrink:0;}
+#tb-right{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+#tb-clock{font-family:var(--font-mono);font-size:0.78rem;color:var(--text2);cursor:default;min-width:80px;text-align:right;}
+#tb-user-btn{display:flex;align-items:center;gap:6px;cursor:pointer;padding:4px 10px;border-radius:8px;transition:all 0.2s;}
+#tb-user-btn:hover{background:var(--surface2);}
+.tb-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;}
+
+/* ═══════════════════════════════════════
+   START MENU
+═══════════════════════════════════════ */
+#start-menu{
+  position:fixed;bottom:var(--taskbar-h);left:8px;
+  width:320px;background:rgba(17,17,24,0.95);
+  border:1px solid var(--border);border-radius:16px 16px 0 0;
+  backdrop-filter:blur(30px);
+  box-shadow:0 -10px 60px rgba(0,0,0,0.5);
+  display:none;flex-direction:column;
+  overflow:hidden;z-index:200;
+  transform:translateY(10px);transition:transform 0.2s,opacity 0.2s;opacity:0;
+}
+#start-menu.open{display:flex;transform:translateY(0);opacity:1;}
+.sm-header{padding:16px;border-bottom:1px solid var(--border);}
+.sm-title{font-family:var(--font-head);font-size:0.9rem;font-weight:700;color:var(--accent1);letter-spacing:2px;}
+.sm-apps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:16px;}
+.sm-app{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:pointer;padding:12px 8px;border-radius:12px;
+  transition:all 0.15s;border:1px solid transparent;
+}
+.sm-app:hover{background:rgba(255,107,53,0.12);border-color:var(--border);}
+.sm-app .sa-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;}
+.sm-app .sa-name{font-size:0.68rem;text-align:center;color:var(--text2);line-height:1.2;}
+.sm-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.sm-user-info{display:flex;align-items:center;gap:10px;}
+.sm-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+.sm-logout{background:none;border:none;color:var(--text2);cursor:pointer;font-size:0.8rem;padding:6px 12px;border-radius:6px;font-family:var(--font-body);transition:all 0.15s;}
+.sm-logout:hover{background:rgba(255,68,68,0.1);color:#ff4444;}
+
+/* ═══════════════════════════════════════
+   WINDOWS
+═══════════════════════════════════════ */
+.window{
+  position:absolute;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  box-shadow:0 20px 80px rgba(0,0,0,0.7),0 0 0 1px rgba(255,107,53,0.05);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  min-width:400px;min-height:300px;
+  z-index:10;
+  animation:win-open 0.2s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes win-open{from{transform:scale(0.9);opacity:0;}to{transform:scale(1);opacity:1;}}
+.window.maximized{
+  top:0!important;left:0!important;
+  width:100%!important;height:calc(100vh - var(--taskbar-h))!important;
+  border-radius:0;
+}
+.window.focused{z-index:50;border-color:rgba(255,107,53,0.4);}
+.win-titlebar{
+  height:38px;background:var(--surface2);
+  display:flex;align-items:center;padding:0 12px;
+  border-bottom:1px solid var(--border);
+  cursor:move;gap:8px;flex-shrink:0;
+}
+.win-controls{display:flex;gap:6px;}
+.win-btn{
+  width:12px;height:12px;border-radius:50%;border:none;cursor:pointer;
+  transition:filter 0.15s;
+}
+.win-btn.close{background:#ff5f57;}
+.win-btn.minimize{background:#febc2e;}
+.win-btn.maximize{background:#28c840;}
+.win-btn:hover{filter:brightness(1.3);}
+.win-title{flex:1;text-align:center;font-size:0.78rem;color:var(--text2);font-family:var(--font-body);font-weight:600;letter-spacing:1px;}
+.win-body{flex:1;overflow:hidden;position:relative;}
+.win-resize{
+  position:absolute;right:0;bottom:0;
+  width:16px;height:16px;cursor:se-resize;
+  background:transparent;
+}
+.win-resize::after{
+  content:'';position:absolute;right:4px;bottom:4px;
+  width:8px;height:8px;
+  border-right:2px solid var(--border);
+  border-bottom:2px solid var(--border);
+}
+
+/* ═══════════════════════════════════════
+   BROWSER APP
+═══════════════════════════════════════ */
+.browser-wrap{display:flex;flex-direction:column;height:100%;}
+.browser-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px;background:var(--surface2);
+  border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.browser-nav-btn{
+  width:28px;height:28px;border-radius:6px;border:1px solid var(--border);
+  background:var(--surface3);color:var(--text);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:0.8rem;
+  transition:all 0.15s;
+}
+.browser-nav-btn:hover{border-color:var(--accent1);background:rgba(255,107,53,0.1);}
+.browser-url{
+  flex:1;background:var(--surface3);border:1px solid var(--border);
+  border-radius:8px;padding:6px 12px;color:var(--text);font-family:var(--font-mono);
+  font-size:0.78rem;outline:none;transition:all 0.2s;
+}
+.browser-url:focus{border-color:var(--accent1);box-shadow:0 0 0 2px rgba(255,107,53,0.1);}
+.browser-go{
+  padding:6px 14px;border-radius:8px;border:none;
+  background:var(--accent1);color:#fff;cursor:pointer;font-size:0.78rem;font-family:var(--font-body);
+  font-weight:700;transition:all 0.2s;
+}
+.browser-go:hover{filter:brightness(1.2);}
+.browser-frame{flex:1;border:none;background:#fff;}
+
+/* ═══════════════════════════════════════
+   VIDEO PLAYER
+═══════════════════════════════════════ */
+.video-wrap{display:flex;flex-direction:column;height:100%;background:#000;}
+.video-main{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.video-main video{max-width:100%;max-height:100%;outline:none;}
+.video-placeholder{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:var(--text2);gap:16px;font-size:0.9rem;
+}
+.video-placeholder .vp-icon{font-size:3rem;opacity:0.4;}
+.video-controls{
+  background:rgba(17,17,24,0.95);border-top:1px solid var(--border);
+  padding:12px 16px;flex-shrink:0;
+}
+.vc-progress{
+  width:100%;height:4px;background:var(--surface3);border-radius:2px;
+  cursor:pointer;margin-bottom:10px;position:relative;overflow:hidden;
+}
+.vc-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent1),var(--accent4));border-radius:2px;width:0%;transition:width 0.1s;}
+.vc-btns{display:flex;align-items:center;gap:10px;}
+.vc-btn{background:none;border:none;color:var(--text);cursor:pointer;font-size:1rem;padding:4px;border-radius:6px;transition:all 0.15s;}
+.vc-btn:hover{color:var(--accent1);}
+.vc-time{font-family:var(--font-mono);font-size:0.72rem;color:var(--text2);}
+.vc-vol{display:flex;align-items:center;gap:6px;margin-left:auto;}
+.vc-vol input{width:80px;accent-color:var(--accent1);}
+.vc-open-btn{
+  padding:8px 20px;border-radius:8px;border:1px solid var(--accent1);
+  background:rgba(255,107,53,0.1);color:var(--accent1);cursor:pointer;
+  font-family:var(--font-body);font-size:0.85rem;transition:all 0.2s;
+}
+.vc-open-btn:hover{background:rgba(255,107,53,0.2);}
+.video-sidebar{
+  width:220px;border-left:1px solid var(--border);
+  background:var(--surface2);overflow-y:auto;
+  display:flex;flex-direction:column;flex-shrink:0;
+}
+.video-sidebar-title{padding:12px;font-size:0.75rem;color:var(--text2);border-bottom:1px solid var(--border);font-family:var(--font-mono);}
+.video-playlist-item{
+  padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);
+  font-size:0.78rem;color:var(--text2);transition:all 0.15s;display:flex;align-items:center;gap:8px;
+}
+.video-playlist-item:hover,.video-playlist-item.active{background:rgba(255,107,53,0.1);color:var(--text);}
+.video-wrap.with-sidebar{flex-direction:row;}
+.video-wrap.with-sidebar .video-left{flex:1;display:flex;flex-direction:column;}
+
+/* ═══════════════════════════════════════
+   MUSIC PLAYER
+═══════════════════════════════════════ */
+.music-wrap{
+  height:100%;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,var(--surface2) 0%,var(--surface) 100%);
+}
+.music-art-area{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:16px;padding:24px;
+  position:relative;overflow:hidden;
+}
+.music-art-area::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at center,rgba(255,107,53,0.08) 0%,transparent 70%);
+}
+.music-cover{
+  width:140px;height:140px;border-radius:16px;
+  background:linear-gradient(135deg,var(--accent1),var(--accent5),#1a0a0a);
+  display:flex;align-items:center;justify-content:center;
+  font-size:3rem;box-shadow:0 20px 60px rgba(255,107,53,0.3),0 0 0 1px rgba(255,107,53,0.2);
+  position:relative;z-index:1;
+  animation:spin-slow 20s linear infinite paused;
+}
+.music-cover.playing{animation-play-state:running;}
+@keyframes spin-slow{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.music-info{text-align:center;position:relative;z-index:1;}
+.music-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:4px;}
+.music-artist{font-size:0.85rem;color:var(--text2);}
+.music-controls{background:var(--surface2);border-top:1px solid var(--border);padding:16px;flex-shrink:0;}
+.mc-progress{width:100%;height:3px;background:var(--surface3);border-radius:2px;cursor:pointer;margin-bottom:12px;overflow:hidden;}
+.mc-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent1),var(--accent4));border-radius:2px;transition:width 0.1s;}
+.mc-btns{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:12px;}
+.mc-btn{background:none;border:none;color:var(--text2);cursor:pointer;font-size:1.1rem;padding:6px;border-radius:8px;transition:all 0.15s;}
+.mc-btn:hover{color:var(--accent1);}
+.mc-btn.main{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent1),var(--accent5));
+  color:#fff;font-size:1.2rem;box-shadow:0 4px 20px rgba(255,107,53,0.4);
+}
+.mc-btn.main:hover{filter:brightness(1.2);transform:scale(1.05);}
+.mc-vol{display:flex;align-items:center;gap:8px;font-size:0.75rem;color:var(--text2);}
+.mc-vol input{flex:1;accent-color:var(--accent1);}
+.music-library{
+  border-top:1px solid var(--border);
+  max-height:150px;overflow-y:auto;
+}
+.music-lib-item{
+  display:flex;align-items:center;gap:10px;padding:8px 14px;
+  cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);
+  transition:all 0.15s;
+}
+.music-lib-item:hover,.music-lib-item.active{background:rgba(255,107,53,0.1);}
+.music-lib-icon{font-size:1rem;width:24px;text-align:center;}
+.music-lib-info{flex:1;}
+.music-lib-name{font-size:0.78rem;color:var(--text);}
+.music-lib-artist{font-size:0.68rem;color:var(--text2);}
+.music-lib-dur{font-size:0.68rem;color:var(--text2);font-family:var(--font-mono);}
+
+/* ═══════════════════════════════════════
+   SETTINGS
+═══════════════════════════════════════ */
+.settings-wrap{display:flex;height:100%;}
+.settings-nav{
+  width:180px;background:var(--surface2);border-right:1px solid var(--border);
+  padding:8px;flex-shrink:0;overflow-y:auto;
+}
+.settings-nav-item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-radius:8px;cursor:pointer;font-size:0.82rem;color:var(--text2);
+  transition:all 0.15s;margin-bottom:2px;
+}
+.settings-nav-item:hover,.settings-nav-item.active{background:rgba(255,107,53,0.12);color:var(--text);}
+.settings-nav-item .sni{font-size:1rem;width:20px;text-align:center;}
+.settings-content{flex:1;overflow-y:auto;padding:20px;}
+.settings-section{display:none;}
+.settings-section.active{display:block;}
+.settings-h{font-family:var(--font-head);font-size:0.85rem;font-weight:700;color:var(--accent1);letter-spacing:2px;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.setting-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.setting-label{font-size:0.85rem;color:var(--text);}
+.setting-sub{font-size:0.72rem;color:var(--text2);margin-top:2px;}
+.toggle-switch{
+  width:44px;height:24px;background:var(--surface3);border-radius:12px;
+  cursor:pointer;position:relative;transition:background 0.2s;
+}
+.toggle-switch.on{background:var(--accent1);}
+.toggle-switch::after{
+  content:'';position:absolute;top:3px;left:3px;
+  width:18px;height:18px;border-radius:50%;background:#fff;
+  transition:transform 0.2s;
+}
+.toggle-switch.on::after{transform:translateX(20px);}
+.setting-select{
+  background:var(--surface3);border:1px solid var(--border);
+  color:var(--text);padding:6px 10px;border-radius:8px;font-family:var(--font-body);
+  font-size:0.82rem;outline:none;cursor:pointer;
+}
+.setting-select:focus{border-color:var(--accent1);}
+.setting-range{accent-color:var(--accent1);width:120px;}
+.wallpaper-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;}
+.wp-option{
+  height:60px;border-radius:8px;cursor:pointer;border:2px solid transparent;
+  transition:all 0.2s;
+}
+.wp-option:hover,.wp-option.active{border-color:var(--accent1);box-shadow:0 0 12px rgba(255,107,53,0.3);}
+
+/* ═══════════════════════════════════════
+   USERS MANAGER
+═══════════════════════════════════════ */
+.users-wrap{padding:20px;overflow-y:auto;height:100%;}
+.users-h{font-family:var(--font-head);font-size:0.85rem;font-weight:700;color:var(--accent1);letter-spacing:2px;margin-bottom:16px;}
+.users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px;}
+.user-card{
+  background:var(--surface2);border:1px solid var(--border);border-radius:12px;
+  padding:16px;text-align:center;cursor:pointer;transition:all 0.2s;
+}
+.user-card:hover{border-color:var(--accent1);background:rgba(255,107,53,0.08);}
+.uc-avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 10px;}
+.uc-name{font-size:0.9rem;font-weight:700;color:var(--text);}
+.uc-role{font-size:0.72rem;color:var(--text2);margin-top:2px;}
+.uc-actions{display:flex;gap:6px;justify-content:center;margin-top:10px;}
+.uc-btn{font-size:0.68rem;padding:4px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:var(--surface3);color:var(--text2);transition:all 0.15s;font-family:var(--font-body);}
+.uc-btn:hover{border-color:var(--accent1);color:var(--accent1);}
+.uc-btn.danger:hover{border-color:#ff4444;color:#ff4444;}
+.add-user-form{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.auf-h{font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:12px;}
+.auf-row{display:flex;gap:8px;flex-wrap:wrap;}
+.auf-input{
+  flex:1;min-width:120px;background:var(--surface3);border:1px solid var(--border);
+  border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font-body);
+  font-size:0.82rem;outline:none;transition:all 0.2s;
+}
+.auf-input:focus{border-color:var(--accent1);}
+.auf-btn{
+  padding:8px 20px;border-radius:8px;border:none;
+  background:var(--accent1);color:#fff;cursor:pointer;font-family:var(--font-body);
+  font-size:0.82rem;font-weight:700;transition:all 0.2s;
+}
+.auf-btn:hover{filter:brightness(1.2);}
+.avatar-picker{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;}
+.av-opt{
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:1rem;border:2px solid transparent;transition:all 0.15s;
+}
+.av-opt.selected{border-color:var(--accent1);box-shadow:0 0 8px rgba(255,107,53,0.4);}
+
+/* ═══════════════════════════════════════
+   APP INSTALLER
+═══════════════════════════════════════ */
+.installer-wrap{padding:20px;overflow-y:auto;height:100%;}
+.installer-h{font-family:var(--font-head);font-size:0.85rem;font-weight:700;color:var(--accent1);letter-spacing:2px;margin-bottom:16px;}
+.installer-zone{
+  border:2px dashed var(--border);border-radius:12px;padding:32px;
+  text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:20px;
+}
+.installer-zone:hover,.installer-zone.drag-over{border-color:var(--accent1);background:rgba(255,107,53,0.05);}
+.iz-icon{font-size:2.5rem;margin-bottom:12px;opacity:0.5;}
+.iz-text{font-size:0.9rem;color:var(--text2);}
+.iz-sub{font-size:0.75rem;color:var(--text2);opacity:0.6;margin-top:4px;}
+.installed-apps-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;}
+.installed-app-item{
+  background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+  padding:12px;display:flex;align-items:center;gap:10px;
+}
+.iai-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--accent1),var(--accent5));display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.iai-info{flex:1;min-width:0;}
+.iai-name{font-size:0.82rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.iai-size{font-size:0.68rem;color:var(--text2);}
+.iai-actions{display:flex;gap:4px;}
+.iai-btn{background:none;border:none;color:var(--text2);cursor:pointer;font-size:0.8rem;padding:4px;border-radius:4px;transition:all 0.15s;}
+.iai-btn:hover{color:var(--accent1);}
+.iai-btn.del:hover{color:#ff4444;}
+
+/* ═══════════════════════════════════════
+   ZENIA APPS (IFRAME)
+═══════════════════════════════════════ */
+.zenia-app-wrap{height:100%;display:flex;flex-direction:column;}
+.zenia-app-bar{
+  padding:6px 12px;background:var(--surface2);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;flex-shrink:0;font-size:0.75rem;color:var(--text2);
+}
+.zenia-app-bar .zab-badge{
+  background:linear-gradient(135deg,var(--accent1),var(--accent5));
+  color:#fff;font-size:0.65rem;padding:2px 8px;border-radius:10px;font-weight:700;letter-spacing:1px;
+}
+.zenia-app-frame{flex:1;border:none;width:100%;}
+
+/* ═══════════════════════════════════════
+   VIDEO GENERATOR APP
+═══════════════════════════════════════ */
+.vgen-wrap{
+  height:100%;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#060a08 0%,#0a0f06 50%,#080a06 100%);
+  font-family:var(--font-body);overflow:hidden;
+}
+.vgen-header{
+  padding:20px 24px 12px;flex-shrink:0;
+  background:linear-gradient(180deg,rgba(0,80,40,0.3) 0%,transparent 100%);
+  border-bottom:1px solid rgba(0,255,150,0.1);
+}
+.vgen-logo{
+  font-family:var(--font-head);font-size:1.2rem;font-weight:900;
+  background:linear-gradient(135deg,#00ff96,#ffb347,#ff6b35);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:3px;margin-bottom:2px;
+}
+.vgen-sub{font-size:0.7rem;color:rgba(0,255,150,0.5);letter-spacing:2px;}
+.vgen-body{flex:1;display:flex;overflow:hidden;}
+.vgen-left{flex:1;padding:20px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;}
+.vgen-label{font-size:0.72rem;color:rgba(255,255,255,0.4);letter-spacing:2px;margin-bottom:6px;font-family:var(--font-mono);}
+.vgen-textarea{
+  width:100%;background:rgba(0,255,100,0.04);border:1px solid rgba(0,255,100,0.15);
+  border-radius:10px;padding:12px;color:#ddfff0;font-family:var(--font-body);
+  font-size:0.88rem;resize:none;outline:none;min-height:80px;
+  transition:all 0.2s;
+}
+.vgen-textarea:focus{border-color:rgba(0,255,150,0.4);box-shadow:0 0 20px rgba(0,255,100,0.08);}
+.vgen-row{display:flex;gap:10px;}
+.vgen-select{
+  flex:1;background:rgba(0,255,100,0.04);border:1px solid rgba(0,255,100,0.15);
+  border-radius:8px;padding:8px 12px;color:#ddfff0;font-family:var(--font-body);
+  font-size:0.82rem;outline:none;
+}
+.vgen-select:focus{border-color:rgba(0,255,150,0.4);}
+.vgen-generate-btn{
+  padding:12px 28px;border-radius:10px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#00c876,#00ff96);
+  color:#003a20;font-family:var(--font-head);font-size:0.78rem;font-weight:700;
+  letter-spacing:2px;transition:all 0.2s;
+  box-shadow:0 4px 20px rgba(0,255,150,0.2);
+}
+.vgen-generate-btn:hover:not(:disabled){filter:brightness(1.15);transform:translateY(-1px);box-shadow:0 8px 30px rgba(0,255,150,0.3);}
+.vgen-generate-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.vgen-right{width:280px;border-left:1px solid rgba(0,255,100,0.08);padding:16px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;}
+.vgen-preview-box{
+  aspect-ratio:16/9;background:rgba(0,0,0,0.5);border-radius:10px;
+  border:1px solid rgba(0,255,100,0.1);display:flex;align-items:center;justify-content:center;
+  overflow:hidden;position:relative;
+}
+.vgen-preview-box video{width:100%;height:100%;object-fit:cover;}
+.vgen-preview-placeholder{display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0.3;}
+.vgen-preview-placeholder .vpp-icon{font-size:2rem;}
+.vgen-preview-placeholder .vpp-text{font-size:0.7rem;color:rgba(0,255,150,0.6);}
+.vgen-status{
+  padding:10px 14px;background:rgba(0,255,100,0.05);border:1px solid rgba(0,255,100,0.1);
+  border-radius:8px;font-size:0.75rem;color:rgba(0,255,150,0.7);font-family:var(--font-mono);
+  min-height:44px;display:flex;align-items:center;
+}
+.vgen-history-title{font-size:0.72rem;color:rgba(255,255,255,0.3);letter-spacing:2px;font-family:var(--font-mono);}
+.vgen-history-list{display:flex;flex-direction:column;gap:6px;}
+.vgen-history-item{
+  padding:8px;background:rgba(0,255,100,0.04);border-radius:8px;
+  border:1px solid rgba(0,255,100,0.08);cursor:pointer;transition:all 0.15s;
+}
+.vgen-history-item:hover{border-color:rgba(0,255,100,0.2);}
+.vhi-prompt{font-size:0.72rem;color:rgba(255,255,255,0.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vhi-meta{font-size:0.65rem;color:rgba(0,255,150,0.4);margin-top:2px;}
+.vgen-progress{
+  height:3px;background:rgba(0,255,100,0.1);border-radius:2px;overflow:hidden;margin-top:4px;
+}
+.vgen-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#00c876,#00ff96);border-radius:2px;transition:width 0.3s;}
+.vgen-credit{font-size:0.6rem;color:rgba(0,255,150,0.2);text-align:center;letter-spacing:1px;padding-top:8px;border-top:1px solid rgba(0,255,100,0.06);}
+.vgen-dl-btn{
+  padding:8px;border-radius:8px;border:1px solid rgba(0,255,100,0.2);
+  background:rgba(0,255,100,0.06);color:rgba(0,255,150,0.8);
+  cursor:pointer;font-size:0.75rem;font-family:var(--font-body);
+  transition:all 0.15s;width:100%;
+}
+.vgen-dl-btn:hover:not(:disabled){background:rgba(0,255,100,0.12);border-color:rgba(0,255,100,0.4);}
+.vgen-dl-btn:disabled{opacity:0.3;cursor:not-allowed;}
+
+/* ═══════════════════════════════════════
+   CONTEXT MENU
+═══════════════════════════════════════ */
+#ctx-menu{
+  position:fixed;background:rgba(17,17,24,0.97);
+  border:1px solid var(--border);border-radius:10px;
+  padding:4px;box-shadow:0 8px 32px rgba(0,0,0,0.5);
+  z-index:9990;display:none;backdrop-filter:blur(20px);min-width:160px;
+}
+.ctx-item{
+  padding:8px 16px;border-radius:6px;cursor:pointer;
+  font-size:0.82rem;color:var(--text);transition:all 0.1s;
+  display:flex;align-items:center;gap:10px;
+}
+.ctx-item:hover{background:rgba(255,107,53,0.12);color:var(--accent1);}
+.ctx-separator{height:1px;background:var(--border);margin:4px 8px;}
+
+/* ═══════════════════════════════════════
+   NOTIFICATION
+═══════════════════════════════════════ */
+#notifications{
+  position:fixed;top:12px;right:12px;
+  display:flex;flex-direction:column;gap:8px;
+  z-index:9995;pointer-events:none;
+}
+.notif{
+  background:rgba(17,17,24,0.97);border:1px solid var(--border);
+  border-radius:10px;padding:12px 16px;backdrop-filter:blur(20px);
+  box-shadow:0 4px 20px rgba(0,0,0,0.4);max-width:280px;
+  animation:notif-in 0.3s ease;
+  border-left:3px solid var(--accent1);
+}
+.notif.success{border-left-color:var(--accent3);}
+.notif.error{border-left-color:#ff4444;}
+@keyframes notif-in{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.notif-title{font-size:0.8rem;font-weight:700;color:var(--text);}
+.notif-msg{font-size:0.72rem;color:var(--text2);margin-top:4px;}
+
+/* ═══════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════ */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:2px;}
+::-webkit-scrollbar-thumb:hover{background:var(--accent1);}
+
+/* Animations */
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+.desk-icon:hover .icon-img{animation:float 2s ease-in-out infinite;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ BOOT ═══════════════════════ -->
+<div id="boot">
+  <div class="boot-logo">ZENIAOS</div>
+  <div class="boot-sub">by Zénia Projects & Inácio U. Daniel</div>
+  <div class="boot-bar-wrap"><div class="boot-bar" id="boot-bar"></div></div>
+  <div class="boot-status" id="boot-status">Iniciando sistema...</div>
+</div>
+
+<!-- ═══════════════════════ LOGIN ═══════════════════════ -->
+<div id="login">
+  <div class="login-card">
+    <div class="login-os-name">ZENIAOS</div>
+    <div class="login-os-sub">Sistema Operativo Zénia</div>
+    <div class="login-user-select" id="login-user-select"></div>
+    <div class="login-avatar-wrap">
+      <div class="login-avatar" id="login-avatar">👤</div>
+      <div class="login-username-disp" id="login-username-disp">Seleciona um utilizador</div>
+    </div>
+    <input type="password" class="login-input" id="login-pass" placeholder="Palavra-passe (deixe vazio se não tiver)">
+    <button class="login-btn" onclick="doLogin()">ENTRAR →</button>
+    <div class="login-error" id="login-error"></div>
+    <div class="login-add-user" onclick="showAddUser()">+ Criar novo utilizador</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ DESKTOP ═══════════════════════ -->
+<div id="desktop">
+  <div id="desktop-grid" id="desktop-icons"></div>
+  <!-- Windows render here -->
+  <div id="windows-container"></div>
+</div>
+
+<!-- ═══════════════════════ TASKBAR ═══════════════════════ -->
+<div id="taskbar" style="display:none;">
+  <div id="tb-start" onclick="toggleStartMenu()">Z</div>
+  <div id="tb-apps"></div>
+  <div id="tb-right">
+    <div id="tb-clock"></div>
+    <div id="tb-user-btn" onclick="toggleStartMenu()">
+      <div class="tb-avatar" id="tb-avatar-display">👤</div>
+      <span id="tb-username-display" style="font-size:0.78rem;color:var(--text2);"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ START MENU ═══════════════════════ -->
+<div id="start-menu">
+  <div class="sm-header"><div class="sm-title">⚡ ZENIAOS</div></div>
+  <div class="sm-apps" id="sm-apps-grid"></div>
+  <div class="sm-footer">
+    <div class="sm-user-info">
+      <div class="sm-avatar" id="sm-avatar">👤</div>
+      <span style="font-size:0.82rem;" id="sm-username">Utilizador</span>
+    </div>
+    <button class="sm-logout" onclick="logout()">Sair ⏻</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════ CONTEXT MENU ═══════════════════════ -->
+<div id="ctx-menu"></div>
+
+<!-- ═══════════════════════ NOTIFICATIONS ═══════════════════════ -->
+<div id="notifications"></div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// DATA & STATE
+// ════════════════════════════════════════════════════════
+const STATE = {
+  users: JSON.parse(localStorage.getItem('zeniaos_users') || 'null') || [
+    { id: 1, name: 'Admin', password: '', avatar: '🦁', color: '#ff6b35', role: 'Administrador' },
+    { id: 2, name: 'Visitante', password: 'visita', avatar: '👤', color: '#00d4aa', role: 'Utilizador' }
+  ],
+  currentUser: null,
+  windows: {},
+  windowZIndex: 10,
+  selectedLoginUser: null,
+  installedApps: JSON.parse(localStorage.getItem('zeniaos_installed') || '[]'),
+  settings: JSON.parse(localStorage.getItem('zeniaos_settings') || 'null') || {
+    wallpaper: 0, animations: true, sound: true,
+    autoUpdate: true, darkMode: true, language: 'pt'
+  },
+  videoHistory: [],
+  taskbarApps: [],
+};
+
+const saveUsers = () => localStorage.setItem('zeniaos_users', JSON.stringify(STATE.users));
+const saveInstalled = () => localStorage.setItem('zeniaos_installed', JSON.stringify(STATE.installedApps));
+const saveSettings = () => localStorage.setItem('zeniaos_settings', JSON.stringify(STATE.settings));
+
+const WALLPAPERS = [
+  'linear-gradient(135deg,#0a0a0f 0%,#1a0a0a 50%,#0a0f0a 100%)',
+  'linear-gradient(135deg,#050510 0%,#150530 50%,#051520 100%)',
+  'linear-gradient(135deg,#100a00 0%,#200800 50%,#0a0500 100%)',
+  'linear-gradient(135deg,#000a10 0%,#001520 50%,#002010 100%)',
+  'linear-gradient(135deg,#1a0a00 0%,#002020 50%,#100010 100%)',
+  'linear-gradient(45deg,#0a0505 0%,#1a0808 25%,#050a05 50%,#08051a 75%,#0a0a05 100%)',
+];
+
+// ════════════════════════════════════════════════════════
+// BOOT SEQUENCE
+// ════════════════════════════════════════════════════════
+const bootMsgs = [
+  'Iniciando kernel Zénia...', 'Carregando drivers gráficos...',
+  'Inicializando subsistemas...', 'Montando sistema de arquivos...',
+  'Carregando interface Zénia...', 'Configurando serviços...', 'Bem-vindo ao ZeniaOS!'
+];
+let bootProgress = 0;
+const bootBar = document.getElementById('boot-bar');
+const bootStatus = document.getElementById('boot-status');
+
+function bootTick() {
+  if (bootProgress >= 100) {
+    setTimeout(() => {
+      document.getElementById('boot').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('boot').style.display = 'none';
+        showLogin();
+      }, 800);
+    }, 400);
+    return;
+  }
+  bootProgress += Math.random() * 8 + 4;
+  if (bootProgress > 100) bootProgress = 100;
+  bootBar.style.width = bootProgress + '%';
+  const idx = Math.floor((bootProgress / 100) * bootMsgs.length);
+  bootStatus.textContent = bootMsgs[Math.min(idx, bootMsgs.length - 1)];
+  setTimeout(bootTick, 80 + Math.random() * 100);
+}
+setTimeout(bootTick, 500);
+
+// ════════════════════════════════════════════════════════
+// LOGIN
+// ════════════════════════════════════════════════════════
+function showLogin() {
+  const loginEl = document.getElementById('login');
+  loginEl.style.display = 'flex';
+  renderLoginUsers();
+  if (STATE.users.length > 0) selectLoginUser(STATE.users[0]);
+}
+
+function renderLoginUsers() {
+  const el = document.getElementById('login-user-select');
+  el.innerHTML = STATE.users.map(u => `
+    <div class="user-btn ${STATE.selectedLoginUser?.id === u.id ? 'active':''}" onclick="selectLoginUser_id(${u.id})">
+      <div class="uavatar" style="background:${u.color}20;font-size:1.1rem;">${u.avatar}</div>
+      <div class="uname">${u.name}</div>
+    </div>
+  `).join('');
+}
+
+function selectLoginUser_id(id) {
+  const u = STATE.users.find(x => x.id === id);
+  if (u) selectLoginUser(u);
+}
+
+function selectLoginUser(u) {
+  STATE.selectedLoginUser = u;
+  document.getElementById('login-avatar').textContent = u.avatar;
+  document.getElementById('login-avatar').style.background = `linear-gradient(135deg, ${u.color}, ${u.color}aa)`;
+  document.getElementById('login-username-disp').textContent = u.name;
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-error').textContent = '';
+  renderLoginUsers();
+}
+
+function doLogin() {
+  const u = STATE.selectedLoginUser;
+  if (!u) { document.getElementById('login-error').textContent = 'Seleciona um utilizador!'; return; }
+  const pass = document.getElementById('login-pass').value;
+  if (u.password && u.password !== pass) {
+    document.getElementById('login-error').textContent = 'Palavra-passe incorreta!'; return;
+  }
+  STATE.currentUser = u;
+  document.getElementById('login').style.display = 'none';
+  startDesktop();
+}
+
+function showAddUser() {
+  const name = prompt('Nome do novo utilizador:');
+  if (!name) return;
+  const pass = prompt('Palavra-passe (deixe vazio para sem password):') || '';
+  const emojis = ['🦁','🐆','🦅','🌍','🎭','🔥','⚡','🌟','🎨','🛡️'];
+  const colors = ['#ff6b35','#00d4aa','#ffb347','#e85d04','#7b2d8b','#0077b6','#2d6a4f'];
+  const newUser = {
+    id: Date.now(), name, password: pass,
+    avatar: emojis[Math.floor(Math.random()*emojis.length)],
+    color: colors[Math.floor(Math.random()*colors.length)],
+    role: 'Utilizador'
+  };
+  STATE.users.push(newUser);
+  saveUsers();
+  renderLoginUsers();
+  selectLoginUser(newUser);
+  notify('Utilizador criado!', `${name} foi adicionado ao sistema.`, 'success');
+}
+
+// ════════════════════════════════════════════════════════
+// DESKTOP
+// ════════════════════════════════════════════════════════
+const APPS = [
+  { id: 'browser', name: 'Navegador', icon: '🌐', color: 'linear-gradient(135deg,#0077b6,#00b4d8)', open: openBrowser },
+  { id: 'videos', name: 'Vídeos', icon: '🎬', color: 'linear-gradient(135deg,#e85d04,#f48c06)', open: openVideos },
+  { id: 'music', name: 'Música', icon: '🎵', color: 'linear-gradient(135deg,#7b2d8b,#c77dff)', open: openMusic },
+  { id: 'settings', name: 'Definições', icon: '⚙️', color: 'linear-gradient(135deg,#4a4a5a,#6a6a8a)', open: openSettings },
+  { id: 'users', name: 'Utilizadores', icon: '👥', color: 'linear-gradient(135deg,#2d6a4f,#52b788)', open: openUsers },
+  { id: 'installer', name: 'Instalador', icon: '📦', color: 'linear-gradient(135deg,#6b4226,#d4895a)', open: openInstaller },
+  { id: 'ia-zenia', name: 'IA-Zénia', icon: '🤖', color: 'linear-gradient(135deg,#ff6b35,#ff9a3c)', open: () => openZeniaApp('ia-zenia') },
+  { id: 'zedex', name: 'Zedex', icon: '📱', color: 'linear-gradient(135deg,#0096c7,#48cae4)', open: () => openZeniaApp('zedex') },
+  { id: 'zedex-ide', name: 'Zedex IDE', icon: '💻', color: 'linear-gradient(135deg,#1b4332,#40916c)', open: () => openZeniaApp('zedex-ide') },
+  { id: 'zenia-projects', name: 'Zénia Projects', icon: '🚀', color: 'linear-gradient(135deg,#7b2fbe,#c77dff)', open: () => openZeniaApp('zenia-projects') },
+  { id: 'vgen', name: 'Zénia Video', icon: '🎥', color: 'linear-gradient(135deg,#004b23,#00a550)', open: openVideoGenerator },
+];
+
+function startDesktop() {
+  document.getElementById('desktop').classList.add('visible');
+  document.getElementById('taskbar').style.display = 'flex';
+  applyWallpaper();
+  renderDesktopIcons();
+  renderStartMenu();
+  startClock();
+  updateTaskbarUser();
+  notify('Bem-vindo!', `Olá, ${STATE.currentUser.name}! ZeniaOS iniciado.`, 'success');
+}
+
+function applyWallpaper() {
+  const wp = WALLPAPERS[STATE.settings.wallpaper] || WALLPAPERS[0];
+  document.getElementById('desktop').style.background = wp;
+}
+
+function renderDesktopIcons() {
+  const grid = document.getElementById('desktop-grid');
+  const allApps = [...APPS, ...STATE.installedApps.map(a => ({
+    id: 'installed_' + a.id, name: a.name, icon: a.icon || '📄',
+    color: 'linear-gradient(135deg,#555,#888)',
+    open: () => openInstalledApp(a)
+  }))];
+  grid.innerHTML = allApps.map(app => `
+    <div class="desk-icon" ondblclick="openApp('${app.id}')" oncontextmenu="showCtxMenu(event,'${app.id}')">
+      <div class="icon-img" style="background:${app.color}">${app.icon}</div>
+      <div class="icon-label">${app.name}</div>
+    </div>
+  `).join('');
+}
+
+function renderStartMenu() {
+  const grid = document.getElementById('sm-apps-grid');
+  grid.innerHTML = APPS.map(app => `
+    <div class="sm-app" onclick="openApp('${app.id}');closeStartMenu()">
+      <div class="sa-icon" style="background:${app.color}">${app.icon}</div>
+      <div class="sa-name">${app.name}</div>
+    </div>
+  `).join('');
+  document.getElementById('sm-avatar').textContent = STATE.currentUser.avatar;
+  document.getElementById('sm-username').textContent = STATE.currentUser.name;
+}
+
+function updateTaskbarUser() {
+  document.getElementById('tb-avatar-display').textContent = STATE.currentUser.avatar;
+  document.getElementById('tb-username-display').textContent = STATE.currentUser.name;
+}
+
+function openApp(id) {
+  const app = [...APPS, ...STATE.installedApps.map(a => ({id:'installed_'+a.id, open:()=>openInstalledApp(a)}))].find(a => a.id === id);
+  if (app) app.open();
+}
+
+function startClock() {
+  const el = document.getElementById('tb-clock');
+  const update = () => {
+    const now = new Date();
+    el.textContent = now.toLocaleTimeString('pt-PT', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  };
+  update(); setInterval(update, 1000);
+}
+
+function toggleStartMenu() {
+  const sm = document.getElementById('start-menu');
+  sm.classList.toggle('open');
+}
+function closeStartMenu() {
+  document.getElementById('start-menu').classList.remove('open');
+}
+
+function logout() {
+  STATE.currentUser = null;
+  document.getElementById('desktop').classList.remove('visible');
+  document.getElementById('taskbar').style.display = 'none';
+  document.getElementById('windows-container').innerHTML = '';
+  document.getElementById('tb-apps').innerHTML = '';
+  STATE.windows = {};
+  closeStartMenu();
+  showLogin();
+}
+
+// ════════════════════════════════════════════════════════
+// WINDOW MANAGER
+// ════════════════════════════════════════════════════════
+let dragState = null;
+let resizeState = null;
+
+function createWindow({ id, title, icon, content, width = 900, height = 600, minW = 400, minH = 300 }) {
+  if (STATE.windows[id]) { focusWindow(id); return; }
+
+  const container = document.getElementById('windows-container');
+  const el = document.createElement('div');
+  el.className = 'window';
+  el.id = 'win_' + id;
+  const x = 60 + Object.keys(STATE.windows).length * 30;
+  const y = 40 + Object.keys(STATE.windows).length * 20;
+  el.style.cssText = `left:${x}px;top:${y}px;width:${width}px;height:${height}px;`;
+
+  el.innerHTML = `
+    <div class="win-titlebar" id="tb_${id}">
+      <div class="win-controls">
+        <button class="win-btn close" onclick="closeWindow('${id}')"></button>
+        <button class="win-btn minimize" onclick="minimizeWindow('${id}')"></button>
+        <button class="win-btn maximize" onclick="maximizeWindow('${id}')"></button>
+      </div>
+      <div class="win-title">${icon} ${title}</div>
+    </div>
+    <div class="win-body" id="wb_${id}">${content}</div>
+    <div class="win-resize" id="wr_${id}"></div>
+  `;
+
+  container.appendChild(el);
+  STATE.windows[id] = { el, maximized: false, savedPos: null, title, icon };
+  focusWindow(id);
+  addTaskbarApp(id, title, icon);
+  setupWindowDrag(id);
+  setupWindowResize(id);
+}
+
+function focusWindow(id) {
+  Object.keys(STATE.windows).forEach(wid => {
+    document.getElementById('win_' + wid)?.classList.remove('focused');
+    document.querySelector(`.tb-app-btn[data-wid="${wid}"]`)?.classList.remove('active');
+  });
+  const el = document.getElementById('win_' + id);
+  if (el) {
+    STATE.windowZIndex++;
+    el.style.zIndex = STATE.windowZIndex;
+    el.classList.add('focused');
+    document.querySelector(`.tb-app-btn[data-wid="${id}"]`)?.classList.add('active');
+  }
+}
+
+function closeWindow(id) {
+  const el = document.getElementById('win_' + id);
+  if (el) { el.style.animation = 'win-open 0.15s reverse'; setTimeout(() => el.remove(), 150); }
+  delete STATE.windows[id];
+  removeTaskbarApp(id);
+}
+
+function minimizeWindow(id) {
+  const el = document.getElementById('win_' + id);
+  if (el) el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+}
+
+function maximizeWindow(id) {
+  const win = STATE.windows[id];
+  const el = document.getElementById('win_' + id);
+  if (!win || !el) return;
+  if (win.maximized) {
+    el.classList.remove('maximized');
+    if (win.savedPos) Object.assign(el.style, win.savedPos);
+    win.maximized = false;
+  } else {
+    win.savedPos = { left: el.style.left, top: el.style.top, width: el.style.width, height: el.style.height };
+    el.classList.add('maximized');
+    win.maximized = true;
+  }
+}
+
+function setupWindowDrag(id) {
+  const tb = document.getElementById('tb_' + id);
+  const el = document.getElementById('win_' + id);
+  if (!tb || !el) return;
+  tb.addEventListener('mousedown', e => {
+    if (e.target.classList.contains('win-btn')) return;
+    const win = STATE.windows[id];
+    if (win?.maximized) return;
+    focusWindow(id);
+    dragState = { id, startX: e.clientX - el.offsetLeft, startY: e.clientY - el.offsetTop };
+  });
+}
+
+function setupWindowResize(id) {
+  const wr = document.getElementById('wr_' + id);
+  const el = document.getElementById('win_' + id);
+  if (!wr || !el) return;
+  wr.addEventListener('mousedown', e => {
+    e.stopPropagation();
+    resizeState = { id, startX: e.clientX, startY: e.clientY, startW: el.offsetWidth, startH: el.offsetHeight };
+  });
+}
+
+document.addEventListener('mousemove', e => {
+  if (dragState) {
+    const el = document.getElementById('win_' + dragState.id);
+    if (el) {
+      const x = Math.max(0, Math.min(e.clientX - dragState.startX, window.innerWidth - el.offsetWidth));
+      const y = Math.max(0, Math.min(e.clientY - dragState.startY, window.innerHeight - 52 - el.offsetHeight));
+      el.style.left = x + 'px'; el.style.top = y + 'px';
+    }
+  }
+  if (resizeState) {
+    const el = document.getElementById('win_' + resizeState.id);
+    if (el) {
+      const w = Math.max(400, resizeState.startW + e.clientX - resizeState.startX);
+      const h = Math.max(300, resizeState.startH + e.clientY - resizeState.startY);
+      el.style.width = w + 'px'; el.style.height = h + 'px';
+    }
+  }
+});
+document.addEventListener('mouseup', () => { dragState = null; resizeState = null; });
+
+function addTaskbarApp(id, title, icon) {
+  const tb = document.getElementById('tb-apps');
+  const btn = document.createElement('div');
+  btn.className = 'tb-app-btn';
+  btn.dataset.wid = id;
+  btn.innerHTML = `<span class="tb-icon">${icon}</span>${title}`;
+  btn.onclick = () => { const el = document.getElementById('win_'+id); if(el?.style.display==='none'){el.style.display='flex';} focusWindow(id); };
+  tb.appendChild(btn);
+}
+
+function removeTaskbarApp(id) {
+  document.querySelector(`.tb-app-btn[data-wid="${id}"]`)?.remove();
+}
+
+// ════════════════════════════════════════════════════════
+// BROWSER
+// ════════════════════════════════════════════════════════
+function openBrowser(initialUrl) {
+  const id = 'browser_' + Date.now();
+  const startUrl = initialUrl || 'https://zenia-projects.onrender.com';
+  createWindow({
+    id, title: 'Navegador Zénia', icon: '🌐', width: 1100, height: 700,
+    content: `<div class="browser-wrap">
+      <div class="browser-bar">
+        <button class="browser-nav-btn" onclick="browserBack('${id}')">◀</button>
+        <button class="browser-nav-btn" onclick="browserForward('${id}')">▶</button>
+        <button class="browser-nav-btn" onclick="browserReload('${id}')">↻</button>
+        <input class="browser-url" id="burl_${id}" value="${startUrl}" onkeydown="if(event.key==='Enter')browserGo('${id}')">
+        <button class="browser-go" onclick="browserGo('${id}')">IR</button>
+      </div>
+      <iframe class="browser-frame" id="bframe_${id}" src="${startUrl}" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"></iframe>
+    </div>`
+  });
+  setTimeout(() => {
+    const frame = document.getElementById('bframe_' + id);
+    const urlInput = document.getElementById('burl_' + id);
+    if (frame && urlInput) {
+      frame.addEventListener('load', () => { try { urlInput.value = frame.src; } catch(e){} });
+    }
+  }, 100);
+}
+
+function browserGo(id) {
+  const url = document.getElementById('burl_' + id).value;
+  const frame = document.getElementById('bframe_' + id);
+  if (!frame) return;
+  let finalUrl = url;
+  if (!url.startsWith('http')) finalUrl = 'https://' + url;
+  frame.src = finalUrl;
+  document.getElementById('burl_' + id).value = finalUrl;
+}
+function browserBack(id) { try { document.getElementById('bframe_'+id).contentWindow.history.back(); } catch(e){} }
+function browserForward(id) { try { document.getElementById('bframe_'+id).contentWindow.history.forward(); } catch(e){} }
+function browserReload(id) { const f = document.getElementById('bframe_'+id); if(f) f.src = f.src; }
+
+// ════════════════════════════════════════════════════════
+// VIDEO PLAYER
+// ════════════════════════════════════════════════════════
+function openVideos() {
+  const id = 'videos_' + Date.now();
+  createWindow({
+    id, title: 'Reprodutor de Vídeo', icon: '🎬', width: 900, height: 580,
+    content: `<div class="video-wrap with-sidebar">
+      <div class="video-left">
+        <div class="video-main" id="vmain_${id}">
+          <div class="video-placeholder">
+            <div class="vp-icon">🎬</div>
+            <p>Nenhum vídeo selecionado</p>
+            <label class="vc-open-btn" style="cursor:pointer;">
+              📂 Abrir Vídeo
+              <input type="file" accept="video/*" style="display:none" onchange="loadVideo(event,'${id}')">
+            </label>
+          </div>
+        </div>
+        <div class="video-controls">
+          <div class="vc-progress" onclick="seekVideo(event,'${id}')"><div class="vc-progress-fill" id="vprog_${id}"></div></div>
+          <div class="vc-btns">
+            <button class="vc-btn" onclick="videoSkip('${id}',-10)">⏮</button>
+            <button class="vc-btn" id="vplay_${id}" onclick="toggleVideo('${id}')">▶</button>
+            <button class="vc-btn" onclick="videoSkip('${id}',10)">⏭</button>
+            <span class="vc-time" id="vtime_${id}">0:00 / 0:00</span>
+            <div class="vc-vol">🔊<input type="range" min="0" max="1" step="0.05" value="1" oninput="setVideoVol(this,'${id}')"></div>
+            <button class="vc-btn" onclick="toggleVideoFS('${id}')">⛶</button>
+          </div>
+        </div>
+      </div>
+      <div class="video-sidebar">
+        <div class="video-sidebar-title">📂 PLAYLIST</div>
+        <div id="vplaylist_${id}"></div>
+      </div>
+    </div>`
+  });
+  window['vdata_' + id] = { files: [], currentIdx: -1 };
+}
+
+function loadVideo(e, id) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  const vdata = window['vdata_' + id];
+  vdata.files = [...vdata.files, ...files];
+  renderPlaylist(id);
+  if (vdata.currentIdx < 0) playVideoIdx(id, 0);
+}
+
+function renderPlaylist(id) {
+  const vdata = window['vdata_' + id];
+  const pl = document.getElementById('vplaylist_' + id);
+  if (!pl) return;
+  pl.innerHTML = vdata.files.map((f, i) => `
+    <div class="video-playlist-item ${i===vdata.currentIdx?'active':''}" ondblclick="playVideoIdx('${id}',${i})">
+      🎬 ${f.name.substring(0,24)}${f.name.length>24?'...':''}
+    </div>`).join('');
+}
+
+function playVideoIdx(id, idx) {
+  const vdata = window['vdata_' + id];
+  if (!vdata || !vdata.files[idx]) return;
+  vdata.currentIdx = idx;
+  const url = URL.createObjectURL(vdata.files[idx]);
+  const main = document.getElementById('vmain_' + id);
+  if (!main) return;
+  main.innerHTML = `<video id="vid_${id}" src="${url}" style="max-width:100%;max-height:100%;" ontimeupdate="updateVideoProgress('${id}')" onended="videoEnded('${id}')"></video>`;
+  document.getElementById('vid_' + id).play();
+  document.getElementById('vplay_' + id).textContent = '⏸';
+  renderPlaylist(id);
+}
+
+function toggleVideo(id) {
+  const v = document.getElementById('vid_' + id);
+  if (!v) return;
+  if (v.paused) { v.play(); document.getElementById('vplay_'+id).textContent='⏸'; }
+  else { v.pause(); document.getElementById('vplay_'+id).textContent='▶'; }
+}
+
+function updateVideoProgress(id) {
+  const v = document.getElementById('vid_' + id);
+  if (!v) return;
+  const pct = (v.currentTime / v.duration * 100) || 0;
+  const prog = document.getElementById('vprog_' + id);
+  if (prog) prog.style.width = pct + '%';
+  const fmt = t => { const m = Math.floor(t/60), s = Math.floor(t%60); return `${m}:${s<10?'0':''}${s}`; };
+  const time = document.getElementById('vtime_' + id);
+  if (time) time.textContent = `${fmt(v.currentTime)} / ${fmt(v.duration||0)}`;
+}
+
+function seekVideo(e, id) {
+  const v = document.getElementById('vid_' + id);
+  if (!v) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  v.currentTime = pct * v.duration;
+}
+
+function videoSkip(id, sec) {
+  const v = document.getElementById('vid_' + id); if (v) v.currentTime += sec;
+}
+function setVideoVol(el, id) {
+  const v = document.getElementById('vid_' + id); if (v) v.volume = el.value;
+}
+function videoEnded(id) {
+  document.getElementById('vplay_' + id).textContent = '▶';
+}
+function toggleVideoFS(id) {
+  const v = document.getElementById('vid_' + id);
+  if (v) { if (v.requestFullscreen) v.requestFullscreen(); }
+}
+
+// ════════════════════════════════════════════════════════
+// MUSIC PLAYER
+// ════════════════════════════════════════════════════════
+function openMusic() {
+  const id = 'music_' + Date.now();
+  createWindow({
+    id, title: 'Reprodutor de Música', icon: '🎵', width: 420, height: 600,
+    content: `<div class="music-wrap">
+      <div class="music-art-area">
+        <div class="music-cover" id="mcover_${id}">🎵</div>
+        <div class="music-info">
+          <div class="music-title" id="mtitle_${id}">Nenhuma música</div>
+          <div class="music-artist" id="martist_${id}">Seleciona um arquivo de música</div>
+        </div>
+      </div>
+      <div class="music-controls">
+        <div class="mc-progress" onclick="seekMusic(event,'${id}')"><div class="mc-progress-fill" id="mprog_${id}"></div></div>
+        <div class="mc-btns">
+          <button class="mc-btn" onclick="musicPrev('${id}')">⏮</button>
+          <button class="mc-btn main" id="mplay_${id}" onclick="toggleMusic('${id}')">▶</button>
+          <button class="mc-btn" onclick="musicNext('${id}')">⏭</button>
+        </div>
+        <div class="mc-vol">🔇<input type="range" min="0" max="1" step="0.05" value="0.8" oninput="setMusicVol(this,'${id}')">🔊</div>
+      </div>
+      <div class="music-library" id="mlib_${id}">
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);">
+          <span style="font-size:0.75rem;color:var(--text2);flex:1;">📚 BIBLIOTECA</span>
+          <label class="uc-btn" style="cursor:pointer;">
+            + Adicionar
+            <input type="file" accept="audio/*" multiple style="display:none" onchange="loadMusic(event,'${id}')">
+          </label>
+        </div>
+        <div id="mliblist_${id}"></div>
+      </div>
+    </div>`
+  });
+  window['mdata_' + id] = { files: [], currentIdx: -1, audio: new Audio() };
+}
+
+function loadMusic(e, id) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  const md = window['mdata_' + id];
+  md.files = [...md.files, ...files];
+  renderMusicLib(id);
+  if (md.currentIdx < 0) playMusicIdx(id, 0);
+}
+
+function renderMusicLib(id) {
+  const md = window['mdata_' + id];
+  const el = document.getElementById('mliblist_' + id);
+  if (!el) return;
+  el.innerHTML = md.files.map((f, i) => `
+    <div class="music-lib-item ${i===md.currentIdx?'active':''}" ondblclick="playMusicIdx('${id}',${i})">
+      <div class="music-lib-icon">🎵</div>
+      <div class="music-lib-info">
+        <div class="music-lib-name">${f.name.replace(/\.[^.]+$/, '').substring(0, 24)}</div>
+        <div class="music-lib-artist">Arquivo local</div>
+      </div>
+    </div>`).join('');
+}
+
+function playMusicIdx(id, idx) {
+  const md = window['mdata_' + id];
+  if (!md || !md.files[idx]) return;
+  md.currentIdx = idx;
+  const f = md.files[idx];
+  if (md.audio.src) URL.revokeObjectURL(md.audio.src);
+  md.audio.src = URL.createObjectURL(f);
+  md.audio.volume = 0.8;
+  md.audio.play();
+  const name = f.name.replace(/\.[^.]+$/, '');
+  document.getElementById('mtitle_' + id).textContent = name;
+  document.getElementById('martist_' + id).textContent = 'Arquivo local';
+  document.getElementById('mplay_' + id).textContent = '⏸';
+  document.getElementById('mcover_' + id).classList.add('playing');
+  md.audio.ontimeupdate = () => updateMusicProgress(id);
+  md.audio.onended = () => musicNext(id);
+  renderMusicLib(id);
+}
+
+function toggleMusic(id) {
+  const md = window['mdata_' + id];
+  if (!md?.audio?.src) return;
+  if (md.audio.paused) {
+    md.audio.play();
+    document.getElementById('mplay_'+id).textContent = '⏸';
+    document.getElementById('mcover_'+id).classList.add('playing');
+  } else {
+    md.audio.pause();
+    document.getElementById('mplay_'+id).textContent = '▶';
+    document.getElementById('mcover_'+id).classList.remove('playing');
+  }
+}
+
+function updateMusicProgress(id) {
+  const md = window['mdata_' + id];
+  if (!md?.audio) return;
+  const pct = (md.audio.currentTime / md.audio.duration * 100) || 0;
+  const p = document.getElementById('mprog_' + id);
+  if (p) p.style.width = pct + '%';
+}
+
+function seekMusic(e, id) {
+  const md = window['mdata_' + id];
+  if (!md?.audio) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  md.audio.currentTime = (e.clientX - rect.left) / rect.width * md.audio.duration;
+}
+
+function setMusicVol(el, id) { const md = window['mdata_'+id]; if(md?.audio) md.audio.volume = el.value; }
+function musicNext(id) { const md = window['mdata_'+id]; if(!md) return; playMusicIdx(id, (md.currentIdx+1)%md.files.length); }
+function musicPrev(id) { const md = window['mdata_'+id]; if(!md) return; playMusicIdx(id, (md.currentIdx-1+md.files.length)%md.files.length); }
+
+// ════════════════════════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════════════════════════
+function openSettings() {
+  createWindow({
+    id: 'settings', title: 'Definições', icon: '⚙️', width: 720, height: 540,
+    content: `<div class="settings-wrap">
+      <div class="settings-nav">
+        ${[
+          ['aparencia','🎨','Aparência'],
+          ['sistema','⚙️','Sistema'],
+          ['som','🔊','Som'],
+          ['rede','🌐','Rede'],
+          ['privacidade','🔒','Privacidade'],
+          ['sobre','ℹ️','Sobre'],
+        ].map(([sec,ic,lb]) => `<div class="settings-nav-item ${sec==='aparencia'?'active':''}" onclick="showSettingsSection('${sec}',this)">${ic} ${lb}</div>`).join('')}
+      </div>
+      <div class="settings-content">
+        <div class="settings-section active" id="sec-aparencia">
+          <div class="settings-h">APARÊNCIA</div>
+          <div class="setting-row">
+            <div><div class="setting-label">Wallpaper</div><div class="setting-sub">Escolhe o fundo do ecrã</div></div>
+          </div>
+          <div class="wallpaper-grid" id="wp-grid">${WALLPAPERS.map((wp,i)=>`<div class="wp-option ${STATE.settings.wallpaper===i?'active':''}" style="background:${wp}" onclick="changeWallpaper(${i},this)"></div>`).join('')}</div>
+          <div class="setting-row" style="margin-top:16px;">
+            <div><div class="setting-label">Animações</div><div class="setting-sub">Efeitos de transição</div></div>
+            <div class="toggle-switch ${STATE.settings.animations?'on':''}" onclick="this.classList.toggle('on');STATE.settings.animations=this.classList.contains('on');saveSettings()"></div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Modo Escuro</div><div class="setting-sub">Interface escura</div></div>
+            <div class="toggle-switch ${STATE.settings.darkMode?'on':''}" onclick="this.classList.toggle('on');STATE.settings.darkMode=this.classList.contains('on');saveSettings()"></div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Idioma</div></div>
+            <select class="setting-select" onchange="STATE.settings.language=this.value;saveSettings()">
+              <option value="pt" ${STATE.settings.language==='pt'?'selected':''}>Português</option>
+              <option value="en" ${STATE.settings.language==='en'?'selected':''}>English</option>
+            </select>
+          </div>
+        </div>
+        <div class="settings-section" id="sec-sistema">
+          <div class="settings-h">SISTEMA</div>
+          <div class="setting-row">
+            <div><div class="setting-label">Actualizações automáticas</div><div class="setting-sub">Manter o sistema actualizado</div></div>
+            <div class="toggle-switch ${STATE.settings.autoUpdate?'on':''}" onclick="this.classList.toggle('on');STATE.settings.autoUpdate=this.classList.contains('on');saveSettings()"></div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Notificações do sistema</div></div>
+            <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Barra de tarefas</div></div>
+            <select class="setting-select">
+              <option>Baixo</option><option>Cima</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Memória usada</div><div class="setting-sub" id="mem-info">A calcular...</div></div>
+          </div>
+        </div>
+        <div class="settings-section" id="sec-som">
+          <div class="settings-h">SOM</div>
+          <div class="setting-row">
+            <div><div class="setting-label">Volume principal</div></div>
+            <input type="range" min="0" max="100" value="80" class="setting-range">
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Sons do sistema</div></div>
+            <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Microfone</div></div>
+            <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+        </div>
+        <div class="settings-section" id="sec-rede">
+          <div class="settings-h">REDE</div>
+          <div class="setting-row">
+            <div><div class="setting-label">Estado da rede</div><div class="setting-sub" id="net-status">A verificar...</div></div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Proxy</div></div>
+            <div class="toggle-switch" onclick="this.classList.toggle('on')"></div>
+          </div>
+        </div>
+        <div class="settings-section" id="sec-privacidade">
+          <div class="settings-h">PRIVACIDADE</div>
+          <div class="setting-row">
+            <div><div class="setting-label">Localização</div></div>
+            <div class="toggle-switch" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Câmera</div></div>
+            <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Histórico de navegação</div></div>
+            <button style="padding:6px 14px;border-radius:6px;border:1px solid #ff4444;background:rgba(255,68,68,0.1);color:#ff4444;cursor:pointer;font-size:0.78rem;" onclick="notify('Histórico apagado!','O histórico foi limpo.','success')">Limpar</button>
+          </div>
+        </div>
+        <div class="settings-section" id="sec-sobre">
+          <div class="settings-h">SOBRE O ZENIAOS</div>
+          <div style="text-align:center;padding:24px;">
+            <div style="font-family:var(--font-head);font-size:2rem;font-weight:900;background:linear-gradient(135deg,var(--accent1),var(--accent4));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;">ZENIAOS</div>
+            <div style="font-size:0.85rem;color:var(--text2);margin-bottom:4px;">Versão 1.0.0</div>
+            <div style="font-size:0.85rem;color:var(--text2);margin-bottom:20px;">by Zénia Projects & Inácio U. Daniel</div>
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:left;">
+              <div style="font-size:0.8rem;color:var(--text2);line-height:1.8;">
+                <div>🚀 <strong>Sistema:</strong> ZeniaOS v1.0</div>
+                <div>🎨 <strong>UI:</strong> Zénia Design System</div>
+                <div>🤖 <strong>IA:</strong> IA-Zénia integrada</div>
+                <div>📱 <strong>Apps:</strong> Zedex, Zedex IDE</div>
+                <div>🏢 <strong>Empresa:</strong> Zénia Projects</div>
+                <div>👤 <strong>Criador:</strong> Inácio U. Daniel</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`
+  });
+  // fill dynamic info
+  setTimeout(() => {
+    const mem = document.getElementById('mem-info');
+    if (mem && performance.memory) {
+      const used = Math.round(performance.memory.usedJSHeapSize / 1048576);
+      mem.textContent = `JS Heap: ~${used} MB utilizado`;
+    } else if (mem) { mem.textContent = 'Informação não disponível'; }
+    const net = document.getElementById('net-status');
+    if (net) net.textContent = navigator.onLine ? '🟢 Online' : '🔴 Offline';
+  }, 100);
+}
+
+function showSettingsSection(sec, el) {
+  document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.settings-nav-item').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + sec)?.classList.add('active');
+  el.classList.add('active');
+}
+
+function changeWallpaper(idx, el) {
+  document.querySelectorAll('.wp-option').forEach(w => w.classList.remove('active'));
+  el.classList.add('active');
+  STATE.settings.wallpaper = idx;
+  saveSettings();
+  applyWallpaper();
+}
+
+// ════════════════════════════════════════════════════════
+// USERS MANAGER
+// ════════════════════════════════════════════════════════
+function openUsers() {
+  createWindow({
+    id: 'users', title: 'Utilizadores', icon: '👥', width: 660, height: 520,
+    content: `<div class="users-wrap">
+      <div class="users-h">GESTÃO DE UTILIZADORES</div>
+      <div class="users-grid" id="users-grid"></div>
+      <div class="add-user-form">
+        <div class="auf-h">➕ Novo Utilizador</div>
+        <div class="avatar-picker" id="avatar-picker">
+          ${['🦁','🐆','🦅','🌍','🎭','🔥','⚡','🌟','🎨','🛡️'].map((a,i) =>
+            `<div class="av-opt ${i===0?'selected':''}" onclick="selectAv(this,'${a}')" style="background:var(--surface3);">${a}</div>`
+          ).join('')}
+        </div>
+        <div class="auf-row">
+          <input class="auf-input" id="new-uname" placeholder="Nome do utilizador">
+          <input class="auf-input" id="new-upass" type="password" placeholder="Palavra-passe (opcional)">
+          <select class="auf-input" id="new-urole">
+            <option>Utilizador</option><option>Administrador</option>
+          </select>
+          <button class="auf-btn" onclick="addUserFromUI()">Criar</button>
+        </div>
+      </div>
+    </div>`
+  });
+  window._selectedAv = '🦁';
+  setTimeout(() => renderUsersGrid(), 50);
+}
+
+function renderUsersGrid() {
+  const grid = document.getElementById('users-grid');
+  if (!grid) return;
+  grid.innerHTML = STATE.users.map(u => `
+    <div class="user-card">
+      <div class="uc-avatar" style="background:${u.color}30;font-size:1.5rem;">${u.avatar}</div>
+      <div class="uc-name">${u.name}</div>
+      <div class="uc-role">${u.role}</div>
+      <div class="uc-actions">
+        <button class="uc-btn" onclick="editUser(${u.id})">✏️</button>
+        <button class="uc-btn danger" onclick="deleteUser(${u.id})">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+function selectAv(el, av) {
+  document.querySelectorAll('.av-opt').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  window._selectedAv = av;
+}
+
+function addUserFromUI() {
+  const name = document.getElementById('new-uname').value.trim();
+  if (!name) { notify('Erro', 'Insere um nome!', 'error'); return; }
+  const pass = document.getElementById('new-upass').value;
+  const role = document.getElementById('new-urole').value;
+  const colors = ['#ff6b35','#00d4aa','#ffb347','#e85d04','#7b2d8b','#0077b6'];
+  STATE.users.push({
+    id: Date.now(), name, password: pass, role,
+    avatar: window._selectedAv || '👤',
+    color: colors[Math.floor(Math.random()*colors.length)]
+  });
+  saveUsers();
+  renderUsersGrid();
+  document.getElementById('new-uname').value = '';
+  document.getElementById('new-upass').value = '';
+  notify('Utilizador criado!', `${name} foi adicionado.`, 'success');
+}
+
+function deleteUser(id) {
+  if (STATE.users.find(u => u.id === id)?.id === STATE.currentUser?.id) {
+    notify('Erro', 'Não podes eliminar o utilizador atual!', 'error'); return;
+  }
+  if (!confirm('Eliminar utilizador?')) return;
+  STATE.users = STATE.users.filter(u => u.id !== id);
+  saveUsers();
+  renderUsersGrid();
+  notify('Utilizador eliminado!', '', 'success');
+}
+
+function editUser(id) {
+  const u = STATE.users.find(u => u.id === id);
+  if (!u) return;
+  const name = prompt('Nome:', u.name);
+  if (!name) return;
+  const pass = prompt('Nova palavra-passe (vazio = manter):', '');
+  u.name = name;
+  if (pass) u.password = pass;
+  saveUsers();
+  renderUsersGrid();
+  notify('Utilizador atualizado!', '', 'success');
+}
+
+// ════════════════════════════════════════════════════════
+// APP INSTALLER
+// ════════════════════════════════════════════════════════
+function openInstaller() {
+  createWindow({
+    id: 'installer', title: 'Instalador de Apps', icon: '📦', width: 660, height: 500,
+    content: `<div class="installer-wrap">
+      <div class="installer-h">INSTALADOR DE APLICATIVOS HTML</div>
+      <div class="installer-zone" id="drop-zone"
+        ondragover="event.preventDefault();this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="handleDrop(event)">
+        <div class="iz-icon">📦</div>
+        <div class="iz-text">Arrasta ficheiros HTML aqui</div>
+        <div class="iz-sub">ou clica para selecionar</div>
+        <input type="file" accept=".html,.htm" multiple style="position:absolute;inset:0;opacity:0;cursor:pointer" onchange="installFiles(event)">
+      </div>
+      <div class="installer-h" style="margin-top:0;">APPS INSTALADAS (${STATE.installedApps.length})</div>
+      <div class="installed-apps-list" id="installed-list"></div>
+    </div>`
+  });
+  setTimeout(renderInstalledApps, 50);
+}
+
+function renderInstalledApps() {
+  const el = document.getElementById('installed-list');
+  if (!el) return;
+  if (!STATE.installedApps.length) { el.innerHTML = '<div style="color:var(--text2);font-size:0.82rem;padding:12px;">Nenhuma app instalada.</div>'; return; }
+  el.innerHTML = STATE.installedApps.map(a => `
+    <div class="installed-app-item">
+      <div class="iai-icon">📄</div>
+      <div class="iai-info"><div class="iai-name">${a.name}</div><div class="iai-size">${a.size}</div></div>
+      <div class="iai-actions">
+        <button class="iai-btn" onclick="openInstalledApp_id('${a.id}')">▶</button>
+        <button class="iai-btn del" onclick="uninstallApp('${a.id}')">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone')?.classList.remove('drag-over');
+  const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.html') || f.name.endsWith('.htm'));
+  installFilesArray(files);
+}
+
+function installFiles(e) {
+  installFilesArray(Array.from(e.target.files));
+}
+
+function installFilesArray(files) {
+  files.forEach(f => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const app = {
+        id: Date.now() + Math.random().toString(36).slice(2),
+        name: f.name.replace(/\.[^.]+$/, ''),
+        content: ev.target.result,
+        size: (f.size / 1024).toFixed(1) + ' KB',
+        icon: '📄'
+      };
+      STATE.installedApps.push(app);
+      saveInstalled();
+      renderInstalledApps();
+      renderDesktopIcons();
+      notify('App Instalada!', `${app.name} foi instalada com sucesso.`, 'success');
+      const cnt = document.querySelector('#win_installer .installer-h');
+      if (cnt) cnt.textContent = `APPS INSTALADAS (${STATE.installedApps.length})`;
+    };
+    reader.readAsText(f);
+  });
+}
+
+function openInstalledApp_id(id) {
+  const app = STATE.installedApps.find(a => a.id === id);
+  if (app) openInstalledApp(app);
+}
+
+function openInstalledApp(app) {
+  const wid = 'iapp_' + app.id;
+  const blob = new Blob([app.content], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  createWindow({
+    id: wid, title: app.name, icon: '📄', width: 900, height: 600,
+    content: `<iframe src="${url}" style="width:100%;height:100%;border:none;"></iframe>`
+  });
+}
+
+function uninstallApp(id) {
+  if (!confirm('Desinstalar app?')) return;
+  STATE.installedApps = STATE.installedApps.filter(a => a.id !== id);
+  saveInstalled();
+  renderInstalledApps();
+  renderDesktopIcons();
+  notify('App removida!', '', 'success');
+}
+
+// ════════════════════════════════════════════════════════
+// ZENIA APPS
+// ════════════════════════════════════════════════════════
+const ZENIA_APPS_MAP = {
+  'ia-zenia': { url: 'https://ia-zenia.onrender.com', name: 'IA-Zénia', icon: '🤖' },
+  'zedex': { url: 'https://ia-zenia.onrender.com/zedex', name: 'Zedex', icon: '📱' },
+  'zedex-ide': { url: 'https://ia-zenia.onrender.com/zedex/ide', name: 'Zedex IDE', icon: '💻' },
+  'zenia-projects': { url: 'https://zenia-projects.onrender.com', name: 'Zénia Projects', icon: '🚀' },
+};
+
+function openZeniaApp(appId) {
+  const app = ZENIA_APPS_MAP[appId];
+  if (!app) return;
+  const wid = appId + '_' + Date.now();
+  createWindow({
+    id: wid, title: app.name, icon: app.icon, width: 1100, height: 720,
+    content: `<div class="zenia-app-wrap">
+      <div class="zenia-app-bar">
+        <span class="zab-badge">ZÉNIA APP</span>
+        <span style="flex:1;">${app.icon} ${app.name}</span>
+        <button onclick="document.getElementById('zaframe_${wid}').src=document.getElementById('zaframe_${wid}').src" style="background:none;border:none;color:var(--text2);cursor:pointer;">↻ Recarregar</button>
+        <button onclick="openBrowser('${app.url}')" style="background:none;border:none;color:var(--text2);cursor:pointer;">🌐 Abrir no Navegador</button>
+      </div>
+      <iframe class="zenia-app-frame" id="zaframe_${wid}" src="${app.url}" allow="camera; microphone; fullscreen"></iframe>
+    </div>`
+  });
+}
+
+// ════════════════════════════════════════════════════════
+// VIDEO GENERATOR (Zénia Video)
+// ════════════════════════════════════════════════════════
+function openVideoGenerator() {
+  const wid = 'vgen_' + Date.now();
+  createWindow({
+    id: wid, title: 'Zénia Video Generator', icon: '🎥', width: 880, height: 580,
+    content: buildVideoGenHTML(wid)
+  });
+  setTimeout(() => initVideoGen(wid), 100);
+}
+
+function buildVideoGenHTML(wid) {
+  return `<div class="vgen-wrap">
+    <div class="vgen-header">
+      <div class="vgen-logo">ZÉNIA VIDEO</div>
+      <div class="vgen-sub">GERADOR DE VÍDEO IA • by Zénia Projects & Inácio U. Daniel</div>
+    </div>
+    <div class="vgen-body">
+      <div class="vgen-left">
+        <div>
+          <div class="vgen-label">DESCREVE O TEU VÍDEO</div>
+          <textarea class="vgen-textarea" id="vgprompt_${wid}" rows="4" placeholder="Ex: Um pôr do sol africano sobre o savana, girafas ao fundo, céu alaranjado, timelapse épico..."></textarea>
+        </div>
+        <div class="vgen-row">
+          <div style="flex:1;">
+            <div class="vgen-label">MODELO</div>
+            <select class="vgen-select" id="vgmodel_${wid}">
+              <option value="veo">Veo (HD)</option>
+            </select>
+          </div>
+          <div style="flex:1;">
+            <div class="vgen-label">DURAÇÃO</div>
+            <select class="vgen-select" id="vgdur_${wid}">
+              <option value="4">4 segundos</option>
+              <option value="8">8 segundos</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <div class="vgen-label">EXEMPLOS RÁPIDOS</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            ${[
+              'Savana africana ao pôr do sol',
+              'Cascata tropical na floresta',
+              'Cidade africana à noite com neon',
+              'Leão caminhando pela savana',
+              'Baobá no deserto ao amanhecer'
+            ].map(p => `<div onclick="document.getElementById('vgprompt_${wid}').value='${p}'" style="padding:5px 10px;background:rgba(0,255,100,0.06);border:1px solid rgba(0,255,100,0.15);border-radius:6px;cursor:pointer;font-size:0.72rem;color:rgba(0,255,150,0.8);transition:all 0.15s;" onmouseover="this.style.background='rgba(0,255,100,0.12)'" onmouseout="this.style.background='rgba(0,255,100,0.06)'">${p}</div>`).join('')}
+          </div>
+        </div>
+        <button class="vgen-generate-btn" id="vgbtn_${wid}" onclick="generateZeniaVideo('${wid}')">
+          ⚡ GERAR VÍDEO
+        </button>
+        <div class="vgen-credit">Zénia Projects & Inácio U. Daniel © 2024 — Tecnologia IA de Geração de Vídeo</div>
+      </div>
+      <div class="vgen-right">
+        <div class="vgen-label">PRÉ-VISUALIZAÇÃO</div>
+        <div class="vgen-preview-box" id="vgpreview_${wid}">
+          <div class="vgen-preview-placeholder">
+            <div class="vpp-icon">🎥</div>
+            <div class="vpp-text">AGUARDANDO GERAÇÃO</div>
+          </div>
+        </div>
+        <button class="vgen-dl-btn" id="vgdl_${wid}" disabled onclick="downloadVGenVideo('${wid}')">⬇ Descarregar Vídeo</button>
+        <div class="vgen-status" id="vgstatus_${wid}">Pronto para gerar...</div>
+        <div class="vgen-progress"><div class="vgen-progress-fill" id="vgprogbar_${wid}"></div></div>
+        <div class="vgen-history-title">HISTÓRICO</div>
+        <div class="vgen-history-list" id="vghist_${wid}"></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function initVideoGen(wid) {
+  window['vgdata_' + wid] = { history: [], currentBlob: null, currentUrl: null };
+}
+
+async function generateZeniaVideo(wid) {
+  const prompt = document.getElementById('vgprompt_' + wid)?.value?.trim();
+  if (!prompt) { notify('Erro', 'Insere uma descrição para o vídeo!', 'error'); return; }
+  const model = document.getElementById('vgmodel_' + wid)?.value || 'veo';
+  const duration = document.getElementById('vgdur_' + wid)?.value || '4';
+  const btn = document.getElementById('vgbtn_' + wid);
+  const status = document.getElementById('vgstatus_' + wid);
+  const progBar = document.getElementById('vgprogbar_' + wid);
+  const preview = document.getElementById('vgpreview_' + wid);
+  const dlBtn = document.getElementById('vgdl_' + wid);
+
+  btn.disabled = true;
+  btn.textContent = '⏳ A GERAR...';
+  dlBtn.disabled = true;
+
+  const statuses = [
+    'Iniciando geração de vídeo IA...',
+    'Processando prompt em IA...',
+    'Renderizando frames...',
+    'Aplicando efeitos visuais...',
+    'Codificando vídeo final...',
+    'Quase pronto...',
+  ];
+  let si = 0;
+  const statusInterval = setInterval(() => {
+    if (si < statuses.length) {
+      status.textContent = statuses[si++];
+      progBar.style.width = (si / statuses.length * 85) + '%';
+    }
+  }, 1500);
+
+  try {
+    const encodedPrompt = encodeURIComponent(prompt);
+    const url = `https://gen.pollinations.ai/video/${encodedPrompt}?model=${model}&duration=${duration}`;
+    const response = await fetch(url, {
+      headers: { Authorization: 'Bearer pk_7HHmBkBPEiNS5dyF' }
+    });
+    if (!response.ok) throw new Error(`Erro ${response.status}`);
+    const blob = await response.blob();
+    clearInterval(statusInterval);
+    progBar.style.width = '100%';
+    status.textContent = '✅ Vídeo gerado com sucesso!';
+
+    const vdata = window['vgdata_' + wid];
+    if (vdata.currentUrl) URL.revokeObjectURL(vdata.currentUrl);
+    vdata.currentBlob = blob;
+    vdata.currentUrl = URL.createObjectURL(blob);
+
+    preview.innerHTML = `<video src="${vdata.currentUrl}" controls style="width:100%;height:100%;object-fit:cover;" autoplay loop></video>`;
+    dlBtn.disabled = false;
+
+    vdata.history.unshift({ prompt, time: new Date().toLocaleTimeString('pt-PT'), url: vdata.currentUrl });
+    renderVGenHistory(wid);
+    notify('Vídeo gerado!', `Vídeo "${prompt.substring(0, 30)}..." pronto.`, 'success');
+  } catch (err) {
+    clearInterval(statusInterval);
+    progBar.style.width = '0%';
+    status.textContent = `❌ Erro: ${err.message}. Verifica a ligação e tenta novamente.`;
+    notify('Erro ao gerar vídeo', err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⚡ GERAR VÍDEO';
+    setTimeout(() => { progBar.style.width = '0%'; }, 3000);
+  }
+}
+
+function downloadVGenVideo(wid) {
+  const vdata = window['vgdata_' + wid];
+  if (!vdata?.currentBlob) return;
+  const a = document.createElement('a');
+  a.href = vdata.currentUrl;
+  a.download = 'zenia-video-' + Date.now() + '.mp4';
+  a.click();
+}
+
+function renderVGenHistory(wid) {
+  const vdata = window['vgdata_' + wid];
+  const el = document.getElementById('vghist_' + wid);
+  if (!el) return;
+  el.innerHTML = vdata.history.slice(0, 5).map((h, i) => `
+    <div class="vgen-history-item" onclick="loadVGenHistory('${wid}',${i})">
+      <div class="vhi-prompt">${h.prompt}</div>
+      <div class="vhi-meta">🕐 ${h.time}</div>
+    </div>`).join('');
+}
+
+function loadVGenHistory(wid, idx) {
+  const vdata = window['vgdata_' + wid];
+  if (!vdata?.history[idx]) return;
+  const h = vdata.history[idx];
+  document.getElementById('vgprompt_' + wid).value = h.prompt;
+  const preview = document.getElementById('vgpreview_' + wid);
+  if (preview) preview.innerHTML = `<video src="${h.url}" controls style="width:100%;height:100%;object-fit:cover;" autoplay loop></video>`;
+}
+
+// ════════════════════════════════════════════════════════
+// CONTEXT MENU
+// ════════════════════════════════════════════════════════
+document.getElementById('desktop').addEventListener('contextmenu', e => {
+  e.preventDefault();
+  const menu = document.getElementById('ctx-menu');
+  menu.innerHTML = `
+    <div class="ctx-item" onclick="hideCtxMenu()">🔄 Atualizar Desktop</div>
+    <div class="ctx-separator"></div>
+    <div class="ctx-item" onclick="openSettings();hideCtxMenu()">⚙️ Definições</div>
+    <div class="ctx-item" onclick="notify('ZeniaOS','Sistema a funcionar correctamente!','success');hideCtxMenu()">ℹ️ Sobre ZeniaOS</div>
+  `;
+  showCtxMenuAt(e.clientX, e.clientY);
+});
+
+function showCtxMenu(e, appId) {
+  e.preventDefault(); e.stopPropagation();
+  const menu = document.getElementById('ctx-menu');
+  const app = APPS.find(a => a.id === appId);
+  if (!app) return;
+  menu.innerHTML = `
+    <div class="ctx-item" onclick="openApp('${appId}');hideCtxMenu()">${app.icon} Abrir</div>
+    <div class="ctx-separator"></div>
+    <div class="ctx-item" onclick="notify('Info','App: ${app.name}','');hideCtxMenu()">ℹ️ Propriedades</div>
+  `;
+  showCtxMenuAt(e.clientX, e.clientY);
+}
+
+function showCtxMenuAt(x, y) {
+  const menu = document.getElementById('ctx-menu');
+  menu.style.display = 'block';
+  menu.style.left = Math.min(x, window.innerWidth - 180) + 'px';
+  menu.style.top = Math.min(y, window.innerHeight - 200) + 'px';
+}
+function hideCtxMenu() { document.getElementById('ctx-menu').style.display = 'none'; }
+document.addEventListener('click', hideCtxMenu);
+
+// ════════════════════════════════════════════════════════
+// NOTIFICATIONS
+// ════════════════════════════════════════════════════════
+function notify(title, msg, type = '') {
+  const el = document.createElement('div');
+  el.className = 'notif ' + type;
+  el.innerHTML = `<div class="notif-title">${title}</div>${msg ? `<div class="notif-msg">${msg}</div>` : ''}`;
+  document.getElementById('notifications').appendChild(el);
+  setTimeout(() => {
+    el.style.opacity = '0'; el.style.transform = 'translateX(100%)'; el.style.transition = 'all 0.3s';
+    setTimeout(() => el.remove(), 300);
+  }, 3500);
+}
+
+// ════════════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ════════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (!STATE.currentUser) return;
+  if (e.ctrlKey && e.key === 'b') { openBrowser(); e.preventDefault(); }
+  if (e.ctrlKey && e.key === 'k') { openMusic(); e.preventDefault(); }
+  if (e.ctrlKey && e.key === 'm') { openVideos(); e.preventDefault(); }
+  if (e.ctrlKey && e.key === ',') { openSettings(); e.preventDefault(); }
+  if (e.key === 'Escape') { closeStartMenu(); hideCtxMenu(); }
+});
+
+// Click outside closes start menu
+document.addEventListener('click', e => {
+  const sm = document.getElementById('start-menu');
+  const start = document.getElementById('tb-start');
+  if (!sm.contains(e.target) && !start.contains(e.target)) closeStartMenu();
+});
+
+// Window click to focus
+document.getElementById('windows-container').addEventListener('mousedown', e => {
+  const win = e.target.closest('.window');
+  if (win) {
+    const id = win.id.replace('win_', '');
+    focusWindow(id);
+  }
+});
+</script>
+</body>
+</html>
