@@ -3686,7 +3686,7 @@
                     font-weight: 600;
                   "
                 >
-                  v4 Â· Zenia-Projects
+                  v5 · Zenia-Projects
                 </div>
               </div>
             </div>
@@ -4487,86 +4487,62 @@
           var POLLO_KEY = "pk_7HHmBkBPEiNS5dyF";
 
           // ==========================================
+          // ==========================================
           // Zenia v5 - DATABASE MODULE
           // ==========================================
-          var db2025 = [];
-          var db2026 = [];
-          var isDbLoaded = false;
+          if (typeof db2026 === "undefined") {
+            var db2026 = [];
+            var db2027 = [];
+            var isDbLoaded = false;
 
-          async function loadKnowledgeBases() {
-            try {
-              const [res25, res26] = await Promise.all([
-                fetch("db_2026.json").then((r) => r.json()),
-                fetch("db_2026.json").then((r) => r.json()),
-              ]);
-              db2025 = res25;
-              db2026 = res26;
-              isDbLoaded = true;
-              console.log("Zenia v5 DBs loaded:", {
-                2025: db2025.length,
-                2026: db2026.length,
-              });
-              toast(
-                "Zenia v5: Bases de conhecimento 2026/27 carregadas.",
-                "success"
-              );
-            } catch (e) {
-              console.error("Erro ao carregar DBs:", e);
-              toast("Zenia v5: Erro ao carregar dados locais.", "error");
+            async function loadKnowledgeBases() {
+              try {
+                const [res26, res27] = await Promise.all([
+                  fetch("db_2026.json").then((r) => r.json()),
+                  fetch("db_2027.json").then((r) => r.json()),
+                ]);
+                db2026 = res26 || [];
+                db2027 = res27 || [];
+                isDbLoaded = true;
+                console.log("Zenia v5 DBs loaded:", {
+                  2026: db2026.length,
+                  2027: db2027.length,
+                });
+                if (typeof toast === "function") toast("Zenia v5: Bases 2026/27 carregadas.", "success");
+              } catch (e) {
+                console.error("Erro ao carregar DBs:", e);
+                if (typeof toast === "function") toast("Zenia v5: Erro ao carregar dados.", "error");
+              }
             }
+            loadKnowledgeBases();
           }
-
-          // Inicia carregamento
-          loadKnowledgeBases();
 
           function searchLocalKnowledge(query) {
             if (!isDbLoaded) return null;
             const q = query.toLowerCase();
             let results = [];
 
-            // Verifica ano no query
-            const check25 = q.includes("2025");
             const check26 = q.includes("2026");
+            const check27 = q.includes("2027");
 
-            if (check25 || !check26) {
-              // Prioriza 2025 se 2026 nÃ£o for explÃ­cito, ou ambos
-              db2025.forEach((item) => {
-                var cat = (item.category || "").toLowerCase();
-                var tit = (item.title || "").toLowerCase();
-                var cont = (item.content || "").toLowerCase();
-                if (
-                  q.includes(cat) ||
-                  cat.includes(q) ||
-                  q.includes(tit) ||
-                  tit.includes(q) ||
-                  cont.includes(q)
-                ) {
-                  results.push(
-                    `[2025 - ${item.category.toUpperCase()}] ${item.title}: ${
-                      item.content
-                    }`
-                  );
-                }
-              });
-            }
-
-            if (check26 || !check25) {
+            if (check26 || (!check26 && !check27)) {
               db2026.forEach((item) => {
                 var cat = (item.category || "").toLowerCase();
                 var tit = (item.title || "").toLowerCase();
                 var cont = (item.content || "").toLowerCase();
-                if (
-                  q.includes(cat) ||
-                  cat.includes(q) ||
-                  q.includes(tit) ||
-                  tit.includes(q) ||
-                  cont.includes(q)
-                ) {
-                  results.push(
-                    `[2026 - ${item.category.toUpperCase()}] ${item.title}: ${
-                      item.content
-                    }`
-                  );
+                if (q.includes(cat) || cat.includes(q) || q.includes(tit) || tit.includes(q) || cont.includes(q)) {
+                  results.push(`[2026 - ${item.category.toUpperCase()}] ${item.title}: ${item.content}`);
+                }
+              });
+            }
+
+            if (check27) {
+              db2027.forEach((item) => {
+                var cat = (item.category || "").toLowerCase();
+                var tit = (item.title || "").toLowerCase();
+                var cont = (item.content || "").toLowerCase();
+                if (q.includes(cat) || cat.includes(q) || q.includes(tit) || tit.includes(q) || cont.includes(q)) {
+                  results.push(`[2027 - ${item.category.toUpperCase()}] ${item.title}: ${item.content}`);
                 }
               });
             }
@@ -5222,7 +5198,7 @@
             if (area) area.innerHTML = "";
             var msg = document.getElementById("vpn-search-msg");
             var queries = [
-              "VPN net grÃ¡tis Angola 2025",
+              "VPN net grátis Angola 2026",
               "HttpInjector Angola",
               "HTTP Custom Angola free net",
               "VPN grÃ¡tis Angola Unitel",
@@ -5778,61 +5754,77 @@
           // ZENIA REAL FUNCTIONS v5
           // ==========================================
           async function callZeniaFunc(action, params) {
-            if (pensarMode) addThinkStep("Zenia-Functions v5", "inner", `A executar ação real: ${action}...`);
-            addMonitorLog(`Ação: ${action.toUpperCase()} com parâmetros: ${JSON.stringify(params)}`);
+            if (typeof pensarMode !== "undefined" && pensarMode) {
+              if (typeof addThinkStep === "function") addThinkStep("Zenia-Functions v5", "inner", `A executar ação real: ${action}...`);
+            }
+            if (typeof addMonitorLog === "function") addMonitorLog(`Ação: ${action.toUpperCase()} com parâmetros: ${JSON.stringify(params)}`);
+            
+            var term = document.getElementById("mon-terminal");
+            if (term) {
+              var time = new Date().toLocaleTimeString("pt-PT");
+              term.innerHTML += `<br><span style="color: #4f46e5">[${time}] EXECUTING:</span> ${action.toUpperCase()}(${JSON.stringify(params)})`;
+              term.scrollTop = term.scrollHeight;
+            }
+
             try {
+              var result = "Comando processado.";
               if (action === "call") {
                 window.location.href = `tel:${params.to}`;
-                return `Chamada para ${params.to} iniciada via protocolo de sistema.`;
-              }
-              if (action === "msg") {
+                result = `Chamada para ${params.to} iniciada via protocolo de sistema.`;
+              } else if (action === "msg") {
                 window.location.href = `sms:${params.to}?body=${encodeURIComponent(params.text || "")}`;
-                return `Aplicação de mensagens aberta para ${params.to}.`;
-              }
-              if (action === "access") {
-                var ut = new SpeechSynthesisUtterance(params.text || "Acessibilidade Zénia v5 ativada.");
-                ut.lang = "pt-AO";
-                window.speechSynthesis.speak(ut);
-                return "Acessibilidade local (TTS) ativada.";
-              }
-              if (action === "download") {
+                result = `Aplicação de mensagens aberta para ${params.to}.`;
+              } else if (action === "access") {
+                if ('speechSynthesis' in window) {
+                  var ut = new SpeechSynthesisUtterance(params.text || "Acessibilidade Zénia v5 ativada.");
+                  ut.lang = "pt-AO";
+                  window.speechSynthesis.speak(ut);
+                  result = "Acessibilidade local (TTS) ativada.";
+                } else {
+                  result = "TTS não suportado neste navegador.";
+                }
+              } else if (action === "download") {
                 var blob = new Blob([params.content], { type: params.mime || "text/plain" });
-                forceDownload(blob, params.filename || "zenia_file.txt");
-                return "Download processado com sucesso.";
+                if (typeof forceDownload === "function") {
+                  forceDownload(blob, params.filename || "zenia_file.txt");
+                  result = "Download processado com sucesso.";
+                } else {
+                  result = "Erro: forceDownload não disponível.";
+                }
+              } else if (action === "desktop") {
+                result = `Zenia v5 interagiu com o desktop: ${params.msg || "Ação concluída"}`;
+              } else if (action === "email") {
+                result = `E-mail para ${params.to} preparado para envio seguro v5.`;
+              } else if (action === "edit_img") {
+                result = `Zenia-Editing v5: Imagem processada (Denoising/Pillow).`;
+              } else if (action === "test_code") {
+                result = `Tester-Code v5: Código validado em ambiente seguro.`;
+              } else if (action === "gen_diagram") {
+                result = `Zenia-Diagrama v5: Diagrama técnico gerado.`;
+              } else if (action === "gen_map") {
+                result = `Zenia-Maps v5: Mapa/Planta técnica processada.`;
+              } else if (action === "gen_table") {
+                result = `Zenia-Table v5: Tabela futurista estruturada.`;
+              } else if (action === "optimize_cpu") {
+                result = `Zenia-Processor v5: CPU otimizada para carga ${params.level || "média"}.`;
+              } else if (action === "web_nav") {
+                result = `Zenia-Navigator v5: Navegação profunda concluída em ${params.url || "web"}.`;
+              } else if (action === "server_log") {
+                result = `Server-Log v5: Mensagem registada na consola do servidor.`;
               }
-              if (action === "desktop") {
-                return `Zenia v5 interagiu com o desktop: ${params.msg || "Ação concluída"}`;
+
+              if (term) {
+                term.innerHTML += `<br><span style="color: #22c55e">SUCCESS:</span> ${result}`;
+                term.scrollTop = term.scrollHeight;
               }
-              if (action === "email") {
-                return `E-mail para ${params.to} preparado para envio seguro v5.`;
-              }
-              if (action === "edit_img") {
-                return `Zenia-Editing v5: Imagem processada (Denoising/Pillow).`;
-              }
-              if (action === "test_code") {
-                return `Tester-Code v5: Código validado em ambiente seguro.`;
-              }
-              if (action === "gen_diagram") {
-                return `Zenia-Diagrama v5: Diagrama técnico gerado.`;
-              }
-              if (action === "gen_map") {
-                return `Zenia-Maps v5: Mapa/Planta técnica processada.`;
-              }
-              if (action === "gen_table") {
-                return `Zenia-Table v5: Tabela futurista estruturada.`;
-              }
-              if (action === "optimize_cpu") {
-                return `Zenia-Processor v5: CPU otimizada para carga ${params.level || "média"}.`;
-              }
-              if (action === "web_nav") {
-                return `Zenia-Navigator v5: Navegação profunda concluída em ${params.url || "web"}.`;
-              }
-              if (action === "server_log") {
-                return `Server-Log v5: Mensagem registada na consola do servidor.`;
-              }
-              return "Comando processado pela Zenia v5.";
+              return result;
             } catch(e) {
-              return "Erro na execução real: " + e.message;
+              var errMsg = "Erro na execução real: " + e.message;
+              if (term) {
+                term.innerHTML += `<br><span style="color: #ef4444">ERROR:</span> ${errMsg}`;
+                term.scrollTop = term.scrollHeight;
+              }
+              return errMsg;
             }
           }
 
@@ -6171,6 +6163,27 @@
             currentThinkContainer = null;
           }
 
+          async function fetchLongCode(msgs, model, onChunk) {
+            var fullResp = "";
+            var currentMsgs = [...msgs];
+            var iters = 0;
+            var maxIters = 20; 
+            while (iters < maxIters) {
+              var resp = await fetchAI(currentMsgs, model, 1, onChunk);
+              if (!resp) break;
+              fullResp += (iters > 0 ? "\n" : "") + resp;
+              var openBlocks = (resp.match(/```/g) || []).length;
+              if (openBlocks % 2 !== 0 || resp.length > 3800 || resp.trim().endsWith("...")) {
+                iters++;
+                if (typeof addThinkStep === "function") addThinkStep("Geração Massiva v5", "inner", "Código vasto detectado. A gerar parte " + (iters + 1) + "...");
+                currentMsgs.push({ role: "assistant", content: resp });
+                currentMsgs.push({ role: "user", content: "Continua o código exactamente de onde paraste. Sem repetições." });
+                if (onChunk) onChunk("\n\n// --- CONTINUAÇÃO AUTOMÁTICA (PARTE " + (iters + 1) + ") ---\n\n");
+              } else { break; }
+            }
+            return fullResp;
+          }
+
           async function sleep(ms) {
             return new Promise((r) => setTimeout(r, ms));
           }
@@ -6489,7 +6502,9 @@
           }
 
           function buildSystem(q) {
-            var today = new Date().toLocaleDateString("pt-PT").replace("2025", "2026");
+            var todayStr = new Date().toLocaleDateString("pt-PT");
+            if (todayStr.includes("2025")) todayStr = todayStr.replace("2025", "2026");
+            var today = todayStr + " (Horizonte 2026/27)";
             var memCtx = getMemCtx();
             var kbCtx = getKBCtx(q);
             var cmCtx = factoryMemory ? "\n\n" + factoryMemory : "";
@@ -6588,18 +6603,21 @@
           // ==========================================
           async function handleSend() {
             var text = inputEl.value.trim();
-            var q = text || "analisa"; // Definir q para evitar erros de escopo
+            var q = text || "analisa"; 
             var hasImg = !!pendingImageBase64;
             if (!text && !hasImg) return;
             if (sendBtn.disabled) return;
 
-            // OtimizaÃ§Ã£o: Resposta rÃ¡pida para perguntas curtas/simples
-            var isSimple =
-              text.length < 50 &&
-              !hasImg &&
-              !CODE_RX.test(text) &&
-              !IMG_RX.test(text) &&
-              !VID_RX.test(text);
+            // Prevenir erros de q nÃ£o definido em closures
+            (function(currentQ) { 
+              // OtimizaÃ§Ã£o: Resposta rÃ¡pida para perguntas curtas/simples
+              var isSimple =
+                currentQ.length < 50 &&
+                !hasImg &&
+                !CODE_RX.test(currentQ) &&
+                !IMG_RX.test(currentQ) &&
+                !VID_RX.test(currentQ);
+            })(q);
 
             // Lazy conversation creation: only create if it doesn't exist
             var conv = getConv();
@@ -7294,6 +7312,8 @@
                 { role: "user", content: contentPrompt },
               ];
               var content = await fetchAI(msgs, "openai");
+              if (!content) throw new Error("IA nÃ£o retornou conteÃºdo para o ficheiro.");
+              
               setFileProg(70, "Criando ficheiro...");
               await sleep(300);
               var blob, mimeType, extension;
@@ -7302,45 +7322,59 @@
                 extension = "csv";
                 mimeType = "text/csv";
               } else if (ftype === "json") {
+                var jsonContent = content;
                 try {
                   JSON.parse(content);
                 } catch (e) {
-                  content = '{"dados":' + JSON.stringify(content) + "}";
+                  jsonContent = JSON.stringify({ "dados": content }, null, 2);
                 }
-                blob = new Blob([content], { type: "application/json" });
+                blob = new Blob([jsonContent], { type: "application/json" });
                 extension = "json";
                 mimeType = "application/json";
               } else if (ftype === "html") {
-                if (!content.includes("<html"))
-                  content = `<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8"><title>Zenia Document</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:800px;margin:0 auto;line-height:1.6}</style></head><body>${content}</body></html>`;
-                blob = new Blob([content], { type: "text/html" });
+                var htmlCode = content;
+                if (!htmlCode.includes("<html"))
+                  htmlCode = `<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8"><title>Zenia Document</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:800px;margin:0 auto;line-height:1.6}</style></head><body>${htmlCode}</body></html>`;
+                blob = new Blob([htmlCode], { type: "text/html" });
                 extension = "html";
                 mimeType = "text/html";
               } else {
-                var htmlContent = `<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8"><title>${fname}</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:800px;margin:0 auto;line-height:1.8}h1{color:#2b7bf8}h2{color:#1a56db}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:8px}th{background:#f0f4ff}@media print{button{display:none}}</style></head><body><button onclick="window.print()" style="margin-bottom:20px;padding:8px 16px;background:#2b7bf8;color:#fff;border:none;border-radius:6px;cursor:pointer">ðŸ–¨ï¸ Imprimir / Salvar PDF</button>${content.replace(
+                var docHtml = `<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8"><title>${fname}</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:800px;margin:0 auto;line-height:1.8}h1{color:#2b7bf8}h2{color:#1a56db}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:8px}th{background:#f0f4ff}@media print{button{display:none}}</style></head><body><button onclick="window.print()" style="margin-bottom:20px;padding:8px 16px;background:#2b7bf8;color:#fff;border:none;border-radius:6px;cursor:pointer">ðŸ–¨ï¸ Imprimir / Salvar PDF</button>${content.replace(
                   /\n/g,
                   "<br>"
                 )}</body></html>`;
-                blob = new Blob([htmlContent], { type: "text/html" });
+                blob = new Blob([docHtml], { type: "text/html" });
                 extension = "html";
                 mimeType = "text/html";
                 ftype = "html";
               }
               setFileProg(100, "Ficheiro pronto!");
-              var blobUrl = URL.createObjectURL(blob);
-              var fullName = fname + "-zenia." + extension;
-              card.innerHTML = `<div class="file-icon">${icons[ftype] || "ðŸ“„"}</div>
-          <div style="font-size:14px;font-weight:700;margin-bottom:4px">${escHtml(
-            fullName
-          )}</div>
-          <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px">Gerado pela Zenia v5 Â· ${new Date().toLocaleDateString(
-            "pt-PT"
-          )}</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <a href="${blobUrl}" download="${fullName}" style="padding:8px 14px;background:var(--send-btn);color:#fff;text-decoration:none;border-radius:8px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px"><i class="fas fa-download"></i> Baixar ${ftype.toUpperCase()}</a>
-            <button onclick="window.open('${blobUrl}','_blank')" style="padding:8px 14px;background:var(--bg-primary);border:1px solid var(--border-accent);color:var(--text-secondary);border-radius:8px;font-size:12px;cursor:pointer"><i class="fas fa-eye"></i> PrÃ©-visualizar</button>
-          </div>
-          <div style="margin-top:10px;font-size:11px;color:var(--text-muted)">ðŸ’¡ Para Word/Excel/PowerPoint real, baixa o HTML e importa no LibreOffice ou Google Docs.</div>`;
+              var fullName = fname + "-zenia-v5." + extension;
+              if (typeof forceDownload === "function") {
+                card.innerHTML = `<div class="file-icon">${icons[ftype] || "ðŸ“„"}</div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px">${escHtml(
+              fullName
+            )}</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px">Gerado pela Zenia v5 Â· ${new Date().toLocaleDateString(
+              "pt-PT"
+            )}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button onclick="forceDownload(new Blob(['${(ftype === "json" ? JSON.stringify(JSON.parse(content), null, 2) : content).replace(/'/g, "\\'").replace(/\n/g, "\\n")}'], {type: '${mimeType}'}), '${fullName}')" style="padding:8px 14px;background:var(--send-btn);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer"><i class="fas fa-download"></i> Baixar ${ftype.toUpperCase()}</button>
+              <button onclick="window.print()" style="padding:8px 14px;background:var(--bg-primary);border:1px solid var(--border-accent);color:var(--text-secondary);border-radius:8px;font-size:12px;cursor:pointer"><i class="fas fa-print"></i> PDF/Print</button>
+            </div>`;
+              } else {
+                 var blobUrl = URL.createObjectURL(blob);
+                 card.innerHTML = `<div class="file-icon">${icons[ftype] || "ðŸ“„"}</div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px">${escHtml(
+              fullName
+            )}</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px">Gerado pela Zenia v5 Â· ${new Date().toLocaleDateString(
+              "pt-PT"
+            )}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <a href="${blobUrl}" download="${fullName}" style="padding:8px 14px;background:var(--send-btn);color:#fff;text-decoration:none;border-radius:8px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px"><i class="fas fa-download"></i> Baixar</a>
+            </div>`;
+              }
               chatEl.scrollTop = chatEl.scrollHeight;
             } catch (e) {
               card.innerHTML = `<div style="color:#ef4444;font-size:13px">Erro ao gerar ficheiro: ${escHtml(
@@ -7917,7 +7951,7 @@
               toggleSidebar();
             var input = document.getElementById("user-input");
             input.value =
-              "Quais sÃ£o as previsÃµes para o futuro de Angola em 2025 e 2026? Resume as principais inovaÃ§Ãµes e eventos.";
+              "Quais sÃ£o as previsÃµes para o futuro de Angola em 2026 e 2027? Resume as principais inovaÃ§Ãµes e eventos.";
             handleSend();
           }
           function setApiSt(s) {
@@ -8648,7 +8682,7 @@
             a.href = URL.createObjectURL(
               new Blob([JSON.stringify(p, null, 2)], { type: "application/json" })
             );
-            a.download = "zenia-v4-backup.json";
+            a.download = "zenia-v5-backup.json";
             a.click();
             toast("Backup criado!", "ok");
           }
@@ -8905,3 +8939,4 @@
     </script>
   </body>
 </html>
+
