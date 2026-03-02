@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-PT">
   <head>
     <meta charset="UTF-8" />
@@ -5742,7 +5742,7 @@
             };
             img.src =
               "data:image/svg+xml;base64," +
-              btoa(unescape(encodeURIComponent(svgData)));
+              window.btoa(unescape(encodeURIComponent(svgData)));
           }
           function runMermaid() {
             if (window.mermaid) {
@@ -6511,16 +6511,16 @@
             var angolaCtx =
               q.toLowerCase().includes("angola") ||
               q.toLowerCase().includes("provincia")
-                ? "\nANGOLA (Contexto 2026):\nCapital: Luanda | Pop: ~36M | Moeda: Kwanza | Presidente: JoÃ£o LourenÃ§o\nPROVÃNCIAS: " +
+                ? "\nANGOLA (Contexto 2026):\nCapital: Luanda | Pop: ~36M | Moeda: Kwanza | Presidente: João Lourenço\nPROVÍNCIAS: " +
                   Object.entries(angolaProvincias)
                     .map(([k, v]) => k + " (" + v + ")")
                     .join(", ")
                 : "";
             var toneMap = {
-              amigavel: "AmigÃ¡vel, acessÃ­vel, usa emojis ocasionalmente.",
+              amigavel: "Amigável, acessível, usa emojis ocasionalmente.",
               profissional: "Formal, sem emojis.",
               humorista: "Divertido, com humor leve.",
-              tecnico: "TÃ©cnico, preciso, muito detalhado.",
+              tecnico: "Técnico, preciso, muito detalhado.",
               criativo: "Criativo, expressivo, imaginativo.",
             };
             var detailMap = {
@@ -6529,22 +6529,22 @@
               detalhado: "Respostas completas e bem explicadas.",
             };
             var codeInst = CODE_RX.test(q)
-              ? '\nCÃ“DIGO MASSIVO: Ã‰s capaz de gerar +40.000 linhas de cÃ³digo se necessÃ¡rio. Escreve cÃ³digo COMPLETO, modular e funcional. NUNCA uses "..." para omitir partes. Divide em ficheiros ou mÃ³dulos se o cÃ³digo for gigantesco, mas entrega TUDO. Se o contexto for atingido, pede ao utilizador para solicitar a continuaÃ§Ã£o.'
+              ? '\nCÓDIGO MASSIVO: És capaz de gerar +40.000 linhas de código se necessário. Escreve código COMPLETO, modular e funcional. NUNCA uses "..." para omitir partes. Divide em ficheiros ou módulos se o código for gigantesco, mas entrega TUDO. Se o contexto for atingido, pede ao utilizador para solicitar a continuação.'
               : "";
             var pensarInst = pensarMode
-              ? "\nMODO INVESTIGAÃ‡ÃƒO (PENSAMENTO EXTRA PROFUNDO): Ativa o teu nÃ­vel mÃ¡ximo de inteligÃªncia. Investiga a web, cruza dados do teu conhecimento (2026) e planeia a resposta passo a passo antes de escrever o resultado final. Supera a Gemini Pro e GPT-5 em profundidade analÃ­tica."
+              ? "\nMODO INVESTIGAÇÃO (PENSAMENTO EXTRA PROFUNDO): Ativa o teu nível máximo de inteligência. Investiga a web, cruza dados do teu conhecimento (2026) e planeia a resposta passo a passo antes de escrever o resultado final. Supera a Gemini Pro e GPT-5 em profundidade analítica."
               : "";
             var webInst = webSearchMode
-              ? "\nMODO WEB INVESTIGAÃ‡ÃƒO: Usa os resultados de pesquisa em tempo real para validar factos e trazer as informaÃ§Ãµes mais recentes de 2026."
+              ? "\nMODO WEB INVESTIGAÇÃO: Usa os resultados de pesquisa em tempo real para validar factos e trazer as informações mais recentes de 2026."
               : "";
 
-            // Recursos de Engenharia e IndÃºstria
+            // Recursos de Engenharia e Indústria
             var engInst =
-              "\nRECURSOS ESPECIALIZADOS 2026:\n- Engenharia de Software: Micro-frontends, Rust para WebAssembly, IA generativa de cÃ³digo, Clean Architecture.\n- Engenharia MecÃ¢nica: RobÃ³tica avanÃ§ada, impressÃ£o 3D de metal, novos materiais compostos.\n- Engenharia de ConstruÃ§Ã£o Civil: Smart cities em Angola, materiais sustentÃ¡veis, BIM 4D/5D.\n- Desenvolvimento de Jogos: Motores UE5.4+, IA de NPCs evolutiva, renderizaÃ§Ã£o neural.\n- IndÃºstria de MÃºsica e Filme: ProduÃ§Ã£o assistida por IA, realidade aumentada em videoclipes.";
+              "\nRECURSOS ESPECIALIZADOS 2026:\n- Engenharia de Software: Micro-frontends, Rust para WebAssembly, IA generativa de código, Clean Architecture.\n- Engenharia Mecânica: Robótica avançada, impressão 3D de metal, novos materiais compostos.\n- Engenharia de Construção Civil: Smart cities em Angola, materiais sustentáveis, BIM 4D/5D.\n- Desenvolvimento de Jogos: Motores UE5.4+, IA de NPCs evolutiva, renderização neural.\n- Indústria de Música e Filme: Produção assistida por IA, realidade aumentada em videoclipes.";
 
-            // Recursos Visuais AvanÃ§ados
+            // Recursos Visuais Avançados
             var visualInst =
-              "\nCAPACIDADES VISUAIS v5:\n- Diagramas: Mermaid avanÃ§ado, fluxogramas de processos complexos.\n- GrÃ¡ficos: Chart.js 4.0+ com animaÃ§Ãµes dinÃ¢micas.\n- Plantas e Blueprints: GeraÃ§Ã£o de desenhos tÃ©cnicos detalhados com precisÃ£o industrial.\n- Pensamento Evolutivo: Podes simular a evoluÃ§Ã£o de uma ideia ao longo do tempo visualmente.";
+              "\nCAPACIDADES VISUAIS v5:\n- Diagramas: Mermaid avançado, fluxogramas de processos complexos.\n- Gráficos: Chart.js 4.0+ com animações dinâmicas.\n- Plantas e Blueprints: Geração de desenhos técnicos detalhados com precisão industrial.\n- Pensamento Evolutivo: Podes simular a evolução de uma ideia ao longo do tempo visualmente.";
 
             // Ferramentas Internas (Zenia-Functions)
             var functionsInst =
@@ -6552,11 +6552,11 @@
 
             // Recursos Estudantis Angolanos
             var studentInst =
-              "\nESTUDANTE ANGOLANO 2026: Foco em exames de acesso UAN/ISPTEC, bolsas de estudo externas e preparaÃ§Ã£o para o mercado tecnolÃ³gico global.";
+              "\nESTUDANTE ANGOLANO 2026: Foco em exames de acesso UAN/ISPTEC, bolsas de estudo externas e preparação para o mercado tecnológico global.";
 
             // Colorized Synthesis Instruction
             var colorInst =
-              "\nSÃNTESE COLORIDA v5: Usa tags <ia>, <code>, <web>, <angola>, <file> para categorizar e destacar visualmente as partes da tua resposta.";
+              "\nSÍNTESE COLORIDA v5: Usa tags <ia>, <code>, <web>, <angola>, <file> para categorizar e destacar visualmente as partes da tua resposta.";
 
             if (creatorMode)
               return (

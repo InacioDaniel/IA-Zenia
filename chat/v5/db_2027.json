@@ -1,0 +1,44 @@
+[
+  {
+    "category": "tecnologia",
+    "title": "Quantum Angola",
+    "content": "Em 2027, o ISPTEC inaugura o primeiro laboratório de computação quântica aplicada à criptografia bancária em Luanda.",
+    "year": 2027
+  },
+  {
+    "category": "espaço",
+    "title": "Lançamento de Micro-Satélites",
+    "content": "Angola lança com sucesso os seus primeiros três micro-satélites de observação marinha em parceria com o GGPEN.",
+    "year": 2027
+  },
+  {
+    "category": "saúde",
+    "title": "Cirurgia Remota 5G",
+    "content": "A primeira cirurgia complexa realizada totalmente via robótica 5G entre o Lubango e Luanda é concluída com sucesso.",
+    "year": 2027
+  },
+  {
+    "category": "indústria",
+    "title": "Automação Industrial 4.0",
+    "content": "A Zona Económica Especial (ZEE) atinge 90% de automação nas linhas de montagem de componentes eletrónicos angolanos.",
+    "year": 2027
+  },
+  {
+    "category": "transporte",
+    "title": "Taxi-Drones",
+    "content": "Início da fase de testes controlada para taxi-drones de passageiros na zona da Baía de Luanda.",
+    "year": 2027
+  },
+  {
+    "category": "ambiente",
+    "title": "Grande Muralha Verde",
+    "content": "Angola conclui a plantação de 5 milhões de árvores no corredor sul, combatendo a desertificação com monitorização por IA.",
+    "year": 2027
+  },
+  {
+    "category": "finanças",
+    "title": "Tokenização de Ativos",
+    "content": "A Bolsa de Dívida e Valores de Angola (BODIVA) inicia a negociação de ativos imobiliários tokenizados em blockchain.",
+    "year": 2027
+  }
+]
