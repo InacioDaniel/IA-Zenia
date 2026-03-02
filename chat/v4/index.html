@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-PT">
   <head>
+    <meta name="google-site-verification" content="KWV19aez6dGCMFi0gEPKfXfa7g1ABw2qJeUnYHQCGFc" />
     <meta charset="UTF-8" />
     <meta
       name="viewport"
@@ -4053,7 +4054,19 @@
         </div>
       </div>
     </div>
-
+<script type="text/javascript">
+(function() {
+  var ARTICLE_URL = window.location.href;
+  var CONTENT_ID = 'everything';
+  document.write(
+    '<scr'+'ipt '+
+    'src="//survey.g.doubleclick.net/survey?site=_GSACCOUNTID'+
+    '&amp;url='+encodeURIComponent(ARTICLE_URL)+
+    (CONTENT_ID ? '&amp;cid='+encodeURIComponent(CONTENT_ID) : '')+
+    '&amp;random='+(new Date).getTime()+
+    '" type="text/javascript">'+'\x3C/scr'+'ipt>');
+})();
+</script>
     <script>
       // ==========================================
       // CONFIG — Endpoints correctos Pollinations
@@ -4158,14 +4171,17 @@
       var POLLO_API =
         "https://pollo.ai/api/platform/generation/pollo/pollo-v2-0";
       var POLLO_STATUS = "https://pollo.ai/api/platform/generation/status";
-      var CM_URL = "https://zenia-3.netlify.app/chat/v2.1/cm.json";
+      var CM_URL = "https://ia-zenia.onrender.com/chat/v2.1/cm.json";
 
       var angolaProvincias = {
         Bengo: "Capital: Caxito",
         Benguela: "Capital: Benguela",
         Bié: "Capital: Kuito",
         Cabinda: "Capital: Cabinda",
-        "Cuando Cubango": "Capital: Menongue",
+        Cuando: "Capital: ",
+        "Moxico Leste": "Capital: ",
+        "Icolo e Bengo": "Capital: ",
+        Cubango: "Capital: Menongue",
         "Cuanza Norte": "Capital: N'Dalatando",
         "Cuanza Sul": "Capital: Sumbe",
         Cunene: "Capital: Ondjiva",
@@ -4515,14 +4531,14 @@
         if (un) un.textContent = userName || "Utilizador";
         var ui = document.getElementById("user-initial");
         if (ui) ui.textContent = (userName || "U").charAt(0).toUpperCase();
-        // Otimização Sidebar Android: Renderização assíncrona do histórico
+        /* Otimização Sidebar Android: Renderização assíncrona do histórico
         setTimeout(() => {
           initSbSections();
           renderHist();
         }, 50);
 
         startNew();
-        setApiSt("ok");
+        setApiSt("ok");*/
       }
 
       // ==========================================
@@ -8439,3 +8455,4 @@
     </script>
   </body>
 </html>
+
