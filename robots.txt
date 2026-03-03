@@ -8,4 +8,4 @@ Disallow: /login
 Disallow: /config
 
 # A parte mais importante para o Search Console:
-Sitemap: https://ia-zenia4.com/sitemap.xml
+Sitemap: https://ia-zenia.onrender.com/sitemap.xml
