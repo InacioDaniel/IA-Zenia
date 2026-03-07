@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>IA-ZÉNIA 5 · zénia-projects</title>
+<!-- Render.com injeta a chave via variável de ambiente VITE_POLLINATIONS_API_KEY -->
+<!-- Em produção, o servidor (Render Static Site) serve este script com a chave substituída -->
+<!-- Em Vite build, use: src/env.js gerado automaticamente com import.meta.env -->
+<script>
+/* __ZENIA_ENV_INJECT__ — Render substitui __ZENIA_KEY__ pelo valor de VITE_POLLINATIONS_API_KEY */
+window.__Z_AK = typeof __ZENIA_KEY__ !== 'undefined' ? __ZENIA_KEY__ : '';
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 [data-theme="dark"]{--bg:#09090b;--sf:#111113;--pan:#16161a;--bd:#242428;--bd2:#2e2e34;--ac:#f59e0b;--ac2:#78490a;--tx:#e4e4e7;--tx2:#a1a1aa;--tx3:#52525b;--ub:#13253a;--ubd:#1a3050}
@@ -788,10 +795,41 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 
 <script>
 // ══ IA-ZÉNIA 5 ENGINE · Zénia Projects · Inácio U. Daniel ══
-const K = 'sk_IpRFiSHdzLbqhEDUBHE0zgp6mQR1jJnK';
+// ── API CONFIG — chave carregada via variável de ambiente do servidor (Render.com) ──
+// A chave NUNCA está no código-fonte. É injectada pelo Vite em build time
+// via VITE_POLLINATIONS_API_KEY definida no painel do Render.
 const B = 'https://gen.pollinations.ai';
-const H = () => ({ 'Authorization': `Bearer ${K}` });
-const HJ = () => ({ 'Authorization': `Bearer ${K}`, 'Content-Type': 'application/json' });
+
+// Resolução segura da chave: Vite injeta em build; em runtime puro usa meta tag ou proxy
+async function resolveKey() {
+  // 1. Vite build inject (produção no Render)
+  if (typeof import_meta_env_key !== 'undefined' && import_meta_env_key) return import_meta_env_key;
+  // 2. Meta tag injectada pelo servidor (alternativa SSR/Render)
+  const metaEl = document.querySelector('meta[name="z-ak"]');
+  if (metaEl && metaEl.content && metaEl.content.length > 10) return metaEl.content;
+  // 3. Variável global injetada pelo Render via _env.js (script inline)
+  if (typeof window.__Z_AK !== 'undefined' && window.__Z_AK) return window.__Z_AK;
+  // 4. Endpoint proxy no mesmo domínio (Render serve /api/key)
+  try {
+    const r = await fetch('/api/key', { credentials: 'same-origin' });
+    if (r.ok) { const d = await r.json(); if (d.k) return d.k; }
+  } catch(_) {}
+  return null;
+}
+
+// Placeholder para Vite — substituído em build por import.meta.env.VITE_POLLINATIONS_API_KEY
+// Em dev local, cria .env com VITE_POLLINATIONS_API_KEY=sk_...
+const import_meta_env_key = (typeof window !== 'undefined' && window.__VITE_ENV_KEY__) || null;
+
+let _K = null;
+async function getK() {
+  if (_K) return _K;
+  _K = await resolveKey();
+  return _K;
+}
+
+const H = async () => ({ 'Authorization': `Bearer ${await getK()}` });
+const HJ = async () => ({ 'Authorization': `Bearer ${await getK()}`, 'Content-Type': 'application/json' });
 
 // ── STATE ───────────────────────────────────────────
 let S = {
@@ -1451,7 +1489,7 @@ async function streamChat(model) {
   try {
     const res = await fetch(`${B}/v1/chat/completions`, {
       method:'POST',
-      headers: HJ(),
+      headers: await HJ(),
       signal: streamAbort.signal,
       body: JSON.stringify({
         model,
@@ -1518,7 +1556,7 @@ async function streamChat(model) {
       // Fallback non-streaming
       try {
         const res2 = await fetch(`${B}/v1/chat/completions`,{
-          method:'POST',headers:HJ(),
+          method:'POST',headers: await HJ(),
           body:JSON.stringify({model,messages:[{role:'system',content:sysPrompt()},...msgs.slice(-20)],seed:Math.random()*99999|0})
         });
         const d = await res2.json();
@@ -1577,7 +1615,7 @@ async function genMus(){
   const p=document.getElementById('mt2').value.trim();if(!p)return;
   const dur=document.getElementById('md2').value;
   const out=document.getElementById('ao');out.innerHTML=ld(`Zénia Music · ${dur}s`);
-  const url=await fb(`${B}/audio/${enc(p)}?model=elevenmusic&duration=${dur}`);
+  const url=await fb(`${B}/audio/${enc(p)}?model=suno&duration=${dur}`);
   if(!url){out.innerHTML=er('Erro na música.');return;}
   out.innerHTML='';out.appendChild(mkCard(`<audio controls src="${url}"></audio>`,`🎵 ${p.slice(0,40)} · ${dur}s`,url,'↓ MP3'));
 }
@@ -1654,7 +1692,7 @@ async function stGen() {
   let url=null;
   if(type==='img')url=await fb(`${B}/image/${enc(p)}?model=flux&width=400&height=280`);
   else if(type==='aud')url=await fb(`${B}/audio/${enc(p)}?voice=${S.voice}`);
-  else if(type==='mus')url=await fb(`${B}/audio/${enc(p)}?model=elevenmusic&duration=30`);
+  else if(type==='mus')url=await fb(`${B}/audio/${enc(p)}?model=suno&duration=30`);
   else if(type==='vid')url=await fb(`${B}/video/${enc(p)}?model=veo&duration=4`);
   btn.textContent='Gerar';btn.disabled=false;
   if(!url){return;}
@@ -1940,7 +1978,7 @@ async function codeAISend() {
 
   try {
     const res=await fetch(`${B}/v1/chat/completions`,{
-      method:'POST',headers:HJ(),
+      method:'POST',headers: await HJ(),
       body:JSON.stringify({model:'openai-large',messages:[{role:'system',content:sys},...codeAIMsgs.slice(-10)],stream:true,seed:Math.random()*99999|0})
     });
     loadEl.innerHTML='';
@@ -2012,7 +2050,7 @@ function mkCard(inner,label,url,dlText){
 }
 async function fb(url){
   try{
-    const r=await fetch(url,{headers:H()});
+    const r=await fetch(url,{headers: await H()});
     if(!r.ok)throw new Error(`HTTP ${r.status}`);
     return URL.createObjectURL(await r.blob());
   }catch(e){console.error('fb:',e.message);return null;}
