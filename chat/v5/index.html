@@ -790,10 +790,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 </div></div>
 
 <script>
-// ══ IA-ZÉNIA 5 ENGINE · Zénia Projects · Inácio U. Daniel ══
-// ── API CONFIG — chave carregada via variável de ambiente do servidor (Render.com) ──
-// A chave NUNCA está no código-fonte. É injectada pelo Vite em build time
-// via VITE_POLLINATIONS_API_KEY definida no painel do Render.
+
 const B = 'https://gen.pollinations.ai';
 
 // Resolução segura da chave: Vite injeta em build; em runtime puro usa meta tag ou proxy
@@ -813,8 +810,6 @@ async function resolveKey() {
   return null;
 }
 
-// Placeholder para Vite — substituído em build por import.meta.env.VITE_POLLINATIONS_API_KEY
-// Em dev local, cria .env com VITE_POLLINATIONS_API_KEY=sk_...
 const import_meta_env_key = (typeof window !== 'undefined' && window.__VITE_ENV_KEY__) || null;
 
 let _K = null;
@@ -2054,4 +2049,5 @@ async function fb(url){
 </script>
 </body>
 </html>
+
 
